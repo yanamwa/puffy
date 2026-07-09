@@ -1,38 +1,95 @@
-.App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
+.app-shell {
   min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7ff, #eef4ff);
+  color: #16213e;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background: #16213e;
+  color: #fff;
+}
+
+.brand {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fff;
+  text-decoration: none;
+}
+
+.topnav {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.topnav a,
+.topnav button {
+  color: #fff;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.page-content {
+  padding: 2rem;
+}
+
+.auth-card,
+.role-page {
+  max-width: 720px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.auth-card form {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.auth-card input,
+.auth-card button {
+  padding: 0.8rem 1rem;
+  border-radius: 10px;
+  border: 1px solid #d7def2;
+}
+
+.auth-card button {
+  background: #4f46e5;
   color: white;
+  cursor: pointer;
 }
 
-.App-link {
-  color: #61dafb;
+.hint {
+  font-size: 0.9rem;
+  color: #64748b;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  border-radius: 12px;
+  background: #eef2ff;
+  font-weight: 600;
+}
+
+.user-pill {
+  background: rgba(255,255,255,0.15);
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
 }

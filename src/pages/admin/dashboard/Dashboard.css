@@ -1,0 +1,253 @@
+.dashboard-container {
+  width: 100%;
+}
+
+.dashboard-title {
+  margin: 0 0 24px;
+  color: #101010;
+  font-size: 22px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.stat-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  margin-bottom: 28px;
+}
+
+.stat-card {
+  min-height: 141px;
+  background: #ffffff;
+  border: 1px solid #f1f1f1;
+  border-radius: 10px;
+  box-shadow: 0 15px 28px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  padding: 17px 20px 18px;
+  position: relative;
+}
+
+.stat-card::before {
+  content: "";
+  height: 3px;
+  background: #111111;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: #eeeeee;
+  color: #111111;
+  display: grid;
+  place-items: center;
+  font-size: 24px;
+  margin-bottom: 17px;
+}
+
+.stat-content {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  align-items: end;
+}
+
+.stat-label {
+  grid-column: 1;
+  margin: 0 0 8px;
+  color: #6b6b6b;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.stat-value {
+  grid-column: 2;
+  grid-row: 1 / 3;
+  margin: 0;
+  color: #000000;
+  font-size: 28px;
+  font-weight: 950;
+  letter-spacing: -1px;
+  line-height: 0.9;
+}
+
+.stat-change {
+  grid-column: 1;
+  justify-self: start;
+  border-radius: 999px;
+  background: #f0f0f0;
+  color: #111111;
+  font-size: 9px;
+  font-weight: 900;
+  line-height: 1;
+  padding: 5px 9px;
+}
+
+.dashboard-sections {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 22px;
+}
+
+.section {
+  min-height: 324px;
+  background: #ffffff;
+  border: 1px solid #f2f2f2;
+  border-radius: 10px;
+  box-shadow: 0 15px 28px rgba(0, 0, 0, 0.06);
+  padding: 24px 26px 22px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+
+.section-header h2 {
+  margin: 0;
+  color: #111111;
+  font-size: 16px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.show-all {
+  color: #111111;
+  font-size: 10px;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.show-all:hover {
+  text-decoration: underline;
+}
+
+.decks-list,
+.users-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.deck-item,
+.user-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 34px;
+}
+
+.deck-icon,
+.recent-user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #eeeeee;
+  color: #111111;
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  font-size: 15px;
+}
+
+.deck-info,
+.user-info {
+  min-width: 0;
+}
+
+.deck-title,
+.user-name {
+  margin: 0 0 4px;
+  color: #111111;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.deck-author,
+.recent-user-role {
+  margin: 0;
+  color: #777777;
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+@media (max-width: 1024px) {
+  .stat-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dashboard-sections {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .stat-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .section {
+    padding: 20px;
+  }
+}
+
+.dashboard-container {
+  color: var(--admin-ink);
+}
+
+.dashboard-title {
+  color: var(--admin-ink);
+  font-size: 28px;
+}
+
+.stat-card,
+.section {
+  background: var(--admin-card);
+  border: 2px solid var(--admin-line);
+  border-radius: 14px;
+  box-shadow: 6px 6px 0 var(--admin-shadow);
+}
+
+.stat-card::before {
+  background: var(--admin-peach);
+  border-bottom: 1px solid var(--admin-peach-line);
+  height: 6px;
+}
+
+.stat-icon,
+.deck-icon,
+.recent-user-avatar {
+  background: var(--admin-peach);
+  border: 1px solid var(--admin-peach-line);
+  color: var(--admin-ink);
+}
+
+.stat-label,
+.deck-author,
+.recent-user-role {
+  color: var(--admin-muted);
+}
+
+.stat-value,
+.section-header h2,
+.deck-title,
+.user-name,
+.show-all {
+  color: var(--admin-ink);
+}
+
+.stat-change {
+  background: var(--admin-peach);
+  border: 1px solid var(--admin-peach-line);
+  color: var(--admin-ink);
+}

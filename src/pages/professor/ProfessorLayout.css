@@ -1,0 +1,1674 @@
+@import url('https://fonts.googleapis.com/css2?family=Jersey+15&display=swap');
+
+.professor-layout {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  min-height: 100vh;
+  background: #ffffff;
+  color: #1f2937;
+}
+
+.professor-sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 18px 8px;
+  overflow-y: auto;
+  background: #ebd3fa;
+  border-right: 1px solid #dec2f2;
+}
+
+.professor-collapse {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-content: center;
+  gap: 3px;
+  margin: 0 0 34px 8px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.professor-collapse span {
+  width: 14px;
+  height: 5px;
+  border: 2px solid #807287;
+  border-radius: 2px;
+}
+
+.professor-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 8px 18px;
+  border-bottom: 1px solid #ffffff;
+}
+
+.professor-brand img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
+.professor-brand h2 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.professor-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.professor-menu-section {
+  padding-top: 8px;
+}
+
+.professor-menu-section p {
+  margin: 0 0 8px;
+  padding-left: 6px;
+  color: #111111;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.professor-others {
+  border-top: 1px solid #ffffff;
+}
+
+.professor-link,
+.professor-logout {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 16px;
+  border: 0;
+  border-radius: 999px 0 0 999px;
+  background: transparent;
+  color: #111111;
+  text-decoration: none;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.professor-link svg,
+.professor-logout svg {
+  width: 19px;
+  height: 19px;
+  flex: 0 0 auto;
+  color: #695f70;
+}
+
+.professor-link:hover,
+.professor-link.active {
+  background: #ffffff;
+  transform: translateX(6px);
+  font-weight: 500;
+}
+
+.professor-logout {
+  margin-top: auto;
+  border-top: 1px solid #ffffff;
+  border-radius: 0;
+}
+
+.professor-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.professor-header {
+  min-height: 65px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 0 28px;
+  background: #ffffff;
+  border-bottom: 1px solid #e7e7e7;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
+}
+
+.professor-search {
+  width: min(500px, 100%);
+  height: 34px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  border: 2px solid #c494ef;
+  border-radius: 999px;
+  background: #ffffff;
+}
+
+.professor-search input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  font: inherit;
+}
+
+.professor-user {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: #222222;
+}
+
+.professor-avatar {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #efe7f7;
+  color: #6c4b82;
+  font-weight: 900;
+}
+
+.professor-content {
+  padding: 40px;
+}
+
+.professor-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.professor-page h1 {
+  margin: 0;
+  color: #251b2f;
+  font-size: 2rem;
+}
+
+.professor-page p {
+  margin: 0;
+  color: #6b7280;
+}
+
+.professor-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.professor-card,
+.professor-panel {
+  background: #ffffff;
+  border: 1px solid #ebe7f1;
+  border-radius: 8px;
+  padding: 1.2rem;
+  box-shadow: 0 10px 24px rgba(55, 31, 77, 0.06);
+}
+
+.professor-card strong {
+  display: block;
+  color: #251b2f;
+  font-size: 1.6rem;
+  margin-top: 0.4rem;
+}
+
+.professor-list {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.professor-list li {
+  padding: 0.9rem 1rem;
+  border-radius: 8px;
+  background: #fbfaff;
+  border: 1px solid #ebe7f1;
+}
+
+.professor-notifications {
+  display: grid;
+  gap: 18px;
+}
+
+.professor-notification-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  background: #ffffff;
+  border: 1px solid #ebe7f1;
+  border-radius: 8px;
+  box-shadow: 0 10px 24px rgba(55, 31, 77, 0.05);
+}
+
+.professor-notification-tabs {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.professor-notification-tabs button,
+.professor-mark-read {
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: 1px solid #d8c2ea;
+  background: #ffffff;
+  color: #4b2d65;
+  font: inherit;
+  cursor: pointer;
+}
+
+.professor-notification-tabs button.active {
+  background: #ebd3fa;
+  border-color: #c494ef;
+}
+
+.professor-mark-read {
+  background: #8e6cb9;
+  color: #ffffff;
+  border-color: #56387e;
+  box-shadow: 0 4px 0 rgba(115, 41, 158, 0.65);
+}
+
+.professor-notification-list {
+  display: grid;
+  gap: 14px;
+}
+
+.professor-notification-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: start;
+  padding: 18px;
+  background: #ffffff;
+  border: 1px solid #ebe7f1;
+  border-radius: 8px;
+  box-shadow: 0 10px 24px rgba(55, 31, 77, 0.06);
+}
+
+.professor-notification-icon {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: #f4eaff;
+  color: #6c4b82;
+}
+
+.professor-notification-content h2 {
+  margin: 0;
+  color: #251b2f;
+  font-size: 18px;
+}
+
+.professor-notification-content p {
+  margin: 6px 0 0;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+.professor-notification-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  color: #8a7c96;
+  font-size: 13px;
+}
+
+.professor-unread-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #8e6cb9;
+}
+
+.professor-notification-badge {
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: #d7f8df;
+  color: #16803a;
+  font-size: 13px;
+}
+
+.professor-notification-badge.system {
+  background: #f5d38a;
+  color: #835e0e;
+}
+
+.professor-notification-badge.announcement {
+  background: #e7ddff;
+  color: #5b3a75;
+}
+
+.monitor-page {
+  gap: 22px;
+}
+
+.monitor-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #e5deeb;
+}
+
+.monitor-header h1 {
+  font-size: 30px;
+  letter-spacing: 0;
+}
+
+.monitor-header p,
+.monitor-panel p {
+  max-width: 760px;
+  line-height: 1.5;
+}
+
+.monitor-tabs {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.monitor-tabs button,
+.monitor-panel-heading button,
+.monitor-link-button {
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid #ded4e8;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #6d587d;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.monitor-tabs button.active {
+  background: #221b2d;
+  border-color: #221b2d;
+  color: #ffffff;
+}
+
+.monitor-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.monitor-course-select {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  border: 2px solid #251b2f;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #251b2f;
+  font-weight: 800;
+}
+
+.monitor-course-select svg {
+  flex: 0 0 auto;
+}
+
+.monitor-course-select select {
+  width: min(420px, 70vw);
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.monitor-course-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  color: #756681;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.monitor-course-meta span {
+  padding: 8px 12px;
+  border: 1px solid #ebe7f1;
+  border-radius: 999px;
+  background: #fbfaff;
+}
+
+.monitor-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.monitor-kpi {
+  min-height: 116px;
+  display: grid;
+  align-content: center;
+  gap: 7px;
+  padding: 18px;
+  border: 1px solid #e5deeb;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.monitor-kpi svg {
+  color: #7d5da5;
+}
+
+.monitor-kpi span {
+  color: #756681;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.monitor-kpi strong {
+  color: #251b2f;
+  font-size: 26px;
+  line-height: 1;
+}
+
+.monitor-kpi.alert svg,
+.monitor-kpi.alert strong {
+  color: #c14646;
+}
+
+.monitor-insight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border: 1px solid #f1d7aa;
+  border-radius: 8px;
+  background: #fff9ec;
+  color: #5f4c23;
+  line-height: 1.45;
+}
+
+.monitor-insight strong {
+  color: #4a3411;
+  white-space: nowrap;
+}
+
+.monitor-two-column {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
+  gap: 16px;
+}
+
+.monitor-panel {
+  border: 1px solid #e5deeb;
+  border-radius: 8px;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.monitor-panel-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 18px;
+  border-bottom: 1px solid #efeaf4;
+}
+
+.monitor-panel-heading h2 {
+  margin: 0;
+  color: #251b2f;
+  font-size: 18px;
+}
+
+.monitor-panel-heading p {
+  margin-top: 5px;
+  font-size: 13px;
+}
+
+.monitor-panel-heading button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex: 0 0 auto;
+}
+
+.monitor-action-stack {
+  display: grid;
+  justify-items: end;
+  gap: 7px;
+}
+
+.monitor-action-note {
+  color: #16803a;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.monitor-topic-list,
+.monitor-assessment-list {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+}
+
+.monitor-topic-row {
+  display: grid;
+  grid-template-columns: 170px minmax(150px, 1fr) 48px;
+  align-items: center;
+  gap: 14px;
+  color: #251b2f;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.monitor-progress-track,
+.monitor-mini-track {
+  height: 12px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #f0ecf3;
+}
+
+.monitor-progress-fill,
+.monitor-mini-track div {
+  height: 100%;
+  border-radius: inherit;
+}
+
+.monitor-progress-fill.low {
+  background: #df5f62;
+}
+
+.monitor-progress-fill.mid {
+  background: #e5a622;
+}
+
+.monitor-progress-fill.high {
+  background: #46aa79;
+}
+
+.monitor-topic-row strong {
+  color: #6d587d;
+  text-align: right;
+}
+
+.monitor-assessment {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px 12px;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.monitor-assessment span {
+  color: #251b2f;
+}
+
+.monitor-assessment strong {
+  color: #6d587d;
+}
+
+.monitor-mini-track {
+  grid-column: 1 / -1;
+  height: 9px;
+}
+
+.monitor-mini-track div {
+  background: #8e6cb9;
+}
+
+.monitor-breakdown {
+  padding: 0 18px 18px;
+  overflow-x: auto;
+}
+
+.monitor-breakdown table {
+  width: 100%;
+  min-width: 520px;
+  border-collapse: collapse;
+  border: 1px solid #ebe7f1;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.monitor-breakdown th,
+.monitor-breakdown td {
+  padding: 12px;
+  border-bottom: 1px solid #ebe7f1;
+  text-align: left;
+  color: #251b2f;
+  font-size: 13px;
+}
+
+.monitor-breakdown th {
+  background: #fbf8fd;
+  color: #756681;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.monitor-breakdown tr:last-child td {
+  border-bottom: 0;
+}
+
+.monitor-table-wrap {
+  overflow-x: auto;
+}
+
+.monitor-table {
+  width: 100%;
+  min-width: 940px;
+  border-collapse: collapse;
+}
+
+.monitor-table th,
+.monitor-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid #ebe7f1;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.monitor-table th {
+  background: #fbf8fd;
+  color: #756681;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.monitor-table td {
+  color: #251b2f;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.monitor-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.monitor-student-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.monitor-avatar {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #f1e5fc;
+  color: #5d3b77;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.monitor-student-cell strong,
+.monitor-student-cell span {
+  display: block;
+}
+
+.monitor-student-cell div span {
+  margin-top: 2px;
+  color: #8a7c96;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.monitor-topic-dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.monitor-topic-dots span {
+  min-width: 32px;
+  padding: 5px 7px;
+  border-radius: 999px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.monitor-topic-dots .low {
+  background: #ffe0df;
+  color: #c14646;
+}
+
+.monitor-topic-dots .mid {
+  background: #fff0ca;
+  color: #9a690e;
+}
+
+.monitor-topic-dots .high {
+  background: #def8e9;
+  color: #15764a;
+}
+
+.monitor-status {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.monitor-status.onTrack {
+  background: #dff7ec;
+  color: #138154;
+}
+
+.monitor-status.needsReview {
+  background: #fff0ca;
+  color: #9a690e;
+}
+
+.monitor-status.atRisk {
+  background: #ffe0df;
+  color: #c14646;
+}
+
+.monitor-link-button {
+  min-height: 30px;
+  padding-inline: 12px;
+  border-color: #d9c0f0;
+  color: #7b3fc0;
+}
+
+.monitor-student-detail {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  border-top: 1px solid #ebe7f1;
+  background: #fbfaff;
+}
+
+.monitor-student-detail h3 {
+  margin: 0;
+  color: #251b2f;
+  font-size: 18px;
+}
+
+.monitor-student-detail p {
+  margin-top: 4px;
+  font-size: 13px;
+}
+
+.monitor-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.monitor-detail-grid span {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  border: 1px solid #ebe7f1;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #756681;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.monitor-detail-grid strong {
+  color: #251b2f;
+  font-size: 16px;
+}
+
+.monitor-detail-topics {
+  display: grid;
+  gap: 8px;
+}
+
+.monitor-detail-topics div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #251b2f;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.monitor-report-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  padding: 18px;
+}
+
+.monitor-report-card {
+  display: grid;
+  gap: 7px;
+  min-height: 130px;
+  align-content: center;
+  padding: 18px;
+  border: 1px solid #ebe7f1;
+  border-radius: 8px;
+  background: #fbfaff;
+}
+
+.monitor-report-card span {
+  color: #756681;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.monitor-report-card strong {
+  color: #251b2f;
+  font-size: 26px;
+}
+
+.monitor-report-card p {
+  font-size: 13px;
+}
+
+.monitor-report-body {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  padding: 0 18px 18px;
+}
+
+.monitor-report-body div {
+  padding: 18px;
+  border: 1px solid #ebe7f1;
+  border-radius: 8px;
+}
+
+.monitor-report-body h3 {
+  margin: 0 0 10px;
+  color: #251b2f;
+  font-size: 16px;
+}
+
+.monitor-report-body ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 18px;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.monitor-analytics-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+  gap: 16px;
+}
+
+.monitor-analytics-grid .monitor-priority-panel {
+  grid-column: 1 / -1;
+}
+
+.monitor-status-meters,
+.monitor-priority-list {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+}
+
+.monitor-status-meters > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px 12px;
+  align-items: center;
+  color: #251b2f;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.monitor-status-meters .monitor-mini-track {
+  grid-column: 1 / -1;
+}
+
+.monitor-status-meters .onTrack {
+  background: #46aa79;
+}
+
+.monitor-status-meters .needsReview {
+  background: #e5a622;
+}
+
+.monitor-status-meters .atRisk {
+  background: #df5f62;
+}
+
+.monitor-priority-list button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  width: 100%;
+  min-height: 58px;
+  padding: 12px 14px;
+  border: 1px solid #ebe7f1;
+  border-radius: 8px;
+  background: #fbfaff;
+  color: #251b2f;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.monitor-priority-list button:hover {
+  border-color: #c494ef;
+  background: #f7efff;
+}
+
+.monitor-priority-list span,
+.monitor-priority-list strong {
+  display: block;
+}
+
+.monitor-priority-list span {
+  color: #756681;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.monitor-priority-list strong {
+  margin-bottom: 3px;
+  color: #251b2f;
+  font-size: 14px;
+}
+
+.monitor-priority-list em {
+  color: #c14646;
+  font-style: normal;
+  font-weight: 900;
+}
+
+@media (max-width: 900px) {
+  .professor-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .professor-sidebar {
+    position: static;
+    height: auto;
+  }
+
+  .professor-header {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 12px;
+  }
+
+  .professor-content {
+    padding: 1rem;
+  }
+
+  .monitor-header,
+  .monitor-panel-heading {
+    flex-direction: column;
+  }
+
+  .monitor-kpi-grid,
+  .monitor-two-column,
+  .monitor-report-grid,
+  .monitor-report-body,
+  .monitor-analytics-grid,
+  .monitor-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .monitor-topic-row {
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+
+  .monitor-topic-row strong {
+    text-align: left;
+  }
+
+  .monitor-insight {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+/* Admin theme for professor area */
+:root {
+  --professor-bg: #f7f7f8;
+  --professor-card: #ffffff;
+  --professor-ink: #191b2a;
+  --professor-muted: #7d8798;
+  --professor-line: #b9c1cc;
+  --professor-soft-line: #dde2e8;
+  --professor-shadow: #c5cbd4;
+  --professor-soft: #f4f5f7;
+  --professor-soft-border: #d6dce4;
+}
+
+.professor-layout {
+  grid-template-columns: 220px minmax(0, 1fr);
+  background: var(--professor-bg);
+  color: var(--professor-ink);
+  font-family: "Jersey 15", "Arial Rounded MT Bold", system-ui, sans-serif;
+}
+
+.professor-sidebar {
+  min-height: 100vh;
+  height: auto;
+  padding: 0;
+  overflow: hidden;
+  background: var(--professor-bg);
+  border-right: 1.5px solid var(--professor-line);
+  color: var(--professor-ink);
+  font-family: "Jersey 15", "Arial Rounded MT Bold", system-ui, sans-serif;
+}
+
+.professor-collapse {
+  width: 34px;
+  height: 34px;
+  margin: 8px 0 8px 8px;
+  color: var(--professor-muted);
+  font-size: 17px;
+}
+
+.professor-collapse svg {
+  width: 17px;
+  height: 17px;
+}
+
+.professor-collapse:hover {
+  color: var(--professor-ink);
+}
+
+.professor-brand {
+  min-height: 54px;
+  padding: 4px 16px 16px;
+  border-bottom: 1px solid var(--professor-soft-line);
+}
+
+.professor-brand img {
+  width: 34px;
+  height: 34px;
+}
+
+.professor-brand h2 {
+  color: var(--professor-muted);
+  font-size: 22px;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.professor-menu {
+  flex: 1;
+  gap: 0;
+  padding-top: 18px;
+}
+
+.professor-menu-section {
+  display: flex;
+  flex-direction: column;
+  padding: 0 0 10px;
+}
+
+.professor-menu-section + .professor-menu-section,
+.professor-others {
+  border-top: 1px solid var(--professor-soft-line);
+  padding-top: 10px;
+}
+
+.professor-menu-section p {
+  margin: 5px 24px 8px;
+  padding-left: 0;
+  color: var(--professor-muted);
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.professor-link,
+.professor-logout {
+  min-height: 44px;
+  margin: 2px 10px;
+  padding: 0 10px;
+  border: 1.5px solid transparent;
+  border-radius: 999px;
+  gap: 10px;
+  color: var(--professor-muted);
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 1.1;
+  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+  white-space: nowrap;
+}
+
+.professor-link span,
+.professor-logout span {
+  min-width: 0;
+  overflow: visible;
+  white-space: nowrap;
+  letter-spacing: 0;
+}
+
+.professor-link svg,
+.professor-logout svg {
+  width: 20px;
+  height: 20px;
+  color: currentColor;
+}
+
+.professor-link:hover,
+.professor-link.active {
+  background: var(--professor-card);
+  border-color: var(--professor-line);
+  box-shadow: 3px 3px 0 var(--professor-shadow);
+  color: var(--professor-ink);
+  transform: none;
+}
+
+.professor-logout {
+  margin-top: auto;
+  margin-bottom: 16px;
+  border-radius: 999px;
+  border-top: 1.5px solid transparent;
+}
+
+.professor-logout:hover {
+  background: var(--professor-card);
+  border-color: var(--professor-soft-line);
+}
+
+.professor-main {
+  background: var(--professor-bg);
+}
+
+.professor-header {
+  min-height: 68px;
+  padding: 0 32px;
+  background: var(--professor-card);
+  border-bottom: 1.5px solid var(--professor-line);
+  box-shadow: none;
+}
+
+.professor-search {
+  width: min(720px, 52vw);
+  height: 43px;
+  padding: 0 16px;
+  border: 1.5px solid var(--professor-line);
+  background: var(--professor-card);
+}
+
+.professor-search svg {
+  width: 15px;
+  height: 15px;
+  color: var(--professor-ink);
+}
+
+.professor-search input {
+  color: var(--professor-ink);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.professor-search input::placeholder {
+  color: #a0a7b4;
+}
+
+.professor-search:focus-within {
+  border-color: var(--professor-ink);
+  box-shadow: 0 0 0 3px rgba(25, 27, 42, 0.08);
+}
+
+.professor-user {
+  gap: 10px;
+  color: var(--professor-ink);
+}
+
+.professor-notification-button {
+  width: 48px;
+  height: 48px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--professor-ink);
+  box-shadow: 4px 4px 0 var(--professor-shadow);
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  font: inherit;
+  font-size: 18px;
+}
+
+.professor-avatar {
+  width: 36px;
+  height: 36px;
+  background: var(--professor-soft);
+  border: 1.5px solid var(--professor-soft-border);
+  color: var(--professor-ink);
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.professor-user strong {
+  color: var(--professor-ink);
+  font-size: 13px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.professor-content {
+  padding: 34px 42px 48px;
+}
+
+.professor-page {
+  gap: 1.35rem;
+}
+
+.professor-page h1,
+.monitor-header h1 {
+  color: var(--professor-ink);
+  font-size: 28px;
+  font-weight: 900;
+}
+
+.professor-page p,
+.monitor-header p,
+.monitor-panel p,
+.monitor-course-meta,
+.monitor-student-cell div span,
+.monitor-report-body ul {
+  color: var(--professor-muted);
+}
+
+.professor-card-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.professor-card,
+.professor-panel,
+.professor-notification-toolbar,
+.professor-notification-item,
+.monitor-kpi,
+.monitor-panel,
+.monitor-report-card,
+.monitor-report-body div,
+.monitor-detail-grid span,
+.monitor-detail-topics div {
+  background: var(--professor-card);
+  border: 2px solid var(--professor-line);
+  border-radius: 14px;
+  box-shadow: 6px 6px 0 var(--professor-shadow);
+}
+
+.professor-card {
+  min-height: 141px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.professor-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 6px;
+  background: var(--professor-soft);
+  border-bottom: 1px solid var(--professor-soft-border);
+}
+
+.professor-card span,
+.professor-list li,
+.monitor-kpi span,
+.monitor-report-card span,
+.monitor-detail-grid span {
+  color: var(--professor-muted);
+  font-weight: 900;
+}
+
+.professor-card strong,
+.professor-panel h2,
+.professor-notification-content h2,
+.monitor-kpi strong,
+.monitor-panel-heading h2,
+.monitor-topic-row,
+.monitor-assessment span,
+.monitor-assessment strong,
+.monitor-breakdown td,
+.monitor-table td,
+.monitor-student-cell strong,
+.monitor-student-detail h3,
+.monitor-detail-grid strong,
+.monitor-detail-topics div,
+.monitor-report-card strong,
+.monitor-report-body h3,
+.monitor-priority-list strong {
+  color: var(--professor-ink);
+}
+
+.professor-card strong {
+  font-size: 28px;
+  font-weight: 950;
+}
+
+.professor-list li,
+.monitor-student-detail,
+.monitor-report-card,
+.monitor-priority-list button {
+  background: #fbfbfc;
+  border: 1px solid var(--professor-soft-line);
+}
+
+.professor-notification-tabs button,
+.professor-mark-read,
+.monitor-tabs button,
+.monitor-panel-heading button,
+.monitor-link-button,
+.monitor-course-select,
+.monitor-priority-list button {
+  border: 1.5px solid var(--professor-line);
+  background: var(--professor-card);
+  color: var(--professor-ink);
+}
+
+.professor-notification-tabs button.active,
+.professor-mark-read,
+.monitor-tabs button.active,
+.monitor-panel-heading button:hover,
+.monitor-link-button:hover {
+  background: var(--professor-ink);
+  border-color: var(--professor-ink);
+  box-shadow: 3px 3px 0 var(--professor-shadow);
+  color: #ffffff;
+}
+
+.professor-notification-icon,
+.monitor-avatar {
+  background: var(--professor-soft);
+  border: 1px solid var(--professor-soft-border);
+  color: var(--professor-ink);
+}
+
+.professor-unread-dot {
+  background: var(--professor-ink);
+}
+
+.professor-notification-badge,
+.professor-notification-badge.system,
+.professor-notification-badge.announcement {
+  background: var(--professor-soft);
+  border: 1px solid var(--professor-soft-border);
+  color: var(--professor-ink);
+}
+
+.monitor-header {
+  border-bottom-color: var(--professor-soft-line);
+}
+
+.monitor-course-select {
+  border-radius: 999px;
+  font-weight: 900;
+}
+
+.monitor-course-meta span,
+.monitor-breakdown table,
+.monitor-table th,
+.monitor-table td,
+.monitor-panel-heading,
+.monitor-student-detail,
+.monitor-report-body div {
+  border-color: var(--professor-soft-line);
+}
+
+.monitor-course-meta span,
+.monitor-report-card,
+.monitor-priority-list button {
+  background: #fbfbfc;
+}
+
+.monitor-insight {
+  background: #fbfbfc;
+  border: 1.5px solid var(--professor-line);
+  color: var(--professor-ink);
+}
+
+.monitor-insight strong {
+  color: var(--professor-ink);
+}
+
+.monitor-progress-track,
+.monitor-mini-track {
+  background: var(--professor-soft-line);
+}
+
+.monitor-mini-track div {
+  background: var(--professor-ink);
+}
+
+.monitor-breakdown th,
+.monitor-table th {
+  background: #fbfbfc;
+  color: var(--professor-muted);
+}
+
+.monitor-status.onTrack,
+.monitor-topic-dots .high {
+  background: #dff7ec;
+  color: #138154;
+}
+
+.monitor-status.needsReview,
+.monitor-topic-dots .mid {
+  background: #fff0ca;
+  color: #9a690e;
+}
+
+.monitor-status.atRisk,
+.monitor-topic-dots .low {
+  background: #ffe0df;
+  color: #c14646;
+}
+
+.monitor-link-button {
+  border-radius: 999px;
+}
+
+.monitor-priority-list button:hover {
+  border-color: var(--professor-line);
+  background: var(--professor-soft);
+}
+
+@media (max-width: 900px) {
+  .professor-layout {
+    grid-template-columns: 76px 1fr;
+  }
+
+  .professor-sidebar {
+    position: sticky;
+    height: 100vh;
+  }
+
+  .professor-brand h2,
+  .professor-link span,
+  .professor-menu-section p,
+  .professor-logout span {
+    display: none;
+  }
+
+  .professor-brand {
+    padding-inline: 0;
+  }
+
+  .professor-link,
+  .professor-logout {
+    justify-content: center;
+    padding: 0;
+  }
+
+  .professor-search {
+    width: min(420px, 52vw);
+  }
+
+  .professor-card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .professor-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .professor-sidebar {
+    position: static;
+    min-height: auto;
+    height: auto;
+    flex-direction: row;
+    align-items: center;
+    overflow-x: auto;
+    padding: 6px;
+    border-right: 0;
+    border-bottom: 1.5px solid var(--professor-line);
+  }
+
+  .professor-collapse,
+  .professor-brand,
+  .professor-menu-section p,
+  .professor-logout {
+    display: none;
+  }
+
+  .professor-menu,
+  .professor-menu-section {
+    flex-direction: row;
+    padding: 0;
+  }
+
+  .professor-menu-section + .professor-menu-section {
+    border-top: 0;
+    padding-top: 0;
+  }
+
+  .professor-link {
+    min-width: 42px;
+  }
+
+  .professor-header {
+    min-height: auto;
+    gap: 12px;
+    padding: 10px 12px;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .professor-search {
+    flex: 1;
+    width: auto;
+  }
+
+  .professor-user strong {
+    display: none;
+  }
+
+  .professor-content {
+    padding: 22px 16px 32px;
+  }
+
+  .professor-card-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Readable normal-weight professor typography */
+.professor-layout,
+.professor-layout :where(a, button, input, select, textarea, label, p, span, strong, small, li, td, th, h1, h2, h3, h4, h5, h6) {
+  font-family: "Jersey 15", "Arial Rounded MT Bold", system-ui, sans-serif;
+  font-weight: 400 !important;
+  letter-spacing: 0;
+}
+
+.professor-layout :where(a, button, input, select, textarea, label, p, span, strong, small, li, td, th) {
+  font-size: 18px;
+  line-height: 1.28;
+}
+
+.professor-page h1,
+.monitor-header h1 {
+  font-size: 32px;
+  line-height: 1.1;
+}
+
+.professor-page h2,
+.monitor-panel-heading h2,
+.professor-notification-content h2 {
+  font-size: 24px;
+  line-height: 1.15;
+}
+
+.professor-page h3,
+.monitor-student-detail h3,
+.monitor-report-body h3 {
+  font-size: 22px;
+  line-height: 1.15;
+}
+
+.professor-sidebar :where(a, button, span, p, strong) {
+  font-size: 20px;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.professor-brand h2 {
+  font-size: 22px;
+}
+
+.professor-card strong,
+.monitor-kpi strong,
+.monitor-report-card strong,
+.monitor-detail-grid strong {
+  font-size: 30px;
+  line-height: 1;
+}
+
+.professor-notification-badge,
+.monitor-status,
+.monitor-topic-dots span {
+  font-size: 18px;
+}

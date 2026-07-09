@@ -1,0 +1,67 @@
+.wrapper {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+
+  position: absolute;
+  inset: 0;
+  background-image: url('/images/background.png');
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+}
+
+.card {
+  width: 430px;
+  background: white;
+  border-radius: 25px;
+  padding: 40px;
+  text-align: center;
+  box-shadow: 0 10px 0 #757575;
+  position: relative;
+  z-index: 2;
+}
+
+.image {
+  width: 350px;
+  margin-bottom: 15px;
+  pointer-events: none;
+}
+
+.homeBtn {
+  padding: 10px 146px;
+  background: rgb(234, 202, 244);
+  color: var(--font-color);
+  border: 1px solid #ae9db3;
+  border-radius: 25px;
+  font-family: "Jersey 15", sans-serif;
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: 0px 3px 0px #764784;
+}
+
+.code {
+  font-size: 70px;
+  font-family: "Jersey 15", sans-serif;
+  color: #6e50b5;
+  margin: 0;
+}
+
+.title {
+  font-size: 50px;
+  font-family: "Jersey 15", sans-serif;
+  margin-top: 10px;
+  color: var(--font-color);
+}
+
+.text {
+  font-size: 20px;
+  color: #666;
+  margin: 14px 0 25px;
+}
+
+.homeBtn:hover {
+  transform: translateY(-2px);
+}

@@ -1,0 +1,70 @@
+.admin-page {
+  max-width: 1200px;
+}
+
+.admin-page h1 {
+  margin: 0 0 0.5rem;
+  font-size: 2rem;
+  color: #1f2937;
+}
+
+.admin-page > p {
+  margin: 0 0 2rem;
+  color: #6b7280;
+  font-size: 1rem;
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.setting-card {
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+}
+
+.setting-card h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.15rem;
+  color: #1f2937;
+}
+
+.setting-card p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+.admin-page h1,
+.setting-card h3 {
+  color: var(--admin-ink);
+}
+
+.admin-page > p,
+.setting-card p {
+  color: var(--admin-muted);
+}
+
+.setting-card {
+  background: var(--admin-card);
+  border: 2px solid var(--admin-line);
+  border-radius: 14px;
+  box-shadow: 6px 6px 0 var(--admin-shadow);
+}
+
+.setting-card h3::before {
+  content: "";
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  margin-right: 10px;
+  border: 1px solid var(--admin-peach-line);
+  border-radius: 9px;
+  background: var(--admin-peach);
+  vertical-align: middle;
+}
