@@ -1,68 +1,55 @@
 import { useEffect, useMemo, useState } from 'react';
+import {
+  deleteQuizModeById,
+  fetchQuizModes,
+  saveQuizMode,
+} from '../../../services/quizModeApi.js';
 import '../Features/AdminFeaturePages.css';
-
-const STORAGE_KEY = 'admin-modes';
-
-const seedModes = [
-  {
-    id: 8113789,
-    title: 'Flashcards',
-    description:
-      'Review facts and test your memory in a fun and quick way. Perfect for learning on the go!',
-    route: '/flashcards-tutorial',
-  },
-  {
-    id: 5515895,
-    title: 'Q & A',
-    description:
-      'Challenge your brain with interesting questions and discover something new every time you play!',
-    route: '/QandA-tutorial',
-  },
-  {
-    id: 9218948,
-    title: 'Multiple Choice',
-    description:
-      'Only one answer is correct. Trust your instincts, think carefully, and aim for that perfect score!',
-    route: '/multipleChoice-tutorial',
-  },
-  {
-    id: 7291701,
-    title: 'Matching Type',
-    description: "Pair the terms, ideas, or clues correctly. It's a fun way to test your memory and logic!",
-    route: '/Matching-tutorial',
-  },
-];
 
 const emptyForm = {
   title: '',
   description: '',
   route: '',
+  image: '',
 };
-
-function readModes() {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    return saved ? JSON.parse(saved) : seedModes;
-  } catch {
-    return seedModes;
-  }
-}
 
 function getModeCode(mode) {
   return `MD${String(mode.id).padStart(7, '0')}`;
 }
 
 export default function ModePage() {
-  const [modes, setModes] = useState(() => readModes());
+  const [modes, setModes] = useState([]);
   const [query, setQuery] = useState('');
   const [form, setForm] = useState(emptyForm);
   const [editingMode, setEditingMode] = useState(null);
   const [viewMode, setViewMode] = useState(null);
   const [formOpen, setFormOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(modes));
-  }, [modes]);
+    let active = true;
+
+    async function loadModes() {
+      try {
+        setLoading(true);
+        const loadedModes = await fetchQuizModes();
+
+        if (active) {
+          setModes(loadedModes);
+        }
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadModes();
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const filteredModes = useMemo(() => {
     const search = query.trim().toLowerCase();
@@ -89,11 +76,12 @@ export default function ModePage() {
       title: mode.title || '',
       description: mode.description || '',
       route: mode.route || '',
+      image: mode.image || '',
     });
     setFormOpen(true);
   };
 
-  const saveMode = (event) => {
+  const saveMode = async (event) => {
     event.preventDefault();
 
     if (!form.title.trim() || !form.description.trim() || !form.route.trim()) {
@@ -105,26 +93,34 @@ export default function ModePage() {
       title: form.title.trim(),
       description: form.description.trim(),
       route: form.route.trim(),
+      image: form.image.trim(),
     };
 
-    if (editingMode) {
-      setModes((current) =>
-        current.map((mode) => (mode.id === editingMode.id ? { ...mode, ...payload } : mode))
-      );
-    } else {
-      setModes((current) => [{ id: Date.now(), ...payload }, ...current]);
-    }
+    const savedMode = await saveQuizMode(
+      editingMode ? { ...editingMode, ...payload } : payload
+    );
+
+    setModes((current) =>
+      editingMode
+        ? current.map((mode) =>
+            String(mode.id) === String(savedMode.id) ? savedMode : mode
+          )
+        : [savedMode, ...current]
+    );
 
     setFormOpen(false);
     setEditingMode(null);
     setForm(emptyForm);
   };
 
-  const deleteMode = (mode) => {
+  const deleteMode = async (mode) => {
     const ok = window.confirm(`Delete "${mode.title}"?`);
     if (!ok) return;
 
-    setModes((current) => current.filter((item) => item.id !== mode.id));
+    await deleteQuizModeById(mode.id);
+    setModes((current) =>
+      current.filter((item) => String(item.id) !== String(mode.id))
+    );
   };
 
   return (
@@ -159,7 +155,13 @@ export default function ModePage() {
             </tr>
           </thead>
           <tbody>
-            {filteredModes.length === 0 ? (
+            {loading ? (
+              <tr>
+                <td className="feature-empty" colSpan="5">
+                  Loading modes...
+                </td>
+              </tr>
+            ) : filteredModes.length === 0 ? (
               <tr>
                 <td className="feature-empty" colSpan="5">
                   No modes found.
@@ -222,6 +224,14 @@ export default function ModePage() {
                 placeholder="/flashcards-tutorial"
               />
             </label>
+            <label className="feature-field">
+              <span>Image Path</span>
+              <input
+                value={form.image}
+                onChange={(event) => setForm((current) => ({ ...current, image: event.target.value }))}
+                placeholder="/images/flashcard.png"
+              />
+            </label>
             <div className="feature-modal-actions">
               <button type="button" className="secondary-feature-btn" onClick={() => setFormOpen(false)}>
                 Cancel
@@ -254,6 +264,10 @@ export default function ModePage() {
               <div>
                 <dt>Route</dt>
                 <dd>{viewMode.route}</dd>
+              </div>
+              <div>
+                <dt>Image</dt>
+                <dd>{viewMode.image || 'Default image'}</dd>
               </div>
             </dl>
             <div className="feature-modal-actions">

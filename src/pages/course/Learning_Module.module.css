@@ -1,0 +1,1833 @@
+:root {
+  --color-primary: #EBD3FA;
+  --color-secondary: #E3AADD;
+  --color-third: #C8A8E9;
+  --color-fourth: #A993D8;
+  --color-fifth: #C3C7F3;
+  --font-color: #2F2F2F;
+}
+
+.container {
+  display: flex;
+  min-height: 100vh;
+  background: #f5f5f5;
+  transition: all 0.3s ease;
+}
+
+.swal2-container {
+  z-index: 99999 !important;
+}
+
+/* SIDEBAR */
+
+.container.sidebarCollapsed .sidebar {
+  width: 60px;
+}
+
+.sidebar {
+  position: fixed;
+  width: 220px;
+  background-color: var(--color-primary);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100vh;
+  padding-top: 10px;
+  transition: width 0.3s ease;
+  z-index: 1000;
+}
+
+.sidebar.collapsed {
+  width: 60px;
+}
+
+.logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.logoExpanded {
+  display: block;
+  width: 150px;
+  height: auto;
+  object-fit: contain;
+  transition: all 0.3s ease;
+}
+
+.logoCollapsed {
+  display: none;
+  width: 90px;
+  height: 90px;
+  object-fit: contain;
+  transition: all 0.3s ease;
+  margin: 0;
+}
+
+.sidebar.collapsed .logoExpanded {
+  display: none;
+}
+
+.sidebar.collapsed .logoCollapsed {
+  display: block;
+}
+
+.sidebarToggle {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.sidebar.collapsed .sidebarToggle {
+  justify-content: center;
+  padding: 0;
+}
+
+.sidebarToggle i {
+  font-size: 24px;
+  color: #959494;
+}
+
+.myDecksTitle {
+  font-size: 17px;
+  margin: 0.3rem 0 0 15px;
+}
+
+.menu,
+.myDecksNav,
+.logout {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebarList,
+.sectionList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sidebarListItem {
+  margin: 0;
+  padding: 0 8px 0 10px;
+}
+
+.sidebarList i,
+.sectionList i {
+  width: 22px;
+  min-width: 22px;
+  font-size: 20px;
+  margin-left: 14px;
+  margin-right: 10px;
+  opacity: 0.3;
+  color: black;
+  transition: all 0.3s ease;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+  text-decoration: none;
+  color: #000;
+  background: transparent;
+  border: none;
+  padding: 10px 14px;
+  margin: 4px 0;
+  border-radius: 999px 0 0 999px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.25s ease, transform 0.25s ease;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.menuItem:hover {
+  background: #ffffff;
+  transform: translateX(6px);
+}
+
+.menuItem.active,
+.active {
+  background: #ffffff;
+  transform: translateX(6px);
+}
+
+.menuItem:hover i,
+.menuItem.active i,
+.active i {
+  opacity: 1;
+}
+
+.menuText {
+  display: inline-block;
+  line-height: 1.2;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.sidebar.collapsed i {
+  margin-left: 0;
+  justify-content: center;
+  width: 100%;
+  display: flex;
+  font-size: 1.5rem;
+}
+
+.sidebar.collapsed .sidebarList span,
+.sidebar.collapsed .sectionList span,
+.sidebar.collapsed .menuText {
+  display: none;
+}
+
+.divider {
+  height: 1px;
+  background-color: white;
+  margin: 0 10px;
+}
+
+.sidebar.collapsed .myDecksTitle,
+.sidebar.collapsed .sectionTitle,
+.sidebar.collapsed .sidebarEmptyText {
+  display: none;
+}
+
+.sectionBlock {
+  margin-top: 10px;
+}
+
+.sectionTitle {
+  font-size: 17px;
+  margin: 10px 0 5px 15px;
+  font-weight: 500;
+}
+
+.sectionDivider {
+  height: 1px;
+  background-color: white;
+  margin: 8px 10px;
+}
+
+.sidebarEmptyText {
+  opacity: 0.6;
+  padding-left: 20px;
+  font-size: 14px;
+  color: #333;
+}
+
+/* MAIN LAYOUT */
+
+.mainArea {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  margin-left: 220px;
+  transition: margin-left 0.3s ease;
+}
+
+.sidebarCollapsed .mainArea {
+  margin-left: 60px;
+}
+
+.gridContainer {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 70px 1fr;
+  grid-template-areas:
+    "header"
+    "main";
+  min-height: 100vh;
+}
+
+/* HEADER */
+
+.headerContainer {
+  grid-area: header;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #e6e6e6;
+  background: #fff;
+  position: fixed;
+  top: 0;
+  left: 220px;
+  right: 0;
+  height: 76px;
+  z-index: 5000;
+  box-sizing: border-box;
+}
+
+.sidebarCollapsed .headerContainer {
+  left: 60px;
+}
+
+.searchBar {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: 100px;
+  height: 34px;
+  width: 520px;
+  max-width: 640px;
+  border: 2px solid var(--color-third);
+  overflow: hidden;
+}
+
+.searchBar input {
+  border: none;
+  background: transparent;
+  padding: 0 18px;
+  flex: 1;
+  font-size: 16px;
+  outline: none;
+  color: var(--font-color);
+  font-family: inherit;
+}
+
+.searchBar i {
+  font-size: 16px;
+  color: #000;
+  width: 52px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+}
+
+.searchBar:focus-within {
+  box-shadow: 0 0 0 3px rgba(200, 168, 233, 0.18);
+}
+
+.profileWrapper {
+  position: absolute;
+  right: 30px;
+  top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 10;
+}
+
+.dpContainer {
+  width: 40px;
+  height: 40px;
+}
+
+.profilePic {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+.userInfo p {
+  margin: 0;
+  font-size: 20px;
+  color: #000;
+  white-space: nowrap;
+}
+
+.dropdown {
+  position: relative;
+}
+
+.dropdownBtn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 6px;
+}
+
+.dropdownContent {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  left: auto;
+  display: none;
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+  border-radius: 12px;
+  width: 190px;
+  max-width: calc(100vw - 20px);
+  padding: 8px;
+  z-index: 9999;
+}
+
+.dropdownContent a,
+.dropdownContent button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border-radius: 10px;
+  text-decoration: none;
+  color: #000;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 15px;
+  text-align: left;
+}
+
+.dropdownContent a:hover,
+.dropdownContent button:hover {
+  background: #f3f3f3;
+}
+
+.show {
+  display: block;
+}
+
+/* ===== NOTIFICATION ===== */
+
+.notificationWrapper {
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notificationBtn {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  margin: 0;
+  border: none;
+  background: transparent;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.notificationBtn i {
+  font-size: 24px;
+  color: #555;
+}
+
+.notificationBadge {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: #e74c3c;
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+}
+
+.notificationDropdown {
+  position: absolute;
+  top: 52px;
+  right: 0;
+  width: 330px;
+  min-height: 240px;
+  max-height: 430px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #eeeeee;
+  border-radius: 20px;
+  padding: 14px;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.14);
+  z-index: 99999;
+  display: none;
+}
+
+.notificationDropdown.show,
+.show {
+  display: block;
+}
+
+.notificationHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 12px;
+}
+
+.notificationHeader h4 {
+  margin: 0;
+  font-size: 20px;
+  color: var(--font-color);
+}
+
+.markReadBtn {
+  border: none;
+  background: #907ead;
+  border: 1px solid #6f5796;
+  box-shadow: 0 4px rgb(126, 107, 158);
+  color: rgb(255, 255, 255);
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.markReadBtn:hover {
+  background: #decfff;
+}
+
+.emptyNotification {
+  min-height: 180px;
+  padding: 22px 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+}
+
+.emptyNotificationImg {
+  width: 165px;
+  height: auto;
+  object-fit: contain;
+}
+
+.emptyNotification p {
+  margin: 0;
+  color: #777;
+  font-size: 17px;
+  line-height: 1.4;
+}
+
+.notificationItem {
+  padding: 14px 4px;
+  border-bottom: 1px solid #eeeeee;
+  background: transparent;
+}
+
+.notificationItem:last-child {
+  border-bottom: none;
+}
+
+.notificationItem:hover {
+  background: #faf7ff;
+  border-radius: 12px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.notificationTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.notificationTop h5 {
+  margin: 0;
+  font-size: 16px;
+  color: #5a0776;
+}
+
+.notificationRole {
+  background: #1515158b;
+  border: 1px solid #3d3d3d;
+  box-shadow: 0 2px 0px rgba(0, 0, 0, 0.563);
+  color: #ffffff;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 14px;
+  text-transform: capitalize;
+}
+
+.notificationItem p {
+  margin: 9px 0 6px;
+  color: var(--font-color);
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.notificationDate,
+.notificationItem small {
+  color: #5454546d;
+  font-size: 16px;
+}
+.profileLink {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.mainContent {
+  padding: 120px 56px 70px;
+  background: rgb(243, 243, 243);
+  min-height: 100vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.cardsContainer {
+  display: grid;
+  grid-template-columns: minmax(360px, 0.9fr) minmax(480px, 1.1fr);
+  gap: 70px;
+  align-items: start;
+  width: 100%;
+  margin-top: 0;
+}
+
+.leftcont {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  min-width: 0;
+}
+
+.rightcol {
+  min-width: 0;
+  margin-bottom: 60px;
+  overflow: visible;
+}
+
+.courses,
+.studyProgress,
+.cards {
+  width: 100%;
+  background-color: #ffffff;
+  border-radius: 50px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  padding: 0;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 0;
+}
+
+.cards {
+  min-height: 580px;
+  max-height: calc(100vh - 160px);
+}
+
+.cardContent {
+  padding: 18px 28px 32px;
+  max-height: calc(100vh - 270px);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.cardHead {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: #c8a8e9;
+  height: 50px;
+}
+
+.cardButtons {
+  display: flex;
+  gap: 30px;
+  margin-right: 25px;
+}
+
+.innercardHead {
+  display: flex;
+  align-items: flex-end;
+  gap: 35px;
+  margin-top: 58px;
+  padding: 0 28px;
+  height: 38px;
+  border-bottom: 2px solid #d0d0d0;
+  
+}
+
+.tabBtn {
+  background: transparent;
+  border: none;
+  padding: 0 0 8px 0;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  color: var(--font-color);
+  font-family: inherit;
+}
+
+.activeTab {
+  color: #8a2be2;
+  border-bottom: 3px solid #8a2be2;
+  margin-bottom: -2px;
+}
+
+.cardContent {
+  padding: 18px 28px 28px;
+  max-height: 470px;  
+  overflow-y: auto;    
+  overflow-x: hidden;
+  padding-right: 18px;
+}
+
+.tabBoxes {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.box {
+  background: #e9e9e9;
+  border-radius: 12px;
+  padding: 18px 18px; 
+  min-height: 65px;
+  margin-bottom: 0;    
+  display: flex;
+  align-items: center;
+  box-shadow: 0 3px 7px rgba(0, 0, 0, 0.12);
+}
+
+.question {
+  margin: 0;
+  font-size: 18px;
+  font-weight: normal;
+  line-height: 1.4;
+  font-style: normal;
+}
+
+.courseHead,
+.ProgressHead {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: #C8A8E9;
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+}
+
+.courseHead {
+  height: 40px;
+}
+
+.ProgressHead {
+  height: 40px;
+}
+
+.innercourse {
+  padding: 30px;
+}
+
+.innerhead {
+  width: 100%;
+  padding-top: 40px;
+  border-bottom: 2px solid #ddd;
+  padding-bottom: 10px;
+}
+
+.innerhead h1 {
+  font-size: 25px;
+  font-weight: lighter;
+  margin: 0 0 0 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.innerhead h1 i {
+  cursor: pointer;
+  font-size: 20px;
+}
+
+.cardCount {
+  font-size: 15px;
+  color: gray;
+  margin-top: 5px;
+  margin-left: 10px;
+}
+
+.description {
+  font-weight: lighter;
+  margin-left: 10px;
+  margin-right: 10px;
+  border-bottom: 2px solid #ddd;
+}
+
+.description p {
+  font-weight: 300;
+  line-height: 1.5;
+  text-align: justify;
+  min-height: 86px;
+}
+
+.innerfoot h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: normal;
+  margin-left: 10px;
+}
+
+.statusDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-left: auto;
+}
+
+.public {
+  background-color: #4CAF50;
+}
+
+.private {
+  background-color: #F44336;
+}
+
+.statusText {
+  font-size: 14px;
+  color: gray;
+}
+
+/* PROGRESS */
+
+.studyProgress {
+  min-height: 150px;
+  justify-content: center;
+}
+
+.innerProgress {
+  margin: 30px;
+  margin-top: 40px;
+}
+
+.innerProgress h1 {
+  font-size: 25px;
+}
+
+.progressBarContainer {
+  width: 100%;
+  height: 10px;
+  background-color: #e0e0e0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progressBar {
+  height: 100%;
+  background-color: #8A2BE2;
+  border-radius: 10px 0 0 10px;
+  transition: width 0.5s ease;
+}
+
+.progressPercent {
+  margin-left: 8px;
+  margin-top: 5px;
+  font-size: 20px;
+  color: #555;
+}
+
+/* CARD PANEL */
+
+.cards {
+  min-height: 580px;
+}
+
+.cardHead {
+  display: flex;
+  justify-content: flex-end;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: #C8A8E9;
+  height: 50px;
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+}
+
+.cardButtons {
+  display: flex;
+  gap: 15px;
+  margin-right: 30px;
+  align-items: center;
+}
+
+.btn {
+  padding: 6px 20px;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+  height: 30px;
+  margin-top: 2px;
+  transition: all 0.2s ease;
+}
+
+.studyBtn {
+  background-color: #ffffff;
+  color: var(--font-color);
+  font-family: inherit;
+  box-shadow: 2px 2px #2b2b2b;
+}
+
+.studyBtn:hover {
+  background-color: #dcdcdc;
+  transform: translateY(-1px);
+}
+
+.practiceBtn {
+  background-color: #8A2BE2;
+  color: #fff;
+  font-family: inherit;
+  box-shadow: 2px 2px  #64279e;
+}
+
+.practiceBtn:hover {
+  background-color: #a855f7;
+  transform: translateY(-1px);
+}
+
+.answer {
+  cursor: pointer;
+  color: #666;
+  transition: 0.2s ease;
+}
+
+.answer:hover {
+  color: #222;
+}
+.innerhead {
+  width: 100%;
+}
+
+.titleBlock {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+}
+
+.titleInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  flex: 1;
+}
+
+.lessonTitle {
+  margin: 0;
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.titleLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.lessonTitle {
+  margin: 0;
+  font-size: 36px;
+  font-weight: 700;
+}
+.innerhead {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* 👈 THIS fixes alignment */
+  gap: 6px;
+}
+
+.titleRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.lessonTitle {
+  margin: 0;            
+  padding: 0;
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.2;    
+}
+
+.cardCount {
+  margin-top: 4px;     
+  font-size: 15px;
+  font-weight: 600;
+  color: #7a7a7a;
+}
+
+.shareBtn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.shareBtn i {
+  font-size: 22px;
+}
+
+.progressBarContainer {
+  width: 100%;
+  height: 14px;
+  background: #e5e5e5;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.progressBar {
+  height: 100%;
+  background: #c89cf5;
+  border-radius: 20px;
+  transition: width 0.3s ease;
+}
+
+.progressDetails {
+  margin-top: 4px;
+  font-size: 13px;
+  color: #555;
+}
+
+.emptyState {
+  width: 100%;
+  height: 250px; 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; 
+  text-align: center;
+  color: #777;
+  font-size: 20px;
+  margin-top: 70px;
+}
+
+.emptyImage {
+  width: 200px;
+  height: auto;
+  margin-bottom: 0px;
+  opacity: 0.8;
+}
+
+/*cute scroolbar*/
+
+.cardContent::-webkit-scrollbar {
+  width: 8px;
+}
+
+.cardContent::-webkit-scrollbar-thumb {
+  background: #c8a8e9;
+  border-radius: 20px;
+}
+
+.cardContent::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 20px;
+}
+
+.swalPopup {
+  border-radius: 28px;
+  padding: 2rem 1.5rem;
+  background: #ffffff;
+  box-shadow:  0px 8px 0px rgba(81, 81, 81, 0.594);
+}
+
+.swalTitle {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #2d1b69;
+  margin-top: 0.5rem;
+}
+
+.swalText {
+  font-size: 1rem;
+  color: #6b6b85;
+  line-height: 1.6;
+  margin-top: 0.5rem;
+}
+
+.swalActions {
+  display: flex !important;
+  gap: 14px !important;
+  margin-top: 1.5rem !important;
+}
+
+.swalConfirmBtn {
+  background: #7b5ba5 !important;
+  border: 2px solid #56387e !important;
+  color: #ffffff !important;
+  box-shadow: 0 5px 0px rgba(115, 41, 158, 0.925) !important;
+  border-radius: 5px !important;
+  padding: 12px 22px !important;
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  border: none !important;
+  font-family: inherit !important;
+  font-weight: normal  !important;
+  font-style: normal  !important;
+}
+
+.swalConfirmBtn:hover {
+  transform: translateY(-2px);
+  background:  rgba(115, 41, 158, 0.925) !important;
+}
+
+.swalCancelBtn {
+  background: #5b5b5b !important;
+  border: 2px solid #282828 !important;
+  color: #ffffff !important;
+  box-shadow: 0 5px 0px #2f2f2f !important;
+  border-radius: 5px !important;
+  padding: 12px 22px !important;
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  border: none !important;
+  font-family: inherit !important;
+  font-weight: normal  !important;
+  font-style: normal  !important;
+}
+
+.swalCancelBtn:hover {
+  background:  0 5px 0px #2f2f2f !important;
+  transform: translateY(-2px);
+}
+
+.swalImage {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.toastSuccess,
+.toastError {
+  background: #ffffff !important;
+  color: #6b6b6b !important;
+  border-radius: 4px !important;
+  min-height: 58px !important;
+  padding: 12px 14px !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.16) !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+}
+
+.toastSuccess i {
+  color: #19c83f;
+  font-size: 20px;
+}
+
+.toastError i {
+  color: #ff1f1f;
+  font-size: 20px;
+}
+
+.toastSuccessProgress {
+  background: #19c83f !important;
+  height: 4px !important;
+}
+
+.toastErrorProgress {
+  background: #ff1f1f !important;
+  height: 4px !important;
+}
+
+:global(.Toastify__close-button) {
+  color: #aaa !important;
+  opacity: 1 !important;
+}
+
+:global(.Toastify__toast-icon) {
+  width: 22px !important;
+}
+
+@media (max-width: 1200px) {
+  .mainContent {
+    padding: 32px 42px 70px;
+  }
+
+  .cardsContainer {
+    grid-template-columns: minmax(330px, 0.9fr) minmax(430px, 1.1fr);
+    gap: 55px;
+  }
+
+  .lessonTitle {
+    font-size: 30px;
+  }
+}
+
+@media (max-width: 1100px) {
+  .mainContent {
+    padding: 110px 22px 60px;
+  }
+
+  .cardsContainer {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    margin-top: 0;
+  }
+
+  .cards,
+  .courses,
+  .studyProgress {
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .rightcol,
+  .leftcont {
+    width: 100%;
+  }
+
+  .cards {
+    max-height: none;
+  }
+
+  .cardContent {
+    max-height: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .headerContainer {
+    left: 60px;
+    height: 70px;
+  }
+
+  .mainArea {
+    margin-left: 60px;
+  }
+
+  .mainContent {
+    padding: 100px 14px 40px;
+  }
+
+  .courses,
+  .studyProgress,
+  .cards {
+    border-radius: 26px;
+    margin-bottom: 20px;
+  }
+
+  .innercourse {
+    padding: 22px 18px;
+  }
+
+  .lessonTitle {
+    font-size: 24px;
+  }
+
+  .description p {
+    min-height: auto;
+    font-size: 15px;
+  }
+
+  .innerProgress {
+    margin: 24px 18px;
+    margin-top: 42px;
+  }
+
+  .innerProgress h1 {
+    font-size: 22px;
+  }
+
+  .cardHead {
+    height: auto;
+    min-height: 56px;
+    justify-content: center;
+    padding: 8px 0;
+  }
+
+  .cardButtons {
+    margin-right: 0;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .btn {
+    min-width: 100px;
+  }
+
+  .innercardHead {
+    margin-top: 65px;
+    padding: 0 16px;
+    gap: 14px;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .tabBtn {
+    font-size: 14px;
+    flex: 0 0 auto;
+  }
+
+  .cardContent {
+    padding: 16px;
+  }
+
+  .box {
+    padding: 14px;
+    min-height: 56px;
+  }
+
+  .question {
+    font-size: 15px;
+  }
+
+  .emptyState {
+    height: auto;
+    min-height: 220px;
+    margin-top: 20px;
+    font-size: 16px;
+  }
+
+  .emptyImage {
+    width: 150px;
+  }
+}
+
+@media (max-width: 480px) {
+  /* ===== SIDEBAR ===== */
+  .sidebar {
+    width: 56px !important;
+    overflow-x: hidden;
+  }
+
+  .sidebar.collapsed {
+    width: 56px !important;
+  }
+
+  .container.sidebarCollapsed .sidebar {
+    width: 56px !important;
+  }
+
+  .logoExpanded,
+  .sidebar .menuText,
+  .sidebar .sectionTitle,
+  .sidebar .myDecksTitle,
+  .sidebar .sidebarEmptyText,
+  .sidebar .sidebarList span,
+  .sidebar .sectionList span {
+    display: none !important;
+  }
+
+  .logoCollapsed {
+    display: block !important;
+    width: 52px;
+    height: 52px;
+    object-fit: contain;
+  }
+
+  .sidebarToggle {
+    justify-content: center;
+    padding: 0;
+  }
+
+  .sidebarListItem {
+    padding: 0;
+  }
+
+  .menuItem {
+    justify-content: center;
+    padding: 10px 0;
+    margin: 4px 0;
+    border-radius: 0;
+    transform: none !important;
+  }
+
+  .menuItem:hover,
+  .menuItem.active,
+  .active {
+    transform: none !important;
+  }
+
+  .sidebarList i,
+  .sectionList i,
+  .sidebar.collapsed i {
+    width: 100%;
+    min-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    display: flex;
+    justify-content: center;
+    font-size: 18px;
+  }
+
+  /* ===== MAIN AREA ===== */
+  .mainArea {
+    margin-left: 56px !important;
+    width: calc(100% - 56px);
+    min-width: 0;
+  }
+
+  .sidebarCollapsed .mainArea {
+    margin-left: 56px !important;
+  }
+
+  .gridContainer {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .headerContainer {
+    left: 56px !important;
+    right: 0;
+    width: calc(100% - 56px);
+    height: 64px;
+    padding: 0 8px;
+    justify-content: flex-start;
+    gap: 6px;
+    overflow: visible;
+  }
+
+  .sidebarCollapsed .headerContainer {
+    left: 56px !important;
+  }
+
+  .mainContent {
+    padding: 88px 8px 30px;
+    width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+  }
+
+  /* ===== HEADER ITEMS ===== */
+  .searchBar {
+    width: min(100%, 145px);
+    max-width: 145px;
+    height: 32px;
+    flex-shrink: 1;
+  }
+
+  .searchBar input {
+    font-size: 11px;
+    padding: 0 8px;
+    min-width: 0;
+  }
+
+  .searchBar i {
+    width: 32px;
+    font-size: 13px;
+  }
+
+  .profileWrapper {
+    right: 6px;
+    top: 11px;
+    gap: 4px;
+  }
+
+  .notificationBtn {
+    width: 34px;
+    height: 34px;
+  }
+
+  .notificationBtn i {
+    font-size: 20px;
+  }
+
+  .notificationBadge {
+    top: 0;
+    right: 0;
+    min-width: 15px;
+    height: 15px;
+    font-size: 10px;
+  }
+
+  .dpContainer,
+  .profilePic {
+    width: 32px;
+    height: 32px;
+  }
+
+  .userInfo {
+    display: none;
+  }
+
+  .dropdownBtn {
+    padding: 2px;
+    font-size: 14px;
+  }
+
+  .dropdownContent {
+    right: 0;
+    width: 165px;
+  }
+
+  .notificationDropdown {
+    right: -44px;
+    width: calc(100vw - 76px);
+    max-width: 300px;
+    min-height: 220px;
+  }
+
+  /* ===== CONTENT ===== */
+  .cardsContainer {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .leftcont,
+  .rightcol {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .courses,
+  .studyProgress,
+  .cards {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 18px;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .courseHead,
+  .ProgressHead,
+  .cardHead {
+    border-top-left-radius: 18px;
+    border-top-right-radius: 18px;
+  }
+
+  .innercourse {
+    padding: 16px 12px;
+  }
+
+  .innerhead {
+    padding-top: 34px;
+    padding-bottom: 8px;
+    gap: 5px;
+  }
+
+  .titleRow {
+    gap: 8px;
+    align-items: flex-start;
+  }
+
+  .lessonTitle {
+    font-size: 18px;
+    line-height: 1.25;
+    word-break: break-word;
+  }
+
+  .shareBtn i {
+    font-size: 18px;
+  }
+
+  .cardCount {
+    font-size: 12px;
+    margin-left: 0;
+  }
+
+  .description {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .description h3,
+  .innerfoot h3 {
+    font-size: 15px;
+    margin-left: 0;
+  }
+
+  .description p {
+    min-height: auto;
+    font-size: 12px;
+    line-height: 1.45;
+  }
+
+  .innerProgress {
+    margin: 42px 12px 18px;
+  }
+
+  .innerProgress h1 {
+    font-size: 18px;
+  }
+
+  .progressBarContainer {
+    height: 11px;
+  }
+
+  .progressPercent {
+    font-size: 14px;
+    margin-left: 0;
+  }
+
+  .progressDetails {
+    font-size: 12px;
+  }
+
+  .cards {
+    min-height: 420px;
+    max-height: none;
+  }
+
+  .cardHead {
+    min-height: 54px;
+    height: auto;
+    justify-content: center;
+    padding: 8px 0;
+  }
+
+  .cardButtons {
+    width: 100%;
+    margin-right: 0;
+    gap: 10px;
+    padding: 0 10px;
+    justify-content: center;
+  }
+
+  .btn {
+    flex: 1;
+    min-width: 0;
+    height: 30px;
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .innercardHead {
+    margin-top: 64px;
+    gap: 14px;
+    padding: 0 12px;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .tabBtn {
+    font-size: 12px;
+    flex: 0 0 auto;
+  }
+
+  .cardContent {
+    max-height: none;
+    padding: 12px;
+  }
+
+  .box {
+    border-radius: 10px;
+    padding: 12px;
+    min-height: auto;
+  }
+
+  .question {
+    font-size: 13px;
+  }
+
+  .emptyState {
+    height: auto;
+    min-height: 180px;
+    margin-top: 20px;
+    font-size: 15px;
+  }
+
+  .emptyImage {
+    width: 120px;
+  }
+}
+
+@media (max-width: 1250px) {
+  .mainContent {
+    padding: 120px 28px 60px;
+  }
+
+  .cardsContainer {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    margin-top: 0;
+  }
+
+  .leftcont,
+  .rightcol {
+    width: 100%;
+  }
+
+  .courses,
+  .studyProgress,
+  .cards {
+    width: 100%;
+    max-width: 760px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .cards {
+    max-height: none;
+  }
+
+  .cardContent {
+    max-height: 520px;
+  }
+}
+
+.main,
+.mainArea,
+.container {
+  overflow: visible !important;
+}
+
+/* Professor-color theme for the course overview. Layout stays student/course focused. */
+.container {
+  --course-bg: #f7f7f8;
+  --course-card: #ffffff;
+  --course-ink: #191b2a;
+  --course-muted: #7d8798;
+  --course-line: #b9c1cc;
+  --course-soft-line: #dde2e8;
+  --course-shadow: #c5cbd4;
+  --course-soft: #f4f5f7;
+  --course-soft-border: #d6dce4;
+  background: var(--course-bg);
+  color: var(--course-ink);
+}
+
+.mainContent {
+  background: var(--course-bg);
+}
+
+.sidebar {
+  background: var(--course-bg);
+  border-right: 1.5px solid var(--course-line);
+}
+
+.divider,
+.sectionDivider {
+  background: var(--course-soft-line);
+}
+
+.menuItem,
+.sectionTitle,
+.myDecksTitle,
+.sidebarEmptyText {
+  color: var(--course-muted);
+}
+
+.menuItem:hover,
+.menuItem.active,
+.active {
+  background: var(--course-card);
+  border: 1.5px solid var(--course-line);
+  box-shadow: 3px 3px 0 var(--course-shadow);
+  color: var(--course-ink);
+}
+
+.headerContainer,
+.courses,
+.studyProgress,
+.cards,
+.notificationDropdown,
+.dropdownContent {
+  background: var(--course-card);
+  border: 2px solid var(--course-line);
+  border-radius: 14px;
+  box-shadow: 6px 6px 0 var(--course-shadow);
+}
+
+.headerContainer {
+  border-radius: 0;
+  border-width: 0 0 1.5px;
+  box-shadow: none;
+}
+
+.courseHead,
+.ProgressHead,
+.cardHead {
+  background: var(--course-soft);
+  border-bottom: 1px solid var(--course-soft-border);
+  border-radius: 12px 12px 0 0;
+}
+
+.lessonTitle,
+.innerProgress h1,
+.description h3,
+.innerfoot h3,
+.question,
+.notificationHeader h4,
+.notificationTop h5 {
+  color: var(--course-ink);
+}
+
+.description p,
+.cardCount,
+.progressPercent,
+.statusText,
+.notificationItem p,
+.notificationDate,
+.notificationItem small {
+  color: var(--course-muted);
+}
+
+.searchBar {
+  border: 1.5px solid var(--course-line);
+  background: var(--course-card);
+}
+
+.searchBar:focus-within {
+  border-color: var(--course-ink);
+  box-shadow: 0 0 0 3px rgba(25, 27, 42, 0.08);
+}
+
+.progressBar {
+  background: var(--course-ink);
+}
+
+.progressBarContainer {
+  background: var(--course-soft-line);
+}
+
+.studyBtn,
+.practiceBtn,
+.markReadBtn {
+  background: var(--course-ink);
+  border: 0;
+  box-shadow: 3px 3px 0 var(--course-shadow);
+  color: #ffffff;
+}
+
+.studyBtn:hover,
+.practiceBtn:hover,
+.markReadBtn:hover {
+  background: #090b15;
+}
+
+.tabBtn {
+  color: var(--course-muted);
+}
+
+.activeTab {
+  color: var(--course-ink);
+  border-bottom-color: var(--course-ink);
+}
+
+.box,
+.notificationItem {
+  background: #fbfbfc;
+  border: 1px solid var(--course-soft-line);
+  box-shadow: none;
+}
+
+.emptyState {
+  color: var(--course-muted);
+}

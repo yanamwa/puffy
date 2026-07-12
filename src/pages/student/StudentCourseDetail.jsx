@@ -1,5 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import QuizModesModal from '../../components/QuizModesModal';
+import { getCourseQuizItems } from '../course/courseContent.js';
 import { Avatar, Icon } from './EnrolledCourses';
 import {
   findCourseByIdOrCodeAsync,
@@ -16,6 +18,7 @@ export default function StudentCourseDetail() {
   const navigate = useNavigate();
   const [rawCourse, setRawCourse] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showQuizModes, setShowQuizModes] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -45,6 +48,10 @@ export default function StudentCourseDetail() {
   const course = rawCourse ? normalizeStudentCourse(rawCourse) : null;
   const modules = course ? getStudentCourseModules(course) : [];
   const progress = course ? getStudentCourseProgress(course) : 0;
+  const courseRouteId = course
+    ? String(course.id || course.course_id || course.code || '')
+    : '';
+  const courseQuizzes = useMemo(() => getCourseQuizItems(rawCourse), [rawCourse]);
   const completedCount = modules.length
     ? Math.floor((progress / 100) * modules.length)
     : 0;
@@ -59,16 +66,16 @@ export default function StudentCourseDetail() {
       ...readStudentCourseProgress(),
       [key]: nextProgress,
     });
-
-    navigate(0);
   };
 
   const startLearning = () => {
     updateCourseProgress(progress === 0 ? 8 : 4);
+    navigate(`/introduction/${courseRouteId}`);
   };
 
   const practiceCourse = () => {
     updateCourseProgress(12);
+    setShowQuizModes(true);
   };
 
   if (loading) {
@@ -229,7 +236,12 @@ export default function StudentCourseDetail() {
                       <h3>{module.title}</h3>
                       <p>{module.description || 'Lesson page'}</p>
                     </div>
-                    <button type="button">{isComplete ? 'Review' : 'Open'}</button>
+                    <button
+                      type="button"
+                      onClick={() => navigate(`/introduction/${courseRouteId}`)}
+                    >
+                      {isComplete ? 'Review' : 'Open'}
+                    </button>
                   </article>
                 );
               })}
@@ -237,6 +249,15 @@ export default function StudentCourseDetail() {
           </section>
         </section>
       </main>
+
+      {showQuizModes && (
+        <QuizModesModal
+          source="lesson"
+          lessonId={courseRouteId}
+          quizzes={courseQuizzes}
+          onClose={() => setShowQuizModes(false)}
+        />
+      )}
     </div>
   );
 }

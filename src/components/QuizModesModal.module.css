@@ -1,0 +1,175 @@
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.modalBox {
+  background: white;
+  width: min(1000px, 94vw);
+  height: min(550px, 86vh);
+  border: 2px solid #b9c1cc;
+  border-radius: 14px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  animation: fadeIn 0.3s ease;
+  box-shadow: 6px 6px 0 #c5cbd4;
+}
+
+.modalHeader {
+  background: #f4f5f7;
+  border-bottom: 1px solid #d6dce4;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.modalTitle {
+  margin: 0;
+  font-size: clamp(22px, 4vw, 28px);
+  color: #191b2a;
+  font-weight: normal;
+  font-family: "Jersey 15", sans-serif;
+}
+
+.closeModal {
+  position: absolute;
+  right: 18px;
+  top: 8px;
+  background: none;
+  border: none;
+  font-size: 34px;
+  cursor: pointer;
+  color: #191b2a;
+  z-index: 10000;
+}
+
+.cardsScroll {
+  height: calc(100% - 70px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.cardsScroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.cardsScroll::-webkit-scrollbar-thumb {
+  background: #c5cbd4;
+  border-radius: 4px;
+}
+
+/* DESKTOP */
+.modeOptions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  justify-content: center;
+  gap: 28px;
+  padding: 24px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* TABLET */
+@media (max-width: 768px) {
+  .modalOverlay {
+    padding: 12px;
+  }
+
+  .modalBox {
+    width: calc(100vw - 24px);
+    height: min(620px, 86vh);
+    border-radius: 18px;
+  }
+
+  .modalHeader {
+    height: 64px;
+  }
+
+  .closeModal {
+    right: 14px;
+    top: 6px;
+    font-size: 32px;
+  }
+
+  .cardsScroll {
+    height: calc(100% - 64px);
+    padding: 16px;
+  }
+
+  .modeOptions {
+    grid-template-columns: repeat(2, minmax(170px, 1fr));
+    gap: 20px;
+    padding: 12px;
+  }
+}
+
+/* PHONE */
+@media (max-width: 480px) {
+  .modalOverlay {
+    padding: 8px;
+  }
+
+  .modalBox {
+    width: calc(100vw - 16px);
+    height: 84vh;
+    border-radius: 16px;
+  }
+
+  .modalHeader {
+    height: 58px;
+  }
+
+  .modalTitle {
+    font-size: 22px;
+    padding-right: 34px;
+  }
+
+  .closeModal {
+    right: 12px;
+    top: 4px;
+    font-size: 28px;
+  }
+
+  .cardsScroll {
+    height: calc(100% - 58px);
+    padding: 12px;
+  }
+
+  .modeOptions {
+    grid-template-columns: 1fr;
+    gap: 18px;
+    padding: 8px;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.emptyModes {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 42px 16px;
+  color: #7d8798;
+  font-family: "Jersey 15", sans-serif;
+  font-size: 22px;
+}

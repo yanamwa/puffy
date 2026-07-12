@@ -8,13 +8,27 @@ export default function Layout() {
   const isStudentDashboard = location.pathname.startsWith('/student');
   const isAdminArea = location.pathname.startsWith('/admin');
   const isProfessorArea = location.pathname.startsWith('/professor');
+  const isCourseArea = [
+    '/learning',
+    '/introduction',
+    '/lesson',
+    '/review',
+  ].some((path) => location.pathname.startsWith(path));
+  const isOnboardingPage = [
+    '/welcome',
+    '/how-it-works',
+    '/name',
+    '/year',
+    '/section',
+    '/profile',
+  ].includes(location.pathname);
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
-  if (isStudentDashboard || isAdminArea || isProfessorArea) {
+  if (isStudentDashboard || isAdminArea || isProfessorArea || isCourseArea || isOnboardingPage) {
     return <Outlet />;
   }
 
