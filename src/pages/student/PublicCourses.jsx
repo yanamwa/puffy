@@ -20,6 +20,7 @@ export default function PublicCourses() {
   const [publicCourses, setPublicCourses] = useState(() => getPublicStudentCourses());
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -83,42 +84,89 @@ export default function PublicCourses() {
   };
 
   return (
-    <div className="enrolled-dashboard striped-dashboard">
+   <div
+      className={`enrolled-dashboard striped-dashboard ${
+        sidebarCollapsed ? 'sidebar-collapsed' : ''
+      }`}
+    >
       <aside className="enrolled-sidebar">
         <div className="brand-lockup">
-          <img src="/images/logo_solo.png" alt="" />
-          <span>PuffyBrain</span>
+          <button
+            type="button"
+            className="sidebar-logo-button"
+            onClick={() => setSidebarCollapsed((previous) => !previous)}
+            aria-label={
+              sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'
+            }
+          >
+            <img
+              src="/images/logo_solo.png"
+              alt="PuffyBrain logo"
+              className="sidebar-logo"
+            />
+          </button>
+
+          <span className="brand-name">PuffyBrain</span>
         </div>
 
         <nav className="side-nav" aria-label="Student navigation">
-          <Link to="/student" className="side-nav-item">
+          <Link
+            to="/student"
+            className="side-nav-item"
+            title={sidebarCollapsed ? 'Home' : undefined}
+          >
             <Icon name="home" />
-            <span>Home</span>
+            <span className="nav-label">Home</span>
           </Link>
-          <Link to="/student/enrolled-courses" className="side-nav-item">
+
+          <Link
+            to="/student/enrolled-courses"
+            className="side-nav-item"
+            title={sidebarCollapsed ? 'Enrolled Courses' : undefined}
+          >
             <Icon name="courses" />
-            <span>Enrolled Courses</span>
+            <span className="nav-label">Enrolled Courses</span>
             <span className="dropdown-mark">v</span>
           </Link>
-          <Link to="/student/public-courses" className="side-nav-item plain-nav-item active">
+
+          <Link
+            to="/student/public-courses"
+            className="side-nav-item plain-nav-item active"
+            title={sidebarCollapsed ? 'Public Courses' : undefined}
+          >
             <Icon name="public" />
-            <span>Public Courses</span>
+            <span className="nav-label">Public Courses</span>
           </Link>
-          <Link to="/student/archived-courses" className="side-nav-item plain-nav-item">
+
+          <Link
+            to="/student/archived-courses"
+            className="side-nav-item plain-nav-item "
+            title={sidebarCollapsed ? 'Archived Classes' : undefined}
+          >
             <Icon name="archive" />
-            <span>Archived classes</span>
+            <span className="nav-label">Archived Classes</span>
           </Link>
-          <Link to="/student/settings" className="side-nav-item plain-nav-item">
+
+          <Link
+            to="/student/settings"
+            className="side-nav-item plain-nav-item"
+            title={sidebarCollapsed ? 'Settings' : undefined}
+          >
             <Icon name="settings" />
-            <span>Settings</span>
+            <span className="nav-label">Settings</span>
           </Link>
         </nav>
 
-        <button className="logout-button">
-          <span className="logout-icon" aria-hidden="true">&lt;</span>
-          <span>Log-out</span>
+        <button
+          type="button"
+          className="logout-button"
+          title={sidebarCollapsed ? 'Log-out' : undefined}
+        >
+          <span className="logout-icon" aria-hidden="true" />
+          <span className="logout-label">Log-out</span>
         </button>
       </aside>
+
 
       <main className="enrolled-main public-main">
         <header className="enrolled-topbar transparent-topbar">

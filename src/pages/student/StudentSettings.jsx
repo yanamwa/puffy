@@ -7,6 +7,7 @@ import './EnrolledCourses.css';
 export default function StudentSettings() {
   const [joinModalOpen, setJoinModalOpen] = useState(false);
   const [courseCode, setCourseCode] = useState('');
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const closeJoinModal = () => {
     setJoinModalOpen(false);
@@ -14,42 +15,105 @@ export default function StudentSettings() {
   };
 
   return (
-    <div className="enrolled-dashboard student-settings-dashboard striped-dashboard">
+    <div
+  className={`enrolled-dashboard striped-dashboard ${
+    sidebarCollapsed ? 'sidebar-collapsed' : ''
+  }`}
+>
       <aside className="enrolled-sidebar">
-        <div className="brand-lockup">
-          <img src="/images/logo_solo.png" alt="" />
-          <span>PuffyBrain</span>
-        </div>
+          <div className="brand-lockup">
+           <img
+                src="/images/logo_solo.png"
+                alt="PuffyBrain logo"
+                className="sidebar-logo"
+                onClick={() => setSidebarCollapsed((prev) => !prev)}
+              />
 
-        <nav className="side-nav" aria-label="Student navigation">
-          <Link to="/student" className="side-nav-item">
-            <Icon name="home" />
-            <span>Home</span>
-          </Link>
-          <Link to="/student/enrolled-courses" className="side-nav-item">
-            <Icon name="courses" />
-            <span>Enrolled Courses</span>
-            <span className="dropdown-mark">v</span>
-          </Link>
-          <Link to="/student/public-courses" className="side-nav-item plain-nav-item">
-            <Icon name="public" />
-            <span>Public Courses</span>
-          </Link>
-          <Link to="/student/archived-courses" className="side-nav-item plain-nav-item">
-            <Icon name="archive" />
-            <span>Archived classes</span>
-          </Link>
-          <Link to="/student/settings" className="side-nav-item plain-nav-item active settings-active">
-            <Icon name="settings" />
-            <span>Settings</span>
-          </Link>
-        </nav>
+            <span className="brand-name">PuffyBrain</span>
 
-        <button className="logout-button">
-          <span className="logout-icon" aria-hidden="true">&lt;</span>
-          <span>Log-out</span>
-        </button>
-      </aside>
+          </div>
+
+          <nav className="side-nav" aria-label="Student navigation">
+            <Link
+              to="/student"
+              className="side-nav-item"
+              title={sidebarCollapsed ? 'Home' : undefined}
+            >
+              <Icon name="home" />
+              <span className="nav-label">Home</span>
+            </Link>
+
+            <Link
+              to="/student/enrolled-courses"
+              className="side-nav-item "
+              title={
+                sidebarCollapsed
+                  ? 'Enrolled Courses'
+                  : undefined
+              }
+            >
+              <Icon name="courses" />
+              <span className="nav-label">
+                Enrolled Courses
+              </span>
+              <span className="dropdown-mark">v</span>
+            </Link>
+
+            <Link
+              to="/student/public-courses"
+              className="side-nav-item plain-nav-item"
+              title={
+                sidebarCollapsed
+                  ? 'Public Courses'
+                  : undefined
+              }
+            >
+              <Icon name="public" />
+              <span className="nav-label">
+                Public Courses
+              </span>
+            </Link>
+
+            <Link
+              to="/student/archived-courses"
+              className="side-nav-item plain-nav-item"
+              title={
+                sidebarCollapsed
+                  ? 'Archived Classes'
+                  : undefined
+              }
+            >
+              <Icon name="archive" />
+              <span className="nav-label">
+                Archived classes
+              </span>
+            </Link>
+
+            <Link
+              to="/student/settings"
+              className="side-nav-item plain-nav-item active"
+              title={
+                sidebarCollapsed ? 'Settings' : undefined
+              }
+            >
+              <Icon name="settings" />
+              <span className="nav-label">Settings</span>
+            </Link>
+          </nav>
+
+          <button
+            type="button"
+            className="logout-button"
+            title={sidebarCollapsed ? 'Log-out' : undefined}
+          >
+            <span
+              className="logout-icon"
+              aria-hidden="true"
+            />
+
+            <span className="logout-label">Log-out</span>
+          </button>
+        </aside>
 
       <main className="enrolled-main settings-main">
         <header className="enrolled-topbar transparent-topbar">

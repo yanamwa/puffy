@@ -7,7 +7,7 @@
   --dark: #171927;
   min-height: 100vh;
   display: grid;
-  grid-template-columns: 200px minmax(0, 1fr);
+  grid-template-columns: 220px minmax(0, 1fr);
   background: #f7f7f7;
   color: var(--ink);
   font-family: "Jersey 15", "Arial Rounded MT Bold", system-ui, sans-serif;
@@ -23,32 +23,50 @@
   font: inherit;
 }
 
+/* ===========================
+   SIDEBAR
+=========================== */
+
 .enrolled-sidebar {
-  min-height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+
+  width: 220px;
+  height: 100vh;
+
   background: #fbfbfc;
   border-right: 1px solid var(--line);
+
   display: flex;
   flex-direction: column;
-  position: relative;
-  z-index: 10;
-  overflow: hidden;
+
+  overflow-y: auto;
+  overflow-x: hidden;
 }
+
+/* ===========================
+   BRAND
+=========================== */
 
 .brand-lockup {
   position: relative;
   height: 95px;
+
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 18px 18px 15px;
+
+  padding: 18px 24px 15px;
 }
 
 .brand-lockup::after {
   content: "";
   position: absolute;
-  left: 28px;
-  right: 28px;
+  left: 22px;
+  right: 22px;
   bottom: 0;
   height: 1px;
   background: #d3d7de;
@@ -56,8 +74,6 @@
 
 .brand-lockup img {
   width: 44px;
-  height: auto;
-  display: block;
   object-fit: contain;
 }
 
@@ -65,90 +81,414 @@
   color: #858d9b;
   font-size: 22px;
   line-height: 1;
-  white-space: nowrap;
 }
+
+/* ===========================
+   NAVIGATION
+=========================== */
 
 .side-nav {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  padding: 26px 0 0 46px;
+
+  padding: 26px 0 0 56px;
 }
 
 .side-nav-item {
+  position: relative;
+
   width: 100%;
-  max-width: 100%;
   min-height: 40px;
-  margin: 0;
+
   display: flex;
   align-items: center;
   gap: 10px;
-  border: 0;
+
+  padding: 0 12px 0 10px;
+
+  border: 1px solid transparent;
+  border-right: none;
   border-radius: 999px 0 0 999px;
+
   background: transparent;
+
   color: #858d9b;
-  padding: 0 12px 0 0;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 400;
   text-decoration: none;
-  box-sizing: border-box;
+
+  font-size: 14px;
+  font-weight: 400;
+
+  transition: color .2s ease;
 }
 
 .side-nav-item svg {
   width: 18px;
   height: 18px;
   fill: currentColor;
-  flex: 0 0 auto;
+  flex-shrink: 0;
 }
+
+/* -----------------
+   HOVER
+------------------ */
+
+.side-nav-item:hover {
+  background: transparent;
+  border-color: transparent;
+  color: #171927;
+}
+
+/* -----------------
+   ACTIVE
+------------------ */
 
 .side-nav-item.active {
   background: #fff;
-  color: #858d9b;
+  color: #606772;
+
   border: 1px solid #aeb5bf;
-  border-right: 0;
-  position: relative;
+  border-right: none;
+
+  border-radius: 999px 0 0 999px;
+
   z-index: 2;
 }
 
 .side-nav-item.active::after {
   content: "";
+
   position: absolute;
+
   top: 1px;
   right: -2px;
   bottom: 1px;
+
   width: 3px;
+
   background: #fff;
 }
 
+/* -----------------
+   DROPDOWN
+------------------ */
+
+.dropdown-mark {
+  margin-left: auto;
+
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+}
+
 .side-nav-item.plain-nav-item {
-  padding-left: 0;
-  gap: 10px;
+  padding-left: 10px;
 }
 
 .side-nav-item.plain-nav-item.active {
   padding-left: 10px;
 }
 
-.side-dropdown-toggle.expanded {
-  min-height: 40px;
-  margin-bottom: 18px;
-  background: transparent;
+/* ===========================
+   SUB MENU
+=========================== */
+
+.enrolled-subnav {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  margin: -3px 0 0 18px;
+}
+
+.enrolled-subnav-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  min-height: 28px;
+
+  color: #858d9b;
+  text-decoration: none;
+
+  font-size: 14px;
+}
+
+.enrolled-subnav-item svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
   color: #858d9b;
 }
 
-.side-nav-item.disabled {
+/* ===========================
+   LOGOUT
+=========================== */
+
+.logout-button {
+  margin-top: auto;
+
+  width: 100%;
+  height: 56px;
+
+  border: none;
+  border-top: 1px solid #ececec;
+
+  background: #f2f2f2;
+  color: #666;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  gap: 12px;
+
+  padding-right: 22px;
+
+  cursor: pointer;
+
+  font-size: 15px;
+  font-weight: 400;
+}
+
+.logout-button:hover {
+  color: #171927;
+}
+
+.logout-icon {
+  width: 17px;
+  height: 17px;
+
+  border: 2px solid currentColor;
+  border-right: 0;
+  border-top: 0;
+
+  transform: rotate(45deg);
+
+  font-size: 0;
+}
+/* =================================
+   COLLAPSIBLE SIDEBAR
+================================= */
+
+.student-home-dashboard,
+.enrolled-dashboard {
+  transition: grid-template-columns 220ms ease;
+}
+
+.enrolled-sidebar {
+  transition: width 220ms ease;
+}
+
+/* ===========================
+   COLLAPSE BUTTON
+=========================== */
+
+.sidebar-logo-button {
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sidebar-collapsed .sidebar-logo-button {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.sidebar-logo-button img {
+  width: 44px;
+  transition: transform .25s ease;
+}
+
+.sidebar-logo-button:hover img {
+  transform: scale(1.08);
+}
+
+.brand-name,
+.nav-label,
+.logout-label,
+.dropdown-mark {
+  white-space: nowrap;
+  overflow: hidden;
+
+  transition:
+    opacity 140ms ease,
+    width 220ms ease;
+}
+
+/* =================================
+   COLLAPSED LAYOUT
+================================= */
+
+.student-home-dashboard.sidebar-collapsed {
+  grid-template-columns: 76px minmax(0, 1fr) 286px;
+}
+
+.enrolled-dashboard.sidebar-collapsed {
+  grid-template-columns: 76px minmax(0, 1fr);
+}
+
+.sidebar-collapsed .enrolled-sidebar {
+  width: 76px;
+}
+
+/* =================================
+   COLLAPSED BRAND
+================================= */
+
+.sidebar-collapsed .brand-lockup {
+  justify-content: center;
+  align-items: center;
+  padding: 18px 0 15px;
+}
+
+.sidebar-collapsed .brand-lockup img {
+  width: 38px;
+  transform: none;
+  margin: 0 auto;
+}
+.sidebar-collapsed .brand-name {
+  width: 0;
+  opacity: 0;
   pointer-events: none;
 }
 
-.dropdown-mark {
-  margin-left: auto;
-  font-family: Arial, sans-serif;
-  font-size: 11px;
-  font-weight: 700;
-  line-height: 1;
+.sidebar-collapsed .brand-lockup::after {
+  left: 10px;
+  right: 10px;
 }
 
+
+
+.sidebar-collapsed .sidebar-collapse-button svg {
+  width: 14px;
+  height: 14px;
+  transform: rotate(180deg);
+}
+
+/* ===========================
+   COLLAPSED NAVIGATION
+=========================== */
+
+.sidebar-collapsed .side-nav {
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+
+  gap: 14px;
+  padding: 26px 0 0 18px;
+}
+
+/* Keep the same long active shape */
+.sidebar-collapsed .side-nav-item,
+.sidebar-collapsed .side-nav-item.plain-nav-item,
+.sidebar-collapsed .side-nav-item.plain-nav-item.active {
+  position: relative;
+
+  width: 100%;
+  min-height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+
+  gap: 0;
+
+  padding: 0 0 0 18px;
+
+  border: 1px solid transparent;
+  border-right: 0;
+  border-radius: 999px 0 0 999px;
+
+  background: transparent;
+  box-sizing: border-box;
+}
+
+/* Hide labels while collapsed */
+.sidebar-collapsed .nav-label,
+.sidebar-collapsed .dropdown-mark {
+  display: none;
+}
+
+/* Center all icons in the visible collapsed area */
+.sidebar-collapsed .side-nav-item svg {
+  width: 20px;
+  height: 20px;
+
+  flex: 0 0 20px;
+  margin: 0;
+}
+
+/* Hover stays text/icon only */
+.sidebar-collapsed .side-nav-item:hover {
+  background: transparent;
+  border-color: transparent;
+  color: #171927;
+}
+
+/* Active keeps the same expanded shape */
+.sidebar-collapsed .side-nav-item.active {
+  z-index: 2;
+
+  background: #fff;
+  color: #606772;
+
+  border: 1px solid #aeb5bf;
+  border-right: 0;
+
+  border-radius: 999px 0 0 999px;
+}
+
+/* Continue the white shape through the sidebar border */
+.sidebar-collapsed .side-nav-item.active::after {
+  content: "";
+
+  position: absolute;
+  top: 1px;
+  right: -2px;
+  bottom: 1px;
+
+  width: 3px;
+  background: #fff;
+}
+
+/* =================================
+   COLLAPSED LOGOUT
+================================= */
+
+.sidebar-collapsed .logout-button {
+  justify-content: center;
+  gap: 0;
+
+  padding: 0;
+}
+
+.sidebar-collapsed .logout-label {
+  display: none;
+}
+
+.sidebar-collapsed .logout-icon {
+  flex: 0 0 17px;
+  margin: 0;
+}
+
+
+.enrolled-main,
+.home-main {
+  grid-column: 2;
+  min-width: 0;
+  margin-left: 0;
+}
+
+.student-profile-panel {
+  grid-column: 3;
+}
 .enrolled-subnav {
   display: flex;
   flex-direction: column;
@@ -182,31 +522,6 @@
   white-space: nowrap;
 }
 
-.logout-button {
-  height: 50px;
-  margin-top: auto;
-  border: 0;
-  border-top: 1px solid #eee;
-  background: #f0f0f1;
-  color: #666;
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  padding-left: 105px;
-  cursor: pointer;
-  font-size: 15px;
-  font-weight: 400;
-}
-
-.logout-icon {
-  width: 17px;
-  height: 17px;
-  border: 2px solid currentColor;
-  border-right: 0;
-  border-top: 0;
-  transform: rotate(45deg);
-  font-size: 0;
-}
 
 .enrolled-main {
   min-width: 0;
@@ -1373,7 +1688,7 @@
   --dark: #171927;
   min-height: 100vh;
   display: grid;
-  grid-template-columns: 200px minmax(0, 1fr) 286px;
+  grid-template-columns: 220px minmax(0, 1fr) 286px;
   color: var(--ink);
   font-family: "Jersey 15", "Arial Rounded MT Bold", system-ui, sans-serif;
   font-weight: 400;
