@@ -14,7 +14,9 @@ const archivedCourses = Array.from({ length: 6 }, (_, index) => ({
 }));
 
 export default function ArchivedCourses() {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+  return localStorage.getItem("sidebarCollapsed") === "true";
+});
 
   return (
     <div
@@ -24,20 +26,18 @@ export default function ArchivedCourses() {
     >
       <aside className="enrolled-sidebar">
         <div className="brand-lockup">
-          <button
-            type="button"
-            className="sidebar-logo-button"
-            onClick={() => setSidebarCollapsed((previous) => !previous)}
-            aria-label={
-              sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'
-            }
-          >
-            <img
+           <img
               src="/images/logo_solo.png"
               alt="PuffyBrain logo"
               className="sidebar-logo"
+              onClick={() => {
+                setSidebarCollapsed((prev) => {
+                  const newValue = !prev;
+                  localStorage.setItem("sidebarCollapsed", newValue);
+                  return newValue;
+                });
+              }}
             />
-          </button>
 
           <span className="brand-name">PuffyBrain</span>
         </div>
@@ -73,7 +73,7 @@ export default function ArchivedCourses() {
 
           <Link
             to="/student/archived-courses"
-            className="side-nav-item plain-nav-item active"
+            className="side-nav-item  active"
             title={sidebarCollapsed ? 'Archived Classes' : undefined}
           >
             <Icon name="archive" />

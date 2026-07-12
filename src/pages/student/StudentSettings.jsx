@@ -7,7 +7,9 @@ import './EnrolledCourses.css';
 export default function StudentSettings() {
   const [joinModalOpen, setJoinModalOpen] = useState(false);
   const [courseCode, setCourseCode] = useState('');
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+  return localStorage.getItem("sidebarCollapsed") === "true";
+});
 
   const closeJoinModal = () => {
     setJoinModalOpen(false);
@@ -23,11 +25,17 @@ export default function StudentSettings() {
       <aside className="enrolled-sidebar">
           <div className="brand-lockup">
            <img
-                src="/images/logo_solo.png"
-                alt="PuffyBrain logo"
-                className="sidebar-logo"
-                onClick={() => setSidebarCollapsed((prev) => !prev)}
-              />
+              src="/images/logo_solo.png"
+              alt="PuffyBrain logo"
+              className="sidebar-logo"
+              onClick={() => {
+                setSidebarCollapsed((prev) => {
+                  const newValue = !prev;
+                  localStorage.setItem("sidebarCollapsed", newValue);
+                  return newValue;
+                });
+              }}
+            />
 
             <span className="brand-name">PuffyBrain</span>
 
@@ -91,7 +99,7 @@ export default function StudentSettings() {
 
             <Link
               to="/student/settings"
-              className="side-nav-item plain-nav-item active"
+              className="side-nav-item active"
               title={
                 sidebarCollapsed ? 'Settings' : undefined
               }

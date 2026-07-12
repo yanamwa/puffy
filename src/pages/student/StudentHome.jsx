@@ -53,7 +53,9 @@ export default function StudentHome() {
   const [newTodo, setNewTodo] = useState('');
   const [joinModalOpen, setJoinModalOpen] = useState(false);
   const [courseCode, setCourseCode] = useState('');
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+  return localStorage.getItem("sidebarCollapsed") === "true";
+});
 
   const calendarDays = useMemo(() => {
     const year = shownMonth.getFullYear();
@@ -139,11 +141,17 @@ export default function StudentHome() {
 >
       <aside className="enrolled-sidebar">
           <div className="brand-lockup">
-            <img
+           <img
               src="/images/logo_solo.png"
               alt="PuffyBrain logo"
               className="sidebar-logo"
-              onClick={() => setSidebarCollapsed((prev) => !prev)}
+              onClick={() => {
+                setSidebarCollapsed((prev) => {
+                  const newValue = !prev;
+                  localStorage.setItem("sidebarCollapsed", newValue);
+                  return newValue;
+                });
+              }}
             />
 
             <span className="brand-name">PuffyBrain</span>

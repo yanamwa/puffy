@@ -137,7 +137,9 @@ export default function EnrolledCourses() {
   const [courses, setCourses] = useState(() => getStudentEnrolledCourses());
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+  return localStorage.getItem("sidebarCollapsed") === "true";
+});
   const [practiceCourse, setPracticeCourse] = useState(null);
 
   useEffect(() => {
@@ -216,11 +218,17 @@ export default function EnrolledCourses() {
       <aside className="enrolled-sidebar">
           <div className="brand-lockup">
            <img
-                src="/images/logo_solo.png"
-                alt="PuffyBrain logo"
-                className="sidebar-logo"
-                onClick={() => setSidebarCollapsed((prev) => !prev)}
-              />
+              src="/images/logo_solo.png"
+              alt="PuffyBrain logo"
+              className="sidebar-logo"
+              onClick={() => {
+                setSidebarCollapsed((prev) => {
+                  const newValue = !prev;
+                  localStorage.setItem("sidebarCollapsed", newValue);
+                  return newValue;
+                });
+              }}
+            />
 
             <span className="brand-name">PuffyBrain</span>
 
