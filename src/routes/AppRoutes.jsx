@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes, useParams } from 'react-router-dom';
 import Layout from '../components/Layout';
 import ProtectedRoute from '../components/ProtectedRoute';
 
@@ -36,6 +36,22 @@ import StudentSettings from '../pages/student/StudentSettings';
 import StudentCourseDetail from '../pages/student/StudentCourseDetail';
 import StudentJoinCourse from '../pages/student/StudentJoinCourse';
 
+import Introduction from '../pages/course/Introduction';
+import Lesson from '../pages/course/Lesson';
+import LessonResult from '../pages/course/LessonResult';
+
+import Welcome from '../pages/new user/Welcome';
+import HowItWorks from '../pages/new user/HowItWorks';
+import Name from '../pages/new user/Name';
+import Year from '../pages/new user/Year';
+import Section from '../pages/new user/Section';
+import Profile from '../pages/new user/Profile';
+
+function LearningRedirect() {
+  const { lessonId } = useParams();
+  return <Navigate to={`/introduction/${lessonId}`} replace />;
+}
+
 export default function AppRoutes() {
   return (
     <Routes>
@@ -57,6 +73,16 @@ export default function AppRoutes() {
             (Authenticated Users Only)
         ========================== */}
         <Route element={<ProtectedRoute />}>
+
+          {/* ==========================
+              NEW USER ONBOARDING
+          ========================== */}
+          <Route path="/welcome" element={<Welcome />} />
+          <Route path="/how-it-works" element={<HowItWorks />} />
+          <Route path="/name" element={<Name />} />
+          <Route path="/year" element={<Year />} />
+          <Route path="/section" element={<Section />} />
+          <Route path="/profile" element={<Profile />} />
 
           {/* ==========================
               ADMINISTRATOR
@@ -130,6 +156,11 @@ export default function AppRoutes() {
           />
 
           <Route
+            path="/admin/modes"
+            element={<Navigate to="/admin/mode" replace />}
+          />
+
+          <Route
             path="/admin/decks"
             element={
               <AdminLayout>
@@ -199,6 +230,14 @@ export default function AppRoutes() {
             path="/student/settings"
             element={<StudentSettings />}
           />
+
+          {/* ==========================
+              COURSE STUDY FLOW
+          ========================== */}
+          <Route path="/learning/:lessonId" element={<LearningRedirect />} />
+          <Route path="/introduction/:lessonId" element={<Introduction />} />
+          <Route path="/lesson/:lessonId" element={<Lesson />} />
+          <Route path="/review/:lessonId" element={<LessonResult />} />
         </Route>
 
         {/* ==========================

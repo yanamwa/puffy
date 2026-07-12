@@ -23,6 +23,17 @@ export function AuthProvider({ children }) {
 
     localStorage.setItem('puffy-token', data.token);
     localStorage.setItem('puffy-user', JSON.stringify(data.user));
+    localStorage.setItem('user_email', data.user?.email || data.email || '');
+    localStorage.setItem('user_role', data.user?.role || '');
+    localStorage.setItem(
+      'username',
+      data.user?.displayName || data.user?.display_name || data.user?.name || ''
+    );
+    localStorage.setItem('year_level', data.user?.yearLevel || data.user?.year_level || '');
+    localStorage.setItem(
+      'section_name',
+      data.user?.sectionName || data.user?.section_name || ''
+    );
     setUser(data.user);
     return data.user;
   };
@@ -30,6 +41,11 @@ export function AuthProvider({ children }) {
   const logout = () => {
     localStorage.removeItem('puffy-token');
     localStorage.removeItem('puffy-user');
+    localStorage.removeItem('user_email');
+    localStorage.removeItem('user_role');
+    localStorage.removeItem('username');
+    localStorage.removeItem('year_level');
+    localStorage.removeItem('section_name');
     setUser(null);
   };
 

@@ -67,7 +67,7 @@ export default function PublicCourses() {
 
   const startLearning = (course) => {
     enrollStudentInCourse(course);
-    navigate(`/student/enrolled-courses/${course.id || course.code}`);
+    navigate(`/introduction/${course.id || course.course_id || course.code}`);
   };
 
   const joinByCourseCode = async () => {

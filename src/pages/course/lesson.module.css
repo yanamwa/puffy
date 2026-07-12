@@ -1,0 +1,506 @@
+.wrapper {
+    min-height: 100vh;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 40px 20px;
+    font-family: "Jersey 15", sans-serif;
+    background-image: url("/images/background_notebook.png");  
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    overflow-y: auto;
+}
+
+/* Notebook container */
+.content {
+    width: min(650px, 92vw);
+    max-height: 90vh;
+
+    background: #e7d4fb;
+    border-radius: 25px;
+
+    padding-top: 60px;
+    padding-bottom: 40px;
+
+    position: relative;
+
+    box-shadow: 10px 10px 0 #c9c8f8;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+    scroll-padding-bottom: 48px;
+
+    transform: none;
+}
+
+/* Tabs */
+.tabs {
+    position: absolute;
+    top: 15px;
+    left: 40px;
+    display: flex;
+    gap: 20px;
+}
+
+/* Each tab */
+.welcomeactive ,
+.aboutyou,
+.howitworks {
+    background: #d1b7f8;
+    padding: 10px 30px;
+    border-radius: 20px 20px 0 0;
+    font-size: 14px;
+    color: white;
+    border: none;
+    cursor: pointer;
+     font-family: "Jersey 15", sans-serif;
+    font-size: 14px;
+}
+
+.welcomeactive {
+    background: repeating-linear-gradient(
+        white,
+        white 30px,
+        #e4e4e4 31px
+    );
+    color: black;
+    transform: translateY(-8px);
+}
+
+/* Each tab */
+.welcome,
+.aboutyou,
+.howitworksactive {
+    background: #d1b7f8;
+    padding: 10px 30px;
+    border-radius: 20px 20px 0 0;
+    font-size: 14px;
+    color: white;
+    border: none;
+    cursor: pointer;
+     font-family: "Jersey 15", sans-serif;
+
+        font-size: 14px;
+}
+
+/* Active tab style (matches .tab.active in sample) */
+.howitworksactive {
+    background: repeating-linear-gradient(
+        white,
+        white 30px,
+        #e4e4e4 31px
+    );
+    color: black;
+    transform: translateY(-8px);
+}
+
+
+/* Bookmark ribbon */
+.ribbon {
+    position: absolute;
+    right: 40px;
+    top: 0;
+    width: 30px;
+    height: 85px;
+    background: #d48bda;
+    border-radius: 0 0 5px 5px;
+    clip-path: polygon(0 0, 100% 0, 100% 65%, 50% 100%, 0 65%);
+}
+
+/* Notebook page (your greets box) */
+.greets {
+    background: repeating-linear-gradient(
+        white,
+        white 30px,
+        #e4e4e4 31px
+    );
+    width:80%;
+    margin: auto;
+    padding: 40px 40px;
+    border-radius: 25px;
+
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    overflow: visible;
+}
+
+/* Heading on page */
+#hello {
+    font-family: "Jersey 15";
+    font-size: 403px;
+    margin-bottom: 20px;
+    color: #c486e5;
+}
+
+/* Text paragraph */
+#greeting1 {
+    font-size: 16px;
+    width: 90%;
+    line-height: 1.4;
+}
+
+/* Button – notebook style */
+.button{
+    background-color: #F2D1FF;
+    height: 40px;
+    width: 120px;
+    margin-top: 20px;
+    border-radius: 20px;
+    border: none;
+    box-shadow: 6px 4px 0cap rgb(200, 168, 233);
+    font-weight: normal;
+    font-size: 20px;
+    cursor: pointer;
+    font-family: "Jersey 15", sans-serif;
+}
+
+
+.button:hover {
+    transform: scale(1.07);
+    background-color: #a478d8;
+}
+
+/* Unused or adjusted */
+.text-wrapper,
+.text-wrapper-2,
+.frame-welcome,
+.tutorial-box,
+#backgroundgreet {
+    /* retain structure but neutralized */
+    background: transparent;
+}
+
+.lessonText {
+  white-space: pre-wrap;
+  line-height: 1.8;
+  text-align: left;
+  flex: 0 0 auto;
+  overflow: visible;
+}
+
+.objectivesList {
+  margin: 18px 0 8px;
+  padding-left: 24px;
+  font-size: 20px;
+  line-height: 1.55;
+}
+
+.objectivesList li {
+  margin-bottom: 12px;
+  padding-left: 4px;
+}
+
+.progressWrapper {
+  width: 100%;
+  margin: 16px 0 24px;
+}
+
+.progressBar {
+  width: 100%;
+  height: 12px;
+  background: #e6e6e6;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: #b99ae5;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.progressText {
+  margin-top: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+}
+
+.lessonSlide {
+  line-height: 1.8;
+  white-space: pre-wrap;
+}
+
+.quizSlide {
+  width: 100%;
+}
+
+.quizTitle {
+  margin-bottom: 12px;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.quizQuestion {
+  margin-bottom: 20px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.optionsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.optionButton {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid #d8d8d8;
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+  text-align: left;
+  font-size: 20px;
+  font-weight: 500;
+  transition: 0.2s ease;
+}
+
+.optionButton:hover {
+  border-color: #b99ae5;
+}
+
+.selectedOption {
+  background: #f3ecff;
+  border-color: #b99ae5;
+}
+
+.noOptions {
+  color: #777;
+  font-style: italic;
+}
+
+.navButtons {
+  display: flex;
+  gap: 10px;
+  margin-top: 32px;
+  padding-bottom: 24px;
+  flex-shrink: 0;
+}
+.lessonSlideTitle {
+  font-size: 30px;
+  color: #5b3cc4;
+  margin-bottom: 18px;
+}
+
+.lessonSlideContent {
+  font-size: 20px;
+  line-height: 1.65;
+  color: #222;
+  overflow: visible;
+}
+
+.lessonSlideContent p {
+  margin: 0 0 18px;
+}
+
+.lessonSlideContent p:last-child {
+  margin-bottom: 0;
+}
+
+:global(.quiz-popup) {
+  border-radius: 22px !important;
+  width: 430px !important;
+  max-width: 88vw !important;
+  padding: 34px 34px 28px !important;
+  background: #fff !important;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.15) !important;
+  overflow: hidden !important;
+}
+
+/* remove SweetAlert default weird spacing */
+:global(.swal2-html-container) {
+  margin: 0 !important;
+  padding: 0 18px !important;   /* FIX LEFT/RIGHT SPACE */
+  width: 100% !important;
+  box-sizing: border-box !important;
+  text-align: center !important;
+}
+
+:global(.quiz-popup-title) {
+  font-size: 30px !important;
+  margin: 8px 0 18px !important;
+  font-weight: 400 !important;
+  text-align: center !important;
+}
+
+:global(.quiz-popup-content) {
+  width: 100%;
+  padding: 0 40px;             
+  box-sizing: border-box;
+  line-height: 1.7;
+}
+
+:global(.quiz-popup-answer) {
+  font-size: 18px !important;
+  color: #222 !important;
+  margin-bottom: 18px !important;
+  line-height: 1.7 !important;
+}
+
+:global(.quiz-answer-value) {
+  display: block;
+  margin-top: 8px;
+  color: #0c9239;
+  font-weight: 700;
+  line-height: 1.7;
+  word-break: break-word;
+}
+
+:global(.quiz-popup-explanation) {
+  font-size: 16px !important;
+  color: #555 !important;
+  line-height: 1.8 !important;
+  margin-top: 10px !important;
+  word-break: break-word;
+}
+
+:global(.quiz-popup-button) {
+  margin-top: 24px !important;
+  background: #caa6ff !important;
+  color: var(--font-color) !important;
+  border: 1px solid #a063c1 !important;
+  padding: 12px 30px !important;
+  border-radius: 999px !important;
+  font-size: 18px !important;
+  font-weight: normal !important;
+  font-family: "Jersey 15", sans-serif !important;
+  box-shadow: 4px 5px 0 #b48de9 !important;
+}
+
+:global(.quiz-popup-icon) {
+  transform: scale(0.95);
+  margin-bottom: 8px !important;
+}
+
+/* Professor-color theme for course study pages. Keeps the notebook layout. */
+.wrapper {
+  --course-bg: #f7f7f8;
+  --course-card: #ffffff;
+  --course-ink: #191b2a;
+  --course-muted: #7d8798;
+  --course-line: #b9c1cc;
+  --course-soft-line: #dde2e8;
+  --course-shadow: #c5cbd4;
+  --course-soft: #f4f5f7;
+  --course-soft-border: #d6dce4;
+  background: var(--course-bg);
+  color: var(--course-ink);
+}
+
+.content {
+  background: var(--course-card);
+  border: 2px solid var(--course-line);
+  border-radius: 14px;
+  box-shadow: 6px 6px 0 var(--course-shadow);
+}
+
+.greets {
+  background: repeating-linear-gradient(
+    var(--course-card),
+    var(--course-card) 30px,
+    #edf0f4 31px
+  );
+  border: 1.5px solid var(--course-soft-line);
+  border-radius: 14px;
+  color: var(--course-ink);
+}
+
+.hello {
+  margin: 0 0 16px;
+  color: var(--course-ink);
+  font-size: 34px;
+  line-height: 1.1;
+}
+
+.greeting1 {
+  color: var(--course-ink);
+  font-size: 20px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.ribbon {
+  background: var(--course-ink);
+}
+
+.welcomeactive,
+.howitworksactive,
+.welcome,
+.aboutyou,
+.howitworks {
+  border: 1.5px solid var(--course-line);
+  background: var(--course-soft);
+  color: var(--course-ink);
+}
+
+.welcomeactive,
+.howitworksactive {
+  background: var(--course-card);
+  border-bottom-color: var(--course-card);
+  box-shadow: 3px 3px 0 var(--course-shadow);
+}
+
+.button {
+  background: var(--course-ink);
+  border: 0;
+  color: #ffffff;
+  box-shadow: 4px 4px 0 var(--course-shadow);
+}
+
+.button:hover {
+  background: #090b15;
+  transform: translateY(-1px);
+}
+
+.button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.objectivesList,
+.lessonText,
+.lessonSlideContent,
+.quizQuestion,
+.noOptions,
+.progressText {
+  color: var(--course-ink);
+}
+
+.progressBar {
+  background: var(--course-soft-line);
+}
+
+.progressFill {
+  background: var(--course-ink);
+}
+
+.lessonSlideTitle,
+.quizTitle {
+  color: var(--course-ink);
+}
+
+.optionButton {
+  border: 1.5px solid var(--course-line);
+  background: var(--course-card);
+  color: var(--course-ink);
+}
+
+.optionButton:hover,
+.selectedOption {
+  border-color: var(--course-ink);
+  background: var(--course-soft);
+}
+
+:global(.quiz-popup-button) {
+  background: var(--course-ink, #191b2a) !important;
+  border: 0 !important;
+  box-shadow: 4px 4px 0 var(--course-shadow, #c5cbd4) !important;
+  color: #ffffff !important;
+}

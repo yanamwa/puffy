@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   FiAlertTriangle,
   FiBarChart2,
@@ -11,6 +11,8 @@ import {
   professorCoursesSeed,
   readProfessorCourses,
 } from './professorData';
+import { fetchCourses } from '../../services/courseApi.js';
+import { fetchCourseMonitoring } from '../../services/monitoringApi.js';
 import './ProfessorLayout.css';
 
 const courseMonitoringSeed = {
@@ -433,47 +435,153 @@ function getMonitoringForCourse(course) {
   return courseMonitoringSeed[course.code] || getMonitoringFallback(course);
 }
 
+function getCourseSelectId(course) {
+  return String(
+    course?.id ?? course?.course_id ?? course?.code ?? course?.course_code ?? ''
+  );
+}
+
+function getCourseRequestId(course) {
+  return course?.id ?? course?.course_id ?? course?.code ?? course?.course_code ?? '';
+}
+
 function StudentMonitoringDashboard() {
-  const storedCourses = readProfessorCourses();
-  const activeCourses = storedCourses.filter((course) => !course.archived);
-  const courses = activeCourses.length ? activeCourses : professorCoursesSeed;
-  const [selectedCourseId, setSelectedCourseId] = useState(courses[0]?.id || '');
+  const fallbackCourses = useMemo(() => {
+    const storedCourses = readProfessorCourses();
+    const activeCourses = storedCourses.filter((course) => !course.archived);
+
+    return activeCourses.length ? activeCourses : professorCoursesSeed;
+  }, []);
+
+  const [courses, setCourses] = useState(fallbackCourses);
+  const [selectedCourseId, setSelectedCourseId] = useState(
+    getCourseSelectId(fallbackCourses[0])
+  );
   const [activeView, setActiveView] = useState('overview');
   const [showTopicBreakdown, setShowTopicBreakdown] = useState(false);
   const [showAllStudents, setShowAllStudents] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [exportMessage, setExportMessage] = useState('');
+  const [monitoringFromDb, setMonitoringFromDb] = useState(null);
+  const [monitoringLoading, setMonitoringLoading] = useState(false);
+  const [monitoringError, setMonitoringError] = useState('');
+
+  useEffect(() => {
+    let active = true;
+
+    fetchCourses({ includeArchived: true })
+      .then((loadedCourses) => {
+        if (!active) return;
+
+        const activeCourses = loadedCourses.filter((course) => !course.archived);
+
+        if (activeCourses.length === 0) return;
+
+        setCourses(activeCourses);
+        setSelectedCourseId((currentId) =>
+          activeCourses.some(
+            (course) => getCourseSelectId(course) === String(currentId)
+          )
+            ? currentId
+            : getCourseSelectId(activeCourses[0])
+        );
+      })
+      .catch((error) => {
+        console.error('Professor courses load error:', error);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const selectedCourse = useMemo(
     () =>
-      courses.find((course) => String(course.id) === String(selectedCourseId)) ||
-      courses[0],
-    [courses, selectedCourseId]
+      courses.find((course) => getCourseSelectId(course) === String(selectedCourseId)) ||
+      courses[0] ||
+      fallbackCourses[0],
+    [courses, fallbackCourses, selectedCourseId]
   );
 
+  useEffect(() => {
+    const courseId = getCourseRequestId(selectedCourse);
+
+    if (!courseId) return undefined;
+
+    let active = true;
+
+    setMonitoringLoading(true);
+    setMonitoringError('');
+    setMonitoringFromDb(null);
+
+    fetchCourseMonitoring(courseId)
+      .then((monitoring) => {
+        if (active) setMonitoringFromDb(monitoring);
+      })
+      .catch((error) => {
+        console.error('Course monitoring load error:', error);
+        if (active) {
+          setMonitoringError(
+            error.message || 'Could not load database monitoring data.'
+          );
+        }
+      })
+      .finally(() => {
+        if (active) setMonitoringLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [selectedCourse]);
+
   const monitoring = useMemo(
-    () => getMonitoringForCourse(selectedCourse),
-    [selectedCourse]
+    () => monitoringFromDb || getMonitoringForCourse(selectedCourse),
+    [monitoringFromDb, selectedCourse]
+  );
+
+  const monitoringNotice = monitoringLoading
+    ? 'Loading database monitoring...'
+    : monitoringError
+      ? `${monitoringError} Showing local preview data.`
+      : monitoringFromDb
+        ? 'Showing database monitoring data.'
+        : '';
+  const selectedCourseCode =
+    selectedCourse?.code ||
+    selectedCourse?.course_code ||
+    monitoring.course?.code ||
+    'COURSE';
+  const selectedCourseTitle =
+    selectedCourse?.title ||
+    selectedCourse?.courseName ||
+    selectedCourse?.course_name ||
+    monitoring.course?.title ||
+    'Selected course';
+  const selectedCourseStudentCount = Number(
+    selectedCourse?.students || monitoring.students.length
   );
 
   const allStudents = useMemo(
     () =>
       buildClassRoster(
         monitoring,
-        Number(selectedCourse.students || monitoring.students.length),
-        selectedCourse.code
+        selectedCourseStudentCount,
+        selectedCourseCode
       ),
-    [monitoring, selectedCourse]
+    [monitoring, selectedCourseCode, selectedCourseStudentCount]
   );
 
   const courseStats = useMemo(() => {
     const students = allStudents;
-    const lowestTopic = monitoring.topics.reduce((lowest, topic) =>
-      topic.average < lowest.average ? topic : lowest
-    );
+    const lowestTopic = monitoring.topics.length
+      ? monitoring.topics.reduce((lowest, topic) =>
+          topic.average < lowest.average ? topic : lowest
+        )
+      : { name: 'Course data', average: 0 };
 
     return {
-      enrolled: selectedCourse.students || students.length,
+      enrolled: selectedCourseStudentCount || students.length,
       completion: average(students, 'completion'),
       score: average(students, 'score'),
       onTrack: students.filter((student) => student.status === 'onTrack').length,
@@ -481,7 +589,7 @@ function StudentMonitoringDashboard() {
       atRisk: students.filter((student) => student.status === 'atRisk').length,
       lowestTopic,
     };
-  }, [allStudents, monitoring, selectedCourse]);
+  }, [allStudents, monitoring, selectedCourseStudentCount]);
 
   const displayedStudents = showAllStudents
     ? allStudents
@@ -496,8 +604,17 @@ function StudentMonitoringDashboard() {
   );
 
   const topicBreakdown = useMemo(
-    () =>
-      monitoring.topics.map((topic, topicIndex) => {
+    () => {
+      if (allStudents.length === 0) {
+        return monitoring.topics.map((topic) => ({
+          ...topic,
+          needsSupport: 0,
+          highestScore: 0,
+          topStudent: 'No student yet',
+        }));
+      }
+
+      return monitoring.topics.map((topic, topicIndex) => {
         const scores = allStudents.map((student) => student.topicScores[topicIndex]);
         const topStudent = allStudents.reduce((best, student) =>
           student.topicScores[topicIndex] > best.topicScores[topicIndex]
@@ -511,7 +628,8 @@ function StudentMonitoringDashboard() {
           highestScore: topStudent.topicScores[topicIndex],
           topStudent: topStudent.name,
         };
-      }),
+      });
+    },
     [allStudents, monitoring]
   );
 
@@ -525,7 +643,7 @@ function StudentMonitoringDashboard() {
 
   const handleExport = () => {
     const csv = createMonitoringCsv(
-      selectedCourse,
+      { ...selectedCourse, code: selectedCourseCode, title: selectedCourseTitle },
       monitoring,
       allStudents,
       courseStats
@@ -535,12 +653,12 @@ function StudentMonitoringDashboard() {
     const link = document.createElement('a');
 
     link.href = url;
-    link.download = `${selectedCourse.code.toLowerCase()}-student-monitoring.csv`;
+    link.download = `${selectedCourseCode.toLowerCase()}-student-monitoring.csv`;
     document.body.appendChild(link);
     link.click();
     link.remove();
     window.setTimeout(() => URL.revokeObjectURL(url), 0);
-    setExportMessage(`CSV exported for ${selectedCourse.code}.`);
+    setExportMessage(`CSV exported for ${selectedCourseCode}.`);
   };
 
   return (
@@ -577,13 +695,14 @@ function StudentMonitoringDashboard() {
         <label className="monitor-course-select">
           <FiBookOpen />
           <select
-            value={selectedCourse?.id || ''}
+            value={getCourseSelectId(selectedCourse)}
             onChange={handleCourseChange}
             aria-label="Select course to monitor"
           >
             {courses.map((course) => (
-              <option key={course.id} value={course.id}>
-                {course.code} - {course.title}
+              <option key={getCourseSelectId(course)} value={getCourseSelectId(course)}>
+                {course.code || course.course_code} -{' '}
+                {course.title || course.courseName || course.course_name}
               </option>
             ))}
           </select>
@@ -592,6 +711,7 @@ function StudentMonitoringDashboard() {
         <div className="monitor-course-meta">
           <span>{monitoring.section}</span>
           <span>{monitoring.schedule}</span>
+          {monitoringNotice && <span>{monitoringNotice}</span>}
         </div>
       </div>
 
@@ -726,9 +846,9 @@ function StudentMonitoringDashboard() {
           <section className="monitor-panel monitor-students-panel">
             <div className="monitor-panel-heading">
               <div>
-                <h2>Students in {selectedCourse.code}</h2>
+                <h2>Students in {selectedCourseCode}</h2>
                 <p>
-                  Performance is scoped to {selectedCourse.title}, so the
+                  Performance is scoped to {selectedCourseTitle}, so the
                   professor can compare students within the same course context.
                 </p>
               </div>
@@ -758,7 +878,16 @@ function StudentMonitoringDashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {displayedStudents.map((student) => (
+                  {displayedStudents.length === 0 ? (
+                    <tr>
+                      <td colSpan="8">
+                        No student monitoring records yet. Add enrollments,
+                        lesson progress, or quiz attempts in the database to
+                        populate this course.
+                      </td>
+                    </tr>
+                  ) : (
+                    displayedStudents.map((student) => (
                     <tr key={student.id}>
                       <td>
                         <div className="monitor-student-cell">
@@ -809,7 +938,8 @@ function StudentMonitoringDashboard() {
                         </button>
                       </td>
                     </tr>
-                  ))}
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -819,7 +949,7 @@ function StudentMonitoringDashboard() {
                 <div>
                   <h3>{selectedStudent.name}</h3>
                   <p>
-                    {selectedStudent.id} in {selectedCourse.code} -{' '}
+                    {selectedStudent.id} in {selectedCourseCode} -{' '}
                     {statusLabels[selectedStudent.status]}.
                   </p>
                 </div>
@@ -881,8 +1011,8 @@ function StudentMonitoringDashboard() {
           <div className="monitor-report-grid">
             <article className="monitor-report-card">
               <span>Course</span>
-              <strong>{selectedCourse.code}</strong>
-              <p>{selectedCourse.title}</p>
+              <strong>{selectedCourseCode}</strong>
+              <p>{selectedCourseTitle}</p>
             </article>
             <article className="monitor-report-card">
               <span>Completion</span>

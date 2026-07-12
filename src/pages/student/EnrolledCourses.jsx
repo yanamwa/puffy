@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import QuizModesModal from '../../components/QuizModesModal';
+import { getCourseQuizItems } from '../course/courseContent.js';
 import JoinCourseModal from './JoinCourseModal';
 import { PROFESSOR_COURSES_EVENT } from '../professor/professorData';
 import {
@@ -134,6 +136,7 @@ export default function EnrolledCourses() {
   const [courses, setCourses] = useState(() => getStudentEnrolledCourses());
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
+  const [practiceCourse, setPracticeCourse] = useState(null);
 
   useEffect(() => {
     let active = true;
@@ -183,6 +186,10 @@ export default function EnrolledCourses() {
 
   const openCourse = (course) => {
     navigate(`/student/enrolled-courses/${course.id || course.code}`);
+  };
+
+  const openPracticeModes = (course) => {
+    setPracticeCourse(course);
   };
 
   const joinByCourseCode = async () => {
@@ -312,7 +319,7 @@ export default function EnrolledCourses() {
                   <button
                     type="button"
                     className="start-learning-button"
-                    onClick={() => openCourse(course)}
+                    onClick={() => openPracticeModes(course)}
                   >
                     Practice
                   </button>
@@ -330,6 +337,15 @@ export default function EnrolledCourses() {
         onCancel={closeJoinModal}
         onJoin={joinByCourseCode}
       />
+
+      {practiceCourse && (
+        <QuizModesModal
+          source="lesson"
+          lessonId={practiceCourse.id || practiceCourse.course_id || practiceCourse.code}
+          quizzes={getCourseQuizItems(practiceCourse)}
+          onClose={() => setPracticeCourse(null)}
+        />
+      )}
     </div>
   );
 }

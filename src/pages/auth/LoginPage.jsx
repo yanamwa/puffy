@@ -173,8 +173,27 @@ function Login() {
 
       setLoginAttempts(0);
 
-      localStorage.setItem("user_email", data.user?.email || data.email || "");
-      localStorage.setItem("username", data.user?.name || data.username || "");
+      const loggedInUser = data.user || {};
+      const displayName =
+        loggedInUser.displayName ||
+        loggedInUser.display_name ||
+        loggedInUser.name ||
+        data.username ||
+        "";
+
+      localStorage.setItem("puffy-token", data.token || "");
+      localStorage.setItem("puffy-user", JSON.stringify(loggedInUser));
+      localStorage.setItem("user_email", loggedInUser.email || data.email || "");
+      localStorage.setItem("user_role", loggedInUser.role || "");
+      localStorage.setItem("username", displayName);
+      localStorage.setItem(
+        "year_level",
+        loggedInUser.yearLevel || loggedInUser.year_level || ""
+      );
+      localStorage.setItem(
+        "section_name",
+        loggedInUser.sectionName || loggedInUser.section_name || ""
+      );
 
       if (data.isNewUser) {
 
