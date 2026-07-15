@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Avatar, Icon, SortDropdown } from './EnrolledCourses';
+import { Avatar, Icon, SortToggle } from './EnrolledCourses';
 import JoinCourseModal from './JoinCourseModal';
 import './EnrolledCourses.css';
 
@@ -466,20 +466,16 @@ export default function ArchivedCourses() {
           </div>
         </header>
 
-        <section className="public-heading archived-heading">
-          <h1>Archived Courses</h1>
-
-          <div className="filter-actions">
-            <SortDropdown
-              label="Recent"
-              options={['Recent', 'Oldest']}
-            />
-
-            <SortDropdown
-              label="A to Z"
-              options={['A to Z', 'Z to A']}
-            />
-          </div>
+        <section className="public-heading">
+                  <h1>Public Courses</h1>
+        
+                  <div className="filter-actions">
+                    <span className="sort-by-label">Sort by</span>
+        
+                    <SortToggle options={['Recent', 'Oldest']} />
+        
+                    <SortToggle options={['A to Z', 'Z to A']} />
+                  </div>
         </section>
 
         <div className="archive-notice" role="status">

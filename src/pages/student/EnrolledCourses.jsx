@@ -113,40 +113,42 @@ export function Icon({ name }) {
   return null;
 }
 
-export function SortDropdown({ label, options }) {
-  const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState(label);
-  
+export function SortToggle({ options }) {
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  const selected = options[selectedIndex];
+
+  const toggleSort = () => {
+    setSelectedIndex((currentIndex) =>
+      currentIndex === options.length - 1 ? 0 : currentIndex + 1
+    );
+  };
 
   return (
-    <div className="sort-dropdown">
-      <button
-        type="button"
-        className="sort-trigger"
-        aria-expanded={open}
-        onClick={() => setOpen((current) => !current)}
+    <button
+      type="button"
+      className="sort-toggle"
+      onClick={toggleSort}
+      aria-label={`Current sort: ${selected}. Click to switch to ${
+        options[selectedIndex === options.length - 1 ? 0 : selectedIndex + 1]
+      }`}
+      title={`Click to switch to ${
+        options[selectedIndex === options.length - 1 ? 0 : selectedIndex + 1]
+      }`}
+    >
+      <span>{selected}</span>
+
+      <svg
+        className="sort-toggle-icon"
+        viewBox="0 0 24 24"
+        aria-hidden="true"
       >
-        <span>{selected}</span>
-        <span className="dropdown-mark">v</span>
-      </button>
-      {open && (
-        <div className="sort-menu" role="menu">
-          {options.map((option) => (
-            <button
-              key={option}
-              type="button"
-              role="menuitem"
-              onClick={() => {
-                setSelected(option);
-                setOpen(false);
-              }}
-            >
-              {option}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
+        <path d="M7 7h10" />
+        <path d="m14 4 3 3-3 3" />
+        <path d="M17 17H7" />
+        <path d="m10 14-3 3 3 3" />
+      </svg>
+    </button>
   );
 }
 
@@ -679,10 +681,13 @@ useEffect(() => {
         <section className="public-heading">
           <h1>Enrolled Courses</h1>
           <div className="filter-actions">
-            <SortDropdown label="Recent" options={['Recent', 'Oldest']} />
-            <SortDropdown label="A to Z" options={['A to Z', 'Z to A']} />
+            <span className="sort-by-label">Sort by</span>
+
+            <SortToggle options={['Recent', 'Oldest']} />
+
+            <SortToggle options={['A to Z', 'Z to A']} />
           </div>
-        </section>
+                    </section>
 
         <section className="courses-grid" aria-label="Enrolled courses">
           {loading ? (

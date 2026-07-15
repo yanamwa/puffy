@@ -512,7 +512,9 @@ export default function StudentHome() {
         <Avatar large />
         <strong>@meiko</strong>
         <span>2nd year</span>
-        <button>Profile</button>
+        <Link to="/student/profile" className="profile-button">
+          Profile
+        </Link>
 
         <section className="mini-calendar">
           <div className="calendar-header">
