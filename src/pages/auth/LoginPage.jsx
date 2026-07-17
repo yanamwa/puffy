@@ -4,9 +4,11 @@ import Swal from "sweetalert2";
 import { useNavigate, Link } from "react-router-dom";
 import { API_BASE } from "../../config.js";
 import LandingNavbar from "../../components/LandingNavbar";
+import { useAuth } from "../../context/AuthContext.jsx";
 
 function Login() {
   const navigate = useNavigate();
+  const { saveSession } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
   const [username, setUsername] = useState("");
@@ -173,29 +175,22 @@ function Login() {
 
       setLoginAttempts(0);
 
-      const loggedInUser = data.user || {};
-      const displayName =
-        loggedInUser.displayName ||
-        loggedInUser.display_name ||
-        loggedInUser.name ||
-        data.username ||
-        "";
+      const loggedInUser = saveSession(data);
 
-      localStorage.setItem("puffy-token", data.token || "");
-      localStorage.setItem("puffy-user", JSON.stringify(loggedInUser));
-      localStorage.setItem("user_email", loggedInUser.email || data.email || "");
-      localStorage.setItem("user_role", loggedInUser.role || "");
-      localStorage.setItem("username", displayName);
-      localStorage.setItem(
-        "year_level",
-        loggedInUser.yearLevel || loggedInUser.year_level || ""
-      );
-      localStorage.setItem(
-        "section_name",
-        loggedInUser.sectionName || loggedInUser.section_name || ""
-      );
+      const mustChangePassword =
+        loggedInUser.mustChangePassword ||
+        loggedInUser.must_change_password === 1 ||
+        loggedInUser.must_change_password === true;
 
-      if (data.isNewUser) {
+      if (loggedInUser.role === "student" && mustChangePassword) {
+        Swal.fire({
+          imageUrl: "/images/success.png",
+          imageWidth: 170,
+          imageHeight: 170,
+          title: "Password Update Required",
+          text: "Please change your temporary password.",
+        }).then(() => navigate("/student/settings"));
+      } else if (data.isNewUser) {
 
         Swal.fire({
           imageUrl: "/images/success.png",
@@ -216,7 +211,9 @@ function Login() {
         }).then(() => {
           const role = data.user?.role;
 
-          if (role === "admin") {
+          if (role === "super_admin") {
+            navigate("/super-admin");
+          } else if (role === "admin") {
             navigate("/admin");
           } else if (role === "professor") {
             navigate("/professor");

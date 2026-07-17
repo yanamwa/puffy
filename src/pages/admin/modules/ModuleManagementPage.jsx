@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { FiEye, FiTrash2 } from 'react-icons/fi';
 import {
   getProfessorCourseOwner,
 } from '../../professor/professorData';
@@ -188,6 +189,7 @@ export default function ModuleManagementPage() {
                   <td>
                     <div className="admin-module-actions">
                       <button type="button" onClick={() => setSelectedCourse(course)}>
+                        <FiEye />
                         View
                       </button>
                       <button
@@ -195,6 +197,7 @@ export default function ModuleManagementPage() {
                         className="danger"
                         onClick={() => deleteCourse(course)}
                       >
+                        <FiTrash2 />
                         Delete
                       </button>
                     </div>

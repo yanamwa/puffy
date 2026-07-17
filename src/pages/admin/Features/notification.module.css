@@ -381,34 +381,45 @@
 .postBtn {
   width: 100%;
   border: none;
-  border-radius: 16px;
-  padding: 14px;
+  border-radius: 14px;
+  min-height: 46px;
+  padding: 0 20px;
   color: white;
   font-size: 18px;
-  background: #8966c2;
-  border: 1px solid #593e85;
-  box-shadow: 0 4px rgb(107, 85, 143);
+  background: #17192a;
+  box-shadow: 0 6px 0 rgba(23, 25, 42, 0.24);
+  transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease;
 }
 
 .postBtn:hover,
 .markReadBtn:hover {
-  background: #593e85;
+  filter: brightness(1.05);
+  transform: translateY(-1px);
 }
 
 .deleteBtn {
   margin-top: 14px;
   border: none;
-  border-radius: 13px;
-  padding: 10px 14px;
-  background: #ce3838;
-  border: 1px solid #962626;
-  box-shadow: 0 4px rgb(85, 9, 9);
+  border-radius: 14px;
+  min-height: 40px;
+  padding: 0 15px;
+  background: #f24b4b;
+  box-shadow: 0 5px 0 rgba(161, 27, 32, 0.26);
   color: white;
   font-size: 16px;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease;
 }
 
 .deleteBtn:hover {
-  background: #aa2222;
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+}
+
+.postBtn:active,
+.deleteBtn:active,
+.markReadBtn:active {
+  box-shadow: 0 2px 0 rgba(25, 27, 42, 0.22);
+  transform: translateY(3px);
 }
 
 /* ===== LIST ===== */
@@ -802,4 +813,50 @@
 .customSortMenu button:hover {
   background: #f3e8ff;
   color: #4b2aad;
+}
+
+/* Compact lifted pill action buttons. */
+.postBtn,
+.markReadBtn,
+.deleteBtn {
+  min-width: 104px !important;
+  min-height: 44px !important;
+  border: 0 !important;
+  border-radius: 14px !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  line-height: 1;
+  padding: 0 16px !important;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease;
+}
+
+.postBtn,
+.markReadBtn {
+  background: #17192a !important;
+  box-shadow: 0 5px 0 #c9cbd1 !important;
+  color: #ffffff !important;
+}
+
+.deleteBtn {
+  background: #f24b4b !important;
+  box-shadow: 0 5px 0 rgba(161, 27, 32, 0.22) !important;
+  color: #ffffff !important;
+}
+
+.postBtn:hover,
+.markReadBtn:hover,
+.deleteBtn:hover {
+  filter: brightness(1.04);
+  transform: translateY(-1px);
+}
+
+.postBtn:active,
+.markReadBtn:active,
+.deleteBtn:active {
+  box-shadow: 0 2px 0 #c9cbd1 !important;
+  transform: translateY(3px);
 }

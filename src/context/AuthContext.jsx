@@ -9,6 +9,34 @@ export function AuthProvider({ children }) {
     return savedUser ? JSON.parse(savedUser) : null;
   });
 
+  const saveSession = (data) => {
+    const sessionUser = data.user || {};
+
+    localStorage.setItem('puffy-token', data.token || '');
+    localStorage.setItem('puffy-user', JSON.stringify(sessionUser));
+    localStorage.setItem('user_email', sessionUser.email || data.email || '');
+    localStorage.setItem('user_role', sessionUser.role || '');
+    localStorage.setItem(
+      'username',
+      sessionUser.displayName ||
+        sessionUser.display_name ||
+        sessionUser.name ||
+        data.username ||
+        ''
+    );
+    localStorage.setItem(
+      'year_level',
+      sessionUser.yearLevel || sessionUser.year_level || ''
+    );
+    localStorage.setItem(
+      'section_name',
+      sessionUser.sectionName || sessionUser.section_name || ''
+    );
+    setUser(sessionUser);
+
+    return sessionUser;
+  };
+
   const login = async (email, password) => {
     const response = await fetch(`${API_BASE}/login`, {
       method: 'POST',
@@ -21,21 +49,7 @@ export function AuthProvider({ children }) {
       throw new Error(data.message || 'Invalid credentials.');
     }
 
-    localStorage.setItem('puffy-token', data.token);
-    localStorage.setItem('puffy-user', JSON.stringify(data.user));
-    localStorage.setItem('user_email', data.user?.email || data.email || '');
-    localStorage.setItem('user_role', data.user?.role || '');
-    localStorage.setItem(
-      'username',
-      data.user?.displayName || data.user?.display_name || data.user?.name || ''
-    );
-    localStorage.setItem('year_level', data.user?.yearLevel || data.user?.year_level || '');
-    localStorage.setItem(
-      'section_name',
-      data.user?.sectionName || data.user?.section_name || ''
-    );
-    setUser(data.user);
-    return data.user;
+    return saveSession(data);
   };
 
   const logout = () => {
@@ -49,7 +63,10 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
-  const value = useMemo(() => ({ user, login, logout }), [user]);
+  const value = useMemo(
+    () => ({ user, login, logout, saveSession }),
+    [user]
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

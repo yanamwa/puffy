@@ -6,6 +6,7 @@ export default function Layout() {
   const location = useLocation();
   const navigate = useNavigate();
   const isStudentDashboard = location.pathname.startsWith('/student');
+  const isSuperAdminArea = location.pathname.startsWith('/super-admin');
   const isAdminArea = location.pathname.startsWith('/admin');
   const isProfessorArea = location.pathname.startsWith('/professor');
   const isCourseArea = [
@@ -28,7 +29,14 @@ export default function Layout() {
     navigate('/login');
   };
 
-  if (isStudentDashboard || isAdminArea || isProfessorArea || isCourseArea || isOnboardingPage) {
+  if (
+    isStudentDashboard ||
+    isSuperAdminArea ||
+    isAdminArea ||
+    isProfessorArea ||
+    isCourseArea ||
+    isOnboardingPage
+  ) {
     return <Outlet />;
   }
 

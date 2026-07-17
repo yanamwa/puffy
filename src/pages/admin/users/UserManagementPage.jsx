@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
+  FiArchive,
   FiEye,
   FiMail,
   FiSearch,
-  FiShield,
   FiUser,
   FiUsers,
 } from 'react-icons/fi';
@@ -23,58 +23,46 @@ const demoUsers = [
   },
   {
     id: 2,
-    name: 'Anie Cruz',
-    email: 'anie@puffybrain.test',
-    role: 'student',
-    status: 'Active',
-    joined: '2026-06-28',
-    decks: 5,
-    modules: 3,
-  },
-  {
-    id: 3,
     name: 'Ashborn Reyes',
     email: 'ashborn@puffybrain.test',
     role: 'professor',
     status: 'Active',
+    verificationStatus: 'approved',
     joined: '2026-06-21',
     decks: 12,
     modules: 9,
   },
-  {
-    id: 4,
-    name: 'Admin Meii',
-    email: 'admin@puffybrain.test',
-    role: 'admin',
-    status: 'Active',
-    joined: '2026-06-15',
-    decks: 0,
-    modules: 0,
-  },
-  {
-    id: 5,
-    name: 'Shzume Lee',
-    email: 'shzume@puffybrain.test',
-    role: 'student',
-    status: 'Pending',
-    joined: '2026-06-10',
-    decks: 2,
-    modules: 1,
-  },
 ];
 
 function normalizeUser(user) {
-  const displayName = user.name || user.username || user.full_name || 'Unnamed User';
+  const displayName =
+    user.name || user.displayName || user.display_name || user.username || 'Unnamed User';
+  const verificationStatus =
+    user.verificationStatus || user.verification_status || 'approved';
+  const archived =
+    user.isArchived === true ||
+    user.is_archived === 1 ||
+    user.is_archived === true ||
+    user.status === 'Archived';
 
   return {
-    id: user.id || user.user_id || user.UserID || displayName,
+    id: user.id || user.userId || user.user_id || user.UserID || displayName,
     name: displayName,
     email: user.email || 'No email found',
     role: user.role || 'student',
-    status: user.status || 'Active',
+    status: archived ? 'Archived' : user.status || 'Active',
+    verificationStatus,
     joined: user.joined || user.created_at || user.createdAt || '',
     decks: Number(user.decks || user.deck_count || 0),
     modules: Number(user.modules || user.module_count || 0),
+    studentId: user.studentId || user.student_id || '',
+    professorId: user.professorId || user.professor_id || '',
+    verified:
+      user.verified === true ||
+      user.is_verified === 1 ||
+      user.is_verified === true ||
+      user.isVerified === true,
+    isArchived: archived,
     profileImage:
       user.profile_image ||
       user.profileImage ||
@@ -84,6 +72,16 @@ function normalizeUser(user) {
       user.image ||
       '',
   };
+}
+
+function isAdminManagedUser(user) {
+  const role = String(user.role || '').toLowerCase();
+  const verificationStatus = String(user.verificationStatus || '').toLowerCase();
+
+  if (role === 'student') return true;
+  if (role === 'professor') return verificationStatus === 'approved';
+
+  return false;
 }
 
 function formatDate(value) {
@@ -141,6 +139,15 @@ function getProfileImageUrl(image) {
   return `${API_BASE}/${cleanImage}`;
 }
 
+function getAuthHeaders() {
+  const token = localStorage.getItem('puffy-token');
+
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+}
+
 function UserAvatar({ user, large = false }) {
   const [imageFailed, setImageFailed] = useState(false);
   const imageUrl = imageFailed ? '' : getProfileImageUrl(user.profileImage);
@@ -159,12 +166,14 @@ function UserAvatar({ user, large = false }) {
 }
 
 export default function UserManagementPage() {
-  const [users, setUsers] = useState(demoUsers);
+  const [users, setUsers] = useState(demoUsers.map(normalizeUser));
   const [query, setQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [loading, setLoading] = useState(true);
   const [notice, setNotice] = useState('');
   const [selectedUser, setSelectedUser] = useState(null);
+  const [busyUserId, setBusyUserId] = useState('');
 
   useEffect(() => {
     let ignore = false;
@@ -172,7 +181,7 @@ export default function UserManagementPage() {
     async function loadUsers() {
       try {
         setLoading(true);
-        const response = await fetch('/api/users');
+        const response = await fetch(`${API_BASE}/users`);
 
         if (!response.ok) {
           throw new Error('User API unavailable.');
@@ -182,18 +191,16 @@ export default function UserManagementPage() {
         const nextUsers = Array.isArray(data.users) ? data.users : [];
 
         if (!ignore) {
-          setUsers(nextUsers.map(normalizeUser));
+          setUsers(nextUsers.map(normalizeUser).filter(isAdminManagedUser));
           setNotice('');
         }
       } catch {
         if (!ignore) {
-          setUsers(demoUsers);
-          setNotice('Showing sample user info until the users API is available.');
+          setUsers(demoUsers.map(normalizeUser));
+          setNotice('Showing sample approved users until the users API is available.');
         }
       } finally {
-        if (!ignore) {
-          setLoading(false);
-        }
+        if (!ignore) setLoading(false);
       }
     }
 
@@ -204,31 +211,71 @@ export default function UserManagementPage() {
     };
   }, []);
 
+  const updateUserInList = (nextUser) => {
+    const normalized = normalizeUser(nextUser);
+    setUsers((currentUsers) =>
+      currentUsers.map((user) => (user.id === normalized.id ? normalized : user))
+    );
+    setSelectedUser((currentUser) =>
+      currentUser && currentUser.id === normalized.id ? normalized : currentUser
+    );
+  };
+
+  const handleArchiveToggle = async (user) => {
+    const archive = !user.isArchived;
+
+    try {
+      setBusyUserId(`${user.id}-archive`);
+      const response = await fetch(`${API_BASE}/users/${user.id}/archive`, {
+        method: 'PATCH',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ archive }),
+      });
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || 'Could not update account.');
+      }
+
+      updateUserInList(data.user);
+      setNotice(data.message);
+    } catch (error) {
+      setNotice(error.message || 'Could not update account.');
+    } finally {
+      setBusyUserId('');
+    }
+  };
+
   const filteredUsers = useMemo(() => {
     const search = query.trim().toLowerCase();
 
     return users.filter((user) => {
-      const matchesRole =
-        roleFilter === 'all' || String(user.role).toLowerCase() === roleFilter;
+      const role = String(user.role).toLowerCase();
+      const status = String(user.status).toLowerCase();
+      const matchesRole = roleFilter === 'all' || role === roleFilter;
+      const matchesStatus =
+        statusFilter === 'all' || status === statusFilter.toLowerCase();
       const matchesSearch =
         !search ||
         user.name.toLowerCase().includes(search) ||
         user.email.toLowerCase().includes(search) ||
-        String(user.id).toLowerCase().includes(search);
+        String(user.id).toLowerCase().includes(search) ||
+        String(user.studentId).toLowerCase().includes(search);
 
-      return matchesRole && matchesSearch;
+      return matchesRole && matchesStatus && matchesSearch;
     });
-  }, [query, roleFilter, users]);
+  }, [query, roleFilter, statusFilter, users]);
 
   const stats = useMemo(() => {
     const countRole = (role) =>
       users.filter((user) => String(user.role).toLowerCase() === role).length;
+    const archivedCount = users.filter((user) => user.isArchived).length;
 
     return [
-      { label: 'Total Users', value: users.length, icon: FiUsers },
+      { label: 'Managed Users', value: users.length, icon: FiUsers },
       { label: 'Students', value: countRole('student'), icon: FiUser },
-      { label: 'Professors', value: countRole('professor'), icon: FiMail },
-      { label: 'Admins', value: countRole('admin'), icon: FiShield },
+      { label: 'Approved Professors', value: countRole('professor'), icon: FiMail },
+      { label: 'Archived', value: archivedCount, icon: FiArchive },
     ];
   }, [users]);
 
@@ -236,8 +283,8 @@ export default function UserManagementPage() {
     <div className="users-page">
       <div className="users-page-header">
         <div>
-          <h1>User Management</h1>
-          <p>View and manage all PuffyBrain users.</p>
+          <h1>Admin User Management</h1>
+          <p>Manage approved professors and registered students.</p>
         </div>
       </div>
 
@@ -260,7 +307,7 @@ export default function UserManagementPage() {
       <section className="users-panel">
         <div className="users-panel-top">
           <div>
-            <h2>Users Information</h2>
+            <h2>Approved Users</h2>
             <p>{filteredUsers.length} user records shown</p>
           </div>
 
@@ -269,7 +316,7 @@ export default function UserManagementPage() {
               <FiSearch />
               <input
                 type="text"
-                placeholder="Search users..."
+                placeholder="Search approved users..."
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
               />
@@ -283,7 +330,16 @@ export default function UserManagementPage() {
               <option value="all">All Roles</option>
               <option value="student">Students</option>
               <option value="professor">Professors</option>
-              <option value="admin">Admins</option>
+            </select>
+
+            <select
+              value={statusFilter}
+              onChange={(event) => setStatusFilter(event.target.value)}
+              aria-label="Filter users by status"
+            >
+              <option value="all">All Statuses</option>
+              <option value="active">Active</option>
+              <option value="archived">Archived</option>
             </select>
           </div>
         </div>
@@ -306,53 +362,69 @@ export default function UserManagementPage() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td className="users-empty" colSpan="7">Loading users...</td>
+                  <td className="users-empty" colSpan="7">
+                    Loading users...
+                  </td>
                 </tr>
               ) : filteredUsers.length === 0 ? (
                 <tr>
-                  <td className="users-empty" colSpan="7">No users found.</td>
+                  <td className="users-empty" colSpan="7">
+                    No approved users found.
+                  </td>
                 </tr>
               ) : (
-                filteredUsers.map((user) => (
-                  <tr key={user.id}>
-                    <td>
-                      <div className="users-person">
-                        <UserAvatar user={user} />
-                        <div>
-                          <strong>{user.name}</strong>
-                          <small>ID: {user.id}</small>
+                filteredUsers.map((user) => {
+                  const status = String(user.status).toLowerCase();
+
+                  return (
+                    <tr key={user.id}>
+                      <td>
+                        <div className="users-person">
+                          <UserAvatar user={user} />
+                          <div>
+                            <strong>{user.name}</strong>
+                            <small>ID: {user.id}</small>
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                    <td>{user.email}</td>
-                    <td>
-                      <span className="users-role">{titleCase(user.role)}</span>
-                    </td>
-                    <td>
-                      <span
-                        className={`users-status ${
-                          String(user.status).toLowerCase() === 'active'
-                            ? 'is-active'
-                            : 'is-pending'
-                        }`}
-                      >
-                        {titleCase(user.status)}
-                      </span>
-                    </td>
-                    <td>{formatDate(user.joined)}</td>
-                    <td>{user.decks} decks / {user.modules} modules</td>
-                    <td>
-                      <button
-                        className="users-view-btn"
-                        type="button"
-                        onClick={() => setSelectedUser(user)}
-                      >
-                        <FiEye />
-                        View
-                      </button>
-                    </td>
-                  </tr>
-                ))
+                      </td>
+                      <td>{user.email}</td>
+                      <td>
+                        <span className="users-role">{titleCase(user.role)}</span>
+                      </td>
+                      <td>
+                        <span className={`users-status is-${status}`}>
+                          {titleCase(user.status)}
+                        </span>
+                      </td>
+                      <td>{formatDate(user.joined)}</td>
+                      <td>{user.decks} decks / {user.modules} modules</td>
+                      <td>
+                        <div className="users-action-group">
+                          <button
+                            className="users-icon-btn users-view-btn"
+                            type="button"
+                            onClick={() => setSelectedUser(user)}
+                            title="View user"
+                          >
+                            <FiEye />
+                            <span>View</span>
+                          </button>
+
+                          <button
+                            className="users-icon-btn users-archive-btn"
+                            type="button"
+                            onClick={() => handleArchiveToggle(user)}
+                            disabled={busyUserId === `${user.id}-archive`}
+                            title={user.isArchived ? 'Restore account' : 'Archive account'}
+                          >
+                            <FiArchive />
+                            <span>{user.isArchived ? 'Restore' : 'Archive'}</span>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
@@ -361,7 +433,10 @@ export default function UserManagementPage() {
 
       {selectedUser && (
         <div className="users-modal-backdrop" onClick={() => setSelectedUser(null)}>
-          <section className="users-modal" onClick={(event) => event.stopPropagation()}>
+          <section
+            className="users-modal"
+            onClick={(event) => event.stopPropagation()}
+          >
             <button
               className="users-modal-close"
               type="button"
@@ -391,16 +466,24 @@ export default function UserManagementPage() {
                 <dd>{titleCase(selectedUser.status)}</dd>
               </div>
               <div>
+                <dt>Email</dt>
+                <dd>{selectedUser.verified ? 'Verified' : 'Pending'}</dd>
+              </div>
+              <div>
+                <dt>Student ID</dt>
+                <dd>{selectedUser.studentId || 'None'}</dd>
+              </div>
+              <div>
+                <dt>Professor ID</dt>
+                <dd>{selectedUser.professorId || 'None'}</dd>
+              </div>
+              <div>
                 <dt>Joined</dt>
                 <dd>{formatDate(selectedUser.joined)}</dd>
               </div>
               <div>
-                <dt>Decks Created</dt>
-                <dd>{selectedUser.decks}</dd>
-              </div>
-              <div>
-                <dt>Modules Joined</dt>
-                <dd>{selectedUser.modules}</dd>
+                <dt>Activity</dt>
+                <dd>{selectedUser.decks} decks / {selectedUser.modules} modules</dd>
               </div>
             </dl>
           </section>

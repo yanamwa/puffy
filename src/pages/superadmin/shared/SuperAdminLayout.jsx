@@ -1,19 +1,21 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import {
-  FiGrid,
-  FiUsers,
-  FiBook,
-  FiSun,
-  FiBell,
   FiActivity,
-  FiSearch,
-  FiSidebar,
+  FiBell,
+  FiBook,
+  FiDownload,
+  FiGrid,
   FiLogOut,
+  FiSearch,
+  FiSettings,
+  FiShield,
+  FiSidebar,
+  FiUsers,
 } from 'react-icons/fi';
-import './AdminLayout.css';
+import '../../admin/shared/AdminLayout.css';
 
-export default function AdminLayout({ children }) {
+export default function SuperAdminLayout({ children }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -23,12 +25,18 @@ export default function AdminLayout({ children }) {
   };
 
   const mainMenuItems = [
-    { label: 'Dashboard', path: '/admin/dashboard', icon: FiGrid },
-    { label: 'User Management', path: '/admin/users', icon: FiUsers },
-    { label: 'Course Management', path: '/admin/courses', icon: FiBook },
-    { label: 'Modes Management', path: '/admin/mode', icon: FiSun },
-    { label: 'Notification Management', path: '/admin/notification', icon: FiBell },
-    { label: 'Reports & Statistics', path: '/admin/reports', icon: FiActivity },
+    { label: 'Dashboard', path: '/super-admin/dashboard', icon: FiGrid },
+    { label: 'User Management', path: '/super-admin/users', icon: FiUsers },
+    { label: 'Course Management', path: '/super-admin/courses', icon: FiBook },
+    { label: 'System Analytics', path: '/super-admin/analytics', icon: FiActivity },
+    { label: 'Announcements', path: '/super-admin/announcements', icon: FiBell },
+    { label: 'Audit Logs', path: '/super-admin/audit-logs', icon: FiShield },
+    { label: 'Backup and Restore', path: '/super-admin/backup', icon: FiDownload },
+  ];
+
+  const otherMenuItems = [
+    { label: 'System Settings', path: '/super-admin/settings', icon: FiSettings },
+    { label: 'Security and Permissions', path: '/super-admin/security', icon: FiShield },
   ];
 
   return (
@@ -40,12 +48,12 @@ export default function AdminLayout({ children }) {
 
         <div className="sidebar-brand">
           <img src="/images/logo_solo.png" alt="PuffyBrain" />
-          <h2>Admin</h2>
+          <h2>Super Admin</h2>
         </div>
 
         <nav className="sidebar-menu">
           <div className="menu-section">
-            <p className="menu-section-title">Menu</p>
+            <p className="menu-section-title">System</p>
             {mainMenuItems.map((item) => {
               const Icon = item.icon;
               return (
@@ -63,6 +71,24 @@ export default function AdminLayout({ children }) {
             })}
           </div>
 
+          <div className="menu-section">
+            <p className="menu-section-title">Control</p>
+            {otherMenuItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  className={({ isActive }) =>
+                    `sidebar-link ${isActive ? 'active' : ''}`
+                  }
+                >
+                  <Icon className="sidebar-icon" />
+                  <span>{item.label}</span>
+                </NavLink>
+              );
+            })}
+          </div>
         </nav>
 
         <div className="sidebar-footer">
@@ -77,7 +103,7 @@ export default function AdminLayout({ children }) {
         <header className="admin-header">
           <div className="admin-header-search">
             <FiSearch className="search-icon" />
-            <input type="text" placeholder="Search..." />
+            <input type="text" placeholder="Search system records..." />
           </div>
           <div className="admin-header-actions">
             <button className="notification-btn" type="button" aria-label="Notifications">
@@ -85,9 +111,9 @@ export default function AdminLayout({ children }) {
             </button>
             <div className="admin-user">
               <span className="admin-user-avatar">
-                {(user?.name || 'Admin').charAt(0)}
+                {(user?.name || 'Super Admin').charAt(0)}
               </span>
-              <span className="admin-user-name">{user?.name || 'Admin'}</span>
+              <span className="admin-user-name">{user?.name || 'Super Admin'}</span>
             </div>
           </div>
         </header>

@@ -125,7 +125,7 @@ export default function Otp() {
           setInlineError("");
           showSuccessAlert(
             "Verified!",
-            "Your account has been verified."
+            "Your email is verified. The Super Admin will review your professor registration."
           ).then(() => {
             sessionStorage.removeItem("otp_email");
             navigate("/login");

@@ -5,47 +5,20 @@ import { useNavigate, Link } from "react-router-dom";
 import { API_BASE } from "../../config.js";
 import LandingNavbar from "../../components/LandingNavbar";
 
-const ROLE_DETAILS = {
-  student: {
-    title: "Create a Student Account",
-    choiceTitle: "Student",
-    choiceText: "Sign up with your Student ID for student access.",
-    description: "Enter your Student ID so your student account can be verified.",
-    verificationLabel: "Student ID",
-    verificationPlaceholder: "Enter your Student ID",
-    verificationErrorTitle: "Student ID Required",
-    verificationErrorText: "Please enter your Student ID.",
-    buttonLabel: "Student",
-  },
-  professor: {
-    title: "Create a Professor Account",
-    choiceTitle: "Professor",
-    choiceText: "Sign up with your Professor ID for professor access.",
-    description:
-      "Enter your Professor ID so your professor account can be verified.",
-    verificationLabel: "Professor ID",
-    verificationPlaceholder: "Enter your Professor ID",
-    verificationErrorTitle: "Professor Verification Required",
-    verificationErrorText: "Please enter your Professor ID.",
-    buttonLabel: "Professor",
-  },
-};
-
 function Signup() {
   const navigate = useNavigate();
 
-  const [selectedRole, setSelectedRole] = useState("");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
-  const [verificationId, setVerificationId] = useState("");
+  const [facultyId, setFacultyId] = useState("");
+  const [department, setDepartment] = useState("");
+  const [employmentProof, setEmploymentProof] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSigningUp, setIsSigningUp] = useState(false);
-
-  const roleDetails = selectedRole ? ROLE_DETAILS[selectedRole] : null;
 
   const hasLength = password.length >= 12;
   const hasUpper = /[A-Z]/.test(password);
@@ -85,7 +58,9 @@ function Signup() {
   const resetForm = () => {
     setUsername("");
     setEmail("");
-    setVerificationId("");
+    setFacultyId("");
+    setDepartment("");
+    setEmploymentProof("");
     setPassword("");
     setConfirmPassword("");
   };
@@ -93,16 +68,8 @@ function Signup() {
   const handleSignup = async () => {
     if (isSigningUp) return;
 
-    if (!selectedRole || !roleDetails) {
-      return showError(
-        "Account Type Required",
-        "Please choose Student or Professor first."
-      );
-    }
-
     const cleanUsername = username.trim();
     const cleanEmail = email.trim().toLowerCase();
-    const cleanVerificationId = verificationId.trim();
 
     if (!cleanUsername) {
       return showError("Username Required", "Please enter your username.");
@@ -118,11 +85,15 @@ function Signup() {
       return showError("Invalid Email", "Please enter a valid email address.");
     }
 
-    if (!cleanVerificationId) {
+    if (!facultyId.trim()) {
       return showError(
-        roleDetails.verificationErrorTitle,
-        roleDetails.verificationErrorText
+        "Faculty ID Required",
+        "Please enter your employee or faculty ID."
       );
+    }
+
+    if (!department.trim()) {
+      return showError("Department Required", "Please enter your department.");
     }
 
     if (!password) {
@@ -159,11 +130,10 @@ function Signup() {
           name: cleanUsername,
           email: cleanEmail,
           password,
-          role: selectedRole,
-          verificationId: cleanVerificationId,
-          studentId: selectedRole === "student" ? cleanVerificationId : null,
-          professorId:
-            selectedRole === "professor" ? cleanVerificationId : null,
+          role: "professor",
+          facultyId: facultyId.trim(),
+          department: department.trim(),
+          employmentProof: employmentProof.trim(),
         }),
       });
 
@@ -186,7 +156,8 @@ function Signup() {
         imageWidth: 170,
         imageHeight: 170,
         title: "Verification Code Sent",
-        text: "Please check your email for the OTP.",
+        text:
+          "Please verify your email. After that, the Super Admin will approve or decline your professor account.",
         confirmButtonText: "Continue",
       });
 
@@ -215,181 +186,150 @@ function Signup() {
 
         <div className={styles.signupContainer}>
           <div className={styles.signupCard} style={{ marginTop: "50px" }}>
-            {!selectedRole ? (
-              <>
-                <h2>Choose Account Type</h2>
-                <p className={styles.roleIntro}>
-                  Select the type of account you want to create.
+            <div className={styles.roleHeader}>
+              <span className={styles.selectedRolePill}>Professor</span>
+            </div>
+
+            <h2>Create a Professor Account</h2>
+            <p className={styles.roleIntro}>
+              Register your professor account for Super Admin review.
+            </p>
+
+            <label>Username</label>
+            <input
+              type="text"
+              placeholder="Enter your username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
+
+            <label>Email</label>
+            <input
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+
+            <label>Employee or Faculty ID</label>
+            <input
+              type="text"
+              placeholder="Enter your employee or faculty ID"
+              value={facultyId}
+              onChange={(e) => setFacultyId(e.target.value)}
+            />
+
+            <label>Department</label>
+            <input
+              type="text"
+              placeholder="Enter your department"
+              value={department}
+              onChange={(e) => setDepartment(e.target.value)}
+            />
+
+            <label>Proof of Employment</label>
+            <input
+              type="text"
+              placeholder="Paste a document link or proof reference"
+              value={employmentProof}
+              onChange={(e) => setEmploymentProof(e.target.value)}
+            />
+
+            <label>Password</label>
+            <div className={styles.passwordWrapper}>
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+
+              <i
+                className={`fa-solid ${
+                  showPassword ? "fa-eye-slash" : "fa-eye"
+                } ${styles.toggleEye}`}
+                onClick={() => setShowPassword(!showPassword)}
+              ></i>
+            </div>
+
+            {password.length > 0 && (
+              <div className={styles.passwordChecklist}>
+                <p className={hasLength ? styles.valid : styles.invalid}>
+                  {hasLength ? "OK" : "X"} At least 12 characters
                 </p>
-
-                <div className={styles.roleOptions}>
-                  {Object.entries(ROLE_DETAILS).map(([role, details]) => (
-                    <button
-                      key={role}
-                      type="button"
-                      className={styles.roleChoice}
-                      onClick={() => setSelectedRole(role)}
-                    >
-                      <span className={styles.roleChoiceTitle}>
-                        {details.choiceTitle}
-                      </span>
-                      <span className={styles.roleChoiceText}>
-                        {details.choiceText}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-
-                <p className={styles.signinText}>
-                  Already have an account? <Link to="/login">Sign in</Link>
+                <p className={hasUpper ? styles.valid : styles.invalid}>
+                  {hasUpper ? "OK" : "X"} Has uppercase letter
                 </p>
-              </>
-            ) : (
-              <>
-                <div className={styles.roleHeader}>
-                  <button
-                    type="button"
-                    className={styles.roleBackBtn}
-                    onClick={() => setSelectedRole("")}
-                  >
-                    Back
-                  </button>
-                  <span className={styles.selectedRolePill}>
-                    {roleDetails.choiceTitle}
-                  </span>
-                </div>
-
-                <h2>{roleDetails.title}</h2>
-                <p className={styles.roleIntro}>{roleDetails.description}</p>
-
-                <label>Username</label>
-                <input
-                  type="text"
-                  placeholder="Enter your username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                />
-
-                <label>Email</label>
-                <input
-                  type="email"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-
-                <label>{roleDetails.verificationLabel}</label>
-                <input
-                  type="text"
-                  placeholder={roleDetails.verificationPlaceholder}
-                  value={verificationId}
-                  onChange={(e) => setVerificationId(e.target.value)}
-                />
-
-                <label>Password</label>
-                <div className={styles.passwordWrapper}>
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Enter your password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-
-                  <i
-                    className={`fa-solid ${
-                      showPassword ? "fa-eye-slash" : "fa-eye"
-                    } ${styles.toggleEye}`}
-                    onClick={() => setShowPassword(!showPassword)}
-                  ></i>
-                </div>
-
-                {password.length > 0 && (
-                  <div className={styles.passwordChecklist}>
-                    <p className={hasLength ? styles.valid : styles.invalid}>
-                      {hasLength ? "OK" : "X"} At least 12 characters
-                    </p>
-                    <p className={hasUpper ? styles.valid : styles.invalid}>
-                      {hasUpper ? "OK" : "X"} Has uppercase letter
-                    </p>
-                    <p className={hasLower ? styles.valid : styles.invalid}>
-                      {hasLower ? "OK" : "X"} Has lowercase letter
-                    </p>
-                    <p className={hasNumber ? styles.valid : styles.invalid}>
-                      {hasNumber ? "OK" : "X"} Has number
-                    </p>
-                    <p className={hasSymbol ? styles.valid : styles.invalid}>
-                      {hasSymbol ? "OK" : "X"} Has special character
-                    </p>
-                  </div>
-                )}
-
-                {password.length > 0 && (
-                  <div
-                    className={`${styles.validationMessage} ${
-                      passwordStrength === "strong"
-                        ? styles.success
-                        : passwordStrength === "medium"
-                        ? styles.warning
-                        : styles.error
-                    }`}
-                  >
-                    {passwordStrength === "weak" && "Weak password"}
-                    {passwordStrength === "medium" &&
-                      "Medium strength password"}
-                    {passwordStrength === "strong" && "Strong password"}
-                  </div>
-                )}
-
-                <label>Confirm Password</label>
-                <div className={styles.passwordWrapper}>
-                  <input
-                    type={showConfirmPassword ? "text" : "password"}
-                    placeholder="Confirm your password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                  />
-
-                  <i
-                    className={`fa-solid ${
-                      showConfirmPassword ? "fa-eye-slash" : "fa-eye"
-                    } ${styles.toggleEye}`}
-                    onClick={() =>
-                      setShowConfirmPassword(!showConfirmPassword)
-                    }
-                  ></i>
-                </div>
-
-                {confirmPassword.length > 0 && (
-                  <div
-                    className={`${styles.validationMessage} ${
-                      passwordsMatch ? styles.success : styles.error
-                    }`}
-                  >
-                    {passwordsMatch
-                      ? "Passwords match"
-                      : "Passwords do not match"}
-                  </div>
-                )}
-
-                <button
-                  className={styles.loginBtn}
-                  onClick={handleSignup}
-                  disabled={isSigningUp}
-                >
-                  {isSigningUp
-                    ? "Signing Up..."
-                    : `Create ${roleDetails.buttonLabel} Account`}
-                </button>
-
-                <p className={styles.termsText}>
-                  By signing up, you agree to Terms and Privacy policies
+                <p className={hasLower ? styles.valid : styles.invalid}>
+                  {hasLower ? "OK" : "X"} Has lowercase letter
                 </p>
-
-                <p className={styles.signinText}>
-                  Already have an account? <Link to="/login">Sign in</Link>
+                <p className={hasNumber ? styles.valid : styles.invalid}>
+                  {hasNumber ? "OK" : "X"} Has number
                 </p>
-              </>
+                <p className={hasSymbol ? styles.valid : styles.invalid}>
+                  {hasSymbol ? "OK" : "X"} Has special character
+                </p>
+              </div>
             )}
+
+            {password.length > 0 && (
+              <div
+                className={`${styles.validationMessage} ${
+                  passwordStrength === "strong"
+                    ? styles.success
+                    : passwordStrength === "medium"
+                    ? styles.warning
+                    : styles.error
+                }`}
+              >
+                {passwordStrength === "weak" && "Weak password"}
+                {passwordStrength === "medium" && "Medium strength password"}
+                {passwordStrength === "strong" && "Strong password"}
+              </div>
+            )}
+
+            <label>Confirm Password</label>
+            <div className={styles.passwordWrapper}>
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                placeholder="Confirm your password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+
+              <i
+                className={`fa-solid ${
+                  showConfirmPassword ? "fa-eye-slash" : "fa-eye"
+                } ${styles.toggleEye}`}
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              ></i>
+            </div>
+
+            {confirmPassword.length > 0 && (
+              <div
+                className={`${styles.validationMessage} ${
+                  passwordsMatch ? styles.success : styles.error
+                }`}
+              >
+                {passwordsMatch ? "Passwords match" : "Passwords do not match"}
+              </div>
+            )}
+
+            <button
+              className={styles.loginBtn}
+              onClick={handleSignup}
+              disabled={isSigningUp}
+            >
+              {isSigningUp ? "Registering..." : "Register Professor Account"}
+            </button>
+
+            <p className={styles.termsText}>
+              Student accounts are created by the Super Admin.
+            </p>
+
+            <p className={styles.signinText}>
+              Already have an account? <Link to="/login">Sign in</Link>
+            </p>
           </div>
         </div>
       </section>

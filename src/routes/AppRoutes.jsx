@@ -15,11 +15,14 @@ import AdminLayout from '../pages/admin/shared/AdminLayout';
 import DashboardPage from '../pages/admin/dashboard/DashboardPage';
 import UserManagementPage from '../pages/admin/users/UserManagementPage';
 import ModuleManagementPage from '../pages/admin/modules/ModuleManagementPage';
-import SettingsPage from '../pages/admin/settings/SettingsPage';
 import NotificationPage from '../pages/admin/notification/NotificationPage';
 import ModePage from '../pages/admin/mode/ModePage';
 import DecksPage from '../pages/admin/decks/DecksPage';
-import BackupPage from '../pages/admin/backup/BackupPage';
+import SuperAdminHome from '../pages/superadmin/SuperAdminHome';
+import SuperAdminLayout from '../pages/superadmin/shared/SuperAdminLayout';
+import SuperAdminUserManagementPage from '../pages/superadmin/users/SuperAdminUserManagementPage';
+import SuperAdminFeaturePage from '../pages/superadmin/SuperAdminFeaturePage';
+import SuperAdminBackupPage from '../pages/superadmin/backup/SuperAdminBackupPage';
 
 import ProfessorHome from '../pages/professor/ProfessorHome';
 import ProfessorLayout from '../pages/professor/ProfessorLayout';
@@ -85,7 +88,105 @@ export default function AppRoutes() {
           <Route path="/profile" element={<Profile />} />
 
           {/* ==========================
-              ADMINISTRATOR
+              SUPER ADMIN
+          ========================== */}
+          <Route
+            path="/super-admin"
+            element={
+              <SuperAdminLayout>
+                <SuperAdminHome />
+              </SuperAdminLayout>
+            }
+          />
+
+          <Route
+            path="/super-admin/dashboard"
+            element={
+              <SuperAdminLayout>
+                <SuperAdminHome />
+              </SuperAdminLayout>
+            }
+          />
+
+          <Route
+            path="/super-admin/users"
+            element={
+              <SuperAdminLayout>
+                <SuperAdminUserManagementPage />
+              </SuperAdminLayout>
+            }
+          />
+
+          <Route
+            path="/super-admin/analytics"
+            element={
+              <SuperAdminLayout>
+                <SuperAdminFeaturePage type="analytics" />
+              </SuperAdminLayout>
+            }
+          />
+
+          <Route
+            path="/super-admin/courses"
+            element={
+              <SuperAdminLayout>
+                <ModuleManagementPage />
+              </SuperAdminLayout>
+            }
+          />
+
+          <Route
+            path="/super-admin/announcements"
+            element={
+              <SuperAdminLayout>
+                <SuperAdminFeaturePage type="announcements" />
+              </SuperAdminLayout>
+            }
+          />
+
+          <Route
+            path="/super-admin/audit-logs"
+            element={
+              <SuperAdminLayout>
+                <SuperAdminFeaturePage type="audit" />
+              </SuperAdminLayout>
+            }
+          />
+
+          <Route
+            path="/super-admin/archives"
+            element={<Navigate to="/super-admin/users" replace />}
+          />
+
+          <Route
+            path="/super-admin/backup"
+            element={
+              <SuperAdminLayout>
+                <SuperAdminBackupPage />
+              </SuperAdminLayout>
+            }
+          />
+
+          <Route
+            path="/super-admin/settings"
+            element={
+              <SuperAdminLayout>
+                <SuperAdminFeaturePage type="settings" />
+              </SuperAdminLayout>
+            }
+          />
+
+          <Route
+            path="/super-admin/security"
+            element={
+              <SuperAdminLayout>
+                <SuperAdminFeaturePage type="security" />
+              </SuperAdminLayout>
+            }
+          />
+
+          {/* ==========================
+              ADMIN
           ========================== */}
           <Route
             path="/admin"
@@ -124,17 +225,22 @@ export default function AppRoutes() {
           />
 
           <Route
+            path="/admin/reports"
+            element={
+              <AdminLayout>
+                <DashboardPage />
+              </AdminLayout>
+            }
+          />
+
+          <Route
             path="/admin/modules"
             element={<Navigate to="/admin/courses" replace />}
           />
 
           <Route
             path="/admin/settings"
-            element={
-              <AdminLayout>
-                <SettingsPage />
-              </AdminLayout>
-            }
+            element={<Navigate to="/admin/dashboard" replace />}
           />
 
           <Route
@@ -171,11 +277,7 @@ export default function AppRoutes() {
 
           <Route
             path="/admin/backup"
-            element={
-              <AdminLayout>
-                <BackupPage />
-              </AdminLayout>
-            }
+            element={<Navigate to="/admin/dashboard" replace />}
           />
 
           {/* ==========================
