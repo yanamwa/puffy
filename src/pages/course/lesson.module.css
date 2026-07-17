@@ -5,7 +5,7 @@
     align-items: center;
     justify-content: center;
 
-    padding: 40px 20px;
+    padding: 80px 20px;
     font-family: "Jersey 15", sans-serif;
     background-image: url("/images/background_notebook.png");  
     background-size: cover;
@@ -16,8 +16,8 @@
 
 /* Notebook container */
 .content {
-    width: min(650px, 92vw);
-    max-height: 90vh;
+    width: min(780px, 75vw);
+    max-height: 72vh;
 
     background: #e7d4fb;
     border-radius: 25px;
@@ -33,7 +33,8 @@
     overflow-x: hidden;
     scroll-padding-bottom: 48px;
 
-    transform: none;
+    transform: scale(1.25);
+    transform-origin: center;
 }
 
 /* Tabs */
@@ -117,10 +118,11 @@
         white 30px,
         #e4e4e4 31px
     );
-    width:80%;
+    width: 88%;
     margin: auto;
-    padding: 40px 40px;
+    padding: 34px 40px;
     border-radius: 25px;
+    box-sizing: border-box;
 
     display: flex;
     flex-direction: column;
@@ -146,16 +148,18 @@
 /* Button – notebook style */
 .button{
     background-color: #F2D1FF;
-    height: 40px;
-    width: 120px;
+    height: 38px;
+    min-width: 126px;
+    width: auto;
     margin-top: 20px;
     border-radius: 20px;
     border: none;
     box-shadow: 6px 4px 0cap rgb(200, 168, 233);
     font-weight: normal;
-    font-size: 20px;
+    font-size: 17px;
     cursor: pointer;
     font-family: "Jersey 15", sans-serif;
+    white-space: nowrap;
 }
 
 
@@ -183,10 +187,10 @@
 }
 
 .objectivesList {
-  margin: 18px 0 8px;
+  margin: 16px 0 8px;
   padding-left: 24px;
-  font-size: 20px;
-  line-height: 1.55;
+  font-size: 17px;
+  line-height: 1.45;
 }
 
 .objectivesList li {
@@ -232,13 +236,13 @@
 
 .quizTitle {
   margin-bottom: 12px;
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 700;
 }
 
 .quizQuestion {
   margin-bottom: 20px;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 600;
 }
 
@@ -256,7 +260,7 @@
   background: #fff;
   cursor: pointer;
   text-align: left;
-  font-size: 20px;
+  font-size: 17px;
   font-weight: 500;
   transition: 0.2s ease;
 }
@@ -283,14 +287,14 @@
   flex-shrink: 0;
 }
 .lessonSlideTitle {
-  font-size: 30px;
+  font-size: 24px;
   color: #5b3cc4;
   margin-bottom: 18px;
 }
 
 .lessonSlideContent {
-  font-size: 20px;
-  line-height: 1.65;
+  font-size: 17px;
+  line-height: 1.55;
   color: #222;
   overflow: visible;
 }
@@ -378,15 +382,17 @@
   margin-bottom: 8px !important;
 }
 
-/* Professor-color theme for course study pages. Keeps the notebook layout. */
+/* Student-color theme for course study pages. Keeps the notebook layout. */
 .wrapper {
-  --course-bg: #f7f7f8;
+  --course-bg: #f7f7f7;
   --course-card: #ffffff;
-  --course-ink: #191b2a;
-  --course-muted: #7d8798;
-  --course-line: #b9c1cc;
+  --course-ink: #171927;
+  --course-accent: #198754;
+  --course-accent-dark: #12673f;
+  --course-muted: #858d9b;
+  --course-line: #c4c8cf;
   --course-soft-line: #dde2e8;
-  --course-shadow: #c5cbd4;
+  --course-shadow: rgba(137, 146, 159, 0.24);
   --course-soft: #f4f5f7;
   --course-soft-border: #d6dce4;
   background: var(--course-bg);
@@ -414,19 +420,27 @@
 .hello {
   margin: 0 0 16px;
   color: var(--course-ink);
-  font-size: 34px;
+  font-size: 28px;
   line-height: 1.1;
 }
 
 .greeting1 {
   color: var(--course-ink);
-  font-size: 20px;
-  line-height: 1.6;
+  font-size: 17px;
+  line-height: 1.5;
   white-space: pre-wrap;
 }
 
+.greets h2 {
+  margin: 0 0 12px;
+  color: var(--course-ink);
+  font-size: 22px;
+  line-height: 1.2;
+  font-weight: 400;
+}
+
 .ribbon {
-  background: var(--course-ink);
+  background: var(--course-accent);
 }
 
 .welcomeactive,
@@ -443,18 +457,19 @@
 .howitworksactive {
   background: var(--course-card);
   border-bottom-color: var(--course-card);
-  box-shadow: 3px 3px 0 var(--course-shadow);
+  color: var(--course-accent);
+  box-shadow: 3px 3px 0 rgba(25, 135, 84, 0.22);
 }
 
 .button {
-  background: var(--course-ink);
+  background: var(--course-accent);
   border: 0;
   color: #ffffff;
-  box-shadow: 4px 4px 0 var(--course-shadow);
+  box-shadow: 4px 4px 0 rgba(25, 135, 84, 0.24);
 }
 
 .button:hover {
-  background: #090b15;
+  background: var(--course-accent-dark);
   transform: translateY(-1px);
 }
 
@@ -478,12 +493,12 @@
 }
 
 .progressFill {
-  background: var(--course-ink);
+  background: var(--course-accent);
 }
 
 .lessonSlideTitle,
 .quizTitle {
-  color: var(--course-ink);
+  color: var(--course-accent);
 }
 
 .optionButton {
@@ -494,13 +509,25 @@
 
 .optionButton:hover,
 .selectedOption {
-  border-color: var(--course-ink);
-  background: var(--course-soft);
+  border-color: var(--course-accent);
+  background: #eef8f2;
 }
 
 :global(.quiz-popup-button) {
-  background: var(--course-ink, #191b2a) !important;
+  background: var(--course-accent, #198754) !important;
   border: 0 !important;
-  box-shadow: 4px 4px 0 var(--course-shadow, #c5cbd4) !important;
+  box-shadow: 4px 4px 0 rgba(25, 135, 84, 0.24) !important;
   color: #ffffff !important;
+}
+
+@media (max-width: 900px) {
+  .wrapper {
+    padding: 40px 12px;
+  }
+
+  .content {
+    width: min(760px, 92vw);
+    max-height: 88vh;
+    transform: scale(1);
+  }
 }

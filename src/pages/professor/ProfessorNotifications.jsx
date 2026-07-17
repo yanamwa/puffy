@@ -106,8 +106,13 @@ export default function ProfessorNotifications() {
           <div className="professor-card">No notifications found.</div>
         ) : (
           visibleNotifications.map((notification) => (
-            <article className="professor-notification-item" key={notification.id}>
-              <div className="professor-notification-icon">
+            <article
+              className={`professor-notification-item ${
+                notification.unread ? 'unread' : ''
+              }`}
+              key={notification.id}
+            >
+              <div className={`professor-notification-icon ${notification.type}`}>
                 {getIcon(notification.type)}
               </div>
 

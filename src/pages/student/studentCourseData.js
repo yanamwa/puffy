@@ -5,8 +5,9 @@ import {
 import { fetchCourse, fetchCourses } from '../../services/courseApi.js';
 
 export const STUDENT_ENROLLED_COURSES_KEY = 'student-enrolled-courses';
-export const STUDENT_COURSE_PROGRESS_KEY = 'student-course-progress';
 export const STUDENT_ENROLLED_COURSES_EVENT = 'student-enrolled-courses-updated';
+export const STUDENT_READING_PROGRESS_KEY = 'student-reading-progress';
+export const STUDENT_READING_PROGRESS_EVENT = 'student-reading-progress-updated';
 
 function getCourseKey(course) {
   return String(course?.id || course?.course_id || course?.code || '').trim();
@@ -53,6 +54,85 @@ function dispatchEnrollmentUpdate(course) {
   );
 }
 
+function clampProgress(value) {
+  const progress = Number(value);
+  if (!Number.isFinite(progress)) return 0;
+  return Math.max(0, Math.min(Math.round(progress), 100));
+}
+
+function getProgressKey(contentId) {
+  return String(contentId || '').trim();
+}
+
+function readReadingProgressMap() {
+  try {
+    const saved = localStorage.getItem(STUDENT_READING_PROGRESS_KEY);
+    const parsed = saved ? JSON.parse(saved) : {};
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function getLegacyLessonProgress(contentId) {
+  try {
+    const saved = localStorage.getItem(`lessonProgress_${contentId}`);
+    const parsed = saved ? JSON.parse(saved) : null;
+    return clampProgress(parsed?.progress_percent ?? parsed?.progress ?? 0);
+  } catch {
+    return 0;
+  }
+}
+
+export function getStudentReadingProgress(contentId) {
+  const key = getProgressKey(contentId);
+  if (!key) return 0;
+
+  const progressMap = readReadingProgressMap();
+  const savedProgress = progressMap[key];
+  const progress = clampProgress(
+    typeof savedProgress === 'number'
+      ? savedProgress
+      : savedProgress?.progress
+  );
+
+  return Math.max(progress, getLegacyLessonProgress(key));
+}
+
+export function saveStudentReadingProgress(contentId, progress, metadata = {}) {
+  const key = getProgressKey(contentId);
+  if (!key) return 0;
+
+  const progressMap = readReadingProgressMap();
+  const currentProgress = clampProgress(progressMap[key]?.progress ?? progressMap[key]);
+  const nextProgress = Math.max(currentProgress, clampProgress(progress));
+  const nextRecord = {
+    ...metadata,
+    progress: nextProgress,
+    updatedAt: new Date().toISOString(),
+  };
+
+  progressMap[key] = nextRecord;
+  localStorage.setItem(STUDENT_READING_PROGRESS_KEY, JSON.stringify(progressMap));
+
+  window.dispatchEvent(
+    new CustomEvent(STUDENT_READING_PROGRESS_EVENT, {
+      detail: { contentId: key, progress: nextProgress },
+    })
+  );
+
+  return nextProgress;
+}
+
+export function getStudentModuleReadingProgress(contentId, moduleIndex, moduleCount) {
+  const count = Math.max(Number(moduleCount) || 1, 1);
+  const courseProgress = getStudentReadingProgress(contentId);
+  const moduleSize = 100 / count;
+  const moduleStart = moduleSize * moduleIndex;
+
+  return clampProgress(((courseProgress - moduleStart) / moduleSize) * 100);
+}
+
 export function readStudentEnrollmentKeys() {
   try {
     const saved = localStorage.getItem(STUDENT_ENROLLED_COURSES_KEY);
@@ -70,32 +150,6 @@ export function saveStudentEnrollmentKeys(keys) {
   return uniqueKeys;
 }
 
-export function readStudentCourseProgress() {
-  try {
-    const saved = localStorage.getItem(STUDENT_COURSE_PROGRESS_KEY);
-    const parsed = saved ? JSON.parse(saved) : {};
-
-    return parsed && typeof parsed === 'object' ? parsed : {};
-  } catch {
-    return {};
-  }
-}
-
-export function saveStudentCourseProgress(progress) {
-  localStorage.setItem(STUDENT_COURSE_PROGRESS_KEY, JSON.stringify(progress));
-}
-
-export function getStudentCourseProgress(course) {
-  const key = getCourseKey(course);
-  const savedProgress = Number(readStudentCourseProgress()[key]);
-
-  if (Number.isFinite(savedProgress)) {
-    return Math.max(0, Math.min(100, Math.round(savedProgress)));
-  }
-
-  return Math.max(0, Math.min(100, Number(course?.studentProgress || 0)));
-}
-
 export function getStudentCourseModules(course) {
   const lessonPages = Array.isArray(course?.lessonPages) ? course.lessonPages : [];
 
@@ -110,13 +164,8 @@ export function getStudentCourseModules(course) {
   return [
     {
       id: `${getCourseKey(course)}-overview`,
-      title: 'Course Overview',
-      description: course?.summary || 'Start with the course overview.',
-    },
-    {
-      id: `${getCourseKey(course)}-practice`,
-      title: 'Practice Quiz',
-      description: 'Review key ideas with practice questions.',
+      title: 'Module Overview',
+      description: course?.summary || 'Start with the module overview.',
     },
   ];
 }
@@ -128,7 +177,6 @@ export function normalizeStudentCourse(course) {
     code: course.code || 'COURSE',
     title: course.title || 'Untitled course',
     instructor: getProfessorCourseOwner(course),
-    progress: getStudentCourseProgress(course),
     modulesList: getStudentCourseModules(course),
   };
 }
@@ -198,11 +246,6 @@ export function enrollStudentInCourse(course) {
 
   const keys = readStudentEnrollmentKeys();
   saveStudentEnrollmentKeys([...keys, key]);
-
-  const progress = readStudentCourseProgress();
-  if (!Number.isFinite(Number(progress[key]))) {
-    saveStudentCourseProgress({ ...progress, [key]: 0 });
-  }
 
   dispatchEnrollmentUpdate(course);
   return true;

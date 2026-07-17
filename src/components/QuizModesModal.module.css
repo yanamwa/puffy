@@ -1,7 +1,7 @@
 .modalOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(23, 25, 39, 0.46);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -12,21 +12,21 @@
 
 .modalBox {
   background: white;
-  width: min(1000px, 94vw);
-  height: min(550px, 86vh);
-  border: 2px solid #b9c1cc;
-  border-radius: 14px;
+  width: min(1120px, 94vw);
+  height: min(670px, 88vh);
+  border: 2px solid #c4c8cf;
+  border-radius: 22px;
   text-align: center;
   position: relative;
   overflow: hidden;
   animation: fadeIn 0.3s ease;
-  box-shadow: 6px 6px 0 #c5cbd4;
+  box-shadow: 6px 6px 0 rgba(137, 146, 159, 0.24);
 }
 
 .modalHeader {
-  background: #f4f5f7;
+  background: #eef8f2;
   border-bottom: 1px solid #d6dce4;
-  height: 70px;
+  height: 78px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -35,26 +35,32 @@
 
 .modalTitle {
   margin: 0;
-  font-size: clamp(22px, 4vw, 28px);
-  color: #191b2a;
+  font-size: clamp(26px, 4vw, 34px);
+  color: #171927;
   font-weight: normal;
   font-family: "Jersey 15", sans-serif;
 }
 
 .closeModal {
   position: absolute;
-  right: 18px;
-  top: 8px;
+  right: 22px;
+  top: 12px;
   background: none;
   border: none;
   font-size: 34px;
   cursor: pointer;
-  color: #191b2a;
+  color: #198754;
   z-index: 10000;
+  transition: color 0.16s ease, transform 0.16s ease;
+}
+
+.closeModal:hover {
+  color: #12673f;
+  transform: translateY(-1px);
 }
 
 .cardsScroll {
-  height: calc(100% - 70px);
+  height: calc(100% - 78px);
   overflow-y: auto;
   overflow-x: hidden;
   padding: 20px;
@@ -66,17 +72,21 @@
 }
 
 .cardsScroll::-webkit-scrollbar-thumb {
-  background: #c5cbd4;
+  background: #198754;
   border-radius: 4px;
+}
+
+.cardsScroll::-webkit-scrollbar-track {
+  background: #eef8f2;
 }
 
 /* DESKTOP */
 .modeOptions {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   justify-content: center;
-  gap: 28px;
-  padding: 24px;
+  gap: 34px;
+  padding: 34px 28px;
   width: 100%;
   box-sizing: border-box;
 }
@@ -89,8 +99,8 @@
 
   .modalBox {
     width: calc(100vw - 24px);
-    height: min(620px, 86vh);
-    border-radius: 18px;
+    height: min(680px, 88vh);
+    border-radius: 20px;
   }
 
   .modalHeader {
@@ -109,7 +119,7 @@
   }
 
   .modeOptions {
-    grid-template-columns: repeat(2, minmax(170px, 1fr));
+    grid-template-columns: repeat(2, minmax(220px, 1fr));
     gap: 20px;
     padding: 12px;
   }
@@ -124,7 +134,7 @@
   .modalBox {
     width: calc(100vw - 16px);
     height: 84vh;
-    border-radius: 16px;
+    border-radius: 20px;
   }
 
   .modalHeader {
@@ -169,7 +179,7 @@
   grid-column: 1 / -1;
   margin: 0;
   padding: 42px 16px;
-  color: #7d8798;
+  color: #858d9b;
   font-family: "Jersey 15", sans-serif;
   font-size: 22px;
 }

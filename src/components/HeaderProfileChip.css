@@ -1,0 +1,227 @@
+@import url('https://fonts.googleapis.com/css2?family=Jersey+15&display=swap');
+
+.header-profile-wrapper {
+  position: relative;
+  z-index: 1100;
+  flex: 0 0 auto;
+}
+
+.header-profile-chip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: auto;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.header-profile-main-button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.header-profile-avatar {
+  position: relative;
+  display: flex;
+  flex: 0 0 auto;
+}
+
+.header-profile-avatar img {
+  width: 40px;
+  height: 40px;
+  display: block;
+  border: none;
+  border-radius: 50%;
+  box-shadow: none;
+  object-fit: cover;
+}
+
+.header-profile-status-dot {
+  position: absolute;
+  right: 0;
+  bottom: 1px;
+  width: 10px;
+  height: 10px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #2ea86b;
+}
+
+.header-profile-user-info {
+  min-width: 72px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.header-profile-user-info strong {
+  max-width: 148px;
+  overflow: hidden;
+  color: #565656;
+  font-family: "Jersey 15", system-ui, sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.header-profile-user-info small {
+  display: none;
+}
+
+.header-profile-dropdown-button {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin-left: -2px;
+  border: none;
+  background: transparent;
+  color: #8d939b;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.header-profile-dropdown-button svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+  transition:
+    transform 0.22s ease,
+    color 0.22s ease;
+}
+
+.header-profile-dropdown-button:hover {
+  color: #25714e;
+}
+
+.header-profile-dropdown-button.open svg {
+  transform: rotate(180deg);
+}
+
+.header-profile-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 1200;
+  width: 224px;
+  padding: 9px;
+  border: 1px solid #d8dce2;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow:
+    0 18px 40px rgba(23, 25, 39, 0.16),
+    0 3px 8px rgba(23, 25, 39, 0.08);
+  animation: headerProfileMenuIn 160ms ease;
+}
+
+@keyframes headerProfileMenuIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.header-profile-dropdown-header {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 8px 9px 10px;
+}
+
+.header-profile-dropdown-header .header-profile-avatar img {
+  width: 40px;
+  height: 40px;
+}
+
+.header-profile-dropdown-header div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.header-profile-dropdown-header strong {
+  overflow: hidden;
+  color: #242832;
+  font-family: system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.header-profile-dropdown-header span {
+  margin-top: 3px;
+  color: #9299a5;
+  font-family: system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.header-profile-dropdown-divider {
+  height: 1px;
+  margin: 5px 3px;
+  background: #e7e9ed;
+}
+
+.header-profile-dropdown-menu > button {
+  width: 100%;
+  min-height: 39px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 0 11px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: #4e5663;
+  cursor: pointer;
+  text-align: left;
+  font-family: system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 650;
+  transition:
+    background 150ms ease,
+    color 150ms ease,
+    padding-left 150ms ease;
+}
+
+.header-profile-dropdown-menu > button:hover {
+  padding-left: 14px;
+  background: #f0f5f2;
+  color: #25714e;
+}
+
+.header-profile-dropdown-menu > button svg {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.header-profile-dropdown-menu .header-profile-logout-option {
+  color: #b34c4c;
+}
+
+.header-profile-dropdown-menu .header-profile-logout-option:hover {
+  background: #fff0f0;
+  color: #9d3030;
+}

@@ -60,6 +60,14 @@ function normalizeCourse(course) {
   };
 }
 
+function getStoredUser() {
+  try {
+    return JSON.parse(localStorage.getItem('puffy-user') || 'null');
+  } catch {
+    return null;
+  }
+}
+
 export default function AddModule() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -252,8 +260,26 @@ export default function AddModule() {
       return;
     }
 
-    const professorName = user?.name || user?.email || 'Professor';
-    const professorEmail = user?.email || '';
+    const storedUser = getStoredUser();
+    const currentProfessor = user || storedUser || {};
+    const professorName =
+      currentProfessor.displayName ||
+      currentProfessor.display_name ||
+      currentProfessor.name ||
+      currentProfessor.email ||
+      form.professorName ||
+      form.professor_name ||
+      form.professorEmail ||
+      form.professor_email ||
+      'Professor';
+    const professorEmail = currentProfessor.email || form.professorEmail || form.professor_email || '';
+    const professorId =
+      currentProfessor.id ||
+      currentProfessor.userId ||
+      currentProfessor.user_id ||
+      form.professorId ||
+      form.professor_id ||
+      null;
 
     const payload = {
       ...form,
@@ -268,8 +294,12 @@ export default function AddModule() {
       quizzes: quizCount,
       updatedAt: new Date().toISOString().slice(0, 10),
       archived: false,
-      professorName: form.professorName || professorName,
-      professorEmail: form.professorEmail || professorEmail,
+      professorId,
+      professor_id: professorId,
+      professorName: professorName,
+      professor_name: professorName,
+      professorEmail: professorEmail,
+      professor_email: professorEmail,
     };
 
     try {

@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Jersey+15&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Qwitcher+Grypen:wght@700&display=swap');
 
 .enrolled-dashboard {
   --ink: #5f6064;
@@ -678,7 +679,7 @@
 
 }
 
-.notification-button {
+:where(.enrolled-dashboard, .student-home-dashboard) .notification-button {
   position: relative;
 
   width: 50px;
@@ -697,12 +698,12 @@
   transition: all .2s ease;
 }
 
-.notification-button:hover {
+:where(.enrolled-dashboard, .student-home-dashboard) .notification-button:hover {
   background: rgba(0,0,0,.05);
   color: #25714E;
 }
 
-.notification-button svg {
+:where(.enrolled-dashboard, .student-home-dashboard) .notification-button svg {
   width: 30px;
   height: 30px;
 
@@ -1611,6 +1612,7 @@
   height: 100%;
   border-radius: inherit;
   background: #858d9b;
+  transition: width 0.2s ease;
 }
 
 .student-course-actions {
@@ -1642,6 +1644,118 @@
   background: #fff;
   color: #5f6064;
   box-shadow: 4px 5px 0 rgba(137, 146, 159, 0.2);
+}
+
+.student-practice-button:disabled,
+.student-practice-button:disabled:hover {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 2px 3px 0 rgba(137, 146, 159, 0.14);
+}
+
+.practice-scope-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  background: rgba(25, 27, 42, 0.42);
+}
+
+.practice-scope-modal {
+  width: min(620px, 94vw);
+  max-height: min(620px, 86vh);
+  overflow: hidden;
+  border: 2px solid #b9c1cc;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 6px 6px 0 #c5cbd4;
+}
+
+.practice-scope-header {
+  min-height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 20px 0 24px;
+  border-bottom: 1px solid #d6dce4;
+  background: #f4f5f7;
+}
+
+.practice-scope-header h2 {
+  margin: 0;
+  color: #191b2a;
+  font-size: 24px;
+  font-weight: 400;
+}
+
+.practice-scope-header button {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #191b2a;
+  cursor: pointer;
+  font-size: 28px;
+  line-height: 1;
+}
+
+.practice-scope-list {
+  max-height: calc(86vh - 92px);
+  overflow-y: auto;
+  display: grid;
+  gap: 12px;
+  padding: 20px;
+}
+
+.practice-scope-option {
+  min-height: 84px;
+  border: 1px solid #c4c8cf;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #5f6064;
+  display: grid;
+  gap: 5px;
+  padding: 14px 16px;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 3px 4px 0 rgba(137, 146, 159, 0.18);
+  transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+}
+
+.practice-scope-option:hover {
+  border-color: #198754;
+  transform: translateY(-1px);
+}
+
+.practice-scope-option:disabled,
+.practice-scope-option:disabled:hover {
+  opacity: 0.55;
+  cursor: not-allowed;
+  border-color: #c4c8cf;
+  transform: none;
+  box-shadow: 3px 4px 0 rgba(137, 146, 159, 0.12);
+}
+
+.practice-scope-option strong {
+  color: #1d2028;
+  font-size: 18px;
+  font-weight: 400;
+}
+
+.practice-scope-option span,
+.practice-scope-option small {
+  color: #69717f;
+  font-size: 13px;
+}
+
+.practice-scope-option small {
+  color: #198754;
 }
 
 .student-course-modules {
@@ -1700,6 +1814,10 @@
   font-size: 22px;
 }
 
+.student-module-main {
+  min-width: 0;
+}
+
 .student-module-row.complete .student-module-number,
 .student-module-row.current .student-module-number {
   background: #858d9b;
@@ -1723,6 +1841,42 @@
   font-family: system-ui, sans-serif;
   font-size: 12px;
   line-height: 1.4;
+}
+
+.student-module-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.student-module-progress span {
+  flex: 1;
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #dfe3e9;
+}
+
+.student-module-progress i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #858d9b;
+  transition: width 0.2s ease;
+}
+
+.student-module-progress strong {
+  min-width: 42px;
+  color: #69717f;
+  font-family: system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  text-align: right;
+}
+
+.student-module-row.complete .student-module-progress i {
+  background: #198754;
 }
 
 .student-module-row button {
@@ -1784,7 +1938,7 @@
 .student-settings-shell {
   position: relative;
   width: min(616px, calc(100% - 88px));
-  min-height: 476px;
+  min-height: 360px;
   margin: 23px auto 48px;
   padding: 29px 22px 23px;
   border: 9px solid #89929f;
@@ -1836,7 +1990,7 @@
 .settings-form-card {
   position: relative;
   z-index: 1;
-  min-height: 425px;
+  min-height: 300px;
   border: 1px solid #6f7379;
   border-radius: 12px;
   background: #fff;
@@ -1879,10 +2033,12 @@
   font-size: 11px;
 }
 
-.settings-fields input:disabled {
+.settings-fields input:disabled,
+.settings-fields input[readonly] {
   border-color: #e5e5e5;
   background: #ececec;
-  color: #a6a6a6;
+  color: #6d7480;
+  cursor: not-allowed;
 }
 
 .settings-fields input::placeholder {
@@ -1890,31 +2046,33 @@
 }
 
 .settings-photo-column {
-  padding-top: 9px;
+  padding-top: 29px;
   display: flex;
   align-items: center;
   flex-direction: column;
+  gap: 12px;
   color: #a7a7a7;
   text-align: center;
 }
 
 .upload-photo-button {
-  width: 128px;
-  height: 128px;
+  min-width: 148px;
+  height: 38px;
   border: 0;
-  border-radius: 50%;
+  border-radius: 999px;
   background: #f2f2f3;
   color: #383a3f;
-  box-shadow: 5px 5px 0 #d3d3d4;
+  box-shadow: 3px 4px 0 #d3d3d4;
   cursor: pointer;
   font-family: system-ui, sans-serif;
   font-size: 12px;
   font-weight: 800;
+  padding: 0 18px;
 }
 
 .settings-photo-column p {
   max-width: 132px;
-  margin: 22px 0 0;
+  margin: 6px 0 0;
   font-family: system-ui, sans-serif;
   font-size: 8px;
   line-height: 1.35;
@@ -1926,12 +2084,30 @@
   position: relative;
   z-index: 0;
   isolation: isolate;
+  display: block;
   width: 100%;
   max-width: 387px;
   height: 234px;
   padding: 104px 27px 0 18px;
   border: 0;
   background: transparent;
+  box-sizing: border-box;
+  color: inherit;
+  text-decoration: none;
+}
+
+a.course-folder {
+  cursor: pointer;
+  transition: transform 160ms ease;
+}
+
+a.course-folder:hover {
+  transform: translateY(-2px);
+}
+
+a.course-folder:focus-visible {
+  outline: 3px solid rgba(37, 113, 78, 0.3);
+  outline-offset: 5px;
 }
 
 .public-course-folder {
@@ -1980,15 +2156,27 @@
 }
 
 .archived-course-folder {
+  height: 246px;
+  padding-top: 96px;
   filter: saturate(0.78);
 }
 
 .archived-course-folder .course-card-body h2 {
   color: #69717f;
+  max-width: 306px;
+  max-height: 76px;
+  overflow: hidden;
+  font-size: 20px;
+  line-height: 1.25;
 }
 
 .archived-course-folder .course-card-footer {
+  right: 17px;
+  bottom: 12px;
+  height: 38px;
+  gap: 8px;
   color: #69717f;
+  font-size: 14px;
 }
 
 .archived-course-folder .course-card-footer > span:not(.anime-avatar) {
@@ -1997,6 +2185,12 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.archived-course-folder .anime-avatar {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
 }
 
 .archived-course-folder::after {
@@ -2022,9 +2216,9 @@
 
 .archived-view-button {
   margin-left: auto;
-  width: 98px;
+  width: 92px;
   height: 28px;
-  flex: 0 0 98px;
+  flex: 0 0 92px;
   border: 0;
   border-radius: 999px;
   background: #a8b0bd;
@@ -2395,8 +2589,8 @@
 }
 
 .quiz-resume-card h3 {
-  min-height: 43px;
-  margin: 0 0 12px;
+  min-height: 54px;
+  margin: 0 0 18px;
   color: #222630;
   font-size: 22px;
   line-height: 1.22;
@@ -2418,32 +2612,30 @@
 }
 
 .quiz-card-footer {
-  margin-top: 10px;
+  margin-top: auto;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  justify-content: flex-start;
+  gap: 8px;
+  min-height: 38px;
 }
 
 .quiz-card-footer span {
   min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   color: #737b87;
   font-family: system-ui, sans-serif;
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 800;
 }
 
-.quiz-card-footer button {
-  min-width: 105px;
-  height: 34px;
-  border: 0;
-  border-radius: 999px;
-  background: #25714e;
-  color: #fff;
-  cursor: pointer;
-  font-family: system-ui, sans-serif;
-  font-size: 12px;
-  font-weight: 800;
+.quiz-card-footer .anime-avatar {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
 }
 
 .progress-section {
@@ -3053,17 +3245,17 @@
    NOTIFICATION DROPDOWN
 =========================== */
 
-.notification-menu-wrapper {
+:where(.enrolled-dashboard, .student-home-dashboard) .notification-menu-wrapper {
   position: relative;
   z-index: 70;
   flex: 0 0 auto;
 }
 
-.notification-button.active {
+:where(.enrolled-dashboard, .student-home-dashboard) .notification-button.active {
   color: #25714e;
 }
 
-.notification-badge {
+:where(.enrolled-dashboard, .student-home-dashboard) .notification-badge {
   position: absolute;
   top: 4px;
   right: 3px;
@@ -3088,7 +3280,7 @@
   line-height: 1;
 }
 
-.notification-dropdown-menu {
+:where(.enrolled-dashboard, .student-home-dashboard) .notification-dropdown-menu {
   position: absolute;
   top: calc(100% + 10px);
   right: -138px;
@@ -3123,7 +3315,7 @@
   }
 }
 
-.notification-dropdown-header {
+:where(.enrolled-dashboard, .student-home-dashboard) .notification-dropdown-header {
   min-height: 76px;
   display: flex;
   align-items: center;
@@ -3132,11 +3324,11 @@
   padding: 15px 17px 11px;
 }
 
-.notification-dropdown-header > div {
+:where(.enrolled-dashboard, .student-home-dashboard) .notification-dropdown-header > div {
   min-width: 0;
 }
 
-.notification-dropdown-header h2 {
+:where(.enrolled-dashboard, .student-home-dashboard) .notification-dropdown-header h2 {
   margin: 0;
   color: #242832;
   font-size: 27px;
@@ -3144,7 +3336,7 @@
   line-height: 1;
 }
 
-.notification-dropdown-header span {
+:where(.enrolled-dashboard, .student-home-dashboard) .notification-dropdown-header span {
   display: block;
   margin-top: 5px;
   color: #9299a5;
@@ -3153,7 +3345,7 @@
   font-weight: 600;
 }
 
-.mark-all-read-button {
+:where(.enrolled-dashboard, .student-home-dashboard) .mark-all-read-button {
   flex: 0 0 auto;
   padding: 7px 9px;
   border: 0;
@@ -3166,11 +3358,11 @@
   font-weight: 750;
 }
 
-.mark-all-read-button:hover {
+:where(.enrolled-dashboard, .student-home-dashboard) .mark-all-read-button:hover {
   background: #eef6f1;
 }
 
-.notification-dropdown-tabs {
+:where(.enrolled-dashboard, .student-home-dashboard) .notification-dropdown-tabs {
   display: flex;
   align-items: center;
   gap: 7px;
@@ -3178,7 +3370,7 @@
   border-bottom: 1px solid #e8eaee;
 }
 
-.notification-dropdown-tabs button {
+:where(.enrolled-dashboard, .student-home-dashboard) .notification-dropdown-tabs button {
   min-width: 56px;
   height: 30px;
   padding: 0 14px;
@@ -3192,13 +3384,13 @@
   font-weight: 750;
 }
 
-.notification-dropdown-tabs button:hover,
-.notification-dropdown-tabs button.active {
+:where(.enrolled-dashboard, .student-home-dashboard) .notification-dropdown-tabs button:hover,
+:where(.enrolled-dashboard, .student-home-dashboard) .notification-dropdown-tabs button.active {
   background: #eaf4ee;
   color: #25714e;
 }
 
-.notification-list {
+:where(.enrolled-dashboard, .student-home-dashboard) .notification-list {
   max-height: 410px;
   overflow-y: auto;
   padding: 7px;
@@ -3206,7 +3398,7 @@
   scrollbar-color: #c8cdd5 transparent;
 }
 
-.notification-item {
+:where(.enrolled-dashboard, .student-home-dashboard) .notification-item {
   position: relative;
   width: 100%;
   min-height: 86px;
@@ -3228,19 +3420,19 @@
   transition: background 150ms ease;
 }
 
-.notification-item:hover {
+:where(.enrolled-dashboard, .student-home-dashboard) .notification-item:hover {
   background: #f3f5f7;
 }
 
-.notification-item.unread {
+:where(.enrolled-dashboard, .student-home-dashboard) .notification-item.unread {
   background: #eef6f1;
 }
 
-.notification-item.unread:hover {
+:where(.enrolled-dashboard, .student-home-dashboard) .notification-item.unread:hover {
   background: #e5f1e9;
 }
 
-.notification-item-icon {
+:where(.enrolled-dashboard, .student-home-dashboard) .notification-item-icon {
   width: 46px;
   height: 46px;
   display: grid;
@@ -3250,22 +3442,22 @@
   color: #68717e;
 }
 
-.notification-item-icon.course {
+:where(.enrolled-dashboard, .student-home-dashboard) .notification-item-icon.course {
   background: #e5f3ea;
   color: #25714e;
 }
 
-.notification-item-icon.announcement {
+:where(.enrolled-dashboard, .student-home-dashboard) .notification-item-icon.announcement {
   background: #edf0f8;
   color: #596a9a;
 }
 
-.notification-item-icon.sparkle {
+:where(.enrolled-dashboard, .student-home-dashboard) .notification-item-icon.sparkle {
   background: #f3ede0;
   color: #9a7428;
 }
 
-.notification-item-icon svg {
+:where(.enrolled-dashboard, .student-home-dashboard) .notification-item-icon svg {
   width: 23px;
   height: 23px;
   fill: none;
@@ -3275,7 +3467,7 @@
   stroke-linejoin: round;
 }
 
-.notification-item-copy {
+:where(.enrolled-dashboard, .student-home-dashboard) .notification-item-copy {
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -3283,14 +3475,14 @@
   font-family: system-ui, sans-serif;
 }
 
-.notification-item-copy strong {
+:where(.enrolled-dashboard, .student-home-dashboard) .notification-item-copy strong {
   color: #2b3039;
   font-size: 12px;
   font-weight: 800;
   line-height: 1.25;
 }
 
-.notification-item-copy > span {
+:where(.enrolled-dashboard, .student-home-dashboard) .notification-item-copy > span {
   display: -webkit-box;
   margin-top: 3px;
   overflow: hidden;
@@ -3302,14 +3494,14 @@
   -webkit-line-clamp: 2;
 }
 
-.notification-item-copy small {
+:where(.enrolled-dashboard, .student-home-dashboard) .notification-item-copy small {
   margin-top: 5px;
   color: #25714e;
   font-size: 9px;
   font-weight: 750;
 }
 
-.notification-unread-dot {
+:where(.enrolled-dashboard, .student-home-dashboard) .notification-unread-dot {
   width: 8px;
   height: 8px;
   align-self: center;
@@ -3317,7 +3509,7 @@
   background: #2d7b58;
 }
 
-.notification-empty-state {
+:where(.enrolled-dashboard, .student-home-dashboard) .notification-empty-state {
   min-height: 230px;
   display: flex;
   align-items: center;
@@ -3327,7 +3519,7 @@
   text-align: center;
 }
 
-.notification-empty-icon {
+:where(.enrolled-dashboard, .student-home-dashboard) .notification-empty-icon {
   width: 58px;
   height: 58px;
   display: grid;
@@ -3337,7 +3529,7 @@
   color: #6c7a72;
 }
 
-.notification-empty-icon svg {
+:where(.enrolled-dashboard, .student-home-dashboard) .notification-empty-icon svg {
   width: 28px;
   height: 28px;
   fill: none;
@@ -3347,21 +3539,21 @@
   stroke-linejoin: round;
 }
 
-.notification-empty-state strong {
+:where(.enrolled-dashboard, .student-home-dashboard) .notification-empty-state strong {
   margin-top: 13px;
   color: #343941;
   font-family: system-ui, sans-serif;
   font-size: 13px;
 }
 
-.notification-empty-state p {
+:where(.enrolled-dashboard, .student-home-dashboard) .notification-empty-state p {
   margin: 5px 0 0;
   color: #9097a2;
   font-family: system-ui, sans-serif;
   font-size: 11px;
 }
 
-.notification-view-all-button {
+:where(.enrolled-dashboard, .student-home-dashboard) .notification-view-all-button {
   width: calc(100% - 14px);
   min-height: 40px;
   margin: 0 7px 7px;
@@ -3376,12 +3568,12 @@
   font-weight: 800;
 }
 
-.notification-view-all-button:hover {
+:where(.enrolled-dashboard, .student-home-dashboard) .notification-view-all-button:hover {
   background: #f2f7f4;
 }
 
 @media (max-width: 900px) {
-  .notification-dropdown-menu {
+  :where(.enrolled-dashboard, .student-home-dashboard) .notification-dropdown-menu {
     position: fixed;
     top: 68px;
     right: 14px;
@@ -3410,7 +3602,7 @@
 }
 
 /* Notification wrapper */
-.notification-menu-wrapper {
+:where(.enrolled-dashboard, .student-home-dashboard) .notification-menu-wrapper {
   position: relative;
   z-index: 1100;
 }
@@ -3422,7 +3614,7 @@
 }
 
 /* Notification popup */
-.notification-dropdown-menu {
+:where(.enrolled-dashboard, .student-home-dashboard) .notification-dropdown-menu {
   z-index: 1200;
 }
 
@@ -3453,8 +3645,6 @@
   position: relative;
   z-index: 1;
 }
-@import url('https://fonts.googleapis.com/css2?family=Qwitcher+Grypen:wght@700&display=swap');
-
 .student-profile-content {
   width: 100%;
   padding: 35px 45px 60px;

@@ -1,3 +1,4 @@
+import { FiBell, FiCheckCircle } from "react-icons/fi";
 import styles from "../pages/course/Learning_Module.module.css";
 
 export default function UserHeader({
@@ -29,52 +30,107 @@ export default function UserHeader({
       <div className={styles.profileWrapper}>
         <div className={styles.notificationWrapper}>
           <button
-            className={styles.notificationBtn}
+            className={`${styles.notificationBtn} ${
+              notificationOpen ? styles.notificationActive : ""
+            }`}
             type="button"
             onClick={() => setNotificationOpen?.((current) => !current)}
-            aria-label="Notifications"
+            aria-label={`Notifications${
+              notificationCount > 0 ? `, ${notificationCount} unread` : ""
+            }`}
+            aria-expanded={notificationOpen}
+            aria-haspopup="dialog"
           >
-            <span aria-hidden="true">!</span>
+            <FiBell aria-hidden="true" />
             {notificationCount > 0 && (
-              <span className={styles.notificationBadge}>{notificationCount}</span>
+              <span className={styles.notificationBadge}>
+                {notificationCount > 9 ? "9+" : notificationCount}
+              </span>
             )}
           </button>
 
-          <div
-            className={`${styles.notificationDropdown} ${
-              notificationOpen ? styles.show : ""
-            }`}
-          >
-            <div className={styles.notificationHeader}>
-              <h4>Notifications</h4>
-              <button
-                className={styles.markReadBtn}
-                type="button"
-                onClick={markNotificationsAsRead}
-              >
-                Mark read
-              </button>
-            </div>
+          {notificationOpen && (
+            <section
+              className={styles.notificationDropdown}
+              role="dialog"
+              aria-label="Notifications"
+            >
+              <div className={styles.notificationHeader}>
+                <div>
+                  <h2>Notifications</h2>
+                  <span>
+                    {notificationCount > 0
+                      ? `${notificationCount} unread`
+                      : "You are all caught up"}
+                  </span>
+                </div>
 
-            {notifications.length === 0 ? (
-              <div className={styles.emptyNotification}>
-                <p>No notifications yet.</p>
+                {notificationCount > 0 && (
+                  <button
+                    className={styles.markReadBtn}
+                    type="button"
+                    onClick={markNotificationsAsRead}
+                  >
+                    Mark all as read
+                  </button>
+                )}
               </div>
-            ) : (
-              notifications.slice(0, 5).map((notification, index) => (
-                <article className={styles.notificationItem} key={notification.id || index}>
-                  <div className={styles.notificationTop}>
-                    <h5>{notification.title || "Notification"}</h5>
-                    <span className={styles.notificationRole}>
-                      {notification.role || "system"}
+
+              <div className={styles.notificationTabs}>
+                <button type="button" className={styles.notificationTabActive}>
+                  All
+                </button>
+                <button type="button">Unread</button>
+              </div>
+
+              <div className={styles.notificationList}>
+                {notifications.length === 0 ? (
+                  <div className={styles.emptyNotification}>
+                    <span className={styles.emptyNotificationIcon}>
+                      <FiBell aria-hidden="true" />
                     </span>
+                    <strong>No notifications yet</strong>
+                    <p>New updates will appear here.</p>
                   </div>
-                  <p>{notification.message || notification.body || ""}</p>
-                  <small>{notification.created_at || notification.date || ""}</small>
-                </article>
-              ))
-            )}
-          </div>
+                ) : (
+                  notifications.slice(0, 5).map((notification, index) => {
+                    const isUnread = notification.status === "unread";
+
+                    return (
+                      <article
+                        className={`${styles.notificationItem} ${
+                          isUnread ? styles.unread : ""
+                        }`}
+                        key={notification.id || index}
+                      >
+                        <span
+                          className={styles.notificationItemIcon}
+                          aria-hidden="true"
+                        >
+                          <FiCheckCircle />
+                        </span>
+
+                        <span className={styles.notificationItemCopy}>
+                          <strong>{notification.title || "Notification"}</strong>
+                          <span>{notification.message || notification.body || ""}</span>
+                          <small>
+                            {notification.created_at || notification.date || ""}
+                          </small>
+                        </span>
+
+                        {isUnread && (
+                          <span
+                            className={styles.notificationUnreadDot}
+                            aria-label="Unread"
+                          />
+                        )}
+                      </article>
+                    );
+                  })
+                )}
+              </div>
+            </section>
+          )}
         </div>
 
         <button

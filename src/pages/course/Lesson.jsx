@@ -9,6 +9,7 @@ import {
   getCourseLessonPages,
   getCourseQuizItems,
 } from "./courseContent.js";
+import { saveStudentReadingProgress } from "../student/studentCourseData.js";
 
 const splitReadableText = (value) => {
   const text = String(value || "").trim();
@@ -165,6 +166,25 @@ function Lesson() {
 
   const saveProgress = async (slideIndexToSave) => {
     const studiedSlides = slideIndexToSave + 1;
+    const progressToSave = totalSlides
+      ? Math.round((studiedSlides / totalSlides) * 100)
+      : 0;
+
+    saveStudentReadingProgress(lessonId, progressToSave, {
+      totalSlides,
+      studiedSlides,
+      lastViewedSlide: studiedSlides,
+    });
+
+    localStorage.setItem(
+      `lessonProgress_${lessonId}`,
+      JSON.stringify({
+        total_cards: totalSlides,
+        studied_cards: studiedSlides,
+        progress_percent: progressToSave,
+        last_viewed_card: studiedSlides,
+      })
+    );
 
     try {
       await fetch(`${API_BASE}/saveLessonProgress.php`, {

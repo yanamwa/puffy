@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import QuizModesModal from '../../components/QuizModesModal';
-import { getCourseQuizItems } from '../course/courseContent.js';
 import JoinCourseModal from './JoinCourseModal';
 import { PROFESSOR_COURSES_EVENT } from '../professor/professorData';
 import {
@@ -170,7 +168,6 @@ export default function EnrolledCourses() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
   return localStorage.getItem("sidebarCollapsed") === "true";
 });
-  const [practiceCourse, setPracticeCourse] = useState(null);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
   const [notifications, setNotifications] = useState(notificationItems);
@@ -219,14 +216,6 @@ export default function EnrolledCourses() {
   const closeJoinModal = () => {
     setJoinModalOpen(false);
     setCourseCode('');
-  };
-
-  const openCourse = (course) => {
-    navigate(`/student/enrolled-courses/${course.id || course.code}`);
-  };
-
-  const openPracticeModes = (course) => {
-    setPracticeCourse(course);
   };
 
   const joinByCourseCode = async () => {
@@ -700,38 +689,25 @@ useEffect(() => {
             </div>
           ) : (
             courses.map((course) => (
-              <article key={course.id || course.code} className="course-folder enrolled-course-folder">
-                <button
-                  type="button"
-                  className="menu-button"
-                  aria-label="Course options"
-                  onClick={() => openCourse(course)}
-                >
+              <Link
+                key={course.id || course.code}
+                to={`/student/enrolled-courses/${course.id || course.code}`}
+                className="course-folder enrolled-course-folder"
+                aria-label={`Open ${course.code} - ${course.title}`}
+              >
+                <span className="menu-button" aria-hidden="true">
                   <span />
                   <span />
                   <span />
-                </button>
+                </span>
                 <div className="course-card-body">
                   <h2>{course.code} - {course.title}</h2>
-                  <div className="enrolled-card-progress" aria-label={`${course.progress}% complete`}>
-                    <span>
-                      <i style={{ width: `${course.progress}%` }} />
-                    </span>
-                    <strong>{course.progress}% progress</strong>
-                  </div>
                 </div>
                 <div className="course-card-footer">
                   <Avatar />
                   <span>Created by {course.instructor}</span>
-                  <button
-                    type="button"
-                    className="start-learning-button"
-                    onClick={() => openPracticeModes(course)}
-                  >
-                    Practice
-                  </button>
                 </div>
-              </article>
+              </Link>
             ))
           )}
         </section>
@@ -745,14 +721,6 @@ useEffect(() => {
         onJoin={joinByCourseCode}
       />
 
-      {practiceCourse && (
-        <QuizModesModal
-          source="lesson"
-          lessonId={practiceCourse.id || practiceCourse.course_id || practiceCourse.code}
-          quizzes={getCourseQuizItems(practiceCourse)}
-          onClose={() => setPracticeCourse(null)}
-        />
-      )}
     </div>
   );
 }

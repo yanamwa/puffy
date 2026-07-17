@@ -124,7 +124,7 @@ export default function ModePage() {
   };
 
   return (
-    <div className="admin-page feature-page">
+    <div className="admin-page feature-page mode-management-page">
       <div className="feature-page-top">
         <div>
           <h1>Mode Management</h1>

@@ -20,21 +20,21 @@ const quizCards = [
     id: 1,
     course: 'ITEC 106',
     title: 'Web Systems Basics',
-    progress: 72,
+    instructor: 'Prof. Diana Reyes',
     accent: 'MC',
   },
   {
     id: 2,
     course: 'ITEC 108',
     title: 'Integration by Parts',
-    progress: 45,
+    instructor: 'Prof. Marco Santos',
     accent: 'TF',
   },
   {
     id: 3,
     course: 'ART HISTORY',
     title: 'Renaissance Foundations',
-    progress: 90,
+    instructor: 'Instructor Belle Cruz',
     accent: 'QA',
   },
 ];
@@ -469,18 +469,16 @@ export default function StudentHome() {
 
             <div className="quiz-resume-grid">
               {quizCards.map((quiz) => (
-                <article key={quiz.id} className="quiz-resume-card">
-                  <span className="quiz-card-icon">{quiz.accent}</span>
-                  <p>{quiz.course}</p>
-                  <h3>{quiz.title}</h3>
-
-                  <div className="quiz-progress-track" aria-hidden="true">
-                    <span style={{ width: `${quiz.progress}%` }} />
+                <article
+                  key={quiz.id}
+                  className="course-folder enrolled-course-folder home-course-folder"
+                >
+                  <div className="course-card-body">
+                    <h2>{quiz.course} - {quiz.title}</h2>
                   </div>
-
-                  <div className="quiz-card-footer">
-                    <span>{quiz.progress}% mastery</span>
-                    <button type="button">Practice more</button>
+                  <div className="course-card-footer">
+                    <Avatar />
+                    <span>Created by {quiz.instructor}</span>
                   </div>
                 </article>
               ))}

@@ -11,6 +11,8 @@ import {
   FiUser,
   FiUsers,
 } from 'react-icons/fi';
+import RoleNotificationMenu from '../../components/RoleNotificationMenu';
+import HeaderProfileChip from '../../components/HeaderProfileChip';
 import './ProfessorLayout.css';
 
 const menuItems = [
@@ -28,6 +30,10 @@ const otherItems = [
 export default function ProfessorLayout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const avatarSrc =
+    user?.profileImage ||
+    user?.profile_image ||
+    '/images/temporaryimg.png';
 
   const handleLogout = () => {
     logout();
@@ -100,13 +106,18 @@ export default function ProfessorLayout() {
           </label>
 
           <div className="professor-user">
-            <button className="professor-notification-button" type="button" aria-label="Notifications">
-              <FiBell />
-            </button>
-            <span className="professor-avatar">
-              {(user?.name || 'P').charAt(0).toUpperCase()}
-            </span>
-            <strong>{user?.name || 'Professor'}</strong>
+            <RoleNotificationMenu role="professor" />
+            <HeaderProfileChip
+              username="professor"
+              accountLabel="Professor account"
+              avatarSrc={avatarSrc}
+              profilePath="/professor/profile"
+              menuItems={[
+                { label: 'Profile', path: '/professor/profile', icon: 'user' },
+                { label: 'Settings', path: '/professor/change-password', icon: 'settings' },
+              ]}
+              onLogout={handleLogout}
+            />
           </div>
         </header>
 

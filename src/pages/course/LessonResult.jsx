@@ -258,6 +258,25 @@ export default function LessonResult() {
   const [isFeedbackLoading, setIsFeedbackLoading] = useState(false);
   const [contentTitle, setContentTitle] = useState("");
   const [feedbackIndex, setFeedbackIndex] = useState(0);
+  const [showScrollUp, setShowScrollUp] = useState(false);
+
+  useEffect(() => {
+    const updateScrollButton = () => {
+      const pageIsLong =
+        document.documentElement.scrollHeight > window.innerHeight + 120;
+
+      setShowScrollUp(pageIsLong && window.scrollY > 360);
+    };
+
+    updateScrollButton();
+    window.addEventListener("scroll", updateScrollButton, { passive: true });
+    window.addEventListener("resize", updateScrollButton);
+
+    return () => {
+      window.removeEventListener("scroll", updateScrollButton);
+      window.removeEventListener("resize", updateScrollButton);
+    };
+  }, []);
 
   const fetchAttempts = async (savedResults) => {
     try {
@@ -764,6 +783,10 @@ export default function LessonResult() {
     }
   };
 
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <div className={styles.wrapper}>
       <div className={styles.scoreSection}>
@@ -1104,6 +1127,20 @@ export default function LessonResult() {
           cards={results.answers}
           onClose={() => setShowQuizModal(false)}
         />
+      )}
+
+      {showScrollUp && (
+        <button
+          type="button"
+          className={styles.scrollTopButton}
+          onClick={scrollToTop}
+          aria-label="Scroll to top"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 19V5" />
+            <path d="m5 12 7-7 7 7" />
+          </svg>
+        </button>
       )}
     </div>
   );

@@ -77,9 +77,16 @@ export function saveProfessorCourses(courses) {
 
 export function getProfessorCourseOwner(course) {
   return (
+    course.professorDisplayName ||
+    course.professor_display_name ||
     course.professorName ||
+    course.professor_name ||
+    course.createdByName ||
+    course.created_by_name ||
     course.professorEmail ||
+    course.professor_email ||
     course.createdBy ||
+    course.created_by ||
     course.instructor ||
     'Professor'
   );

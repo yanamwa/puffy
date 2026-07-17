@@ -889,34 +889,34 @@
 }
 
 .users-page .users-action-group {
-  gap: 10px;
+  gap: 6px;
   flex-wrap: wrap;
 }
 
 .users-page .users-icon-btn {
   width: auto;
-  min-width: 98px;
-  height: 44px;
-  min-height: 44px;
+  min-width: 72px;
+  height: 32px;
+  min-height: 32px;
   border: 0;
-  border-radius: 14px;
+  border-radius: 10px;
   background: #7A8799;
-  box-shadow: 0 5px 0 rgba(58, 68, 84, 0.28);
+  box-shadow: 0 3px 0 rgba(58, 68, 84, 0.24);
   color: #ffffff;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  font-size: 14px;
+  gap: 5px;
+  font-size: 12px;
   font-weight: 600;
   line-height: 1;
-  padding: 0 15px;
+  padding: 0 10px;
   white-space: nowrap;
 }
 
 .users-page .users-icon-btn svg {
-  width: 18px;
-  height: 18px;
+  width: 14px;
+  height: 14px;
   flex: 0 0 auto;
   stroke-width: 2;
 }
@@ -927,28 +927,28 @@
 
 .users-page .users-view-btn {
   background: #7A8799;
-  box-shadow: 0 5px 0 rgba(58, 68, 84, 0.28);
+  box-shadow: 0 3px 0 rgba(58, 68, 84, 0.24);
 }
 
 .users-page .users-archive-btn {
   background: #ffb800;
-  box-shadow: 0 5px 0 rgba(210, 151, 0, 0.28);
+  box-shadow: 0 3px 0 rgba(210, 151, 0, 0.24);
   color: #ffffff;
 }
 
 .users-page .users-reset-btn {
   background: #4a4a4a;
-  box-shadow: 0 5px 0 rgba(74, 74, 74, 0.24);
+  box-shadow: 0 3px 0 rgba(74, 74, 74, 0.22);
 }
 
 .users-page .users-approve-btn {
   background: #138a52;
-  box-shadow: 0 5px 0 rgba(19, 138, 82, 0.22);
+  box-shadow: 0 3px 0 rgba(19, 138, 82, 0.2);
 }
 
 .users-page .users-decline-btn {
   background: #f24b4b;
-  box-shadow: 0 5px 0 rgba(161, 27, 32, 0.22);
+  box-shadow: 0 3px 0 rgba(161, 27, 32, 0.2);
 }
 
 .users-page .users-icon-btn:hover {
@@ -957,8 +957,8 @@
 }
 
 .users-page .users-icon-btn:active {
-  box-shadow: 0 2px 0 rgba(58, 68, 84, 0.22);
-  transform: translateY(3px);
+  box-shadow: 0 1px 0 rgba(58, 68, 84, 0.2);
+  transform: translateY(2px);
 }
 
 .users-page .users-create-btn,

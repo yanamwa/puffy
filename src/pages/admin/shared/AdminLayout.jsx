@@ -11,11 +11,17 @@ import {
   FiSidebar,
   FiLogOut,
 } from 'react-icons/fi';
+import RoleNotificationMenu from '../../../components/RoleNotificationMenu';
+import HeaderProfileChip from '../../../components/HeaderProfileChip';
 import './AdminLayout.css';
 
 export default function AdminLayout({ children }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const avatarSrc =
+    user?.profileImage ||
+    user?.profile_image ||
+    '/images/temporaryimg.png';
 
   const handleLogout = () => {
     logout();
@@ -40,7 +46,7 @@ export default function AdminLayout({ children }) {
 
         <div className="sidebar-brand">
           <img src="/images/logo_solo.png" alt="PuffyBrain" />
-          <h2>Admin</h2>
+          <h2>PuffyBrain</h2>
         </div>
 
         <nav className="sidebar-menu">
@@ -80,15 +86,18 @@ export default function AdminLayout({ children }) {
             <input type="text" placeholder="Search..." />
           </div>
           <div className="admin-header-actions">
-            <button className="notification-btn" type="button" aria-label="Notifications">
-              <FiBell />
-            </button>
-            <div className="admin-user">
-              <span className="admin-user-avatar">
-                {(user?.name || 'Admin').charAt(0)}
-              </span>
-              <span className="admin-user-name">{user?.name || 'Admin'}</span>
-            </div>
+            <RoleNotificationMenu role="admin" />
+            <HeaderProfileChip
+              username="admin"
+              accountLabel="Admin account"
+              avatarSrc={avatarSrc}
+              profilePath="/admin/profile"
+              menuItems={[
+                { label: 'Profile', path: '/admin/profile', icon: 'user' },
+                { label: 'Settings', path: '/admin/settings', icon: 'settings' },
+              ]}
+              onLogout={handleLogout}
+            />
           </div>
         </header>
         <div className="admin-content">{children}</div>

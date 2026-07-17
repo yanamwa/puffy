@@ -1,15 +1,18 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import QuizModesModal from '../../components/QuizModesModal';
-import { getCourseQuizItems } from '../course/courseContent.js';
+import { getCourseQuizItems } from '../course/courseContent';
 import { Avatar, Icon } from './EnrolledCourses';
+import JoinCourseModal from './JoinCourseModal';
 import {
+  enrollStudentInCourse,
   findCourseByIdOrCodeAsync,
-  getStudentCourseProgress,
+  findJoinableCourseByCodeAsync,
+  getStudentModuleReadingProgress,
+  getStudentReadingProgress,
   getStudentCourseModules,
   normalizeStudentCourse,
-  readStudentCourseProgress,
-  saveStudentCourseProgress,
+  STUDENT_READING_PROGRESS_EVENT,
 } from './studentCourseData';
 import './EnrolledCourses.css';
 
@@ -18,7 +21,12 @@ export default function StudentCourseDetail() {
   const navigate = useNavigate();
   const [rawCourse, setRawCourse] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [showQuizModes, setShowQuizModes] = useState(false);
+  const [practiceScopeOpen, setPracticeScopeOpen] = useState(false);
+  const [quizModesOpen, setQuizModesOpen] = useState(false);
+  const [selectedPracticeScope, setSelectedPracticeScope] = useState(null);
+  const [joinModalOpen, setJoinModalOpen] = useState(false);
+  const [joinCourseCode, setJoinCourseCode] = useState('');
+  const [, setProgressVersion] = useState(0);
 
   useEffect(() => {
     let active = true;
@@ -45,37 +53,128 @@ export default function StudentCourseDetail() {
     };
   }, [courseId]);
 
+  useEffect(() => {
+    const refreshProgress = () => setProgressVersion((version) => version + 1);
+
+    window.addEventListener(STUDENT_READING_PROGRESS_EVENT, refreshProgress);
+    window.addEventListener('storage', refreshProgress);
+
+    return () => {
+      window.removeEventListener(STUDENT_READING_PROGRESS_EVENT, refreshProgress);
+      window.removeEventListener('storage', refreshProgress);
+    };
+  }, []);
+
   const course = rawCourse ? normalizeStudentCourse(rawCourse) : null;
   const modules = course ? getStudentCourseModules(course) : [];
-  const progress = course ? getStudentCourseProgress(course) : 0;
   const courseRouteId = course
     ? String(course.id || course.course_id || course.code || '')
     : '';
-  const courseQuizzes = useMemo(() => getCourseQuizItems(rawCourse), [rawCourse]);
-  const completedCount = modules.length
-    ? Math.floor((progress / 100) * modules.length)
-    : 0;
+  const allQuizItems = course ? getCourseQuizItems(course) : [];
+  const courseProgress = course ? getStudentReadingProgress(courseRouteId) : 0;
+  const moduleProgressValues = modules.map((_, index) => (
+    getStudentModuleReadingProgress(courseRouteId, index, modules.length)
+  ));
+  const isPracticeUnlocked =
+    courseProgress >= 100 || moduleProgressValues.some((progress) => progress >= 100);
+  const getModuleProgress = (index) => (
+    moduleProgressValues[index] ?? 0
+  );
 
-  const updateCourseProgress = (amount) => {
-    if (!course) return;
+  const createFallbackQuiz = (module, index) => ({
+    id: `${module.id || courseRouteId}-practice-${index + 1}`,
+    question: `What should you remember from ${module.title}?`,
+    options: [
+      module.description || course?.summary || 'Review the lesson content.',
+      'Skip the lesson content.',
+      'Ignore the main idea.',
+      'Only memorize the title.',
+    ],
+    correct_answer: module.description || course?.summary || 'Review the lesson content.',
+    answer: module.description || course?.summary || 'Review the lesson content.',
+    explanation: module.description || course?.summary || 'Review this lesson before answering.',
+    lessonTitle: module.title,
+  });
 
-    const key = String(course.id || course.code);
-    const nextProgress = Math.min(100, progress + amount);
+  const getModulePracticeItems = (module, index) => {
+    const matchingItems = allQuizItems.filter((item) => {
+      const lessonIndex = Number(item.lessonIndex ?? item.lesson_index ?? item.pageIndex ?? item.page_index);
+      const lessonTitle = String(item.lessonTitle || item.lesson_title || item.pageTitle || '').toLowerCase();
+      const moduleTitle = String(module.title || '').toLowerCase();
 
-    saveStudentCourseProgress({
-      ...readStudentCourseProgress(),
-      [key]: nextProgress,
+      return lessonIndex === index || (lessonTitle && lessonTitle === moduleTitle);
     });
+
+    if (matchingItems.length) return matchingItems;
+    if (modules.length === 1 && allQuizItems.length) return allQuizItems;
+    return [createFallbackQuiz(module, index)];
   };
 
+  const practiceScopes = course
+    ? [
+        {
+          id: 'all',
+          title: `Everything in ${course.code}`,
+          detail: `${modules.length} module page(s)`,
+          progress: courseProgress,
+          locked: courseProgress < 100,
+          quizzes: allQuizItems.length
+            ? allQuizItems
+            : modules.map((module, index) => createFallbackQuiz(module, index)),
+        },
+        ...modules.map((module, index) => {
+          const progress = getModuleProgress(index);
+
+          return {
+            id: module.id,
+            title: `${course.code} - Module ${index + 1}`,
+            detail: module.title,
+            progress,
+            locked: progress < 100,
+            quizzes: getModulePracticeItems(module, index),
+          };
+        }),
+      ]
+    : [];
+
   const startLearning = () => {
-    updateCourseProgress(progress === 0 ? 8 : 4);
     navigate(`/introduction/${courseRouteId}`);
   };
 
-  const practiceCourse = () => {
-    updateCourseProgress(12);
-    setShowQuizModes(true);
+  const closeJoinModal = () => {
+    setJoinModalOpen(false);
+    setJoinCourseCode('');
+  };
+
+  const joinByCourseCode = async () => {
+    const joinableCourse = await findJoinableCourseByCodeAsync(joinCourseCode);
+
+    if (!joinableCourse) {
+      window.alert('Course code not found. Please check the code from your professor.');
+      return;
+    }
+
+    enrollStudentInCourse(joinableCourse);
+    closeJoinModal();
+    navigate(`/student/enrolled-courses/${joinableCourse.id || joinableCourse.code}`);
+  };
+
+  const openPracticeModes = (scope) => {
+    if (scope.locked) return;
+
+    setSelectedPracticeScope(scope);
+    localStorage.setItem(
+      'practiceScope',
+      JSON.stringify({
+        courseId: courseRouteId,
+        courseCode: course.code,
+        scopeId: scope.id,
+        scopeTitle: scope.title,
+        scopeDetail: scope.detail,
+      })
+    );
+    setPracticeScopeOpen(false);
+    setQuizModesOpen(true);
   };
 
   if (loading) {
@@ -171,6 +270,15 @@ export default function StudentCourseDetail() {
                 <path d="M10 19.2h4" />
               </svg>
             </button>
+
+            <button
+              type="button"
+              className="primary-button"
+              onClick={() => setJoinModalOpen(true)}
+            >
+              + Join course
+            </button>
+
             <div className="profile-chip">
               <Avatar />
               <strong>@meiko</strong>
@@ -194,53 +302,79 @@ export default function StudentCourseDetail() {
                 <span>Created by {course.instructor}</span>
               </div>
 
-              <div className="student-course-progress">
-                <div>
-                  <span>Student progress</span>
-                  <strong>{progress}%</strong>
-                </div>
-                <span className="student-course-progress-track">
-                  <i style={{ width: `${progress}%` }} />
-                </span>
-              </div>
-
               <div className="student-course-actions">
                 <button type="button" className="student-start-button" onClick={startLearning}>
                   Start Learning
                 </button>
-                <button type="button" className="student-practice-button" onClick={practiceCourse}>
+                <button
+                  type="button"
+                  className="student-practice-button"
+                  onClick={() => setPracticeScopeOpen(true)}
+                  disabled={!isPracticeUnlocked}
+                  title={
+                    isPracticeUnlocked
+                      ? 'Practice'
+                      : 'Finish the module content before practicing.'
+                  }
+                >
                   Practice
                 </button>
+              </div>
+
+              <div
+                className="student-course-progress"
+                aria-label={`Course reading progress ${courseProgress}%`}
+              >
+                <div>
+                  <span>Reading progress</span>
+                  <strong>{courseProgress}%</strong>
+                </div>
+                <span className="student-course-progress-track">
+                  <i style={{ width: `${courseProgress}%` }}></i>
+                </span>
               </div>
             </div>
           </div>
 
           <section className="student-course-modules" aria-labelledby="course-modules-title">
             <div className="student-course-section-title">
-              <h2 id="course-modules-title">Course content</h2>
-              <span>{completedCount}/{modules.length} completed</span>
+              <h2 id="course-modules-title">Module content</h2>
+              <span>{modules.length} module page(s)</span>
             </div>
 
             <div className="student-module-list">
               {modules.map((module, index) => {
-                const isComplete = index < completedCount;
-                const isCurrent = !isComplete && index === completedCount;
+                const moduleProgress = getModuleProgress(index);
+                const moduleState = moduleProgress >= 100
+                  ? 'complete'
+                  : moduleProgress > 0
+                    ? 'current'
+                    : '';
 
                 return (
                   <article
-                    className={`student-module-row${isComplete ? ' complete' : ''}${isCurrent ? ' current' : ''}`}
+                    className={`student-module-row ${moduleState}`}
                     key={module.id}
                   >
                     <span className="student-module-number">{index + 1}</span>
-                    <div>
+                    <div className="student-module-main">
                       <h3>{module.title}</h3>
                       <p>{module.description || 'Lesson page'}</p>
+                      <div
+                        className="student-module-progress"
+                        aria-label={`${module.title} reading progress ${moduleProgress}%`}
+                      >
+                        <span>
+                          <i style={{ width: `${moduleProgress}%` }}></i>
+                        </span>
+                        <strong>{moduleProgress}%</strong>
+                      </div>
                     </div>
                     <button
                       type="button"
                       onClick={() => navigate(`/introduction/${courseRouteId}`)}
                     >
-                      {isComplete ? 'Review' : 'Open'}
+                      Open
                     </button>
                   </article>
                 );
@@ -250,12 +384,63 @@ export default function StudentCourseDetail() {
         </section>
       </main>
 
-      {showQuizModes && (
+      <JoinCourseModal
+        open={joinModalOpen}
+        courseCode={joinCourseCode}
+        onCourseCodeChange={setJoinCourseCode}
+        onCancel={closeJoinModal}
+        onJoin={joinByCourseCode}
+      />
+
+      {practiceScopeOpen && (
+        <div className="practice-scope-overlay" onClick={() => setPracticeScopeOpen(false)}>
+          <section
+            className="practice-scope-modal"
+            aria-modal="true"
+            role="dialog"
+            aria-labelledby="practice-scope-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="practice-scope-header">
+              <h2 id="practice-scope-title">What do you want to practice?</h2>
+              <button
+                type="button"
+                onClick={() => setPracticeScopeOpen(false)}
+                aria-label="Close practice picker"
+              >
+                x
+              </button>
+            </div>
+
+            <div className="practice-scope-list">
+              {practiceScopes.map((scope) => (
+                <button
+                  key={scope.id}
+                  type="button"
+                  className="practice-scope-option"
+                  onClick={() => openPracticeModes(scope)}
+                  disabled={scope.locked}
+                >
+                  <strong>{scope.title}</strong>
+                  <span>{scope.detail}</span>
+                  <small>
+                    {scope.locked
+                      ? `${scope.progress}% read`
+                      : `${scope.quizzes.length} practice question(s)`}
+                  </small>
+                </button>
+              ))}
+            </div>
+          </section>
+        </div>
+      )}
+
+      {quizModesOpen && selectedPracticeScope && (
         <QuizModesModal
           source="lesson"
-          lessonId={courseRouteId}
-          quizzes={courseQuizzes}
-          onClose={() => setShowQuizModes(false)}
+          lessonId={`${courseRouteId}-${selectedPracticeScope.id}`}
+          quizzes={selectedPracticeScope.quizzes}
+          onClose={() => setQuizModesOpen(false)}
         />
       )}
     </div>

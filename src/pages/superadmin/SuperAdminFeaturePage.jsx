@@ -3,15 +3,11 @@ import { Link } from 'react-router-dom';
 import {
   FiActivity,
   FiArchive,
-  FiCheckCircle,
   FiClock,
-  FiFileText,
-  FiKey,
   FiLock,
   FiRefreshCw,
   FiShield,
   FiUserCheck,
-  FiUsers,
 } from 'react-icons/fi';
 import '../admin/Features/AdminFeaturePages.css';
 
@@ -41,6 +37,11 @@ const featureContent = {
     summary: 'Configure security, roles, permissions, and system-level platform settings.',
     items: ['Role permissions', 'Security rules', 'Account policies', 'Platform settings'],
   },
+  profile: {
+    title: 'Super Admin Profile',
+    summary: 'Review super administrator identity, access level, and account ownership details.',
+    items: ['Profile details', 'Access level', 'Account ownership', 'Security status'],
+  },
   security: {
     title: 'Security and Permissions',
     summary: 'Manage role access, account requirements, password policies, and sensitive actions.',
@@ -52,57 +53,6 @@ const featureContent = {
     items: ['Database backup', 'Restore database', 'Recovery records', 'Export history'],
   },
 };
-
-const securitySections = [
-  {
-    title: 'Role Access',
-    icon: FiUsers,
-    description:
-      'Control what Super Admins, Admins, Professors, and Students can view, create, approve, archive, or restore.',
-    items: [
-      'Super Admin keeps full system ownership and administrator management access.',
-      'Admin manages approved professors, students, courses, modules, reports, and announcements.',
-      'Professor access is limited to owned courses, enrolled students, learning materials, and class reports.',
-      'Student access is limited to enrolled courses, modules, quizzes, progress, and notifications.',
-    ],
-  },
-  {
-    title: 'Password Policy',
-    icon: FiKey,
-    description:
-      'Set sign-in requirements for generated accounts, professor registrations, and administrator accounts.',
-    items: [
-      'Temporary student passwords require a reset on first login.',
-      'Passwords must meet minimum length and complexity requirements.',
-      'Failed login attempts are monitored for account protection.',
-      'Credential resets are tracked in the permission audit.',
-    ],
-  },
-  {
-    title: 'Approval Rules',
-    icon: FiUserCheck,
-    description:
-      'Define how professor registrations, proof of employment, and sensitive account requests are reviewed.',
-    items: [
-      'Professor accounts remain pending until reviewed by the Super Admin.',
-      'Employee or faculty ID and proof of employment are required for review.',
-      'Approved professors can access instructor tools after verification.',
-      'Declined registrations remain blocked from professor dashboard access.',
-    ],
-  },
-  {
-    title: 'Permission Audit',
-    icon: FiFileText,
-    description:
-      'Review sensitive permission changes, security actions, approval decisions, and account recovery activity.',
-    items: [
-      'Role changes and permission updates are logged.',
-      'Professor approvals and declines are stored for accountability.',
-      'Archive, restore, backup, and credential reset actions are tracked.',
-      'Security events can be reviewed from the audit log page.',
-    ],
-  },
-];
 
 const roleAccessRows = [
   {
@@ -330,31 +280,6 @@ function SecurityPermissionsPage({ content }) {
               <small>{card.status}</small>
               <h2>{card.label}</h2>
               <p>{card.value}</p>
-            </section>
-          );
-        })}
-      </div>
-
-      <div className="security-permission-grid">
-        {securitySections.map((section) => {
-          const Icon = section.icon;
-          return (
-            <section className="feature-card security-permission-card" key={section.title}>
-              <div className="feature-card-body">
-                <div className="security-section-title">
-                  <span><Icon /></span>
-                  <h2>{section.title}</h2>
-                </div>
-                <p>{section.description}</p>
-                <ul>
-                  {section.items.map((item) => (
-                    <li key={item}>
-                      <FiCheckCircle />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
             </section>
           );
         })}

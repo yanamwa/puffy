@@ -3,7 +3,9 @@
 .professor-layout {
   display: grid;
   grid-template-columns: 220px minmax(0, 1fr);
-  min-height: 100vh;
+  height: 100vh;
+  min-height: 0;
+  overflow: hidden;
   background: #ffffff;
   color: #1f2937;
 }
@@ -127,8 +129,11 @@
 
 .professor-main {
   min-width: 0;
+  min-height: 0;
+  height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .professor-header {
@@ -181,6 +186,10 @@
 }
 
 .professor-content {
+  flex: 1;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
   padding: 40px;
 }
 
@@ -1091,7 +1100,7 @@
 
 .professor-sidebar {
   min-height: 100vh;
-  height: auto;
+  height: 100vh;
   padding: 0;
   overflow: hidden;
   background: var(--professor-bg);
@@ -1257,40 +1266,132 @@
 }
 
 .professor-user {
+  position: relative;
+  min-width: 0;
   gap: 10px;
   color: var(--professor-ink);
 }
 
-.professor-notification-button {
-  width: 48px;
-  height: 48px;
-  border: 0;
-  border-radius: 50%;
-  background: var(--professor-ink);
-  box-shadow: 4px 4px 0 var(--professor-shadow);
-  color: #ffffff;
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-  font: inherit;
-  font-size: 18px;
-}
-
 .professor-avatar {
+  position: relative;
   width: 36px;
   height: 36px;
-  background: var(--professor-soft);
-  border: 1.5px solid var(--professor-soft-border);
-  color: var(--professor-ink);
-  font-size: 13px;
-  font-weight: 950;
+  flex: 0 0 36px;
+  display: block;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+}
+
+.professor-avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  object-fit: cover;
+}
+
+.professor-avatar-status {
+  position: absolute;
+  right: 0;
+  bottom: 1px;
+  width: 9px;
+  height: 9px;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  background: #2ea86b;
 }
 
 .professor-user strong {
+  min-width: 0;
+  max-width: 148px;
+  overflow: hidden;
   color: var(--professor-ink);
-  font-size: 13px;
-  font-weight: 900;
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1;
+  text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.professor-user-more {
+  width: 20px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 3px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #8d939b;
+  cursor: pointer;
+  transition: color 150ms ease, background 150ms ease;
+}
+
+.professor-user-more:hover,
+.professor-user-more.open {
+  background: #f0f5f2;
+  color: #25714e;
+}
+
+.professor-user-more span {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.professor-profile-menu {
+  position: absolute;
+  top: calc(100% + 11px);
+  right: 0;
+  z-index: 1300;
+  width: 196px;
+  padding: 8px;
+  border: 1px solid #d8dce2;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow:
+    0 18px 40px rgba(23, 25, 39, 0.16),
+    0 3px 8px rgba(23, 25, 39, 0.08);
+}
+
+.professor-profile-menu button {
+  width: 100%;
+  min-height: 38px;
+  padding: 0 11px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: #4e5663;
+  cursor: pointer;
+  text-align: left;
+  font-family: system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.professor-profile-menu button:hover {
+  background: #f0f5f2;
+  color: #25714e;
+}
+
+.professor-profile-menu button.danger {
+  color: #b34c4c;
+}
+
+.professor-profile-menu button.danger:hover {
+  background: #fff0f0;
+  color: #9d3030;
+}
+
+.professor-profile-menu-divider {
+  height: 1px;
+  margin: 6px 3px;
+  background: #e7e9ed;
 }
 
 .professor-content {
@@ -1443,8 +1544,10 @@
 }
 
 .monitor-course-select {
+  position: relative;
   border-radius: 999px;
   font-weight: 900;
+  padding-right: 34px;
 }
 
 .monitor-course-meta span,
@@ -1554,6 +1657,15 @@
 @media (max-width: 640px) {
   .professor-layout {
     grid-template-columns: 1fr;
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+  }
+
+  .professor-main {
+    height: auto;
+    min-height: 0;
+    overflow: visible;
   }
 
   .professor-sidebar {
@@ -1563,6 +1675,7 @@
     flex-direction: row;
     align-items: center;
     overflow-x: auto;
+    overflow-y: hidden;
     padding: 6px;
     border-right: 0;
     border-bottom: 1.5px solid var(--professor-line);
@@ -1608,6 +1721,7 @@
   }
 
   .professor-content {
+    overflow: visible;
     padding: 22px 16px 32px;
   }
 
@@ -1616,59 +1730,1151 @@
   }
 }
 
-/* Readable normal-weight professor typography */
-.professor-layout,
-.professor-layout :where(a, button, input, select, textarea, label, p, span, strong, small, li, td, th, h1, h2, h3, h4, h5, h6) {
-  font-family: "Jersey 15", "Arial Rounded MT Bold", system-ui, sans-serif;
-  font-weight: 400 !important;
+/* Compact professor typography */
+#root .professor-layout,
+#root .professor-layout :where(a, button, input, select, textarea, label, p, span, strong, small, li, td, th, h1, h2, h3, h4, h5, h6) {
+  font-family: "Segoe UI", Arial, system-ui, sans-serif !important;
   letter-spacing: 0;
 }
 
-.professor-layout :where(a, button, input, select, textarea, label, p, span, strong, small, li, td, th) {
-  font-size: 18px;
-  line-height: 1.28;
+#root .professor-layout {
+  font-size: 14px;
 }
 
-.professor-page h1,
-.monitor-header h1 {
-  font-size: 32px;
-  line-height: 1.1;
+#root .professor-layout :where(a, button, input, select, textarea, label, p, span, small, li, td, th) {
+  font-size: 14px !important;
+  line-height: 1.4;
+  font-weight: 400;
 }
 
-.professor-page h2,
-.monitor-panel-heading h2,
-.professor-notification-content h2 {
-  font-size: 24px;
+#root .professor-layout strong {
+  font-weight: 600;
+}
+
+#root .professor-page h1,
+#root .monitor-header h1 {
+  font-size: 28px !important;
   line-height: 1.15;
+  font-weight: 700 !important;
 }
 
-.professor-page h3,
-.monitor-student-detail h3,
-.monitor-report-body h3 {
-  font-size: 22px;
-  line-height: 1.15;
+#root .professor-page > div:first-child p,
+#root .monitor-header p {
+  font-size: 15px !important;
+  line-height: 1.45;
 }
 
-.professor-sidebar :where(a, button, span, p, strong) {
-  font-size: 20px;
-  line-height: 1.1;
+#root .professor-page h2,
+#root .monitor-panel-heading h2,
+#root .professor-notification-content h2 {
+  font-size: 20px !important;
+  line-height: 1.2;
+  font-weight: 700 !important;
+}
+
+#root .professor-page h3,
+#root .monitor-student-detail h3,
+#root .monitor-report-body h3 {
+  font-size: 18px !important;
+  line-height: 1.2;
+  font-weight: 700 !important;
+}
+
+#root .professor-sidebar :where(a, button, span, p, strong) {
+  font-size: 15px !important;
+  line-height: 1.2;
   white-space: nowrap;
 }
 
-.professor-brand h2 {
-  font-size: 22px;
+#root .professor-brand h2 {
+  font-size: 13px !important;
+  font-weight: 700 !important;
 }
 
-.professor-card strong,
-.monitor-kpi strong,
-.monitor-report-card strong,
-.monitor-detail-grid strong {
-  font-size: 30px;
+#root .professor-link,
+#root .professor-logout {
+  font-size: 15px !important;
+  font-weight: 600;
+}
+
+#root .professor-card span {
+  font-size: 15px !important;
+}
+
+#root .professor-card strong,
+#root .monitor-kpi strong,
+#root .monitor-report-card strong,
+#root .monitor-detail-grid strong {
+  font-size: 28px !important;
   line-height: 1;
+  font-weight: 700 !important;
+}
+
+#root .professor-list li {
+  font-size: 15px !important;
+  line-height: 1.45;
+}
+
+#root .professor-list li strong {
+  font-size: inherit !important;
+  font-weight: 700 !important;
+}
+
+#root .professor-notification-badge,
+#root .monitor-status,
+#root .monitor-topic-dots span {
+  font-size: 12px !important;
+}
+
+@media (min-width: 641px) {
+  .professor-sidebar {
+    background: #198754;
+    border-right: 1px solid #c4c8cf;
+    color: #ffffff;
+  }
+
+  .professor-collapse {
+    color: #ffffff;
+    opacity: 0.85;
+  }
+
+  .professor-collapse:hover {
+    color: #ffffff;
+    opacity: 1;
+  }
+
+  .professor-brand {
+    border-bottom: 1px solid #d3d7de;
+  }
+
+  .professor-brand h2,
+  .professor-menu-section p,
+  .professor-link,
+  .professor-logout {
+    color: #ffffff;
+  }
+
+  .professor-link svg,
+  .professor-logout svg {
+    color: currentColor;
+  }
+}
+
+@media (min-width: 901px) {
+  .professor-layout {
+    grid-template-columns: 220px minmax(0, 1fr);
+  }
+
+  .professor-sidebar {
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 0;
+  }
+
+  .professor-collapse {
+    display: none;
+  }
+
+  .professor-brand {
+    min-height: 105px;
+    justify-content: center;
+    gap: 8px;
+    margin: 0 10px;
+    padding: 18px 14px 15px;
+  }
+
+  .professor-brand img {
+    width: 44px;
+    height: 44px;
+  }
+
+  .professor-menu {
+    gap: 14px;
+    padding: 26px 0 0 10px;
+  }
+
+  .professor-menu-section {
+    gap: 14px;
+    padding: 0;
+  }
+
+  .professor-menu-section + .professor-menu-section,
+  .professor-others {
+    border-top: 0;
+    padding-top: 0;
+  }
+
+  .professor-menu-section p {
+    display: none;
+  }
+
+  .professor-link,
+  .professor-logout {
+    position: relative;
+    width: 100%;
+    min-height: 40px;
+    margin: 0;
+    padding: 0 12px 0 10px;
+    border: 1px solid transparent;
+    border-right: 0;
+    border-radius: 999px 0 0 999px;
+    box-shadow: none;
+    gap: 10px;
+    line-height: 1.2;
+    white-space: normal;
+  }
+
+  .professor-link span,
+  .professor-logout span {
+    min-width: 0;
+    overflow: hidden;
+    white-space: normal;
+  }
+
+  .professor-link svg,
+  .professor-logout svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .professor-link:hover,
+  .professor-link.active {
+    background: #ffffff;
+    border-color: #aeb5bf;
+    box-shadow: none;
+    color: #606772;
+    transform: none;
+    z-index: 2;
+  }
+
+  .professor-link:not(.active):hover {
+    background: transparent;
+    border-color: transparent;
+    color: #171927;
+  }
+
+  .professor-link.active::after {
+    content: "";
+    position: absolute;
+    top: 1px;
+    right: -2px;
+    bottom: 1px;
+    width: 3px;
+    background: #ffffff;
+  }
+
+  .professor-logout {
+    margin: auto 10px 16px;
+    width: auto;
+  }
+
+  .professor-logout:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+  }
+}
+
+/* Professor dashboard home */
+#root .professor-dashboard {
+  gap: 18px;
+}
+
+#root .dashboard-welcome,
+#root .dashboard-panel,
+#root .dashboard-summary-card {
+  background: #ffffff;
+  border: 1.5px solid var(--professor-line);
+  border-radius: 8px;
+  box-shadow: 4px 4px 0 var(--professor-shadow);
+}
+
+#root .dashboard-welcome {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 22px 24px;
+}
+
+#root .dashboard-eyebrow {
+  display: inline-flex;
+  margin-bottom: 7px;
+  color: #198754;
+  font-size: 12px !important;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+#root .dashboard-welcome h1 {
+  margin: 0;
+  color: var(--professor-ink);
+  font-size: 28px !important;
+  line-height: 1.15;
+  font-weight: 750 !important;
+}
+
+#root .dashboard-welcome p {
+  margin-top: 6px;
+  color: var(--professor-muted);
+  font-size: 15px !important;
+}
+
+#root .dashboard-welcome-actions,
+#root .dashboard-section-header a,
+#root .dashboard-summary-card a {
+  display: inline-flex;
+  align-items: center;
+}
+
+#root .dashboard-welcome-actions {
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+#root .dashboard-primary-action,
+#root .dashboard-secondary-action,
+#root .dashboard-table-action,
+#root .dashboard-action-grid a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 13px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 13px !important;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+#root .dashboard-primary-action {
+  border: 1.5px solid #145c37;
+  background: #198754;
+  color: #ffffff;
+}
+
+#root .dashboard-secondary-action {
+  border: 1.5px solid var(--professor-line);
+  background: #ffffff;
+  color: var(--professor-ink);
+}
+
+#root .dashboard-primary-action svg,
+#root .dashboard-secondary-action svg,
+#root .dashboard-table-action svg,
+#root .dashboard-action-grid a svg,
+#root .dashboard-section-header a svg,
+#root .dashboard-summary-card a svg {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 auto;
+}
+
+#root .dashboard-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+#root .dashboard-summary-card {
+  min-height: 132px;
+  display: grid;
+  align-content: space-between;
+  gap: 12px;
+  padding: 16px;
+}
+
+#root .dashboard-summary-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--professor-muted);
+  font-size: 13px !important;
+  font-weight: 700;
+}
+
+#root .dashboard-summary-icon {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 8px;
+  background: #eef8f2;
+  color: #198754;
+}
+
+#root .dashboard-summary-icon svg {
+  width: 17px;
+  height: 17px;
+}
+
+#root .dashboard-summary-card strong {
+  color: var(--professor-ink);
+  font-size: 28px !important;
+  line-height: 1;
+  font-weight: 750 !important;
+}
+
+#root .dashboard-summary-card a {
+  gap: 6px;
+  color: #198754;
+  text-decoration: none;
+  font-size: 13px !important;
+  font-weight: 700;
+}
+
+#root .dashboard-main-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(300px, 0.55fr);
+  gap: 16px;
+}
+
+#root .dashboard-panel {
+  min-width: 0;
+  overflow: hidden;
+}
+
+#root .dashboard-section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 17px 18px;
+  border-bottom: 1px solid var(--professor-soft-line);
+}
+
+#root .dashboard-section-header.compact {
+  align-items: flex-start;
+}
+
+#root .dashboard-section-header h2 {
+  margin: 0;
+  color: var(--professor-ink);
+  font-size: 20px !important;
+  line-height: 1.2;
+  font-weight: 750 !important;
+}
+
+#root .dashboard-section-header p {
+  margin-top: 5px;
+  color: var(--professor-muted);
+  font-size: 13px !important;
+}
+
+#root .dashboard-section-header a {
+  flex: 0 0 auto;
+  gap: 6px;
+  color: #198754;
+  text-decoration: none;
+  font-size: 13px !important;
+  font-weight: 700;
+}
+
+#root .dashboard-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+#root .dashboard-course-table,
+#root .dashboard-attention-table {
+  width: 100%;
+  min-width: 0;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+#root .dashboard-course-table th,
+#root .dashboard-course-table td,
+#root .dashboard-attention-table th,
+#root .dashboard-attention-table td {
+  padding: 11px 12px;
+  border-bottom: 1px solid var(--professor-soft-line);
+  text-align: left;
+  vertical-align: middle;
+  overflow-wrap: anywhere;
+}
+
+#root .dashboard-course-table th,
+#root .dashboard-attention-table th {
+  background: #fbfbfc;
+  color: var(--professor-muted);
+  font-size: 11px !important;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+#root .dashboard-course-table td,
+#root .dashboard-attention-table td {
+  color: var(--professor-ink);
+  font-size: 13px !important;
+}
+
+#root .dashboard-course-table tbody tr:last-child td,
+#root .dashboard-attention-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+#root .dashboard-course-table td:first-child strong,
+#root .dashboard-course-table td:first-child span {
+  display: block;
+}
+
+#root .dashboard-course-table td:first-child strong {
+  color: var(--professor-ink);
+  font-size: 13px !important;
+  font-weight: 800 !important;
+}
+
+#root .dashboard-course-table td:first-child span {
+  margin-top: 3px;
+  color: var(--professor-muted);
+  font-size: 12px !important;
+}
+
+#root .dashboard-course-table th:nth-child(1),
+#root .dashboard-course-table td:nth-child(1) {
+  width: 30%;
+}
+
+#root .dashboard-course-table th:nth-child(2),
+#root .dashboard-course-table td:nth-child(2) {
+  width: 12%;
+}
+
+#root .dashboard-course-table th:nth-child(3),
+#root .dashboard-course-table td:nth-child(3),
+#root .dashboard-course-table th:nth-child(4),
+#root .dashboard-course-table td:nth-child(4),
+#root .dashboard-course-table th:nth-child(5),
+#root .dashboard-course-table td:nth-child(5) {
+  width: 9%;
+}
+
+#root .dashboard-course-table th:nth-child(6),
+#root .dashboard-course-table td:nth-child(6) {
+  width: 12%;
+}
+
+#root .dashboard-course-table th:nth-child(7),
+#root .dashboard-course-table td:nth-child(7) {
+  width: 19%;
+}
+
+#root .dashboard-mastery-pill {
+  display: inline-flex;
+  min-width: 52px;
+  min-height: 26px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #eef8f2;
+  color: #176b42;
+  font-size: 12px !important;
+  font-weight: 800;
+}
+
+#root .dashboard-table-action {
+  min-height: 30px;
+  padding-inline: 10px;
+  border: 1px solid #cfe1d6;
+  background: #f6fbf8;
+  color: #176b42;
+  white-space: normal;
+}
+
+#root .dashboard-quick-actions,
+#root .dashboard-pending-work,
+#root .dashboard-activity {
+  align-self: start;
+}
+
+#root .dashboard-action-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 9px;
+  padding: 16px 18px 18px;
+}
+
+#root .dashboard-action-grid a {
+  justify-content: flex-start;
+  border: 1px solid var(--professor-soft-line);
+  background: #fbfbfc;
+  color: var(--professor-ink);
+}
+
+#root .dashboard-action-grid a:hover,
+#root .dashboard-table-action:hover,
+#root .dashboard-secondary-action:hover {
+  border-color: #9eb3a7;
+  background: #eef8f2;
+}
+
+#root .performance-grid {
+  grid-template-columns: minmax(0, 1fr) minmax(290px, 0.42fr);
+}
+
+#root .dashboard-course-select {
+  position: relative;
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  padding: 0 34px 0 10px;
+  border: 1px solid var(--professor-soft-line);
+  border-radius: 8px;
+  background: #fbfbfc;
+}
+
+#root .dashboard-course-select::after,
+#root .monitor-course-select::after {
+  content: "";
+  position: absolute;
+  right: 13px;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  color: var(--professor-muted);
+  pointer-events: none;
+  transform: translateY(-65%) rotate(45deg);
+}
+
+#root .dashboard-course-select span {
+  color: var(--professor-muted);
+  font-size: 12px !important;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+#root .dashboard-course-select select {
+  appearance: none;
+  -webkit-appearance: none;
+  min-width: 0;
+  border: 0 !important;
+  outline: 0;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--professor-ink);
+  font: inherit;
+  font-size: 13px !important;
+  font-weight: 800;
+  padding: 0;
+}
+
+#root .dashboard-course-select select::-ms-expand,
+#root .monitor-course-select select::-ms-expand {
+  display: none;
+}
+
+#root .monitor-course-select select {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding-right: 0;
+}
+
+#root .dashboard-chart-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 0.55fr);
+  gap: 18px;
+  padding: 18px;
+}
+
+#root .dashboard-bars {
+  display: grid;
+  gap: 12px;
+}
+
+#root .dashboard-bar-row {
+  display: grid;
+  grid-template-columns: 70px minmax(160px, 1fr) 46px;
+  align-items: center;
+  gap: 12px;
+}
+
+#root .dashboard-bar-row > span {
+  color: var(--professor-ink);
+  font-size: 12px !important;
+  font-weight: 800;
+}
+
+#root .dashboard-bar-row > div {
+  display: grid;
+  gap: 5px;
+}
+
+#root .dashboard-bar-row i {
+  height: 9px;
+  display: block;
+  border-radius: 999px;
+}
+
+#root .dashboard-bar-row i.score,
+#root .dashboard-chart-legend i.score {
+  background: #198754;
+}
+
+#root .dashboard-bar-row i.completion,
+#root .dashboard-chart-legend i.completion {
+  background: #4c78d8;
+}
+
+#root .dashboard-bar-row strong {
+  color: var(--professor-ink);
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  text-align: right;
+}
+
+#root .dashboard-chart-legend,
+#root .dashboard-mastery-legend {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+#root .dashboard-chart-legend span,
+#root .dashboard-mastery-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--professor-muted);
+  font-size: 12px !important;
+  font-weight: 700;
+}
+
+#root .dashboard-chart-legend i,
+#root .dashboard-mastery-legend i {
+  width: 10px;
+  height: 10px;
+  display: inline-block;
+  flex: 0 0 auto;
+  border-radius: 999px;
+}
+
+#root .dashboard-selected-course {
+  display: grid;
+  gap: 16px;
+  align-content: center;
+  padding: 16px;
+  border: 1px solid var(--professor-soft-line);
+  border-radius: 8px;
+  background: #fbfbfc;
+}
+
+#root .dashboard-selected-course > div > span {
+  color: var(--professor-muted);
+  font-size: 12px !important;
+  font-weight: 800;
+}
+
+#root .dashboard-selected-course strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--professor-ink);
+  font-size: 34px !important;
+  line-height: 1;
+  font-weight: 800 !important;
+}
+
+#root .dashboard-selected-course p {
+  margin-top: 4px;
+  color: var(--professor-muted);
+  font-size: 13px !important;
+}
+
+#root .dashboard-mastery {
+  display: grid;
+  gap: 10px;
+}
+
+#root .dashboard-mastery-bar {
+  height: 16px;
+  display: flex;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--professor-soft-line);
+}
+
+#root .dashboard-mastery-segment {
+  min-width: 5%;
+  height: 100%;
+}
+
+#root .dashboard-mastery-segment.advanced,
+#root .dashboard-mastery-legend i.advanced {
+  background: #198754;
+}
+
+#root .dashboard-mastery-segment.proficient,
+#root .dashboard-mastery-legend i.proficient {
+  background: #4c78d8;
+}
+
+#root .dashboard-mastery-segment.developing,
+#root .dashboard-mastery-legend i.developing {
+  background: #e1a21a;
+}
+
+#root .dashboard-mastery-segment.beginning,
+#root .dashboard-mastery-legend i.beginning {
+  background: #d25b5b;
+}
+
+#root .dashboard-task-list {
+  display: grid;
+  gap: 0;
+}
+
+#root .dashboard-task-row {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  gap: 2px 11px;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--professor-soft-line);
+}
+
+#root .dashboard-task-row:last-child {
+  border-bottom: 0;
+}
+
+#root .dashboard-task-row strong {
+  grid-row: span 2;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: #fff7e4;
+  color: #8b5d08;
+  font-size: 17px !important;
+  font-weight: 800 !important;
+}
+
+#root .dashboard-task-row span {
+  color: var(--professor-ink);
+  font-size: 13px !important;
+  font-weight: 750;
+}
+
+#root .dashboard-task-row small {
+  color: var(--professor-muted);
+  font-size: 12px !important;
+}
+
+#root .attention-grid {
+  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.65fr);
+}
+
+#root .dashboard-attention-table {
+  min-width: 0;
+}
+
+#root .dashboard-attention-table th:nth-child(1),
+#root .dashboard-attention-table td:nth-child(1) {
+  width: 22%;
+}
+
+#root .dashboard-attention-table th:nth-child(2),
+#root .dashboard-attention-table td:nth-child(2) {
+  width: 13%;
+}
+
+#root .dashboard-attention-table th:nth-child(3),
+#root .dashboard-attention-table td:nth-child(3) {
+  width: 31%;
+}
+
+#root .dashboard-attention-table th:nth-child(4),
+#root .dashboard-attention-table td:nth-child(4) {
+  width: 13%;
+}
+
+#root .dashboard-attention-table th:nth-child(5),
+#root .dashboard-attention-table td:nth-child(5) {
+  width: 21%;
+}
+
+#root .dashboard-timeline {
+  display: grid;
+  padding: 6px 18px 18px;
+}
+
+#root .dashboard-timeline-item {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 10px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--professor-soft-line);
+}
+
+#root .dashboard-timeline-item:last-child {
+  border-bottom: 0;
+}
+
+#root .dashboard-timeline-item > span {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: #eef3ff;
+  color: #4c78d8;
+}
+
+#root .dashboard-timeline-item svg {
+  width: 15px;
+  height: 15px;
+}
+
+#root .dashboard-timeline-item p {
+  color: var(--professor-ink);
+  font-size: 13px !important;
+  line-height: 1.35;
+}
+
+#root .dashboard-timeline-item time {
+  display: block;
+  margin-top: 3px;
+  color: var(--professor-muted);
+  font-size: 12px !important;
+  font-weight: 700;
+}
+
+@media (max-width: 1200px) {
+  #root .dashboard-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #root .dashboard-main-grid,
+  #root .performance-grid,
+  #root .attention-grid,
+  #root .dashboard-chart-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  #root .dashboard-welcome,
+  #root .dashboard-section-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  #root .dashboard-welcome-actions {
+    justify-content: stretch;
+  }
+
+  #root .dashboard-primary-action,
+  #root .dashboard-secondary-action {
+    width: 100%;
+  }
+
+  #root .dashboard-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  #root .dashboard-section-header a,
+  #root .dashboard-course-select {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  #root .dashboard-bar-row {
+    grid-template-columns: 58px minmax(120px, 1fr) 42px;
+  }
+
+  #root .dashboard-course-table {
+    min-width: 680px;
+  }
+
+  #root .dashboard-attention-table {
+    min-width: 620px;
+  }
+}
+
+/* Student-style notification surfaces for professor users. */
+.professor-notifications {
+  gap: 18px;
+}
+
+.professor-notification-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 15px 17px;
+  border: 1px solid #d8dce2;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow:
+    0 20px 48px rgba(23, 25, 39, 0.08),
+    0 4px 12px rgba(23, 25, 39, 0.05);
+}
+
+.professor-notification-tabs {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.professor-notification-tabs button,
+.professor-mark-read {
+  min-width: 56px;
+  min-height: 30px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #69717f;
+  cursor: pointer;
+  font-family: system-ui, sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 750 !important;
+  box-shadow: none;
+}
+
+.professor-notification-tabs button:hover,
+.professor-notification-tabs button.active {
+  background: #eaf4ee;
+  color: #25714e;
+}
+
+.professor-mark-read {
+  background: #25714e;
+  color: #ffffff;
+}
+
+.professor-mark-read:hover {
+  background: #1f6143;
+}
+
+.professor-notification-list {
+  display: grid;
+  gap: 10px;
+}
+
+.professor-notification-item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto 10px;
+  align-items: start;
+  gap: 11px;
+  min-height: 86px;
+  padding: 10px 9px;
+  border: 0;
+  border-radius: 13px;
+  background: #ffffff;
+  box-shadow: none;
+  color: #313640;
+  transition: background 150ms ease;
+}
+
+.professor-notification-item:hover {
+  background: #f3f5f7;
+}
+
+.professor-notification-item.unread {
+  background: #eef6f1;
+}
+
+.professor-notification-item.unread:hover {
+  background: #e5f1e9;
+}
+
+.professor-notification-icon {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: #e8ecef;
+  color: #68717e;
+}
+
+.professor-notification-icon.student {
+  background: #e5f3ea;
+  color: #25714e;
+}
+
+.professor-notification-icon.announcement {
+  background: #edf0f8;
+  color: #596a9a;
+}
+
+.professor-notification-icon.system {
+  background: #f3ede0;
+  color: #9a7428;
+}
+
+.professor-notification-icon svg {
+  width: 23px;
+  height: 23px;
+  stroke-width: 1.65;
+}
+
+.professor-notification-content h2 {
+  color: #2b3039;
+  font-family: system-ui, sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  line-height: 1.25;
+}
+
+.professor-notification-content p {
+  display: -webkit-box;
+  margin-top: 5px;
+  overflow: hidden;
+  color: #69717f;
+  font-family: system-ui, sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  line-height: 1.35;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.professor-notification-meta {
+  margin-top: 7px;
+  color: #25714e;
+  font-family: system-ui, sans-serif !important;
+  font-size: 10px !important;
+  font-weight: 750 !important;
 }
 
 .professor-notification-badge,
-.monitor-status,
-.monitor-topic-dots span {
-  font-size: 18px;
+.professor-notification-badge.system,
+.professor-notification-badge.announcement {
+  align-self: start;
+  border: 1px solid #d2e8d9;
+  border-radius: 9px;
+  background: #e5f3ea;
+  color: #25714e;
+  font-family: system-ui, sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  padding: 5px 10px;
+  text-transform: capitalize;
+}
+
+.professor-unread-dot {
+  width: 8px;
+  height: 8px;
+  align-self: center;
+  border-radius: 50%;
+  background: #2d7b58;
 }

@@ -104,7 +104,7 @@ export default function NotificationPage() {
   };
 
   return (
-    <div className="admin-page feature-page">
+    <div className="admin-page feature-page notification-management-page">
       <h1>Notification Management</h1>
       <p>Create and manage announcements for PuffyBrain users.</p>
 

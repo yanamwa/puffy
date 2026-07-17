@@ -13,11 +13,17 @@ import {
   FiSidebar,
   FiUsers,
 } from 'react-icons/fi';
+import RoleNotificationMenu from '../../../components/RoleNotificationMenu';
+import HeaderProfileChip from '../../../components/HeaderProfileChip';
 import '../../admin/shared/AdminLayout.css';
 
 export default function SuperAdminLayout({ children }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const avatarSrc =
+    user?.profileImage ||
+    user?.profile_image ||
+    '/images/temporaryimg.png';
 
   const handleLogout = () => {
     logout();
@@ -48,7 +54,7 @@ export default function SuperAdminLayout({ children }) {
 
         <div className="sidebar-brand">
           <img src="/images/logo_solo.png" alt="PuffyBrain" />
-          <h2>Super Admin</h2>
+          <h2>PuffyBrain</h2>
         </div>
 
         <nav className="sidebar-menu">
@@ -106,15 +112,18 @@ export default function SuperAdminLayout({ children }) {
             <input type="text" placeholder="Search system records..." />
           </div>
           <div className="admin-header-actions">
-            <button className="notification-btn" type="button" aria-label="Notifications">
-              <FiBell />
-            </button>
-            <div className="admin-user">
-              <span className="admin-user-avatar">
-                {(user?.name || 'Super Admin').charAt(0)}
-              </span>
-              <span className="admin-user-name">{user?.name || 'Super Admin'}</span>
-            </div>
+            <RoleNotificationMenu role="superAdmin" />
+            <HeaderProfileChip
+              username="superadmin"
+              accountLabel="Super admin account"
+              avatarSrc={avatarSrc}
+              profilePath="/super-admin/profile"
+              menuItems={[
+                { label: 'Profile', path: '/super-admin/profile', icon: 'user' },
+                { label: 'Settings', path: '/super-admin/settings', icon: 'settings' },
+              ]}
+              onLogout={handleLogout}
+            />
           </div>
         </header>
         <div className="admin-content">{children}</div>

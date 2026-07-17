@@ -467,7 +467,7 @@ export default function ArchivedCourses() {
         </header>
 
         <section className="public-heading">
-                  <h1>Public Courses</h1>
+                  <h1>Archived Classes</h1>
         
                   <div className="filter-actions">
                     <span className="sort-by-label">Sort by</span>

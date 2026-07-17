@@ -401,7 +401,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
 }
 
 .viewBtn,
@@ -1055,36 +1055,36 @@
 .viewBtn,
 .editBtn,
 .deleteBtn {
-  min-width: 104px !important;
-  min-height: 44px !important;
+  min-width: 70px !important;
+  min-height: 32px !important;
   border: 0 !important;
-  border-radius: 14px !important;
+  border-radius: 10px !important;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  font-size: 16px !important;
+  gap: 5px;
+  font-size: 12px !important;
   font-weight: 600 !important;
   line-height: 1;
-  padding: 0 16px !important;
+  padding: 0 10px !important;
   transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease;
 }
 
 .editBtn {
   background: #4a4a4a !important;
-  box-shadow: 0 5px 0 #c9cbd1 !important;
+  box-shadow: 0 3px 0 #c9cbd1 !important;
   color: #ffffff !important;
 }
 
 .deleteBtn {
   background: #f24b4b !important;
-  box-shadow: 0 5px 0 rgba(161, 27, 32, 0.22) !important;
+  box-shadow: 0 3px 0 rgba(161, 27, 32, 0.2) !important;
   color: #ffffff !important;
 }
 
 .viewBtn {
   background: #7A8799 !important;
-  box-shadow: 0 5px 0 rgba(58, 68, 84, 0.28) !important;
+  box-shadow: 0 3px 0 rgba(58, 68, 84, 0.24) !important;
   color: #ffffff !important;
 }
 
@@ -1098,6 +1098,6 @@
 .viewBtn:active,
 .editBtn:active,
 .deleteBtn:active {
-  box-shadow: 0 2px 0 #c9cbd1 !important;
-  transform: translateY(3px);
+  box-shadow: 0 1px 0 #c9cbd1 !important;
+  transform: translateY(2px);
 }

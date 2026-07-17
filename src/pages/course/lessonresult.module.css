@@ -833,15 +833,18 @@
   }
 }
 
-/* Professor-color theme for results pages. */
+/* Student-color theme for results pages. */
 .wrapper {
-  --course-bg: #f7f7f8;
+  --course-bg: #f7f7f7;
   --course-card: #ffffff;
-  --course-ink: #191b2a;
-  --course-muted: #7d8798;
-  --course-line: #b9c1cc;
+  --course-ink: #171927;
+  --course-accent: #198754;
+  --course-accent-dark: #12673f;
+  --course-accent-soft: #eef8f2;
+  --course-muted: #858d9b;
+  --course-line: #c4c8cf;
   --course-soft-line: #dde2e8;
-  --course-shadow: #c5cbd4;
+  --course-shadow: rgba(137, 146, 159, 0.24);
   --course-soft: #f4f5f7;
   --course-soft-border: #d6dce4;
   background: var(--course-bg);
@@ -865,12 +868,11 @@
 .scoreHeader,
 .reviewHeader,
 .adaptiveFooter {
-  background: var(--course-soft);
+  background: var(--course-accent-soft);
   border-color: var(--course-soft-border);
   color: var(--course-ink);
 }
 
-.scoreHeader h1,
 .feedbackBox h2,
 .summaryCard h3,
 .summaryCard p,
@@ -890,6 +892,10 @@
   color: var(--course-ink);
 }
 
+.scoreHeader h1 {
+  color: var(--course-accent);
+}
+
 .feedbackBox p,
 .quizTypeName,
 .feedbackCounter {
@@ -898,7 +904,7 @@
 
 .percentage,
 .correctText {
-  color: #138154;
+  color: var(--course-accent);
 }
 
 .wrongText,
@@ -913,10 +919,18 @@
 .quizTypeIcon,
 .feedbackNavigation button,
 .modeGrid button {
-  background: var(--course-ink);
+  background: var(--course-accent);
   border: 0;
-  box-shadow: 4px 4px 0 var(--course-shadow);
+  box-shadow: 4px 4px 0 rgba(25, 135, 84, 0.24);
   color: #ffffff;
+}
+
+.retry:hover,
+.lesson:hover,
+.home:hover,
+.feedbackNavigation button:hover,
+.modeGrid button:hover {
+  background: var(--course-accent-dark);
 }
 
 .feedbackNavigation button:disabled {
@@ -926,7 +940,7 @@
 
 .masteryRing {
   background: conic-gradient(
-    var(--course-ink) 0deg var(--mastery),
+    var(--course-accent) 0deg var(--mastery),
     var(--course-soft-line) var(--mastery) 360deg
   );
 }
@@ -939,12 +953,57 @@
 }
 
 .adaptivePlanCard {
-  background: #fbfbfc;
-  border-left-color: var(--course-ink);
+  background: var(--course-accent-soft);
+  border-left-color: var(--course-accent);
 }
 
 .reviewTopics span {
-  background: var(--course-soft);
+  background: var(--course-accent-soft);
   border: 1px solid var(--course-soft-border);
   color: var(--course-ink);
+}
+
+.scrollTopButton {
+  position: fixed;
+  right: 28px;
+  bottom: 28px;
+  z-index: 200;
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: var(--course-accent);
+  color: #ffffff;
+  box-shadow: 4px 4px 0 rgba(25, 135, 84, 0.24);
+  cursor: pointer;
+  transition:
+    background 0.16s ease,
+    transform 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+.scrollTopButton:hover {
+  background: var(--course-accent-dark);
+  transform: translateY(-2px);
+}
+
+.scrollTopButton svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.4;
+}
+
+@media (max-width: 640px) {
+  .scrollTopButton {
+    right: 16px;
+    bottom: 16px;
+    width: 46px;
+    height: 46px;
+  }
 }

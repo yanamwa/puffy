@@ -1,6 +1,5 @@
 import { Navigate, Route, Routes, useParams } from 'react-router-dom';
 import Layout from '../components/Layout';
-import ProtectedRoute from '../components/ProtectedRoute';
 
 import LoginPage from '../pages/auth/LoginPage';
 import SignupPage from '../pages/auth/SignupPage';
@@ -18,6 +17,9 @@ import ModuleManagementPage from '../pages/admin/modules/ModuleManagementPage';
 import NotificationPage from '../pages/admin/notification/NotificationPage';
 import ModePage from '../pages/admin/mode/ModePage';
 import DecksPage from '../pages/admin/decks/DecksPage';
+import ReportsPage from '../pages/admin/reports/ReportsPage';
+import AdminAccountPage from '../pages/admin/settings/AdminAccountPage';
+import SettingsPage from '../pages/admin/settings/SettingsPage';
 import SuperAdminHome from '../pages/superadmin/SuperAdminHome';
 import SuperAdminLayout from '../pages/superadmin/shared/SuperAdminLayout';
 import SuperAdminUserManagementPage from '../pages/superadmin/users/SuperAdminUserManagementPage';
@@ -73,32 +75,31 @@ export default function AppRoutes() {
         <Route path="/recover-account" element={<RecoverAccountPage />} />
 
         {/* ==========================
-            PROTECTED ROUTES
-            (Authenticated Users Only)
+            APP ROUTES
+            Temporarily public while link-only account flows are tested.
         ========================== */}
-        <Route element={<ProtectedRoute />}>
 
-          {/* ==========================
-              NEW USER ONBOARDING
-          ========================== */}
-          <Route path="/welcome" element={<Welcome />} />
-          <Route path="/how-it-works" element={<HowItWorks />} />
-          <Route path="/name" element={<Name />} />
-          <Route path="/year" element={<Year />} />
-          <Route path="/section" element={<Section />} />
-          <Route path="/profile" element={<Profile />} />
+        {/* ==========================
+            NEW USER ONBOARDING
+        ========================== */}
+        <Route path="/welcome" element={<Welcome />} />
+        <Route path="/how-it-works" element={<HowItWorks />} />
+        <Route path="/name" element={<Name />} />
+        <Route path="/year" element={<Year />} />
+        <Route path="/section" element={<Section />} />
+        <Route path="/profile" element={<Profile />} />
 
-          {/* ==========================
-              SUPER ADMIN
-          ========================== */}
-          <Route
-            path="/super-admin"
-            element={
-              <SuperAdminLayout>
-                <SuperAdminHome />
-              </SuperAdminLayout>
-            }
-          />
+        {/* ==========================
+            SUPER ADMIN
+        ========================== */}
+        <Route
+          path="/super-admin"
+          element={
+            <SuperAdminLayout>
+              <SuperAdminHome />
+            </SuperAdminLayout>
+          }
+        />
 
           <Route
             path="/super-admin/dashboard"
@@ -157,6 +158,15 @@ export default function AppRoutes() {
           <Route
             path="/super-admin/archives"
             element={<Navigate to="/super-admin/users" replace />}
+          />
+
+          <Route
+            path="/super-admin/profile"
+            element={
+              <SuperAdminLayout>
+                <SuperAdminFeaturePage type="profile" />
+              </SuperAdminLayout>
+            }
           />
 
           <Route
@@ -229,7 +239,7 @@ export default function AppRoutes() {
             path="/admin/reports"
             element={
               <AdminLayout>
-                <DashboardPage />
+                <ReportsPage />
               </AdminLayout>
             }
           />
@@ -240,8 +250,21 @@ export default function AppRoutes() {
           />
 
           <Route
+            path="/admin/profile"
+            element={
+              <AdminLayout>
+                <AdminAccountPage />
+              </AdminLayout>
+            }
+          />
+
+          <Route
             path="/admin/settings"
-            element={<Navigate to="/admin/dashboard" replace />}
+            element={
+              <AdminLayout>
+                <SettingsPage />
+              </AdminLayout>
+            }
           />
 
           <Route
@@ -345,7 +368,6 @@ export default function AppRoutes() {
           <Route path="/introduction/:lessonId" element={<Introduction />} />
           <Route path="/lesson/:lessonId" element={<Lesson />} />
           <Route path="/review/:lessonId" element={<LessonResult />} />
-        </Route>
 
         {/* ==========================
             DEFAULT ROUTE
