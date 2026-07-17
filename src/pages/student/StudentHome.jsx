@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Avatar, Icon } from './EnrolledCourses';
 import JoinCourseModal from './JoinCourseModal';
@@ -45,6 +45,33 @@ const progressCards = [
   { id: 3, label: 'Avg. quiz accuracy', value: '84%', accent: 'OK' },
 ];
 
+const notificationItems = [
+  {
+    id: 1,
+    title: 'Welcome to PuffyBrain!',
+    message: 'Your student account is ready. Start exploring your enrolled courses.',
+    time: 'Just now',
+    unread: true,
+    icon: 'sparkle',
+  },
+  {
+    id: 2,
+    title: 'New learning material',
+    message: 'A new module was added to ITEC 106 - Web Systems and Technologies 2.',
+    time: '12 minutes ago',
+    unread: true,
+    icon: 'course',
+  },
+  {
+    id: 3,
+    title: 'Course announcement',
+    message: 'Your professor posted an announcement for Introduction to Computing.',
+    time: 'Yesterday',
+    unread: false,
+    icon: 'announcement',
+  },
+];
+
 export default function StudentHome() {
   const navigate = useNavigate();
   const [shownMonth, setShownMonth] = useState(new Date(2021, 8, 1));
@@ -53,6 +80,11 @@ export default function StudentHome() {
   const [newTodo, setNewTodo] = useState('');
   const [joinModalOpen, setJoinModalOpen] = useState(false);
   const [courseCode, setCourseCode] = useState('');
+  const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
+  const [notifications, setNotifications] = useState(notificationItems);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+  return localStorage.getItem("sidebarCollapsed") === "true";
+});
 
   const calendarDays = useMemo(() => {
     const year = shownMonth.getFullYear();
@@ -130,49 +162,132 @@ export default function StudentHome() {
     navigate(`/student/enrolled-courses/${course.id || course.code}`);
   };
 
+  useEffect(() => {
+    const closeNotificationMenu = (event) => {
+      if (!event.target.closest('.notification-menu-wrapper')) {
+        setNotificationMenuOpen(false);
+      }
+    };
+
+    const closeWithEscape = (event) => {
+      if (event.key === 'Escape') {
+        setNotificationMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', closeNotificationMenu);
+    document.addEventListener('keydown', closeWithEscape);
+
+    return () => {
+      document.removeEventListener('mousedown', closeNotificationMenu);
+      document.removeEventListener('keydown', closeWithEscape);
+    };
+  }, []);
+
+  const unreadNotificationCount = notifications.filter(
+    (notification) => notification.unread,
+  ).length;
+
+  const markAllNotificationsAsRead = () => {
+    setNotifications((currentNotifications) =>
+      currentNotifications.map((notification) => ({
+        ...notification,
+        unread: false,
+      })),
+    );
+  };
+
+  const openNotification = (notificationId) => {
+    setNotifications((currentNotifications) =>
+      currentNotifications.map((notification) =>
+        notification.id === notificationId
+          ? { ...notification, unread: false }
+          : notification,
+      ),
+    );
+  };
+
   return (
-    <div className="student-home-dashboard striped-dashboard">
+    <div
+  className={`student-home-dashboard striped-dashboard ${
+    sidebarCollapsed ? "sidebar-collapsed" : ""
+  }`}
+>
       <aside className="enrolled-sidebar">
-        <div className="brand-lockup">
-          <img src="/images/logo_solo.png" alt="" />
-          <span>PuffyBrain</span>
-        </div>
+          <div className="brand-lockup">
+           <img
+              src="/images/logo_solo.png"
+              alt="PuffyBrain logo"
+              className="sidebar-logo"
+              onClick={() => {
+                setSidebarCollapsed((prev) => {
+                  const newValue = !prev;
+                  localStorage.setItem("sidebarCollapsed", newValue);
+                  return newValue;
+                });
+              }}
+            />
 
-        <nav className="side-nav" aria-label="Student navigation">
-          <Link to="/student" className="side-nav-item active">
-            <Icon name="home" />
-            <span>Home</span>
-          </Link>
+            <span className="brand-name">PuffyBrain</span>
+          </div>
 
-          <Link to="/student/enrolled-courses" className="side-nav-item">
-            <Icon name="courses" />
-            <span>Enrolled Courses</span>
-            <span className="dropdown-mark">v</span>
-          </Link>
+          <nav className="side-nav" aria-label="Student navigation">
+            <Link
+              to="/student"
+              className="side-nav-item active"
+              title={sidebarCollapsed ? "Home" : undefined}
+            >
+              <Icon name="home" />
+              <span className="nav-label">Home</span>
+            </Link>
 
-          <Link to="/student/public-courses" className="side-nav-item plain-nav-item">
-            <Icon name="public" />
-            <span>Public Courses</span>
-          </Link>
+            <Link
+              to="/student/enrolled-courses"
+              className="side-nav-item"
+              title={sidebarCollapsed ? "Enrolled Courses" : undefined}
+            >
+              <Icon name="courses" />
+              <span className="nav-label">Enrolled Courses</span>
+              <span className="dropdown-mark">v</span>
+            </Link>
 
-          <Link to="/student/archived-courses" className="side-nav-item plain-nav-item">
-            <Icon name="archive" />
-            <span>Archived classes</span>
-          </Link>
+            <Link
+              to="/student/public-courses"
+              className="side-nav-item plain-nav-item"
+              title={sidebarCollapsed ? "Public Courses" : undefined}
+            >
+              <Icon name="public" />
+              <span className="nav-label">Public Courses</span>
+            </Link>
 
-          <Link to="/student/settings" className="side-nav-item plain-nav-item">
-            <Icon name="settings" />
-            <span>Settings</span>
-          </Link>
-        </nav>
+            <Link
+              to="/student/archived-courses"
+              className="side-nav-item plain-nav-item"
+              title={sidebarCollapsed ? "Archived Classes" : undefined}
+            >
+              <Icon name="archive" />
+              <span className="nav-label">Archived classes</span>
+            </Link>
 
-        <button className="logout-button">
-          <span className="logout-icon" aria-hidden="true">
-            &lt;
-          </span>
-          <span>Log-out</span>
-        </button>
-      </aside>
+            <Link
+              to="/student/settings"
+              className="side-nav-item plain-nav-item"
+              title={sidebarCollapsed ? "Settings" : undefined}
+            >
+              <Icon name="settings" />
+              <span className="nav-label">Settings</span>
+            </Link>
+          </nav>
+
+          <button
+            type="button"
+            className="logout-button"
+            title={sidebarCollapsed ? "Log-out" : undefined}
+          >
+            <span className="logout-icon" aria-hidden="true" />
+            <span className="logout-label">Log-out</span>
+          </button>
+        </aside>
 
       <main className="home-main">
         <header className="enrolled-topbar transparent-topbar home-topbar">
@@ -188,12 +303,144 @@ export default function StudentHome() {
           </label>
 
           <div className="topbar-actions">
-            <button className="notification-button" aria-label="Notifications">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M6.6 17.4h10.8l-.9-1.6v-4.5a4.5 4.5 0 0 0-9 0v4.5l-.9 1.6Z" />
-                <path d="M10 19.2h4" />
-              </svg>
-            </button>
+            <div className="notification-menu-wrapper">
+              <button
+                type="button"
+                className={`notification-button ${
+                  notificationMenuOpen ? 'active' : ''
+                }`}
+                aria-label={`Notifications${
+                  unreadNotificationCount > 0
+                    ? `, ${unreadNotificationCount} unread`
+                    : ''
+                }`}
+                aria-expanded={notificationMenuOpen}
+                aria-haspopup="dialog"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setNotificationMenuOpen((current) => !current);
+                }}
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M6.6 17.4h10.8l-.9-1.6v-4.5a4.5 4.5 0 0 0-9 0v4.5l-.9 1.6Z" />
+                  <path d="M10 19.2h4" />
+                </svg>
+
+                {unreadNotificationCount > 0 && (
+                  <span className="notification-badge">
+                    {unreadNotificationCount > 9
+                      ? '9+'
+                      : unreadNotificationCount}
+                  </span>
+                )}
+              </button>
+
+              {notificationMenuOpen && (
+                <section
+                  className="notification-dropdown-menu"
+                  role="dialog"
+                  aria-label="Notifications"
+                  onClick={(event) => event.stopPropagation()}
+                >
+                  <div className="notification-dropdown-header">
+                    <div>
+                      <h2>Notifications</h2>
+                      <span>
+                        {unreadNotificationCount > 0
+                          ? `${unreadNotificationCount} unread`
+                          : 'You are all caught up'}
+                      </span>
+                    </div>
+
+                    {unreadNotificationCount > 0 && (
+                      <button
+                        type="button"
+                        className="mark-all-read-button"
+                        onClick={markAllNotificationsAsRead}
+                      >
+                        Mark all as read
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="notification-dropdown-tabs">
+                    <button type="button" className="active">All</button>
+                    <button type="button">Unread</button>
+                  </div>
+
+                  <div className="notification-list">
+                    {notifications.length === 0 ? (
+                      <div className="notification-empty-state">
+                        <span className="notification-empty-icon">
+                          <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M6.6 17.4h10.8l-.9-1.6v-4.5a4.5 4.5 0 0 0-9 0v4.5l-.9 1.6Z" />
+                            <path d="M10 19.2h4" />
+                          </svg>
+                        </span>
+                        <strong>No notifications yet</strong>
+                        <p>New updates will appear here.</p>
+                      </div>
+                    ) : (
+                      notifications.map((notification) => (
+                        <button
+                          key={notification.id}
+                          type="button"
+                          className={`notification-item ${
+                            notification.unread ? 'unread' : ''
+                          }`}
+                          onClick={() => openNotification(notification.id)}
+                        >
+                          <span
+                            className={`notification-item-icon ${notification.icon}`}
+                            aria-hidden="true"
+                          >
+                            {notification.icon === 'course' ? (
+                              <svg viewBox="0 0 24 24">
+                                <path d="m3.5 8.2 8.5-4.7 8.5 4.7-8.5 4.7-8.5-4.7Z" />
+                                <path d="M6.5 10.2v5c0 1.3 2.5 3 5.5 3s5.5-1.7 5.5-3v-5" />
+                              </svg>
+                            ) : notification.icon === 'announcement' ? (
+                              <svg viewBox="0 0 24 24">
+                                <path d="M4 11v2h3l7 4V7l-7 4H4Z" />
+                                <path d="m17 9 3-2M17 12h3M17 15l3 2" />
+                              </svg>
+                            ) : (
+                              <svg viewBox="0 0 24 24">
+                                <path d="m12 3 1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5L12 3Z" />
+                              </svg>
+                            )}
+                          </span>
+
+                          <span className="notification-item-copy">
+                            <strong>{notification.title}</strong>
+                            <span>{notification.message}</span>
+                            <small>{notification.time}</small>
+                          </span>
+
+                          {notification.unread && (
+                            <span
+                              className="notification-unread-dot"
+                              aria-label="Unread"
+                            />
+                          )}
+                        </button>
+                      ))
+                    )}
+                  </div>
+
+                  <button
+                    type="button"
+                    className="notification-view-all-button"
+                    onClick={() => {
+                      setNotificationMenuOpen(false);
+                      navigate('/student/notifications');
+                    }}
+                  >
+                    See all notifications
+                  </button>
+                </section>
+              )}
+            </div>
 
             <button
               type="button"
@@ -265,7 +512,9 @@ export default function StudentHome() {
         <Avatar large />
         <strong>@meiko</strong>
         <span>2nd year</span>
-        <button>Profile</button>
+        <Link to="/student/profile" className="profile-button">
+          Profile
+        </Link>
 
         <section className="mini-calendar">
           <div className="calendar-header">

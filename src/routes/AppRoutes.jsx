@@ -38,6 +38,7 @@ import ArchivedCourses from '../pages/student/ArchivedCourses';
 import StudentSettings from '../pages/student/StudentSettings';
 import StudentCourseDetail from '../pages/student/StudentCourseDetail';
 import StudentJoinCourse from '../pages/student/StudentJoinCourse';
+import StudentProfile from '../pages/student/StudentProfile';
 
 import Introduction from '../pages/course/Introduction';
 import Lesson from '../pages/course/Lesson';
@@ -331,6 +332,10 @@ export default function AppRoutes() {
           <Route
             path="/student/settings"
             element={<StudentSettings />}
+          />
+
+          <Route path="/student/profile" 
+          element={<StudentProfile />} 
           />
 
           {/* ==========================
