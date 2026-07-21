@@ -66,13 +66,13 @@ export default function AppRoutes() {
         {/* ==========================
             PUBLIC ROUTES (Guest)
         ========================== */}
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignupPage />} />
-        <Route path="/forgot" element={<ForgotPasswordPage />} />
-        <Route path="/forgot-username" element={<ForgotUsernamePage />} />
-        <Route path="/cant-signin" element={<CannotSignInPage />} />
-        <Route path="/otp" element={<OtpPage />} />
-        <Route path="/recover-account" element={<RecoverAccountPage />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/signup" element={<SignupPage />} />
+      <Route path="/forgot" element={<ForgotPasswordPage />} />
+      <Route path="/forgot-username" element={<ForgotUsernamePage />} />
+      <Route path="/cant-signin" element={<CannotSignInPage />} />
+      <Route path="/otp" element={<OtpPage />} />
+      <Route path="/recover-account" element={<RecoverAccountPage />} />
 
         {/* ==========================
             APP ROUTES
