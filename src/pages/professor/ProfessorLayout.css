@@ -2878,3 +2878,883 @@
   border-radius: 50%;
   background: #2d7b58;
 }
+/* =========================================================
+   PROFESSOR SHARED LAYOUT
+   Student-style sidebar and clean professor header
+========================================================= */
+
+.professor-layout {
+  --professor-sidebar-expanded: 220px;
+  --professor-sidebar-collapsed: 76px;
+  --professor-sidebar-green: #198754;
+  --professor-dark: #171927;
+  --professor-ink: #5f6064;
+  --professor-muted: #858d9b;
+  --professor-line: #c4c8cf;
+
+  min-height: 100vh;
+  height: 100vh;
+
+  display: grid;
+  grid-template-columns:
+    var(--professor-sidebar-expanded)
+    minmax(0, 1fr);
+
+  overflow: hidden;
+
+  background: #f7f7f7;
+  color: var(--professor-ink);
+
+  transition:
+    grid-template-columns 220ms ease;
+}
+
+/* =========================
+   COLLAPSED LAYOUT
+========================= */
+
+.professor-layout.professor-sidebar-collapsed {
+  grid-template-columns:
+    var(--professor-sidebar-collapsed)
+    minmax(0, 1fr);
+}
+
+/* =========================
+   SIDEBAR
+========================= */
+
+.professor-layout .professor-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1100;
+
+  width: var(--professor-sidebar-expanded);
+  height: 100vh;
+  min-height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+
+  padding: 0;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  background: var(--professor-sidebar-green);
+  border-right: 1px solid var(--professor-line);
+
+  color: #ffffff;
+
+  transition:
+    width 220ms ease;
+}
+
+.professor-sidebar-collapsed .professor-sidebar {
+  width: var(--professor-sidebar-collapsed);
+}
+
+/* =========================
+   BRAND
+========================= */
+
+.professor-layout .professor-brand {
+  position: relative;
+
+  width: 100%;
+  height: 95px;
+  min-height: 95px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  margin: 0;
+  padding: 18px 20px 15px;
+
+  border: 0;
+  box-sizing: border-box;
+}
+
+.professor-layout .professor-brand::after {
+  content: "";
+
+  position: absolute;
+  right: 22px;
+  bottom: 0;
+  left: 22px;
+
+  height: 1px;
+
+  background: rgba(255, 255, 255, 0.48);
+
+  transition:
+    left 220ms ease,
+    right 220ms ease;
+}
+
+.professor-layout .professor-logo-button {
+  width: 44px;
+  height: 44px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 44px;
+
+  padding: 0;
+
+  border: 0;
+  background: transparent;
+
+  cursor: pointer;
+}
+
+.professor-layout .professor-logo-button img {
+  width: 44px;
+  height: 44px;
+
+  display: block;
+  object-fit: contain;
+
+  transition:
+    transform 180ms ease,
+    width 220ms ease,
+    height 220ms ease;
+}
+
+.professor-layout .professor-logo-button:hover img {
+  transform: scale(1.07);
+}
+
+.professor-layout .professor-brand-name {
+  color: #ffffff;
+
+  font-family:
+    "Jersey 15",
+    system-ui,
+    sans-serif !important;
+  font-size: 22px !important;
+  font-weight: 400 !important;
+  line-height: 1;
+
+  white-space: nowrap;
+
+  opacity: 1;
+
+  transition:
+    width 180ms ease,
+    opacity 130ms ease;
+}
+
+.professor-sidebar-collapsed .professor-brand {
+  justify-content: center;
+  gap: 0;
+
+  padding-right: 0;
+  padding-left: 0;
+}
+
+.professor-sidebar-collapsed
+  .professor-logo-button {
+  width: 100%;
+  flex-basis: 100%;
+}
+
+.professor-sidebar-collapsed
+  .professor-logo-button img {
+  width: 38px;
+  height: 38px;
+}
+
+.professor-sidebar-collapsed
+  .professor-brand-name {
+  width: 0;
+
+  overflow: hidden;
+
+  opacity: 0;
+  pointer-events: none;
+}
+
+.professor-sidebar-collapsed
+  .professor-brand::after {
+  right: 10px;
+  left: 10px;
+}
+
+/* =========================
+   NAVIGATION
+========================= */
+
+.professor-layout .professor-menu {
+  width: 100%;
+
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 14px;
+
+  padding: 26px 0 20px 56px;
+
+  box-sizing: border-box;
+}
+
+.professor-layout .professor-link {
+  position: relative;
+
+  width: 100%;
+  min-height: 40px;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  margin: 0;
+  padding: 0 12px 0 10px;
+
+  border: 1px solid transparent;
+  border-right: 0;
+  border-radius: 999px 0 0 999px;
+
+  background: transparent;
+  box-shadow: none;
+
+  color: #ffffff;
+
+  text-decoration: none;
+  box-sizing: border-box;
+
+  transition:
+    color 160ms ease,
+    background 160ms ease,
+    border-color 160ms ease;
+}
+
+.professor-layout .professor-link svg {
+  width: 18px;
+  height: 18px;
+
+  flex: 0 0 18px;
+
+  color: currentColor;
+  stroke-width: 1.8;
+}
+
+.professor-layout .professor-nav-label {
+  min-width: 0;
+
+  overflow: hidden;
+
+  color: currentColor;
+
+  font-family:
+    "Jersey 15",
+    system-ui,
+    sans-serif !important;
+  font-size: 15px !important;
+  font-weight: 400 !important;
+  line-height: 1.15;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  opacity: 1;
+
+  transition:
+    opacity 130ms ease;
+}
+
+/* Normal hover only changes the icon/text */
+
+.professor-layout
+  .professor-link:not(.active):hover {
+  border-color: transparent;
+
+  background: transparent;
+  color: var(--professor-dark);
+
+  transform: none;
+  box-shadow: none;
+}
+
+/* Active white pill */
+
+.professor-layout .professor-link.active {
+  z-index: 2;
+
+  border-color: #aeb5bf;
+  border-right: 0;
+
+  background: #ffffff;
+  color: #606772;
+
+  transform: none;
+  box-shadow: none;
+}
+
+.professor-layout
+  .professor-link.active::after {
+  content: "";
+
+  position: absolute;
+  top: 1px;
+  right: -2px;
+  bottom: 1px;
+
+  width: 3px;
+
+  background: #ffffff;
+}
+
+/* =========================
+   COLLAPSED NAVIGATION
+========================= */
+
+.professor-sidebar-collapsed
+  .professor-menu {
+  align-items: stretch;
+
+  padding: 26px 0 20px 18px;
+}
+
+.professor-sidebar-collapsed
+  .professor-link {
+  min-height: 42px;
+
+  justify-content: flex-start;
+  gap: 0;
+
+  padding: 0 0 0 18px;
+}
+
+.professor-sidebar-collapsed
+  .professor-link svg {
+  width: 20px;
+  height: 20px;
+
+  flex-basis: 20px;
+}
+
+.professor-sidebar-collapsed
+  .professor-nav-label {
+  display: none;
+}
+
+/* =========================
+   LOGOUT
+========================= */
+
+.professor-layout .professor-logout {
+  width: 100%;
+  height: 56px;
+  min-height: 56px;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+
+  margin: auto 0 0;
+  padding: 0 22px;
+
+  border: 0;
+  border-top: 1px solid #ececec;
+  border-radius: 0;
+
+  background: #f2f2f2;
+  box-shadow: none;
+
+  color: #666666;
+
+  cursor: pointer;
+  box-sizing: border-box;
+
+  transition:
+    color 160ms ease,
+    background 160ms ease;
+}
+
+.professor-layout .professor-logout:hover {
+  border-color: #ececec;
+
+  background: #f2f2f2;
+  color: var(--professor-dark);
+
+  transform: none;
+  box-shadow: none;
+}
+
+.professor-layout .professor-logout svg {
+  width: 18px;
+  height: 18px;
+
+  flex: 0 0 18px;
+
+  color: currentColor;
+}
+
+.professor-layout
+  .professor-logout-label {
+  font-family:
+    "Jersey 15",
+    system-ui,
+    sans-serif !important;
+  font-size: 15px !important;
+  font-weight: 400 !important;
+
+  white-space: nowrap;
+}
+
+.professor-sidebar-collapsed
+  .professor-logout {
+  justify-content: center;
+  gap: 0;
+
+  padding: 0;
+}
+
+.professor-sidebar-collapsed
+  .professor-logout-label {
+  display: none;
+}
+
+/* =========================
+   MAIN
+========================= */
+
+.professor-layout .professor-main {
+  grid-column: 2;
+
+  min-width: 0;
+  min-height: 0;
+  height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+
+  background: #f7f7f7;
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.professor-layout .professor-header {
+  position: relative;
+  z-index: 1000;
+
+  width: 100%;
+  height: 74px;
+  min-height: 74px;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 32px;
+
+  padding: 0 44px 0 84px;
+
+  border-bottom: 1px solid var(--professor-line);
+
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: none;
+  backdrop-filter: blur(10px);
+
+  box-sizing: border-box;
+}
+
+/* =========================
+   SEARCH BAR
+========================= */
+
+.professor-layout .professor-search {
+  width: 100%;
+  max-width: 716px;
+  min-width: 120px;
+  height: 43px;
+
+  display: flex;
+  align-items: center;
+  flex: 1 1 716px;
+
+  padding: 0 26px 0 30px;
+
+  border: 1px solid #bdc3ce;
+  border-radius: 999px;
+
+  background: #ffffff;
+
+  box-sizing: border-box;
+}
+
+.professor-layout
+  .professor-search:focus-within {
+  border-color: #25714e;
+
+  box-shadow:
+    0 0 0 3px rgba(37, 113, 78, 0.1);
+}
+
+.professor-layout .professor-search input {
+  width: 100%;
+
+  border: 0;
+  outline: 0;
+
+  background: transparent;
+  color: #707070;
+
+  font-family:
+    "Jersey 15",
+    system-ui,
+    sans-serif !important;
+  font-size: 15px !important;
+  font-weight: 400 !important;
+}
+
+.professor-layout
+  .professor-search input::placeholder {
+  color: #c9c9c9;
+  opacity: 1;
+
+  font-family:
+    "Jersey 15",
+    system-ui,
+    sans-serif !important;
+  font-size: 15px !important;
+  font-weight: 400 !important;
+}
+
+.professor-layout
+  .professor-search-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #151515;
+
+  pointer-events: none;
+}
+
+.professor-layout
+  .professor-search-icon svg {
+  width: 19px;
+  height: 19px;
+
+  stroke-width: 1.6;
+}
+
+/* =========================
+   HEADER ACTIONS
+========================= */
+
+.professor-layout
+  .professor-header-actions {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  gap: 24px;
+
+  margin-left: auto;
+
+  flex: 0 0 auto;
+}
+
+/*
+  This keeps existing RoleNotificationMenu and
+  HeaderProfileChip dropdowns above page content.
+*/
+
+.professor-layout
+  .professor-header-actions > * {
+  position: relative;
+}
+
+.professor-layout
+  .notification-menu-wrapper,
+.professor-layout
+  .profile-menu-wrapper {
+  z-index: 1200;
+}
+
+.professor-layout
+  .notification-dropdown-menu,
+.professor-layout
+  .profile-dropdown-menu {
+  z-index: 1300;
+}
+
+/* =========================
+   CONTENT
+========================= */
+
+.professor-layout .professor-content {
+  flex: 1;
+
+  min-width: 0;
+  min-height: 0;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  padding: 34px 42px 48px;
+
+  box-sizing: border-box;
+}
+
+/* =========================
+   TABLET
+========================= */
+
+@media (max-width: 1000px) {
+  .professor-layout .professor-header {
+    gap: 18px;
+
+    padding-right: 24px;
+    padding-left: 32px;
+  }
+
+  .professor-layout .professor-search {
+    max-width: 520px;
+  }
+
+  .professor-layout
+    .professor-header-actions {
+    gap: 14px;
+  }
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 700px) {
+  .professor-layout,
+  .professor-layout.professor-sidebar-collapsed {
+    grid-template-columns: 64px minmax(0, 1fr);
+  }
+
+  .professor-layout .professor-sidebar,
+  .professor-sidebar-collapsed
+    .professor-sidebar {
+    width: 64px;
+  }
+
+  .professor-layout .professor-brand {
+    height: 72px;
+    min-height: 72px;
+
+    padding: 10px 0;
+  }
+
+  .professor-layout
+    .professor-brand-name {
+    display: none;
+  }
+
+  .professor-layout
+    .professor-logo-button img {
+    width: 35px;
+    height: 35px;
+  }
+
+  .professor-layout .professor-menu,
+  .professor-sidebar-collapsed
+    .professor-menu {
+    padding: 18px 0 18px 12px;
+  }
+
+  .professor-layout .professor-link,
+  .professor-sidebar-collapsed
+    .professor-link {
+    min-height: 42px;
+
+    gap: 0;
+
+    padding: 0 0 0 14px;
+  }
+
+  .professor-layout
+    .professor-nav-label {
+    display: none;
+  }
+
+  .professor-layout .professor-logout,
+  .professor-sidebar-collapsed
+    .professor-logout {
+    justify-content: center;
+
+    padding: 0;
+  }
+
+  .professor-layout
+    .professor-logout-label {
+    display: none;
+  }
+
+  .professor-layout .professor-header {
+    height: auto;
+    min-height: 68px;
+
+    gap: 12px;
+
+    padding: 10px 14px;
+  }
+
+  .professor-layout .professor-search {
+    height: 40px;
+
+    padding-right: 15px;
+    padding-left: 16px;
+  }
+
+  .professor-layout
+    .professor-header-actions {
+    gap: 8px;
+  }
+
+  .professor-layout .professor-content {
+    padding: 22px 16px 32px;
+  }
+}
+/* =====================================================
+   PROFESSOR SIDEBAR FINAL SIZE FIX
+   Keep this at the very bottom of ProfessorLayout.css
+===================================================== */
+
+/* Slightly enlarge the professor logo */
+#root .professor-layout .professor-logo-button {
+  width: 70px;
+  height: 70px;
+  flex: 0 0 50px;
+}
+
+#root .professor-layout .professor-logo-button img {
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
+}
+
+/* Keep the logo slightly smaller when collapsed */
+#root
+  .professor-layout.professor-sidebar-collapsed
+  .professor-logo-button {
+  width: 100%;
+  height: 44px;
+  flex-basis: 100%;
+}
+
+#root
+  .professor-layout.professor-sidebar-collapsed
+  .professor-logo-button img {
+  width: 65px;
+  height: 65px;
+}
+
+/* Give the sidebar labels more usable horizontal space */
+#root .professor-layout .professor-menu {
+  padding: 26px 0 20px 38px;
+}
+
+/* Navigation item sizing */
+#root .professor-layout .professor-link {
+  width: 100%;
+  min-height: 42px;
+
+  gap: 9px;
+
+  padding: 0 10px 0 10px;
+
+  box-sizing: border-box;
+}
+
+/* Keep longer labels fully visible on one line */
+#root
+  .professor-layout
+  .professor-link
+  .professor-nav-label {
+  display: block;
+
+  min-width: 0;
+  max-width: none;
+
+  overflow: visible;
+  text-overflow: clip;
+  white-space: nowrap;
+
+  font-family:
+    "Jersey 15",
+    system-ui,
+    sans-serif !important;
+
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  line-height: 1;
+}
+
+/* Keep icons compact so the text has more space */
+#root .professor-layout .professor-link svg {
+  width: 18px;
+  height: 18px;
+
+  flex: 0 0 18px;
+}
+
+/* Preserve the collapsed sidebar alignment */
+#root
+  .professor-layout.professor-sidebar-collapsed
+  .professor-menu {
+  padding: 26px 0 20px 18px;
+}
+
+#root
+  .professor-layout.professor-sidebar-collapsed
+  .professor-link {
+  min-height: 42px;
+
+  justify-content: flex-start;
+  gap: 0;
+
+  padding: 0 0 0 18px;
+}
+
+#root
+  .professor-layout.professor-sidebar-collapsed
+  .professor-nav-label {
+  display: none;
+}
+
+.professor-create-course {
+  height: 42px;
+  padding: 0 18px;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  border-radius: 999px;
+
+  background: #198754;
+  color: #fff;
+
+  text-decoration: none;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  transition: .18s;
+}
+
+.professor-create-course:hover {
+  background: #157347;
+}
+
+.professor-create-course svg {
+  width: 18px;
+  height: 18px;
+}

@@ -700,216 +700,323 @@ export default function StudentProfile() {
         </section>
 
         <section className="student-profile-content">
-          <div className="student-id-card">
-            <div className="student-id-photo-box">
-              <div className="student-id-photo-frame">
-                <img
-                  src={profileImage}
-                  alt={`${temporaryStudentData.name}'s profile`}
-                  className="student-id-photo"
-                />
+  <div className="student-profile-layout">
+    {/* LEFT: STUDENT ID CARD */}
+    <article className="student-identity-card">
+      <div className="student-identity-card-accent" />
 
-                <label
-                  className="student-photo-change-button"
-                  title="Change profile picture"
-                  aria-label="Change profile picture"
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                  >
-                    <path d="M4 8.5h3l1.4-2h7.2l1.4 2h3v10H4v-10Z" />
-                    <circle
-                      cx="12"
-                      cy="13.5"
-                      r="3.2"
-                    />
-                  </svg>
+      <div className="student-identity-header">
+        <div className="student-identity-brand">
+          <img
+            src="/images/logo_solo.png"
+            alt="PuffyBrain"
+          />
 
-                  <input
-                    type="file"
-                    accept="image/png, image/jpeg, image/jpg, image/webp"
-                    className="student-photo-input"
-                    onChange={changeProfilePicture}
-                  />
-                </label>
-              </div>
-
-              <div
-                className="student-id-barcode"
-                aria-hidden="true"
-              />
-            </div>
-
-            <div className="student-id-card-inner">
-              <div className="student-id-card-top">
-                <h2 className="student-id-title">
-                  Student Profile Card
-                </h2>
-
-                <button
-                  type="button"
-                  className="student-profile-share-button"
-                  onClick={shareProfile}
-                  title="Copy profile link"
-                  aria-label="Copy profile link"
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                  >
-                    <circle
-                      cx="18"
-                      cy="5"
-                      r="2.5"
-                    />
-                    <circle
-                      cx="6"
-                      cy="12"
-                      r="2.5"
-                    />
-                    <circle
-                      cx="18"
-                      cy="19"
-                      r="2.5"
-                    />
-                    <path d="m8.2 10.8 7.5-4.4" />
-                    <path d="m8.2 13.2 7.5 4.4" />
-                  </svg>
-                </button>
-              </div>
-
-              <div className="student-id-divider" />
-
-              <div className="student-profile-info-grid">
-                <div className="student-profile-field">
-                  <span className="student-profile-label">
-                    Name:
-                  </span>
-
-                  <span className="student-profile-value">
-                    {temporaryStudentData.name}
-                  </span>
-                </div>
-
-                <div className="student-profile-field">
-                  <span className="student-profile-label">
-                    Student Number:
-                  </span>
-
-                  <span className="student-profile-value">
-                    {temporaryStudentData.studentNumber}
-                  </span>
-                </div>
-
-                <div className="student-profile-field">
-                  <span className="student-profile-label">
-                    Year:
-                  </span>
-
-                  <span className="student-profile-value">
-                    {temporaryStudentData.year}
-                  </span>
-                </div>
-
-                <div className="student-profile-field">
-                  <span className="student-profile-label">
-                    Section:
-                  </span>
-
-                  <span className="student-profile-value">
-                    {temporaryStudentData.section}
-                  </span>
-                </div>
-
-                <div className="student-profile-field">
-                  <span className="student-profile-label">
-                    Email:
-                  </span>
-
-                  <span className="student-profile-value">
-                    {temporaryStudentData.email}
-                  </span>
-                </div>
-
-                <div className="student-profile-field">
-                  <span className="student-profile-label">
-                    Course:
-                  </span>
-
-                  <span className="student-profile-value">
-                    {temporaryStudentData.course}
-                  </span>
-                </div>
-
-                <div className="student-profile-field student-profile-field-wide">
-                  <span className="student-profile-label">
-                    Temporary Password:
-                  </span>
-
-                  <div className="student-password-display">
-                    <span className="student-password-value">
-                      {showTemporaryPassword
-                        ? temporaryStudentData.temporaryPassword
-                        : '••••••••••••••'}
-                    </span>
-
-                    <button
-                      type="button"
-                      className="student-password-toggle"
-                      onClick={() =>
-                        setShowTemporaryPassword(
-                          (currentValue) => !currentValue,
-                        )
-                      }
-                      title={
-                        showTemporaryPassword
-                          ? 'Hide temporary password'
-                          : 'Show temporary password'
-                      }
-                      aria-label={
-                        showTemporaryPassword
-                          ? 'Hide temporary password'
-                          : 'Show temporary password'
-                      }
-                      aria-pressed={
-                        showTemporaryPassword
-                      }
-                    >
-                      {showTemporaryPassword ? (
-                        <svg
-                          viewBox="0 0 24 24"
-                          aria-hidden="true"
-                        >
-                          <path d="m3 3 18 18" />
-
-                          <path d="M10.6 6.2A10.3 10.3 0 0 1 12 6c6 0 9.5 6 9.5 6a17 17 0 0 1-2.3 3.1" />
-
-                          <path d="M14.1 14.1A3 3 0 0 1 9.9 9.9" />
-
-                          <path d="M6.2 6.2C3.7 8 2.5 12 2.5 12s3.5 6 9.5 6a10 10 0 0 0 4.1-.9" />
-                        </svg>
-                      ) : (
-                        <svg
-                          viewBox="0 0 24 24"
-                          aria-hidden="true"
-                        >
-                          <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" />
-
-                          <circle
-                            cx="12"
-                            cy="12"
-                            r="3"
-                          />
-                        </svg>
-                      )}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div>
+            <strong>PuffyBrain</strong>
+            <span>Student Identification Card</span>
           </div>
-        </section>
+        </div>
+
+        <span className="student-identity-role">
+          Student
+        </span>
+      </div>
+
+      <div className="student-identity-photo-area">
+        <div className="student-id-photo-frame">
+          <img
+            src={profileImage}
+            alt={`${temporaryStudentData.name}'s profile`}
+            className="student-id-photo"
+          />
+
+          <label
+            className="student-photo-change-button"
+            title="Change profile picture"
+            aria-label="Change profile picture"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path d="M4 8.5h3l1.4-2h7.2l1.4 2h3v10H4v-10Z" />
+              <circle cx="12" cy="13.5" r="3.2" />
+            </svg>
+
+            <input
+              type="file"
+              accept="image/png, image/jpeg, image/jpg, image/webp"
+              className="student-photo-input"
+              onChange={changeProfilePicture}
+            />
+          </label>
+        </div>
+
+        <div className="student-identity-main">
+          <span className="student-identity-overline">
+            Official student profile
+          </span>
+
+          <h2>{temporaryStudentData.name}</h2>
+
+          <strong className="student-identity-number">
+            {temporaryStudentData.studentNumber}
+          </strong>
+
+          <p>{temporaryStudentData.course}</p>
+
+          <div className="student-identity-academic-row">
+            <span>{temporaryStudentData.year}</span>
+            <i aria-hidden="true" />
+            <span>{temporaryStudentData.section}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="student-identity-footer">
+        <div>
+          <span>Issued by</span>
+          <strong>PuffyBrain Learning System</strong>
+        </div>
+
+        <div
+          className="student-id-barcode"
+          aria-hidden="true"
+        />
+      </div>
+    </article>
+
+    {/* RIGHT: PROFILE INFORMATION */}
+    <div className="student-profile-details">
+      <div className="student-profile-details-header">
+        <div>
+          <span className="student-profile-eyebrow">
+            Profile overview
+          </span>
+
+          <h2>Student Information</h2>
+
+          <p>
+            Your personal, academic, and account
+            information.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          className="student-profile-share-button"
+          onClick={shareProfile}
+          title="Copy profile link"
+          aria-label="Copy profile link"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <circle cx="18" cy="5" r="2.5" />
+            <circle cx="6" cy="12" r="2.5" />
+            <circle cx="18" cy="19" r="2.5" />
+            <path d="m8.2 10.8 7.5-4.4" />
+            <path d="m8.2 13.2 7.5 4.4" />
+          </svg>
+        </button>
+      </div>
+
+      {/* PERSONAL INFORMATION */}
+      <section className="student-info-section">
+        <div className="student-info-section-heading">
+          <span className="student-info-section-icon">
+            <svg
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="8" r="4" />
+              <path d="M5 20c.8-4 3.2-6 7-6s6.2 2 7 6" />
+            </svg>
+          </span>
+
+          <div>
+            <h3>Personal Information</h3>
+            <p>Basic student account details</p>
+          </div>
+        </div>
+
+        <div className="student-info-grid">
+          <div className="student-info-item">
+            <span className="student-info-label">
+              Full Name
+            </span>
+
+            <strong>{temporaryStudentData.name}</strong>
+          </div>
+
+          <div className="student-info-item">
+            <span className="student-info-label">
+              Student Number
+            </span>
+
+            <strong>
+              {temporaryStudentData.studentNumber}
+            </strong>
+          </div>
+
+          <div className="student-info-item student-info-item-wide">
+            <span className="student-info-label">
+              Email Address
+            </span>
+
+            <strong>{temporaryStudentData.email}</strong>
+          </div>
+        </div>
+      </section>
+
+      {/* ACADEMIC INFORMATION */}
+      <section className="student-info-section">
+        <div className="student-info-section-heading">
+          <span className="student-info-section-icon">
+            <svg
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path d="m3.5 8.2 8.5-4.7 8.5 4.7-8.5 4.7-8.5-4.7Z" />
+              <path d="M6.5 10.2v5c0 1.3 2.5 3 5.5 3s5.5-1.7 5.5-3v-5" />
+            </svg>
+          </span>
+
+          <div>
+            <h3>Academic Information</h3>
+            <p>Program and class assignment</p>
+          </div>
+        </div>
+
+        <div className="student-info-grid">
+          <div className="student-info-item student-info-item-wide">
+            <span className="student-info-label">
+              Course
+            </span>
+
+            <strong>{temporaryStudentData.course}</strong>
+          </div>
+
+          <div className="student-info-item">
+            <span className="student-info-label">
+              Year Level
+            </span>
+
+            <strong>{temporaryStudentData.year}</strong>
+          </div>
+
+          <div className="student-info-item">
+            <span className="student-info-label">
+              Section
+            </span>
+
+            <strong>{temporaryStudentData.section}</strong>
+          </div>
+        </div>
+      </section>
+
+      {/* ACCOUNT SECURITY */}
+      <section className="student-info-section student-security-section">
+        <div className="student-info-section-heading">
+          <span className="student-info-section-icon">
+            <svg
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <rect
+                x="5"
+                y="10"
+                width="14"
+                height="10"
+                rx="2"
+              />
+              <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+            </svg>
+          </span>
+
+          <div>
+            <h3>Account Security</h3>
+            <p>Temporary account credentials</p>
+          </div>
+        </div>
+
+        <div className="student-password-card">
+          <div className="student-password-copy">
+            <span className="student-info-label">
+              Temporary Password
+            </span>
+
+            <strong
+              className={
+                showTemporaryPassword
+                  ? 'student-password-visible'
+                  : 'student-password-hidden'
+              }
+            >
+              {showTemporaryPassword
+                ? temporaryStudentData.temporaryPassword
+                : '••••••••••••••'}
+            </strong>
+          </div>
+
+          <button
+            type="button"
+            className="student-password-toggle"
+            onClick={() =>
+              setShowTemporaryPassword(
+                (currentValue) => !currentValue,
+              )
+            }
+            title={
+              showTemporaryPassword
+                ? 'Hide temporary password'
+                : 'Show temporary password'
+            }
+            aria-label={
+              showTemporaryPassword
+                ? 'Hide temporary password'
+                : 'Show temporary password'
+            }
+            aria-pressed={showTemporaryPassword}
+          >
+            {showTemporaryPassword ? (
+              <svg
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path d="m3 3 18 18" />
+                <path d="M10.6 6.2A10.3 10.3 0 0 1 12 6c6 0 9.5 6 9.5 6a18.8 18.8 0 0 1-2.5 3.2" />
+                <path d="M6.2 6.2C3.8 8 2.5 12 2.5 12S6 18 12 18a9.7 9.7 0 0 0 3.8-.8" />
+                <path d="M9.8 9.8a3 3 0 0 0 4.4 4.4" />
+              </svg>
+            ) : (
+              <svg
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path d="M2.5 12S6 6 12 6s9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            )}
+
+            <span>
+              {showTemporaryPassword ? 'Hide' : 'Show'}
+            </span>
+          </button>
+        </div>
+
+        <p className="student-password-note">
+          Keep this password private. You can change it
+          from the Settings page.
+        </p>
+      </section>
+    </div>
+  </div>
+</section>
+
+       
       </main>
 
       <JoinCourseModal

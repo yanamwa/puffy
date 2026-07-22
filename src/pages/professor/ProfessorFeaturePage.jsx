@@ -1233,16 +1233,7 @@ const featureCopy = {
     text: 'Review student submissions, system alerts, and course updates.',
     cards: ['Unread alerts', 'Course updates', 'Student activity'],
   },
-  '/professor/profile': {
-    title: 'Edit Profile',
-    text: 'Update professor profile details and contact information.',
-    cards: ['Basic details', 'Profile photo', 'Office information'],
-  },
-  '/professor/change-password': {
-    title: 'Change Password',
-    text: 'Update account password securely.',
-    cards: ['Current password', 'New password', 'Confirm update'],
-  },
+
   '/professor/activities': {
     title: 'Recent Activities',
     text: 'Track recent teaching activity and course updates.',

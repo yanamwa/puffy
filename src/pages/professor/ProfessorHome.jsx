@@ -321,12 +321,6 @@ export default function ProfessorHome() {
           <h1>{professorGreeting}</h1>
           <p>Manage your courses and monitor your students' learning progress.</p>
         </div>
-        <div className="dashboard-welcome-actions">
-          <Link className="dashboard-primary-action" to="/professor/courses/new">
-            <FiPlusCircle />
-            Create Course
-          </Link>
-        </div>
       </div>
 
       <div className="dashboard-summary-grid">

@@ -39,7 +39,7 @@ function getSavedUser() {
   }
 }
 
-function getInitialSettingsForm() {
+function getStudentAccount() {
   const savedUser = getSavedUser() || {};
 
   return {
@@ -51,13 +51,14 @@ function getInitialSettingsForm() {
       savedUser.username ||
       '',
     email: localStorage.getItem('user_email') || savedUser.email || '',
-    yearLevel:
-      localStorage.getItem('year_level') ||
-      savedUser.yearLevel ||
-      savedUser.year_level ||
-      '',
   };
 }
+
+const initialPasswordForm = {
+  currentPassword: '',
+  newPassword: '',
+  confirmPassword: '',
+};
 
 function clearStudentSession() {
   localStorage.removeItem('puffy-token');
@@ -77,8 +78,15 @@ export default function StudentSettings() {
 
   const [joinModalOpen, setJoinModalOpen] = useState(false);
   const [courseCode, setCourseCode] = useState('');
-  const [settingsForm, setSettingsForm] = useState(getInitialSettingsForm);
-  const [profileNotice, setProfileNotice] = useState('');
+  const [studentAccount] = useState(getStudentAccount);
+  const [passwordForm, setPasswordForm] = useState(initialPasswordForm);
+  const [visiblePasswords, setVisiblePasswords] = useState({
+    currentPassword: false,
+    newPassword: false,
+    confirmPassword: false,
+  });
+  const [passwordNotice, setPasswordNotice] = useState({ type: '', message: '' });
+  const [isSubmittingPassword, setIsSubmittingPassword] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
   return localStorage.getItem("sidebarCollapsed") === "true";
 });
@@ -91,32 +99,109 @@ export default function StudentSettings() {
     setCourseCode('');
   };
 
-  const updateSettingsField = (fieldName) => (event) => {
-    setProfileNotice('');
-    setSettingsForm((currentForm) => ({
+  const updatePasswordField = (fieldName) => (event) => {
+    setPasswordNotice({ type: '', message: '' });
+    setPasswordForm((currentForm) => ({
       ...currentForm,
       [fieldName]: event.target.value,
     }));
   };
 
-  const handleProfileSave = (event) => {
+  const togglePasswordVisibility = (fieldName) => {
+    setVisiblePasswords((current) => ({
+      ...current,
+      [fieldName]: !current[fieldName],
+    }));
+  };
+
+  const passwordChecks = {
+    length: passwordForm.newPassword.length >= 12,
+    uppercase: /[A-Z]/.test(passwordForm.newPassword),
+    lowercase: /[a-z]/.test(passwordForm.newPassword),
+    number: /\d/.test(passwordForm.newPassword),
+    symbol: /[^A-Za-z0-9]/.test(passwordForm.newPassword),
+  };
+
+  const passwordIsStrong = Object.values(passwordChecks).every(Boolean);
+  const passwordsMatch =
+    passwordForm.confirmPassword.length > 0 &&
+    passwordForm.newPassword === passwordForm.confirmPassword;
+
+  const handlePasswordChange = async (event) => {
     event.preventDefault();
+    setPasswordNotice({ type: '', message: '' });
 
-    localStorage.setItem('year_level', settingsForm.yearLevel.trim());
-
-    const savedUser = getSavedUser();
-
-    if (savedUser) {
-      localStorage.setItem(
-        'puffy-user',
-        JSON.stringify({
-          ...savedUser,
-          yearLevel: settingsForm.yearLevel.trim(),
-        })
-      );
+    if (!passwordForm.currentPassword) {
+      setPasswordNotice({
+        type: 'error',
+        message: 'Enter your current password first.',
+      });
+      return;
     }
 
-    setProfileNotice('Student settings saved on this device.');
+    if (!passwordIsStrong) {
+      setPasswordNotice({
+        type: 'error',
+        message: 'Your new password does not meet all requirements.',
+      });
+      return;
+    }
+
+    if (!passwordsMatch) {
+      setPasswordNotice({
+        type: 'error',
+        message: 'The new password and confirmation do not match.',
+      });
+      return;
+    }
+
+    if (passwordForm.currentPassword === passwordForm.newPassword) {
+      setPasswordNotice({
+        type: 'error',
+        message: 'Your new password must be different from your current password.',
+      });
+      return;
+    }
+
+    setIsSubmittingPassword(true);
+
+    try {
+      const token =
+        localStorage.getItem('puffy-token') || localStorage.getItem('token');
+
+      const response = await fetch('/api/change-password', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          currentPassword: passwordForm.currentPassword,
+          newPassword: passwordForm.newPassword,
+        }),
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Unable to change your password.');
+      }
+
+      setPasswordForm(initialPasswordForm);
+      setPasswordNotice({
+        type: 'success',
+        message: data.message || 'Your password was changed successfully.',
+      });
+    } catch (error) {
+      setPasswordNotice({
+        type: 'error',
+        message:
+          error.message || 'Something went wrong while changing your password.',
+      });
+    } finally {
+      setIsSubmittingPassword(false);
+    }
   };
 
   const handleLogout = () => {
@@ -175,10 +260,10 @@ export default function StudentSettings() {
     );
   };
 
-  const displayUsername = settingsForm.fullName
-    ? `@${settingsForm.fullName.replace(/^@/, '')}`
+  const displayUsername = studentAccount.fullName
+    ? `@${studentAccount.fullName.replace(/^@/, '')}`
     : '@meiko';
-  const accountLabel = settingsForm.email ? 'Student account' : 'Link-only preview';
+  const accountLabel = studentAccount.email ? 'Student account' : 'Link-only preview';
 
   return (
     <div
@@ -563,61 +648,171 @@ export default function StudentSettings() {
         </header>
 
         <section className="settings-heading">
-          <h1>Settings</h1>
+          <div>
+            <h1>Account Settings</h1>
+            <p>Manage your password and keep your student account secure.</p>
+          </div>
         </section>
 
-        <section className="student-settings-shell" aria-label="Student settings">
-          <div className="settings-tabs" aria-hidden="true">
-            <span className="settings-tab active">Personal Information</span>
-            <span className="settings-tab">Settings</span>
-          </div>
+        <section className="password-settings-section" aria-label="Change password">
+          <div className="password-settings-card">
+            <div className="password-card-header">
+              <span className="password-card-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <rect x="5" y="10" width="14" height="10" rx="2" />
+                  <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+                  <circle cx="12" cy="15" r="1.2" />
+                </svg>
+              </span>
 
-          <div className="settings-form-card">
-            <form className="settings-form" onSubmit={handleProfileSave}>
-              <div className="settings-fields">
-                <label>
-                  <span>Full Name</span>
-                  <input
-                    type="text"
-                    value={settingsForm.fullName}
-                    readOnly
-                    aria-readonly="true"
-                  />
-                </label>
+              <div>
+                <h2>Change Password</h2>
+                <p>Use a strong password that you do not use on other accounts.</p>
+              </div>
+            </div>
 
-                <label>
-                  <span>Email Address</span>
+            <form className="password-settings-form" onSubmit={handlePasswordChange}>
+              <div className="password-field-group">
+                <label htmlFor="current-password">Current Password</label>
+                <div className="password-input-wrapper">
                   <input
-                    type="email"
-                    placeholder="username@gmail.com"
-                    value={settingsForm.email}
-                    readOnly
-                    aria-readonly="true"
+                    id="current-password"
+                    type={visiblePasswords.currentPassword ? 'text' : 'password'}
+                    value={passwordForm.currentPassword}
+                    onChange={updatePasswordField('currentPassword')}
+                    autoComplete="current-password"
+                    placeholder="Enter your current password"
                   />
-                </label>
-
-                <label>
-                  <span>Year Level</span>
-                  <input
-                    type="text"
-                    placeholder="enter your year level"
-                    value={settingsForm.yearLevel}
-                    onChange={updateSettingsField('yearLevel')}
-                  />
-                </label>
+                  <button
+                    type="button"
+                    className="password-visibility-button"
+                    onClick={() => togglePasswordVisibility('currentPassword')}
+                    aria-label={
+                      visiblePasswords.currentPassword
+                        ? 'Hide current password'
+                        : 'Show current password'
+                    }
+                  >
+                    {visiblePasswords.currentPassword ? 'Hide' : 'Show'}
+                  </button>
+                </div>
               </div>
 
-              <div className="settings-photo-column">
-                <button type="button" className="upload-photo-button">
-                  Upload Photo
+              <div className="password-form-divider" />
+
+              <div className="password-field-group">
+                <label htmlFor="new-password">New Password</label>
+                <div className="password-input-wrapper">
+                  <input
+                    id="new-password"
+                    type={visiblePasswords.newPassword ? 'text' : 'password'}
+                    value={passwordForm.newPassword}
+                    onChange={updatePasswordField('newPassword')}
+                    autoComplete="new-password"
+                    placeholder="Create a new password"
+                  />
+                  <button
+                    type="button"
+                    className="password-visibility-button"
+                    onClick={() => togglePasswordVisibility('newPassword')}
+                    aria-label={
+                      visiblePasswords.newPassword
+                        ? 'Hide new password'
+                        : 'Show new password'
+                    }
+                  >
+                    {visiblePasswords.newPassword ? 'Hide' : 'Show'}
+                  </button>
+                </div>
+              </div>
+
+              <div className="password-requirements" aria-label="Password requirements">
+                <span className={passwordChecks.length ? 'met' : ''}>12 characters</span>
+                <span className={passwordChecks.uppercase ? 'met' : ''}>Uppercase</span>
+                <span className={passwordChecks.lowercase ? 'met' : ''}>Lowercase</span>
+                <span className={passwordChecks.number ? 'met' : ''}>Number</span>
+                <span className={passwordChecks.symbol ? 'met' : ''}>Symbol</span>
+              </div>
+
+              <div className="password-field-group">
+                <label htmlFor="confirm-password">Confirm New Password</label>
+                <div className="password-input-wrapper">
+                  <input
+                    id="confirm-password"
+                    type={visiblePasswords.confirmPassword ? 'text' : 'password'}
+                    value={passwordForm.confirmPassword}
+                    onChange={updatePasswordField('confirmPassword')}
+                    autoComplete="new-password"
+                    placeholder="Re-enter your new password"
+                    className={
+                      passwordForm.confirmPassword && !passwordsMatch
+                        ? 'input-error'
+                        : ''
+                    }
+                  />
+                  <button
+                    type="button"
+                    className="password-visibility-button"
+                    onClick={() => togglePasswordVisibility('confirmPassword')}
+                    aria-label={
+                      visiblePasswords.confirmPassword
+                        ? 'Hide confirmed password'
+                        : 'Show confirmed password'
+                    }
+                  >
+                    {visiblePasswords.confirmPassword ? 'Hide' : 'Show'}
+                  </button>
+                </div>
+                {passwordForm.confirmPassword && (
+                  <small className={passwordsMatch ? 'match-success' : 'match-error'}>
+                    {passwordsMatch ? 'Passwords match.' : 'Passwords do not match.'}
+                  </small>
+                )}
+              </div>
+
+              {passwordNotice.message && (
+                <div
+                  className={`password-notice ${passwordNotice.type}`}
+                  role={passwordNotice.type === 'error' ? 'alert' : 'status'}
+                >
+                  {passwordNotice.message}
+                </div>
+              )}
+
+              <div className="password-form-actions">
+                <button
+                  type="button"
+                  className="password-cancel-button"
+                  onClick={() => {
+                    setPasswordForm(initialPasswordForm);
+                    setPasswordNotice({ type: '', message: '' });
+                  }}
+                  disabled={isSubmittingPassword}
+                >
+                  Clear
                 </button>
-                <button type="submit" className="upload-photo-button">
-                  Save Changes
+
+                <button
+                  type="submit"
+                  className="password-save-button"
+                  disabled={isSubmittingPassword}
+                >
+                  {isSubmittingPassword ? 'Updating...' : 'Update Password'}
                 </button>
-                <p>{profileNotice || 'Recommend ratio 1:1 and file less than 5mb'}</p>
               </div>
             </form>
           </div>
+
+          <aside className="password-security-note">
+            <span aria-hidden="true">i</span>
+            <div>
+              <strong>Security reminder</strong>
+              <p>
+                After changing your password, avoid sharing it and sign out from
+                devices you no longer use.
+              </p>
+            </div>
+          </aside>
         </section>
       </main>
 
