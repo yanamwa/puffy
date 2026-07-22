@@ -11,17 +11,19 @@
 
 .wrapper {
     width: 100%;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
     display: flex;
     justify-content: center;
-    padding: 20px 0;
-    background-color: var(--color-primary);
+    background: #8caf84;
 }
 
 .background {
     position: absolute;
     inset: 0;
     z-index: 0;
-    background: transparent; /* removed decorative background */
+    background: transparent; 
     pointer-events: none;
 }
 
@@ -33,14 +35,13 @@
 }
 
 .container {
-  width: 100%;
-  max-width: 1200px;
-  min-height: 97vh;
-  position: relative;
-  overflow: hidden;
-  border-radius: 12px;
-  border: none; /* removed stroke/border */
-  background: var(--color-primary);
+    width: 100%;
+    min-height: 100vh;
+    margin: 0;
+    position: relative;
+    overflow: hidden;
+    background: #8caf84;
+    border: none;
 }
 
 .navbar {
@@ -105,15 +106,6 @@
   margin: 0 0 12px 0;
 }
 
-.loginCard label {
-  display: block;
-  margin-top: 18px;
-  font-family: "Jersey 15", sans-serif;
-  font-size: 14px;
-  color: #666666;
-  font-weight: 400;
-}
-
 .loginCard input {
   width: 100%;
   padding: 10px 12px;
@@ -145,7 +137,17 @@
 
 .signupContainer { margin-top: 20px; display: flex; justify-content: center; }
 
-.signupCard { margin-top: 60px; background: #ffffff; width: 380px; padding: 36px; height: auto; border-radius: 12px; box-shadow: 0 6px 18px var(--shadow); position: relative; }
+.signupCard { 
+  margin-top: 60px; 
+  background: #ffffff; 
+  width: 380px; 
+  padding: 36px; 
+  height: auto; 
+  border-radius: 12px; 
+  box-shadow: 0 6px 18px var(--shadow); 
+  position: relative; 
+}
+
 .signupCard h2 { font-family: "Jersey 15", sans-serif; font-size: 28px; font-weight: 400; color: var(--font-color); text-align: center; margin: 0 0 12px 0; position: relative; }
 .signupCard h2::after { content: ""; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 60%; height: 3px; background: var(--border); }
 .signupCard label { display: block; margin-top: 18px; font-family: "Jersey 15", sans-serif; font-size: 14px; color: #666666; font-weight: 400; }
@@ -223,4 +225,294 @@
   .cantCard img { width: 140px !important; }
   .cantCard h3 { font-size: 22px !important; }
   .cantCard p { font-size: 15px !important; }
+}
+
+.wrapper {
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  display: block;
+  background: #8caf84;
+}
+
+.container {
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 28px 48px 0;
+  position: relative;
+  overflow: hidden;
+  border: none;
+  border-radius: 0;
+  background: #8caf84;
+}
+
+.container::before {
+  content: "";
+  position: absolute;
+  top: 28px;
+  right: 48px;
+  bottom: 0;
+  left: 48px;
+  z-index: 0;
+  border: 1px solid #59655e;
+  border-bottom: none;
+  border-radius: 34px 34px 0 0;
+  background: #f1f1f2;
+  pointer-events: none;
+}
+
+.background {
+  display: none;
+}
+
+.loginNavbar {
+  width: 100%;
+  padding: 36px 138px 0;
+  position: relative;
+  z-index: 10;
+}
+
+.loginNavbarInner {
+  width: min(100%, 870px);
+  min-height: 62px;
+  margin: 0 auto;
+  padding: 8px 38px;
+  display: grid;
+  grid-template-columns:
+    minmax(70px, 1fr)
+    minmax(70px, 1fr)
+    auto
+    minmax(70px, 1fr)
+    minmax(90px, 1fr);
+  align-items: center;
+  gap: 22px;
+  border-radius: 999px;
+  background: #82c994;
+}
+
+.loginNavLink {
+  color: #ffffff;
+  font-family: "Jersey 15", sans-serif;
+  font-size: 16px;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.loginNavLink:hover {
+  opacity: 0.78;
+}
+
+.loginBrand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  color: #ffffff;
+  font-family: "Jersey 15", sans-serif;
+  font-size: 25px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.loginBrand img {
+  width: 47px;
+  height: 47px;
+  object-fit: contain;
+}
+
+/* Login form placement */
+.signupContainer {
+  width: 100%;
+  margin: 58px 0 0;
+  padding: 0 24px 70px;
+  display: flex;
+  justify-content: center;
+  position: relative;
+  z-index: 5;
+}
+
+.signupCard {
+  width: 320px;
+  min-height: 365px;
+  margin: 0;
+  padding: 0 0 28px;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid #aeb4be;
+  border-radius: 13px;
+  background: #ffffff;
+  box-shadow: none;
+}
+
+.signupCard h2 {
+  width: 100%;
+  height: 54px;
+  margin: 0 0 23px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid #aeb4be;
+  color: #828896;
+  font-family: "Jersey 15", sans-serif;
+  font-size: 25px;
+  font-weight: 400;
+}
+
+.signupCard h2::after {
+  display: none;
+}
+
+.signupCard label {
+  display: block;
+  margin: 0 18px 7px;
+  color: #6d7482;
+  font-family: "Jersey 15", sans-serif;
+  font-size: 13px;
+}
+
+.signupCard > input,
+.passwordWrapper {
+  width: calc(100% - 36px);
+  margin-right: 18px;
+  margin-left: 18px;
+}
+
+.signupCard > input,
+.passwordWrapper input {
+  height: 42px;
+  padding: 0 40px 0 13px;
+  border: 1px solid #d2d6dc;
+  border-radius: 7px;
+  outline: none;
+  background: #ffffff;
+  color: #333333;
+  font-family: "Jersey 15", sans-serif;
+  font-size: 14px;
+}
+
+.signupCard > input {
+  width: calc(100% - 36px);
+  margin-bottom: 18px;
+  padding-right: 13px;
+}
+
+.signupCard > input:focus,
+.passwordWrapper input:focus {
+  border-color: #82c994;
+  box-shadow: 0 0 0 3px rgba(130, 201, 148, 0.18);
+}
+
+.passwordWrapper {
+  position: relative;
+}
+
+.passwordWrapper input {
+  width: 100%;
+  margin: 0;
+}
+
+.toggleEye {
+  position: absolute;
+  top: 21px;
+  right: 13px;
+  transform: translateY(-50%);
+  color: #8b919b;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.forgot {
+  width: calc(100% - 36px);
+  margin: 10px 18px 0;
+  font-family: "Jersey 15", sans-serif;
+  font-size: 13px;
+  text-align: right;
+}
+
+.forgot a {
+  color: #737987;
+  text-decoration: none;
+}
+
+.loginBtn {
+  width: calc(100% - 36px);
+  height: 42px;
+  margin: 18px 18px 0;
+  padding: 0;
+  border: none;
+  border-radius: 7px;
+  background: #82c994;
+  color: #ffffff;
+  font-family: "Jersey 15", sans-serif;
+  font-size: 17px;
+  cursor: pointer;
+}
+
+.loginBtn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: #72b985;
+}
+
+.signupText {
+  margin: 12px 18px 0;
+  color: #777d88;
+  font-family: "Jersey 15", sans-serif;
+  font-size: 13px;
+  text-align: center;
+}
+
+.signupText + .signupText {
+  margin-top: 8px;
+}
+
+.signupText a {
+  color: #5f8468;
+  text-decoration: none;
+}
+
+@media (max-width: 760px) {
+  .container {
+    padding: 12px 10px 0;
+  }
+
+  .container::before {
+    top: 12px;
+    right: 10px;
+    left: 10px;
+    border-radius: 24px 24px 0 0;
+  }
+
+  .loginNavbar {
+    padding: 26px 24px 0;
+  }
+
+  .loginNavbarInner {
+    padding: 14px 20px;
+    grid-template-columns: repeat(4, auto);
+    justify-content: center;
+    gap: 17px;
+  }
+
+  .loginBrand {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+
+  .loginNavLink {
+    grid-row: 2;
+    font-size: 14px;
+  }
+
+  .signupContainer {
+    margin-top: 38px;
+  }
+
+  .signupCard {
+    width: 100%;
+    max-width: 330px;
+  }
 }

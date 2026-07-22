@@ -1,35 +1,50 @@
-import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { Outlet, useLocation } from "react-router-dom";
 
 export default function Layout() {
-  const { user, logout } = useAuth();
   const location = useLocation();
-  const navigate = useNavigate();
-  const isStudentDashboard = location.pathname.startsWith('/student');
-  const isSuperAdminArea = location.pathname.startsWith('/super-admin');
-  const isAdminArea = location.pathname.startsWith('/admin');
-  const isProfessorArea = location.pathname.startsWith('/professor');
-  const isCourseArea = [
-    '/learning',
-    '/introduction',
-    '/lesson',
-    '/review',
-  ].some((path) => location.pathname.startsWith(path));
-  const isOnboardingPage = [
-    '/welcome',
-    '/how-it-works',
-    '/name',
-    '/year',
-    '/section',
-    '/profile',
+
+  const isAuthPage = [
+    "/login",
+    "/signup",
+    "/forgot",
+    "/forgot-username",
+    "/cant-signin",
+    "/otp",
+    "/recover-account",
   ].includes(location.pathname);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
+  const isStudentDashboard =
+    location.pathname.startsWith("/student");
+
+  const isSuperAdminArea =
+    location.pathname.startsWith("/super-admin");
+
+  const isAdminArea =
+    location.pathname.startsWith("/admin");
+
+  const isProfessorArea =
+    location.pathname.startsWith("/professor");
+
+  const isCourseArea = [
+    "/learning",
+    "/introduction",
+    "/lesson",
+    "/review",
+  ].some((path) =>
+    location.pathname.startsWith(path)
+  );
+
+  const isOnboardingPage = [
+    "/welcome",
+    "/how-it-works",
+    "/name",
+    "/year",
+    "/section",
+    "/profile",
+  ].includes(location.pathname);
 
   if (
+    isAuthPage ||
     isStudentDashboard ||
     isSuperAdminArea ||
     isAdminArea ||
@@ -42,20 +57,6 @@ export default function Layout() {
 
   return (
     <div className="app-shell">
-      <header className="topbar">
-        <Link to="/" className="brand">PuffyBrain</Link>
-        <nav className="topnav">
-          {user ? (
-            <>
-              <span className="user-pill">{user.name} ({user.role})</span>
-              <button onClick={handleLogout}>Logout</button>
-            </>
-          ) : (
-            <NavLink to="/login">Login</NavLink>
-          )}
-        </nav>
-      </header>
-
       <main className="page-content">
         <Outlet />
       </main>
