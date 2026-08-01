@@ -9,6 +9,7 @@ import {
   FiX,
 } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
+import { API_BASE } from '../../config.js';
 import './ProfessorSetting.css';
 
 const initialPasswordForm = {
@@ -175,6 +176,15 @@ export default function ProfessorSetting() {
       return;
     }
 
+    if (!professorAccount.email) {
+      setPasswordNotice({
+        type: 'error',
+        message: 'Your account email was not found. Please log in again.',
+      });
+
+      return;
+    }
+
     setIsSubmittingPassword(true);
 
     try {
@@ -183,9 +193,9 @@ export default function ProfessorSetting() {
         localStorage.getItem('token');
 
       const response = await fetch(
-        '/api/change-password',
+        `${API_BASE}/users/change-password`,
         {
-          method: 'PUT',
+          method: 'POST',
 
           headers: {
             'Content-Type': 'application/json',
@@ -200,6 +210,8 @@ export default function ProfessorSetting() {
           credentials: 'include',
 
           body: JSON.stringify({
+            email: professorAccount.email,
+
             currentPassword:
               passwordForm.currentPassword,
 

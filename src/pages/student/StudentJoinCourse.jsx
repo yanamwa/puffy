@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
-  enrollStudentInCourse,
+  enrollStudentInCourseAsync,
   findJoinableCourseByCodeAsync,
 } from './studentCourseData';
 
@@ -19,7 +19,7 @@ export default function StudentJoinCourse() {
       if (!active) return;
 
       if (course) {
-        enrollStudentInCourse(course);
+        await enrollStudentInCourseAsync(course);
         navigate(`/student/enrolled-courses/${course.id || course.code}`, { replace: true });
         return;
       }

@@ -21,6 +21,40 @@ function parseList(value) {
   }
 }
 
+function readList(...values) {
+  for (const value of values) {
+    const parsed = parseList(value);
+
+    if (parsed.length) return parsed;
+  }
+
+  return [];
+}
+
+function normalizeContentModule(module, index) {
+  return {
+    ...module,
+    id: module?.id || module?.lesson_id || module?.module_id || `module-${index + 1}`,
+    title: module?.title || `Module ${index + 1}`,
+    description: module?.description || module?.module_description || module?.summary || "",
+    learningObjectives: module?.learningObjectives || module?.learning_objectives || "",
+    learning_objectives: module?.learning_objectives || module?.learningObjectives || "",
+    lessonPages: readList(
+      module?.lessonPages,
+      module?.lesson_pages,
+      module?.lessonContent,
+      module?.lesson_content,
+      module?.lesson_contents
+    ),
+    quizItems: readList(
+      module?.quizItems,
+      module?.quiz_items,
+      module?.quizModule,
+      module?.quiz_contents
+    ),
+  };
+}
+
 function normalizeStatus(status) {
   const value = String(status || "").toLowerCase();
   return value === "publish" || value === "published" ? "published" : "draft";
@@ -41,8 +75,18 @@ function normalizeLocalCourse(course) {
     code ||
     "Untitled course";
   const summary = course.summary || course.description || "";
-  const lessonPages = parseList(course.lessonPages || course.lessonContent || course.lesson_pages);
-  const quizItems = parseList(course.quizItems || course.quizModule || course.quiz_items);
+  const lessonPages = readList(course.lessonPages, course.lessonContent, course.lesson_pages);
+  const quizItems = readList(course.quizItems, course.quizModule, course.quiz_items);
+  const contentModules = readList(course.contentModules, course.content_modules).map(
+    normalizeContentModule
+  );
+  const learningObjectives =
+    course.learningObjectives ||
+    course.learning_objectives ||
+    contentModules
+      .map((module) => module.learningObjectives)
+      .filter(Boolean)
+      .join("\n\n");
 
   return {
     ...course,
@@ -57,10 +101,12 @@ function normalizeLocalCourse(course) {
     summary,
     description: course.description || summary,
     subject: course.subject || title,
-    learningObjectives: course.learningObjectives || course.learning_objectives || "",
-    learning_objectives: course.learning_objectives || course.learningObjectives || "",
+    learningObjectives,
+    learning_objectives: learningObjectives,
     status: normalizeStatus(course.status),
     visibility: normalizeVisibility(course.visibility),
+    contentModules,
+    content_modules: contentModules,
     lessonPages,
     lessonContent: JSON.stringify(lessonPages),
     lesson_content: JSON.stringify(lessonPages),
@@ -68,7 +114,11 @@ function normalizeLocalCourse(course) {
     quizModule: JSON.stringify(quizItems),
     quiz_contents: JSON.stringify(quizItems),
     students: Number(course.students || 0),
-    modules: lessonPages.length || Number(course.modules || 0),
+    modules: contentModules.length || Number(course.modules || 0) || lessonPages.length,
+    moduleCount: contentModules.length || Number(course.moduleCount || course.module_count || 0),
+    module_count: contentModules.length || Number(course.module_count || course.moduleCount || 0),
+    lessonPageCount: lessonPages.length || Number(course.lessonPageCount || 0),
+    lesson_page_count: lessonPages.length || Number(course.lesson_page_count || 0),
     quizzes: quizItems.length || Number(course.quizzes || 0),
     joinLink: course.joinLink || `/student/join?courseCode=${encodeURIComponent(code)}`,
     join_link: course.join_link || course.joinLink || `/student/join?courseCode=${encodeURIComponent(code)}`,

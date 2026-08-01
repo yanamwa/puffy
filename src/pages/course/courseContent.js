@@ -18,6 +18,7 @@ function normalizeLessonPage(page, index) {
   }
 
   return {
+    ...page,
     title: page?.title || page?.heading || `Lesson Page ${index + 1}`,
     content: page?.content || page?.body || page?.lesson || "",
   };
@@ -44,6 +45,7 @@ function parseLessonPages(value) {
 
 function normalizeQuizItem(item, index) {
   return {
+    ...item,
     id: item?.id ?? index + 1,
     question: String(item?.question || "").trim(),
     options: Array.isArray(item?.options) ? item.options.filter(Boolean) : [],
@@ -104,9 +106,173 @@ export function getCourseQuizItems(content) {
   return [];
 }
 
+function parseModuleList(value) {
+  if (Array.isArray(value)) return value;
+
+  const text = String(value || "").trim();
+  if (!text) return [];
+
+  const parsed = parseJson(text);
+  return Array.isArray(parsed) ? parsed : [];
+}
+
+function getModuleKeyFromItem(item, fallbackIndex = 0) {
+  const moduleIndex = Number(item?.moduleIndex ?? item?.module_index);
+
+  if (Number.isInteger(moduleIndex)) {
+    return `index-${moduleIndex}`;
+  }
+
+  const moduleId = item?.moduleId || item?.module_id;
+
+  if (moduleId) {
+    return `id-${moduleId}`;
+  }
+
+  const moduleTitle = String(item?.moduleTitle || item?.module_title || "").trim();
+
+  if (moduleTitle) {
+    return `title-${moduleTitle.toLowerCase()}`;
+  }
+
+  return `index-${fallbackIndex}`;
+}
+
+function getModuleOrder(item, fallbackIndex = 0) {
+  const moduleIndex = Number(item?.moduleIndex ?? item?.module_index);
+  return Number.isInteger(moduleIndex) ? moduleIndex : fallbackIndex;
+}
+
+function normalizeCourseModule(module, index, course = {}) {
+  const title = String(module?.title || module?.moduleTitle || module?.module_title || "").trim();
+  const description = String(
+    module?.description ||
+      module?.moduleDescription ||
+      module?.module_description ||
+      module?.summary ||
+      ""
+  ).trim();
+  const learningObjectives = String(
+    module?.learningObjectives ||
+      module?.learning_objectives ||
+      module?.moduleLearningObjectives ||
+      module?.module_learning_objectives ||
+      ""
+  ).trim();
+
+  return {
+    ...module,
+    id:
+      module?.id ||
+      module?.lesson_id ||
+      module?.moduleId ||
+      module?.module_id ||
+      `${course?.id || course?.course_id || "course"}-module-${index + 1}`,
+    title: title || `Module ${index + 1}`,
+    description,
+    learningObjectives,
+    learning_objectives: learningObjectives,
+    lessonPages: getCourseLessonPages(module),
+    quizItems: getCourseQuizItems(module),
+  };
+}
+
+function buildModulesFromFlatContent(content) {
+  const lessonPages = getCourseLessonPages(content);
+  const quizItems = getCourseQuizItems(content);
+  const modules = new Map();
+
+  const ensureModule = (item, fallbackIndex = 0) => {
+    const key = getModuleKeyFromItem(item, fallbackIndex);
+    const existing = modules.get(key);
+
+    if (existing) return existing;
+
+    const order = getModuleOrder(item, modules.size);
+    const moduleTitle = String(item?.moduleTitle || item?.module_title || "").trim();
+    const moduleDescription = String(
+      item?.moduleDescription || item?.module_description || ""
+    ).trim();
+    const moduleLearningObjectives = String(
+      item?.moduleLearningObjectives || item?.module_learning_objectives || ""
+    ).trim();
+    const moduleId = item?.moduleId || item?.module_id;
+    const module = {
+      id:
+        moduleId ||
+        `${content?.id || content?.course_id || "course"}-module-${order + 1}`,
+      title: moduleTitle || `Module ${order + 1}`,
+      description: moduleDescription,
+      learningObjectives:
+        moduleLearningObjectives ||
+        String(content?.learningObjectives || content?.learning_objectives || "").trim(),
+      learning_objectives:
+        moduleLearningObjectives ||
+        String(content?.learningObjectives || content?.learning_objectives || "").trim(),
+      lessonPages: [],
+      quizItems: [],
+      order,
+    };
+
+    modules.set(key, module);
+    return module;
+  };
+
+  lessonPages.forEach((page, index) => {
+    ensureModule(page, 0).lessonPages.push(page);
+  });
+
+  quizItems.forEach((item, index) => {
+    ensureModule(item, 0).quizItems.push(item);
+  });
+
+  return [...modules.values()]
+    .sort((a, b) => a.order - b.order)
+    .map(({ order, ...module }, index) => ({
+      ...module,
+      title: module.title || `Module ${index + 1}`,
+    }));
+}
+
+export function getCourseContentModules(content) {
+  const nestedModules = [
+    content?.contentModules,
+    content?.content_modules,
+    content?.learningModules,
+    content?.learning_modules,
+  ]
+    .flatMap(parseModuleList)
+    .filter(Boolean);
+
+  if (nestedModules.length) {
+    return nestedModules.map((module, index) =>
+      normalizeCourseModule(module, index, content)
+    );
+  }
+
+  const flatModules = buildModulesFromFlatContent(content);
+
+  if (flatModules.length) {
+    return flatModules;
+  }
+
+  return [];
+}
+
+export function getCourseModule(content, moduleIndex = 0) {
+  const modules = getCourseContentModules(content);
+  const safeIndex = Math.min(
+    Math.max(Number(moduleIndex) || 0, 0),
+    Math.max(modules.length - 1, 0)
+  );
+
+  return modules[safeIndex] || null;
+}
+
 export function normalizeCourseContent(source) {
   const lessonPages = getCourseLessonPages(source);
   const quizItems = getCourseQuizItems(source);
+  const contentModules = getCourseContentModules(source);
   const id = source?.id || source?.course_id || source?.lesson_id || source?.module_id;
   const title =
     source?.title ||
@@ -128,13 +294,15 @@ export function normalizeCourseContent(source) {
     summary: description,
     learningObjectives,
     learning_objectives: learningObjectives,
+    contentModules,
+    content_modules: contentModules,
     lessonPages,
     lessonContent: JSON.stringify(lessonPages),
     lesson_content: JSON.stringify(lessonPages),
     quizItems,
     quizModule: JSON.stringify(quizItems),
     quiz_contents: JSON.stringify(quizItems),
-    modules: lessonPages.length,
+    modules: contentModules.length || lessonPages.length,
     quizzes: quizItems.length,
   };
 }

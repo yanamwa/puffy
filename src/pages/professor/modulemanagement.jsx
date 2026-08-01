@@ -145,7 +145,10 @@ export default function ModuleManagement() {
 
                 <div className={styles.courseStats}>
                   <span>{course.students || 0} students</span>
-                  <span>{course.modules || 0} pages</span>
+                  <span>{course.moduleCount || course.modules || 0} modules</span>
+                  <span>
+                    {course.lessonPageCount || course.lessonPages?.length || 0} pages
+                  </span>
                   <span>{course.quizzes || 0} quiz items</span>
                 </div>
 

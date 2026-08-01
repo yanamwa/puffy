@@ -2,27 +2,49 @@ import { useEffect, useMemo, useState } from 'react';
 import { FiChevronDown, FiTrash2 } from 'react-icons/fi';
 import '../Features/AdminFeaturePages.css';
 
-const STORAGE_KEY = 'admin-notifications';
+const STORAGE_KEY = 'puffy-notifications-announcements';
+const LEGACY_STORAGE_KEY = 'admin-notifications';
+
+const defaultCopy = {
+  pageTitle: 'Notifications & Announcements',
+  pageDescription: 'Create and manage notifications and announcements for PuffyBrain users.',
+  createTitle: 'Create Notification or Announcement',
+  titlePlaceholder: 'Enter notification or announcement title',
+  messagePlaceholder: 'Write your notification or announcement message',
+  postLabel: 'Post Notification',
+  listTitle: 'Posted Notifications & Announcements',
+  emptyMessage: 'No notifications or announcements found.',
+  deleteConfirm: 'Delete this notification or announcement?',
+};
+
+const announcementCopy = {
+  ...defaultCopy,
+  pageTitle: 'Announcement & Notification Management',
+  createTitle: 'Create Announcement',
+  titlePlaceholder: 'Enter announcement title',
+  messagePlaceholder: 'Write your announcement message',
+  postLabel: 'Post Announcement',
+};
 
 const seedNotifications = [
   {
     id: 1,
-    title: 'Admin',
-    message: 'Admin',
+    title: 'Admin Notice',
+    message: 'Administrative updates can be posted here.',
     target: 'admin',
     createdAt: '2026-06-08T08:33:00',
   },
   {
     id: 2,
-    title: 'User',
-    message: 'User',
+    title: 'User Announcement',
+    message: 'General user announcements can be sent from this page.',
     target: 'user',
     createdAt: '2026-06-08T08:33:00',
   },
   {
     id: 3,
-    title: 'Hello',
-    message: 'Hi',
+    title: 'Welcome',
+    message: 'Welcome to PuffyBrain.',
     target: 'all',
     createdAt: '2026-06-08T08:33:00',
   },
@@ -30,7 +52,9 @@ const seedNotifications = [
 
 function readNotifications() {
   try {
-    const saved = localStorage.getItem(STORAGE_KEY);
+    const saved =
+      localStorage.getItem(STORAGE_KEY) ||
+      localStorage.getItem(LEGACY_STORAGE_KEY);
     return saved ? JSON.parse(saved) : seedNotifications;
   } catch {
     return seedNotifications;
@@ -52,7 +76,20 @@ function formatDate(value) {
   });
 }
 
-export default function NotificationPage() {
+function formatTarget(value) {
+  const labels = {
+    all: 'All',
+    user: 'Users',
+    student: 'Students',
+    professor: 'Professors',
+    admin: 'Admins',
+  };
+
+  return labels[value] || value;
+}
+
+export default function NotificationPage({ variant = 'notification' }) {
+  const copy = variant === 'announcement' ? announcementCopy : defaultCopy;
   const [notifications, setNotifications] = useState(() => readNotifications());
   const [title, setTitle] = useState('');
   const [message, setMessage] = useState('');
@@ -97,7 +134,7 @@ export default function NotificationPage() {
   };
 
   const deleteNotification = (id) => {
-    const ok = window.confirm('Delete this notification?');
+    const ok = window.confirm(copy.deleteConfirm);
     if (!ok) return;
 
     setNotifications((current) => current.filter((item) => item.id !== id));
@@ -105,21 +142,21 @@ export default function NotificationPage() {
 
   return (
     <div className="admin-page feature-page notification-management-page">
-      <h1>Notification Management</h1>
-      <p>Create and manage announcements for PuffyBrain users.</p>
+      <h1>{copy.pageTitle}</h1>
+      <p>{copy.pageDescription}</p>
 
       <div className="notification-management-grid">
         <form className="feature-card notification-form" onSubmit={addNotification}>
           <div className="feature-card-top" />
           <div className="feature-card-body">
-            <h2>Create Notification</h2>
+            <h2>{copy.createTitle}</h2>
 
             <label className="feature-field">
               <span>Title</span>
               <input
                 value={title}
                 onChange={(event) => setTitle(event.target.value)}
-                placeholder="Welcome Admins!"
+                placeholder={copy.titlePlaceholder}
               />
             </label>
 
@@ -128,7 +165,7 @@ export default function NotificationPage() {
               <textarea
                 value={message}
                 onChange={(event) => setMessage(event.target.value)}
-                placeholder="Write your notification message"
+                placeholder={copy.messagePlaceholder}
               />
             </label>
 
@@ -136,13 +173,14 @@ export default function NotificationPage() {
               <span>Send To</span>
               <select value={target} onChange={(event) => setTarget(event.target.value)}>
                 <option value="all">All</option>
-                <option value="user">User</option>
-                <option value="admin">Admin</option>
+                <option value="student">Students</option>
+                <option value="professor">Professors</option>
+                <option value="admin">Admins</option>
               </select>
             </label>
 
             <button className="primary-feature-btn" type="submit">
-              Post Notification
+              {copy.postLabel}
             </button>
           </div>
         </form>
@@ -151,7 +189,7 @@ export default function NotificationPage() {
           <div className="feature-card-top" />
           <div className="feature-card-body">
             <div className="feature-section-top">
-              <h2>Posted Notifications</h2>
+              <h2>{copy.listTitle}</h2>
               <label className="sort-control">
                 <span>Sort by</span>
                 <select value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
@@ -166,13 +204,13 @@ export default function NotificationPage() {
 
             <div className="notification-list">
               {sortedNotifications.length === 0 ? (
-                <div className="feature-empty">No notifications found.</div>
+                <div className="feature-empty">{copy.emptyMessage}</div>
               ) : (
                 sortedNotifications.map((item) => (
                   <article className="notification-item" key={item.id}>
                     <div className="notification-item-top">
                       <h3>{item.title}</h3>
-                      <span>{item.target}</span>
+                      <span>{formatTarget(item.target)}</span>
                     </div>
                     <p>{item.message}</p>
                     <small>{formatDate(item.createdAt)}</small>

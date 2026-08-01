@@ -3,12 +3,18 @@ import { Link, useNavigate } from 'react-router-dom';
 import JoinCourseModal from './JoinCourseModal';
 import { PROFESSOR_COURSES_EVENT } from '../professor/professorData';
 import {
-  enrollStudentInCourse,
+  enrollStudentInCourseAsync,
   findJoinableCourseByCodeAsync,
   getStudentEnrolledCourses,
   loadStudentEnrolledCourses,
   STUDENT_ENROLLED_COURSES_EVENT,
 } from './studentCourseData';
+import {
+  clearStudentSession,
+  getStudentAccountLabel,
+  getStudentProfileHandle,
+  useStudentProfile,
+} from './studentProfileData';
 import './EnrolledCourses.css';
 
 const navItems = [
@@ -44,6 +50,14 @@ const notificationItems = [
     icon: 'announcement',
   },
 ];
+
+function getCourseTitle(course) {
+  return course.title || course.courseName || course.course_name || 'Untitled course';
+}
+
+function getProfessorDepartment(course) {
+  return course.professorDepartment || course.professor_department || 'Department not set';
+}
 
 export function Icon({ name }) {
   if (name === 'home') {
@@ -150,10 +164,14 @@ export function SortToggle({ options }) {
   );
 }
 
-export function Avatar({ large = false }) {
+export function Avatar({
+  large = false,
+  src = '/images/temporaryimg.png',
+  alt = '',
+}) {
   return (
     <span className={`anime-avatar${large ? ' large' : ''}`}>
-      <img src="/images/temporaryimg.png" alt="" />
+      <img src={src} alt={alt} />
     </span>
   );
 }
@@ -171,6 +189,7 @@ export default function EnrolledCourses() {
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
   const [notifications, setNotifications] = useState(notificationItems);
+  const studentProfile = useStudentProfile();
 
   useEffect(() => {
     let active = true;
@@ -226,7 +245,7 @@ export default function EnrolledCourses() {
       return;
     }
 
-    enrollStudentInCourse(course);
+    await enrollStudentInCourseAsync(course);
     closeJoinModal();
     navigate(`/student/enrolled-courses/${course.id || course.code}`);
   };
@@ -279,6 +298,15 @@ useEffect(() => {
           : notification,
       ),
     );
+  };
+
+  const profileHandle = getStudentProfileHandle(studentProfile);
+  const accountLabel = getStudentAccountLabel(studentProfile);
+
+  const handleLogout = () => {
+    setProfileMenuOpen(false);
+    clearStudentSession();
+    navigate('/login');
   };
 
   return (
@@ -378,6 +406,7 @@ useEffect(() => {
             type="button"
             className="logout-button"
             title={sidebarCollapsed ? 'Log-out' : undefined}
+            onClick={handleLogout}
           >
             <span
               className="logout-icon"
@@ -561,12 +590,12 @@ useEffect(() => {
                 aria-label="Open your profile"
               >
                 <span className="profile-avatar">
-                  <Avatar />
+                  <Avatar src={studentProfile.profileImage} alt="" />
                   <span className="profile-status-dot" />
                 </span>
 
                 <span className="profile-user-info">
-                  <strong>@meiko</strong>
+                  <strong>{profileHandle}</strong>
                   <small>Student</small>
                 </span>
               </button>
@@ -599,11 +628,11 @@ useEffect(() => {
                 onClick={(event) => event.stopPropagation()}
               >
                 <div className="profile-dropdown-header">
-                  <Avatar />
+                  <Avatar src={studentProfile.profileImage} alt="" />
 
                   <div>
-                    <strong>@meiko</strong>
-                    <span>Student account</span>
+                    <strong>{profileHandle}</strong>
+                    <span>{accountLabel}</span>
                   </div>
                 </div>
 
@@ -644,14 +673,7 @@ useEffect(() => {
                 <button
                   type="button"
                   className="profile-logout-option"
-                  onClick={() => {
-                    setProfileMenuOpen(false);
-
-                    localStorage.removeItem('token');
-                    sessionStorage.clear();
-
-                    navigate('/login');
-                  }}
+                  onClick={handleLogout}
                 >
                   <svg viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M10 5H5v14h5" />
@@ -693,7 +715,7 @@ useEffect(() => {
                 key={course.id || course.code}
                 to={`/student/enrolled-courses/${course.id || course.code}`}
                 className="course-folder enrolled-course-folder"
-                aria-label={`Open ${course.code} - ${course.title}`}
+                aria-label={`Open ${getCourseTitle(course)}`}
               >
                 <span className="menu-button" aria-hidden="true">
                   <span />
@@ -701,11 +723,14 @@ useEffect(() => {
                   <span />
                 </span>
                 <div className="course-card-body">
-                  <h2>{course.code} - {course.title}</h2>
+                  <h2>{getCourseTitle(course)}</h2>
                 </div>
                 <div className="course-card-footer">
                   <Avatar />
-                  <span>Created by {course.instructor}</span>
+                  <div className="enrolled-course-meta">
+                    <span>{course.instructor}</span>
+                    <small>{getProfessorDepartment(course)}</small>
+                  </div>
                 </div>
               </Link>
             ))

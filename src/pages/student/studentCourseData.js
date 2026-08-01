@@ -2,6 +2,7 @@ import {
   getProfessorCourseOwner,
   readProfessorCourses,
 } from '../professor/professorData';
+import { API_BASE } from '../../config.js';
 import { fetchCourse, fetchCourses } from '../../services/courseApi.js';
 
 export const STUDENT_ENROLLED_COURSES_KEY = 'student-enrolled-courses';
@@ -46,11 +47,137 @@ async function loadProfessorCourses(params = {}) {
   }
 }
 
+function getStoredUser() {
+  try {
+    const storedUser =
+      localStorage.getItem('puffy-user') ||
+      localStorage.getItem('user') ||
+      localStorage.getItem('currentUser') ||
+      sessionStorage.getItem('puffy-user') ||
+      sessionStorage.getItem('user') ||
+      sessionStorage.getItem('currentUser');
+
+    return storedUser ? JSON.parse(storedUser) : null;
+  } catch {
+    return null;
+  }
+}
+
+function getStoredToken() {
+  return (
+    localStorage.getItem('puffy-token') ||
+    localStorage.getItem('token') ||
+    localStorage.getItem('authToken') ||
+    sessionStorage.getItem('puffy-token') ||
+    sessionStorage.getItem('token') ||
+    sessionStorage.getItem('authToken') ||
+    ''
+  );
+}
+
+function getStoredUserId() {
+  const user = getStoredUser() || {};
+
+  return user.id || user.userId || user.user_id || localStorage.getItem('user_id') || null;
+}
+
+function getStudentEnrollmentStorageKey() {
+  const user = getStoredUser() || {};
+  const accountKey =
+    getStoredUserId() ||
+    user.email ||
+    localStorage.getItem('user_email') ||
+    localStorage.getItem('email') ||
+    'anonymous';
+
+  return `${STUDENT_ENROLLED_COURSES_KEY}:${String(accountKey).trim().toLowerCase()}`;
+}
+
+function getAuthHeaders() {
+  const token = getStoredToken();
+  const headers = {
+    'Content-Type': 'application/json',
+  };
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  return headers;
+}
+
+async function readJsonResponse(response, fallbackMessage) {
+  const data = await response.json().catch(() => ({
+    success: false,
+    message: 'Server returned an invalid response.',
+  }));
+
+  if (!response.ok || data.success === false) {
+    const error = new Error(data.message || fallbackMessage);
+    error.status = response.status;
+    throw error;
+  }
+
+  return data;
+}
+
+async function fetchEnrolledCoursesRequest() {
+  const token = getStoredToken();
+  const userId = getStoredUserId();
+
+  if (!token && !userId) {
+    return [];
+  }
+
+  const query = userId ? `?userId=${encodeURIComponent(userId)}` : '';
+  const response = await fetch(`${API_BASE}/courses/enrolled${query}`, {
+    method: 'GET',
+    credentials: 'include',
+    headers: getAuthHeaders(),
+  });
+  const data = await readJsonResponse(response, 'Could not load enrolled courses.');
+
+  return Array.isArray(data.courses) ? data.courses : [];
+}
+
+async function enrollCourseRequest(course) {
+  const token = getStoredToken();
+  const userId = getStoredUserId();
+
+  if (!token && !userId) {
+    return null;
+  }
+
+  const response = await fetch(`${API_BASE}/courses/enroll`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({
+      userId,
+      courseId: course?.id || course?.course_id || null,
+      courseCode: course?.courseCode || course?.course_code || course?.code || '',
+    }),
+  });
+  const data = await readJsonResponse(response, 'Could not enroll in course.');
+
+  return data.course || null;
+}
+
 function dispatchEnrollmentUpdate(course) {
   window.dispatchEvent(
     new CustomEvent(STUDENT_ENROLLED_COURSES_EVENT, {
       detail: { course },
     })
+  );
+}
+
+function getProfessorCourseDepartment(course) {
+  return (
+    course.professorDepartment ||
+    course.professor_department ||
+    course.database_professor_department ||
+    course.department ||
+    ''
   );
 }
 
@@ -84,6 +211,42 @@ function getLegacyLessonProgress(contentId) {
   }
 }
 
+function getLegacyModuleProgress(contentId, moduleIndex) {
+  try {
+    const saved = localStorage.getItem(
+      `lessonProgress_${contentId}_module_${moduleIndex}`
+    );
+    const parsed = saved ? JSON.parse(saved) : null;
+    return clampProgress(parsed?.progress_percent ?? parsed?.progress ?? 0);
+  } catch {
+    return 0;
+  }
+}
+
+function getSavedModuleProgress(savedProgress, moduleIndex) {
+  const moduleKey = String(moduleIndex);
+  const moduleRecord = savedProgress?.modules?.[moduleKey];
+  const moduleRecordProgress = clampProgress(
+    moduleRecord?.progress ?? moduleRecord?.moduleProgress
+  );
+
+  if (moduleRecordProgress > 0) {
+    return moduleRecordProgress;
+  }
+
+  const savedModuleIndex = Number(
+    savedProgress?.moduleIndex ?? savedProgress?.module_index
+  );
+
+  if (Number.isInteger(savedModuleIndex) && savedModuleIndex === moduleIndex) {
+    return clampProgress(
+      savedProgress?.moduleProgress ?? savedProgress?.module_progress
+    );
+  }
+
+  return 0;
+}
+
 export function getStudentReadingProgress(contentId) {
   const key = getProgressKey(contentId);
   if (!key) return 0;
@@ -104,13 +267,54 @@ export function saveStudentReadingProgress(contentId, progress, metadata = {}) {
   if (!key) return 0;
 
   const progressMap = readReadingProgressMap();
+  const currentRecord =
+    progressMap[key] && typeof progressMap[key] === 'object'
+      ? progressMap[key]
+      : {};
   const currentProgress = clampProgress(progressMap[key]?.progress ?? progressMap[key]);
   const nextProgress = Math.max(currentProgress, clampProgress(progress));
+  const moduleIndex = Number(metadata.moduleIndex ?? metadata.module_index);
+  const nextModules = {
+    ...(currentRecord.modules || {}),
+  };
+
+  if (Number.isInteger(moduleIndex)) {
+    const moduleKey = String(moduleIndex);
+    const currentModuleProgress = clampProgress(
+      nextModules[moduleKey]?.progress ??
+        nextModules[moduleKey]?.moduleProgress
+    );
+    const nextModuleProgress = Math.max(
+      currentModuleProgress,
+      clampProgress(
+        metadata.moduleProgress ??
+          metadata.module_progress ??
+          progress
+      )
+    );
+
+    nextModules[moduleKey] = {
+      ...nextModules[moduleKey],
+      moduleIndex,
+      moduleTitle:
+        metadata.moduleTitle ||
+        metadata.module_title ||
+        nextModules[moduleKey]?.moduleTitle ||
+        '',
+      progress: nextModuleProgress,
+      updatedAt: new Date().toISOString(),
+    };
+  }
+
   const nextRecord = {
     ...metadata,
     progress: nextProgress,
     updatedAt: new Date().toISOString(),
   };
+
+  if (Object.keys(nextModules).length > 0) {
+    nextRecord.modules = nextModules;
+  }
 
   progressMap[key] = nextRecord;
   localStorage.setItem(STUDENT_READING_PROGRESS_KEY, JSON.stringify(progressMap));
@@ -125,17 +329,32 @@ export function saveStudentReadingProgress(contentId, progress, metadata = {}) {
 }
 
 export function getStudentModuleReadingProgress(contentId, moduleIndex, moduleCount) {
+  const key = getProgressKey(contentId);
+  if (!key) return 0;
+
+  const progressMap = readReadingProgressMap();
+  const savedProgress = progressMap[key];
+  const exactModuleProgress = Math.max(
+    getSavedModuleProgress(savedProgress, moduleIndex),
+    getLegacyModuleProgress(key, moduleIndex)
+  );
+
+  if (exactModuleProgress > 0) {
+    return exactModuleProgress;
+  }
+
   const count = Math.max(Number(moduleCount) || 1, 1);
-  const courseProgress = getStudentReadingProgress(contentId);
+  const courseProgress = getStudentReadingProgress(key);
   const moduleSize = 100 / count;
   const moduleStart = moduleSize * moduleIndex;
+  const derivedProgress = ((courseProgress - moduleStart) / moduleSize) * 100;
 
-  return clampProgress(((courseProgress - moduleStart) / moduleSize) * 100);
+  return derivedProgress >= 99 ? 100 : clampProgress(derivedProgress);
 }
 
 export function readStudentEnrollmentKeys() {
   try {
-    const saved = localStorage.getItem(STUDENT_ENROLLED_COURSES_KEY);
+    const saved = localStorage.getItem(getStudentEnrollmentStorageKey());
     const parsed = saved ? JSON.parse(saved) : [];
 
     return Array.isArray(parsed) ? parsed.map(String) : [];
@@ -146,7 +365,7 @@ export function readStudentEnrollmentKeys() {
 
 export function saveStudentEnrollmentKeys(keys) {
   const uniqueKeys = [...new Set(keys.map(String).filter(Boolean))];
-  localStorage.setItem(STUDENT_ENROLLED_COURSES_KEY, JSON.stringify(uniqueKeys));
+  localStorage.setItem(getStudentEnrollmentStorageKey(), JSON.stringify(uniqueKeys));
   return uniqueKeys;
 }
 
@@ -171,12 +390,24 @@ export function getStudentCourseModules(course) {
 }
 
 export function normalizeStudentCourse(course) {
+  const title =
+    course.title ||
+    course.courseName ||
+    course.course_name ||
+    course.subject ||
+    'Untitled course';
+  const professorDepartment = getProfessorCourseDepartment(course);
+
   return {
     ...course,
     id: course.id || course.course_id,
     code: course.code || 'COURSE',
-    title: course.title || 'Untitled course',
+    title,
+    courseName: course.courseName || title,
+    course_name: course.course_name || title,
     instructor: getProfessorCourseOwner(course),
+    professorDepartment,
+    professor_department: professorDepartment,
     modulesList: getStudentCourseModules(course),
   };
 }
@@ -235,7 +466,8 @@ export async function findJoinableCourseByCodeAsync(code) {
   return courses.find((course) => (
     !course.archived &&
     course.status === 'published' &&
-    String(course.code || '').trim().toLowerCase() === normalizedCode
+    String(course.code || course.courseCode || course.course_code || '').trim().toLowerCase() ===
+      normalizedCode
   )) || null;
 }
 
@@ -251,6 +483,21 @@ export function enrollStudentInCourse(course) {
   return true;
 }
 
+export async function enrollStudentInCourseAsync(course) {
+  let enrolledCourse = course;
+
+  try {
+    enrolledCourse = (await enrollCourseRequest(course)) || course;
+  } catch (error) {
+    if (error.status && error.status !== 401) {
+      console.warn('Course enrollment API fallback:', error.message);
+    }
+  }
+
+  enrollStudentInCourse(enrolledCourse);
+  return enrolledCourse;
+}
+
 export function getStudentEnrolledCourses() {
   const enrolledKeys = new Set(readStudentEnrollmentKeys());
 
@@ -261,6 +508,24 @@ export function getStudentEnrolledCourses() {
 }
 
 export async function loadStudentEnrolledCourses() {
+  try {
+    const enrolledCourses = await fetchEnrolledCoursesRequest();
+
+    if (enrolledCourses.length) {
+      saveStudentEnrollmentKeys(enrolledCourses.map(getCourseKey));
+      return enrolledCourses.map(normalizeStudentCourse);
+    }
+
+    if (getStoredToken() || getStoredUserId()) {
+      saveStudentEnrollmentKeys([]);
+      return [];
+    }
+  } catch (error) {
+    if (error.status && error.status !== 401) {
+      console.warn('Enrolled courses API fallback:', error.message);
+    }
+  }
+
   const enrolledKeys = new Set(readStudentEnrollmentKeys());
   const courses = await loadProfessorCourses();
 

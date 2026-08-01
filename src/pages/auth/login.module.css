@@ -1,231 +1,28 @@
+/* =========================================================
+   ROOT VARIABLES
+   ========================================================= */
+
 :root {
-    --color-primary: #ffffff;
-    --color-secondary: #f3f4f6;
-    --color-third: #e5e7eb;
-    --color-fourth: #9ca3af;
-    --font-color: #333333;
-    --muted: #6b7280;
-    --border: #e6e6e6;
-    --shadow: rgba(0,0,0,0.06);
+  --color-primary: #ffffff;
+  --color-secondary: #f3f4f6;
+  --color-third: #e5e7eb;
+  --color-fourth: #9ca3af;
+
+  --font-color: #333333;
+  --muted: #6b7280;
+  --border: #e6e6e6;
+  --shadow: rgba(0, 0, 0, 0.06);
+
+  --page-green: #8caf84;
+  --accent-green: #82c994;
+  --accent-green-hover: #72b985;
+  --page-background: #f1f1f2;
 }
 
-.wrapper {
-    width: 100%;
-    min-height: 100vh;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    background: #8caf84;
-}
 
-.background {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    background: transparent; 
-    pointer-events: none;
-}
-
-.background::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: transparent;
-}
-
-.container {
-    width: 100%;
-    min-height: 100vh;
-    margin: 0;
-    position: relative;
-    overflow: hidden;
-    background: #8caf84;
-    border: none;
-}
-
-.navbar {
-    width: 100%;
-    height: 70px;
-    background: transparent;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 24px;
-    margin: 30px auto;
-    position: relative;
-    z-index: 10;
-}
-
-.logo img {
-    height: 48px;
-    width: auto;
-}
-
-.navLinks {
-    justify-content: center;
-    list-style: none;
-    display: flex;
-    gap: 40px;
-    font-family: "Jersey 15", sans-serif;
-    font-size: 16px;
-    font-weight: 400;
-}
-
-.navLinks a { color: var(--font-color); text-decoration: none; }
-
-.startBtn {
-    padding: 8px 18px;
-    background: #ffffff;
-    color: var(--font-color);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    font-family: "Jersey 15", sans-serif;
-    font-size: 14px;
-    cursor: pointer;
-    text-decoration: none;
-}
-
-.loginContainer { margin-top: 80px; display: flex; justify-content: center; }
-
-.loginCard {
-    margin-top: 60px;
-    background: #ffffff;
-    width: 380px;
-    padding: 28px;
-    border-radius: 12px;
-    box-shadow: 0 6px 18px var(--shadow);
-}
-
-.loginCard h2 {
-  font-family: "Jersey 15", sans-serif;
-  font-size: 28px;
-  font-weight: 400;
-  color: var(--font-color);
-  text-align: center;
-  margin: 0 0 12px 0;
-}
-
-.loginCard input {
-  width: 100%;
-  padding: 10px 12px;
-  margin-top: 8px;
-  border: 1px solid var(--border);
-  background: #ffffff;
-  border-radius: 8px;
-  font-family: "Jersey 15", sans-serif;
-  font-size: 14px;
-  color: var(--font-color);
-}
-
-.loginCard input:focus { outline: none; box-shadow: 0 0 0 3px rgba(0,0,0,0.04); }
-
-.passwordWrapper { position: relative; }
-.passwordWrapper input { width: 100%; padding: 12px; }
-.toggleEye { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 16px; color: var(--color-fourth); opacity: 0.8; }
-.toggleEye:hover { opacity: 1; }
-
-.forgot { display: block; margin-top: 10px; font-size: 13px; text-align: right; }
-.forgot a { color: var(--muted); text-decoration: none; }
-.forgot a:hover { text-decoration: underline; }
-
-.loginBtn { margin-top: 18px; width: 100%; padding: 10px 12px; background: var(--color-secondary); border: 1px solid var(--border); border-radius: 10px; font-family: "Jersey 15", sans-serif; font-size: 15px; color: #111827; cursor: pointer; }
-.loginBtn:hover { transform: translateY(-1px); }
-
-.signupText { text-align: center; font-size: 14px; margin-top: 14px; }
-.signupText a { color: var(--muted); text-decoration: none; }
-
-.signupContainer { margin-top: 20px; display: flex; justify-content: center; }
-
-.signupCard { 
-  margin-top: 60px; 
-  background: #ffffff; 
-  width: 380px; 
-  padding: 36px; 
-  height: auto; 
-  border-radius: 12px; 
-  box-shadow: 0 6px 18px var(--shadow); 
-  position: relative; 
-}
-
-.signupCard h2 { font-family: "Jersey 15", sans-serif; font-size: 28px; font-weight: 400; color: var(--font-color); text-align: center; margin: 0 0 12px 0; position: relative; }
-.signupCard h2::after { content: ""; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 60%; height: 3px; background: var(--border); }
-.signupCard label { display: block; margin-top: 18px; font-family: "Jersey 15", sans-serif; font-size: 14px; color: #666666; font-weight: 400; }
-.signupCard input { width: 100%; padding: 10px 12px; margin-top: 8px; border: 1px solid var(--border); background: #ffffff; border-radius: 8px; font-family: "Jersey 15", sans-serif; font-size: 14px; color: var(--font-color); }
-
-.roleIntro { margin: 16px 0 18px; text-align: center; color: var(--muted); font-family: "Jersey 15", sans-serif; font-size: 14px; line-height: 1.35; }
-.roleOptions { display: grid; gap: 12px; margin-top: 20px; }
-.roleChoice { width: 100%; padding: 16px; text-align: left; border: 1px solid var(--border); border-radius: 10px; background: #ffffff; cursor: pointer; font-family: "Jersey 15", sans-serif; color: var(--font-color); }
-.roleChoice:hover { transform: translateY(-1px); box-shadow: 0 6px 16px var(--shadow); }
-.roleChoiceTitle { display: block; font-size: 20px; color: #111827; margin-bottom: 6px; }
-.roleChoiceText { display: block; font-size: 14px; color: var(--muted); line-height: 1.35; }
-.roleHeader { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-.roleBackBtn { border: 1px solid var(--border); background: #ffffff; color: var(--muted); border-radius: 8px; padding: 7px 12px; font-family: "Jersey 15", sans-serif; cursor: pointer; }
-.roleBackBtn:hover { background: var(--color-secondary); }
-.selectedRolePill { border: 1px solid var(--border); border-radius: 999px; padding: 7px 12px; background: var(--color-secondary); color: #111827; font-family: "Jersey 15", sans-serif; font-size: 13px; }
-.passwordChecklist { margin-top: 10px; padding: 10px 12px; border-radius: 8px; background: var(--color-secondary); font-family: "Jersey 15", sans-serif; font-size: 13px; }
-.passwordChecklist p { margin: 4px 0; }
-.valid { color: #2e7d32; }
-.invalid { color: #d32f2f; }
-
-.termsText { width: 100%; text-align: center; font-size: 13px; font-family: "Jersey 15", sans-serif; margin-top: 16px; color: var(--muted); }
-.signinText { width: 100%; text-align: center; font-size: 14px; font-family: "Jersey 15", sans-serif; margin-top: 14px; }
-
-.otpWrapper { display: flex; justify-content: center; gap: 15px; margin: 25px 0; }
-.otpInput { width: 56px; height: 56px; font-size: 22px; text-align: center; border-radius: 12px; border: 1px solid var(--border); background: #ffffff; font-family: "Jersey 15", sans-serif; }
-.otpInput:focus { outline: none; background: #ffffff; box-shadow: 0 0 8px rgba(0,0,0,0.06); }
-
-.resendBtn { padding: 8px 18px; background: #f0f0f0; border: none; border-radius: 30px; font-family: "Jersey 15", sans-serif; font-size: 14px; cursor: pointer; color: #555; }
-.resendBtn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-.verifyBtn { width: 100%; padding: 12px; background: var(--color-secondary); border: none; border-radius: 12px; font-family: "Jersey 15", sans-serif; font-size: 15px; cursor: pointer; }
-
-.verifySubtext { text-align: center; font-size: 14px; margin-top: 14px; margin-bottom: 22px; color: #555; font-family: "Jersey 15", sans-serif; }
-
-.forgotText { align-items: center; text-align: center; font-family: "Jersey 15", sans-serif; font-size: 14px; }
-
-.submitBtn { margin-top: 20px; width: 100%; padding: 12px; background: var(--color-secondary); border: none; border-radius: 12px; font-family: "Jersey 15", sans-serif; font-size: 15px; color: var(--font-color); cursor: pointer; }
-
-.validationMessage { font-family: "Jersey 15", sans-serif; font-size: 13px; margin-top: 8px; padding: 8px 12px; border-radius: 8px; transition: all 0.2s ease; }
-.validationMessage.error { background: #ffe5e5; color: #d32f2f; }
-.validationMessage.success { background: #e5ffe5; color: #2e7d32; }
-.validationMessage.warning { background: #fff7d6; color: #8a5a00; }
-
-.cantCard { width: 380px; min-height: 380px; background: #ffffff; border-radius: 12px; padding: 36px; text-align: center; box-shadow: 0 6px 18px var(--shadow); box-sizing: border-box; }
-.cantCard img { width: 180px; margin: 0 auto 10px; }
-.cantCard h3 { font-size: 22px; color: var(--font-color); }
-.cantCard p { color: #666; font-size: 14px; }
-
-@media (max-width: 600px) {
-  html, body { margin: 0; width: 100%; overflow-x: hidden; }
-  .wrapper { width: 100%; min-height: 100vh; padding: 0; }
-  .container { width: 100%; min-height: 100vh; border: none; border-radius: 0; overflow-x: hidden; }
-  .navbar { position: relative; top: auto; left: auto; transform: none; width: 100%; height: auto; margin: 0; padding: 18px 10px; border-radius: 0; gap: 14px; flex-direction: column; box-sizing: border-box; }
-  .logo img { height: 58px; }
-  .navLinks { width: 100%; display: flex; justify-content: center; flex-wrap: nowrap; gap: 24px; padding: 0; margin: 0; font-size: 16px; overflow-x: auto; }
-  .navActions { display: none; }
-  .signupContainer, .loginContainer { margin-top: 0; padding: 80px 14px 35px; width: 100%; box-sizing: border-box; }
-  .signupCard, .loginCard { width: 100% !important; max-width: 360px !important; margin: 0 auto !important; padding: 48px 28px 35px !important; border-radius: 12px !important; box-sizing: border-box !important; }
-  .signupCard h2, .loginCard h2 { font-size: 24px !important; line-height: 1.1; }
-  .signupCard label, .loginCard label { font-size: 14px; margin-top: 16px; }
-  .signupCard input, .loginCard input, .passwordWrapper input { width: 100% !important; height: 42px; padding: 0 14px; font-size: 15px; box-sizing: border-box; }
-  .toggleEye { right: 14px !important; }
-  .forgot { text-align: center; font-size: 15px; }
-  .loginBtn { font-size: 15px; height: 48px; padding: 0; }
-  .signupText, .signinText, .termsText { font-size: 15px; line-height: 1.35; }
-  .passwordChecklist { font-size: 16px; padding: 10px; }
-}
-
-.cantOptions { display: flex; gap: 40px; justify-content: center; align-items: stretch; }
-
-@media (max-width: 600px) {
-  .cantOptions { flex-direction: column; gap: 24px; width: 100%; align-items: center; }
-  .cantOptions a { width: 100%; max-width: 320px; }
-  .cantCard { width: 100% !important; max-width: 320px !important; min-height: 300px !important; margin: 0 auto !important; padding: 28px 22px !important; box-sizing: border-box !important; }
-  .cantCard img { width: 140px !important; }
-  .cantCard h3 { font-size: 22px !important; }
-  .cantCard p { font-size: 15px !important; }
-}
+/* =========================================================
+   PAGE LAYOUT
+   ========================================================= */
 
 .wrapper {
   width: 100%;
@@ -233,7 +30,7 @@
   margin: 0;
   padding: 0;
   display: block;
-  background: #8caf84;
+  background: var(--page-green);
 }
 
 .container {
@@ -245,7 +42,8 @@
   overflow: hidden;
   border: none;
   border-radius: 0;
-  background: #8caf84;
+  background: var(--page-green);
+  box-sizing: border-box;
 }
 
 .container::before {
@@ -256,10 +54,12 @@
   bottom: 0;
   left: 48px;
   z-index: 0;
+
   border: 1px solid #59655e;
   border-bottom: none;
   border-radius: 34px 34px 0 0;
-  background: #f1f1f2;
+
+  background: var(--page-background);
   pointer-events: none;
 }
 
@@ -267,11 +67,80 @@
   display: none;
 }
 
+
+/* =========================================================
+   GENERAL NAVIGATION
+   ========================================================= */
+
+.navbar {
+  width: 100%;
+  height: 70px;
+  margin: 30px auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+
+  position: relative;
+  z-index: 10;
+
+  background: transparent;
+}
+
+.logo img {
+  width: auto;
+  height: 48px;
+}
+
+.navLinks {
+  margin: 0;
+  padding: 0;
+
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+
+  list-style: none;
+
+  font-family: "Jersey 15", sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+}
+
+.navLinks a {
+  color: var(--font-color);
+  text-decoration: none;
+}
+
+.startBtn {
+  padding: 8px 18px;
+
+  border: 1px solid var(--border);
+  border-radius: 16px;
+
+  background: #ffffff;
+  color: var(--font-color);
+
+  font-family: "Jersey 15", sans-serif;
+  font-size: 14px;
+  text-decoration: none;
+
+  cursor: pointer;
+}
+
+
+/* =========================================================
+   LOGIN PAGE NAVIGATION
+   ========================================================= */
+
 .loginNavbar {
   width: 100%;
   padding: 36px 138px 0;
   position: relative;
   z-index: 10;
+  box-sizing: border-box;
+  margin-bottom: 120px;
 }
 
 .loginNavbarInner {
@@ -279,6 +148,7 @@
   min-height: 62px;
   margin: 0 auto;
   padding: 8px 38px;
+
   display: grid;
   grid-template-columns:
     minmax(70px, 1fr)
@@ -288,17 +158,20 @@
     minmax(90px, 1fr);
   align-items: center;
   gap: 22px;
+
   border-radius: 999px;
-  background: #82c994;
+  background: var(--accent-green);
+
+  box-sizing: border-box;
 }
 
 .loginNavLink {
   color: #ffffff;
-  font-family: "Jersey 15", sans-serif;
   font-size: 16px;
   text-align: center;
   text-decoration: none;
   white-space: nowrap;
+  transition: opacity 0.2s ease;
 }
 
 .loginNavLink:hover {
@@ -311,7 +184,6 @@
   justify-content: center;
   gap: 9px;
   color: #ffffff;
-  font-family: "Jersey 15", sans-serif;
   font-size: 25px;
   text-decoration: none;
   white-space: nowrap;
@@ -323,57 +195,111 @@
   object-fit: contain;
 }
 
-/* Login form placement */
+
+/* =========================================================
+   LOGIN AND SIGNUP CONTAINERS
+   ========================================================= */
+
+.loginContainer {
+  width: 100%;
+  margin: 58px 0 0;
+  padding: 0 24px 70px;
+
+  display: flex;
+  justify-content: center;
+
+  position: relative;
+  z-index: 5;
+
+  box-sizing: border-box;
+}
+
 .signupContainer {
   width: 100%;
   margin: 58px 0 0;
   padding: 0 24px 70px;
+
   display: flex;
   justify-content: center;
+
   position: relative;
   z-index: 5;
+
+  box-sizing: border-box;
 }
 
+
+/* =========================================================
+   LOGIN AND SIGNUP CARDS
+   ========================================================= */
+
+.loginCard,
 .signupCard {
   width: 320px;
   min-height: 365px;
   margin: 0;
   padding: 0 0 28px;
+
   overflow: hidden;
   position: relative;
+
   border: 1px solid #aeb4be;
   border-radius: 13px;
+
   background: #ffffff;
   box-shadow: none;
+
+  box-sizing: border-box;
 }
 
+.loginCard h2,
 .signupCard h2 {
   width: 100%;
   height: 54px;
   margin: 0 0 23px;
   padding: 0;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   border-bottom: 1px solid #aeb4be;
+
   color: #828896;
+
   font-family: "Jersey 15", sans-serif;
   font-size: 25px;
   font-weight: 400;
+  text-align: center;
 }
 
 .signupCard h2::after {
   display: none;
 }
 
+
+/* =========================================================
+   FORM LABELS
+   ========================================================= */
+
+.loginCard label,
 .signupCard label {
   display: block;
   margin: 0 18px 7px;
+
   color: #6d7482;
+
   font-family: "Jersey 15", sans-serif;
   font-size: 13px;
+  font-weight: 400;
 }
 
+
+/* =========================================================
+   FORM INPUTS
+   ========================================================= */
+
+.loginCard > input,
 .signupCard > input,
 .passwordWrapper {
   width: calc(100% - 36px);
@@ -381,30 +307,43 @@
   margin-left: 18px;
 }
 
+.loginCard > input,
 .signupCard > input,
 .passwordWrapper input {
   height: 42px;
   padding: 0 40px 0 13px;
+
   border: 1px solid #d2d6dc;
   border-radius: 7px;
   outline: none;
+
   background: #ffffff;
   color: #333333;
+
   font-family: "Jersey 15", sans-serif;
   font-size: 14px;
+
+  box-sizing: border-box;
 }
 
+.loginCard > input,
 .signupCard > input {
   width: calc(100% - 36px);
   margin-bottom: 18px;
   padding-right: 13px;
 }
 
+.loginCard > input:focus,
 .signupCard > input:focus,
 .passwordWrapper input:focus {
-  border-color: #82c994;
+  border-color: var(--accent-green);
   box-shadow: 0 0 0 3px rgba(130, 201, 148, 0.18);
 }
+
+
+/* =========================================================
+   PASSWORD INPUT
+   ========================================================= */
 
 .passwordWrapper {
   position: relative;
@@ -416,18 +355,66 @@
 }
 
 .toggleEye {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+
   position: absolute;
-  top: 21px;
-  right: 13px;
+  top: 50%;
+  right: 6px;
+
+  display: grid;
+  place-items: center;
+
   transform: translateY(-50%);
+
+  border: none;
+  border-radius: 7px;
+
+  background: transparent;
   color: #8b919b;
-  font-size: 14px;
+  font-size: 17px;
+
   cursor: pointer;
+  opacity: 0.8;
+
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    opacity 0.2s ease;
 }
+
+.toggleEye:hover:not(:disabled),
+.toggleEye:focus-visible {
+  background: rgba(130, 201, 148, 0.14);
+  color: #4f7659;
+  opacity: 1;
+}
+
+.toggleEye:focus-visible {
+  outline: 2px solid rgba(130, 201, 148, 0.55);
+  outline-offset: 2px;
+}
+
+.toggleEye:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.toggleEye svg {
+  width: 18px;
+  height: 18px;
+}
+
+
+/* =========================================================
+   FORGOT PASSWORD LINK
+   ========================================================= */
 
 .forgot {
   width: calc(100% - 36px);
   margin: 10px 18px 0;
+
   font-family: "Jersey 15", sans-serif;
   font-size: 13px;
   text-align: right;
@@ -438,28 +425,57 @@
   text-decoration: none;
 }
 
+.forgot a:hover {
+  text-decoration: underline;
+}
+
+
+/* =========================================================
+   LOGIN BUTTON
+   ========================================================= */
+
 .loginBtn {
   width: calc(100% - 36px);
   height: 42px;
   margin: 18px 18px 0;
   padding: 0;
+
   border: none;
   border-radius: 7px;
-  background: #82c994;
+
+  background: var(--accent-green);
   color: #ffffff;
+
   font-family: "Jersey 15", sans-serif;
   font-size: 17px;
+
   cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease;
 }
 
 .loginBtn:hover:not(:disabled) {
   transform: translateY(-1px);
-  background: #72b985;
+  background: var(--accent-green-hover);
 }
+
+.loginBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+
+/* =========================================================
+   SIGNUP AND SIGN-IN TEXT
+   ========================================================= */
 
 .signupText {
   margin: 12px 18px 0;
+
   color: #777d88;
+
   font-family: "Jersey 15", sans-serif;
   font-size: 13px;
   text-align: center;
@@ -474,16 +490,429 @@
   text-decoration: none;
 }
 
+.signupText a:hover {
+  text-decoration: underline;
+}
+
+.signinText {
+  width: 100%;
+  margin-top: 14px;
+
+  font-family: "Jersey 15", sans-serif;
+  font-size: 14px;
+  text-align: center;
+}
+
+
+/* =========================================================
+   TERMS TEXT
+   ========================================================= */
+
+.termsText {
+  width: 100%;
+  margin-top: 16px;
+
+  color: var(--muted);
+
+  font-family: "Jersey 15", sans-serif;
+  font-size: 13px;
+  text-align: center;
+}
+
+
+/* =========================================================
+   ROLE SELECTION
+   ========================================================= */
+
+.roleIntro {
+  margin: 16px 18px 18px;
+
+  color: var(--muted);
+
+  font-family: "Jersey 15", sans-serif;
+  font-size: 14px;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.roleOptions {
+  margin: 20px 18px 0;
+
+  display: grid;
+  gap: 12px;
+}
+
+.roleChoice {
+  width: 100%;
+  padding: 16px;
+
+  border: 1px solid var(--border);
+  border-radius: 10px;
+
+  background: #ffffff;
+  color: var(--font-color);
+
+  font-family: "Jersey 15", sans-serif;
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.roleChoice:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px var(--shadow);
+}
+
+.roleChoiceTitle {
+  display: block;
+  margin-bottom: 6px;
+
+  color: #111827;
+  font-size: 20px;
+}
+
+.roleChoiceText {
+  display: block;
+
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.roleHeader {
+  margin: 0 18px 14px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.roleBackBtn {
+  padding: 7px 12px;
+
+  border: 1px solid var(--border);
+  border-radius: 8px;
+
+  background: #ffffff;
+  color: var(--muted);
+
+  font-family: "Jersey 15", sans-serif;
+
+  cursor: pointer;
+}
+
+.roleBackBtn:hover {
+  background: var(--color-secondary);
+}
+
+.selectedRolePill {
+  padding: 7px 12px;
+
+  border: 1px solid var(--border);
+  border-radius: 999px;
+
+  background: var(--color-secondary);
+  color: #111827;
+
+  font-family: "Jersey 15", sans-serif;
+  font-size: 13px;
+}
+
+
+/* =========================================================
+   PASSWORD CHECKLIST
+   ========================================================= */
+
+.passwordChecklist {
+  margin: 10px 18px 0;
+  padding: 10px 12px;
+
+  border-radius: 8px;
+
+  background: var(--color-secondary);
+
+  font-family: "Jersey 15", sans-serif;
+  font-size: 13px;
+}
+
+.passwordChecklist p {
+  margin: 4px 0;
+}
+
+.valid {
+  color: #2e7d32;
+}
+
+.invalid {
+  color: #d32f2f;
+}
+
+
+/* =========================================================
+   OTP VERIFICATION
+   ========================================================= */
+
+.otpWrapper {
+  margin: 25px 18px;
+
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.otpInput {
+  width: 56px;
+  height: 56px;
+
+  border: 1px solid var(--border);
+  border-radius: 12px;
+
+  background: #ffffff;
+
+  font-family: "Jersey 15", sans-serif;
+  font-size: 22px;
+  text-align: center;
+
+  box-sizing: border-box;
+}
+
+.otpInput:focus {
+  outline: none;
+  background: #ffffff;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.06);
+}
+
+.resendBtn {
+  padding: 8px 18px;
+
+  border: none;
+  border-radius: 30px;
+
+  background: #f0f0f0;
+  color: #555555;
+
+  font-family: "Jersey 15", sans-serif;
+  font-size: 14px;
+
+  cursor: pointer;
+}
+
+.resendBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.verifyBtn {
+  width: calc(100% - 36px);
+  margin: 0 18px;
+  padding: 12px;
+
+  border: none;
+  border-radius: 12px;
+
+  background: var(--color-secondary);
+
+  font-family: "Jersey 15", sans-serif;
+  font-size: 15px;
+
+  cursor: pointer;
+}
+
+.verifySubtext {
+  margin: 14px 18px 22px;
+
+  color: #555555;
+
+  font-family: "Jersey 15", sans-serif;
+  font-size: 14px;
+  text-align: center;
+}
+
+
+/* =========================================================
+   FORGOT PASSWORD FORM
+   ========================================================= */
+
+.forgotText {
+  margin: 0 18px;
+
+  font-family: "Jersey 15", sans-serif;
+  font-size: 14px;
+  text-align: center;
+}
+
+.submitBtn {
+  width: calc(100% - 36px);
+  margin: 20px 18px 0;
+  padding: 12px;
+
+  border: none;
+  border-radius: 12px;
+
+  background: var(--color-secondary);
+  color: var(--font-color);
+
+  font-family: "Jersey 15", sans-serif;
+  font-size: 15px;
+
+  cursor: pointer;
+}
+
+
+/* =========================================================
+   VALIDATION MESSAGES
+   ========================================================= */
+
+.validationMessage {
+  margin: 8px 18px 0;
+  padding: 8px 12px;
+
+  border-radius: 8px;
+
+  font-family: "Jersey 15", sans-serif;
+  font-size: 13px;
+
+  transition: all 0.2s ease;
+}
+
+.validationMessage.error {
+  background: #ffe5e5;
+  color: #d32f2f;
+}
+
+.validationMessage.success {
+  background: #e5ffe5;
+  color: #2e7d32;
+}
+
+.validationMessage.warning {
+  background: #fff7d6;
+  color: #8a5a00;
+}
+
+
+/* =========================================================
+   ACCOUNT HELP OPTIONS
+   ========================================================= */
+
+.cantOptions {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  gap: 40px;
+}
+
+.cantCard {
+  width: 380px;
+  min-height: 380px;
+  padding: 36px;
+
+  border-radius: 12px;
+
+  background: #ffffff;
+  box-shadow: 0 6px 18px var(--shadow);
+
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.cantCard img {
+  width: 180px;
+  margin: 0 auto 10px;
+}
+
+.cantCard h3 {
+  color: var(--font-color);
+  font-size: 22px;
+}
+
+.cantCard p {
+  color: #666666;
+  font-size: 14px;
+}
+
+
+/* =========================================================
+   MOBILE RESPONSIVE LAYOUT
+   ========================================================= */
+
 @media (max-width: 760px) {
+  html,
+  body {
+    width: 100%;
+    margin: 0;
+    overflow-x: hidden;
+  }
+
+  .wrapper {
+    width: 100%;
+    min-height: 100vh;
+    padding: 0;
+  }
+
   .container {
+    width: 100%;
+    min-height: 100vh;
     padding: 12px 10px 0;
+
+    overflow-x: hidden;
+
+    border: none;
+    border-radius: 0;
   }
 
   .container::before {
     top: 12px;
     right: 10px;
     left: 10px;
+
     border-radius: 24px 24px 0 0;
+  }
+
+  .navbar {
+    width: 100%;
+    height: auto;
+    margin: 0;
+    padding: 18px 10px;
+
+    flex-direction: column;
+    gap: 14px;
+
+    position: relative;
+    top: auto;
+    left: auto;
+
+    border-radius: 0;
+
+    transform: none;
+    box-sizing: border-box;
+  }
+
+  .logo img {
+    height: 58px;
+  }
+
+  .navLinks {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+
+    display: flex;
+    justify-content: center;
+    flex-wrap: nowrap;
+    gap: 24px;
+
+    overflow-x: auto;
+
+    font-size: 16px;
+  }
+
+  .navActions {
+    display: none;
   }
 
   .loginNavbar {
@@ -492,6 +921,7 @@
 
   .loginNavbarInner {
     padding: 14px 20px;
+
     grid-template-columns: repeat(4, auto);
     justify-content: center;
     gap: 17px;
@@ -507,12 +937,1291 @@
     font-size: 14px;
   }
 
+  .loginContainer,
   .signupContainer {
+    width: 100%;
     margin-top: 38px;
+    padding: 0 14px 35px;
+
+    box-sizing: border-box;
   }
 
+  .loginCard,
   .signupCard {
     width: 100%;
     max-width: 330px;
+    margin: 0 auto;
+    padding-bottom: 35px;
+
+    border-radius: 12px;
+
+    box-sizing: border-box;
+  }
+
+  .loginCard h2,
+  .signupCard h2 {
+    font-size: 24px;
+    line-height: 1.1;
+  }
+
+  .loginCard label,
+  .signupCard label {
+    margin-top: 16px;
+    font-size: 14px;
+  }
+
+  .loginCard > input,
+  .signupCard > input,
+  .passwordWrapper input {
+    width: 100%;
+    height: 42px;
+    padding: 0 14px;
+
+    font-size: 15px;
+
+    box-sizing: border-box;
+  }
+
+  .loginCard > input,
+  .signupCard > input {
+    width: calc(100% - 36px);
+  }
+
+  .passwordWrapper input {
+    padding-right: 42px;
+  }
+
+  .toggleEye {
+    right: 14px;
+  }
+
+  .forgot {
+    font-size: 15px;
+    text-align: center;
+  }
+
+  .loginBtn {
+    height: 48px;
+    padding: 0;
+
+    font-size: 15px;
+  }
+
+  .signupText,
+  .signinText,
+  .termsText {
+    font-size: 15px;
+    line-height: 1.35;
+  }
+
+  .passwordChecklist {
+    padding: 10px;
+    font-size: 16px;
+  }
+
+  .otpWrapper {
+    gap: 10px;
+  }
+
+  .otpInput {
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+  }
+
+  .cantOptions {
+    width: 100%;
+
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .cantOptions a {
+    width: 100%;
+    max-width: 320px;
+  }
+
+  .cantCard {
+    width: 100%;
+    max-width: 320px;
+    min-height: 300px;
+    margin: 0 auto;
+    padding: 28px 22px;
+
+    box-sizing: border-box;
+  }
+
+  .cantCard img {
+    width: 140px;
+  }
+
+  .cantCard h3 {
+    font-size: 22px;
+  }
+
+  .cantCard p {
+    font-size: 15px;
+  }
+}
+/* =========================================================
+   PAGE HEADER
+   ========================================================= */
+
+.pageHeader {
+  width: 100%;
+  position: relative;
+  z-index: 20;
+}
+
+
+/* =========================================================
+   FORGOT PASSWORD LINK
+   ========================================================= */
+
+.forgotLoginLink {
+  margin-left: 5px;
+  color: #5f8468;
+  text-decoration: none;
+}
+
+.forgotLoginLink:hover {
+  text-decoration: underline;
+}
+
+
+/* =========================================================
+   SUBMIT BUTTON
+   ========================================================= */
+
+.submitBtn {
+  width: calc(100% - 36px);
+  height: 42px;
+  margin: 20px 18px 0;
+  padding: 0;
+
+  border: none;
+  border-radius: 7px;
+
+  background: #82c994;
+  color: #ffffff;
+
+  font-family: "Jersey 15", sans-serif;
+  font-size: 17px;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.submitBtn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: #72b985;
+}
+
+.submitBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+/* =========================================================
+   POLISHED PROFESSOR SIGNUP PAGE
+   ========================================================= */
+
+.professorSignupContainer {
+  width: 100%;
+  padding: 0 24px 90px;
+
+  display: flex;
+  justify-content: center;
+
+  position: relative;
+  z-index: 5;
+
+  box-sizing: border-box;
+}
+
+.professorSignupCard {
+  width: min(100%, 780px);
+  margin: 0;
+  padding: 34px 36px;
+
+  position: relative;
+  z-index: 6;
+
+  border: 1px solid #ccd3ce;
+  border-radius: 26px;
+
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow:
+    0 18px 45px rgba(54, 68, 59, 0.1),
+    0 4px 12px rgba(54, 68, 59, 0.05);
+
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+   SIGNUP HEADING
+   ========================================================= */
+
+.professorSignupHeading {
+  margin-bottom: 28px;
+  padding-bottom: 24px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+
+  border-bottom: 1px solid #e2e7e3;
+}
+
+.professorSignupHeading h1 {
+  margin: 0;
+
+  color: #53635a;
+
+  font-family: "Jersey 15", sans-serif;
+  font-size: clamp(30px, 4vw, 38px);
+  font-weight: 400;
+  line-height: 1;
+}
+
+.professorSignupHeading p {
+  margin: 9px 0 0;
+
+  color: #7a857f;
+
+  font-family: "Jersey 15", sans-serif;
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+
+/* =========================================================
+   FORM GRID
+   ========================================================= */
+
+.professorSignupFormGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px 20px;
+}
+
+.professorFullWidth {
+  grid-column: 1 / -1;
+}
+
+.professorFormGroup {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.professorFormGroup label {
+  margin: 0;
+
+  color: #58675f;
+
+  font-family: "Jersey 15", sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+}
+
+
+/* =========================================================
+   TEXT INPUTS
+   ========================================================= */
+
+.professorFormGroup > input,
+.professorPasswordWrapper input {
+  width: 100%;
+  height: 48px;
+  margin: 0;
+  padding: 0 15px;
+
+  border: 1px solid #d4dbd6;
+  border-radius: 11px;
+  outline: none;
+
+  background: #ffffff;
+  color: #39453f;
+
+  font-family: "Jersey 15", sans-serif;
+  font-size: 15px;
+
+  box-sizing: border-box;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.professorFormGroup > input::placeholder,
+.professorPasswordWrapper input::placeholder {
+  color: #a0aaa4;
+}
+
+.professorFormGroup > input:hover,
+.professorPasswordWrapper input:hover {
+  border-color: #b8c5bc;
+}
+
+.professorFormGroup > input:focus,
+.professorPasswordWrapper input:focus {
+  border-color: #82c994;
+  box-shadow: 0 0 0 4px rgba(130, 201, 148, 0.16);
+}
+
+.professorFormGroup > input:disabled,
+.professorPasswordWrapper input:disabled {
+  cursor: not-allowed;
+  background: #f3f5f4;
+  opacity: 0.72;
+}
+
+
+/* =========================================================
+   DEPARTMENT DROPDOWN
+   ========================================================= */
+
+.professorFormGroup select {
+  width: 100%;
+  height: 48px;
+  margin: 0;
+  padding: 0 44px 0 15px;
+
+  border: 1px solid #d4dbd6;
+  border-radius: 11px;
+  outline: none;
+
+  background-color: #ffffff;
+  color: #39453f;
+
+  font-family: "Jersey 15", sans-serif;
+  font-size: 15px;
+
+  cursor: pointer;
+  appearance: none;
+  box-sizing: border-box;
+
+  background-image:
+    linear-gradient(
+      45deg,
+      transparent 50%,
+      #718078 50%
+    ),
+    linear-gradient(
+      135deg,
+      #718078 50%,
+      transparent 50%
+    );
+
+  background-position:
+    calc(100% - 19px) 21px,
+    calc(100% - 14px) 21px;
+
+  background-size:
+    5px 5px,
+    5px 5px;
+
+  background-repeat: no-repeat;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.professorFormGroup select:hover {
+  border-color: #b8c5bc;
+}
+
+.professorFormGroup select:focus {
+  border-color: #82c994;
+  box-shadow: 0 0 0 4px rgba(130, 201, 148, 0.16);
+}
+
+.professorFormGroup select:disabled {
+  cursor: not-allowed;
+  background-color: #f3f5f4;
+  opacity: 0.72;
+}
+
+
+/* =========================================================
+   ID PHOTO UPLOAD
+   ========================================================= */
+
+.professorUploadDescription {
+  margin: 0 0 3px;
+
+  color: #7a857f;
+
+  font-family: "Jersey 15", sans-serif;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.professorUploadArea {
+  width: 100%;
+  min-height: 104px;
+  padding: 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+
+  position: relative;
+
+  border: 1.5px dashed #aebcb2;
+  border-radius: 16px;
+
+  background: #f7faf8;
+
+  box-sizing: border-box;
+
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.professorUploadArea:hover {
+  border-color: #82c994;
+  background: #f1f8f3;
+}
+
+/* Hides the browser's default Choose File input */
+.professorFileInput {
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+
+  position: absolute;
+
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+
+  border: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.professorUploadButton {
+  min-height: 44px;
+  margin: 0;
+  padding: 0 18px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  flex-shrink: 0;
+
+  border: none;
+  border-radius: 11px;
+
+  background: #82c994;
+  color: #ffffff;
+
+  font-family: "Jersey 15", sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+
+  cursor: pointer;
+
+  box-shadow: 0 6px 14px rgba(71, 132, 87, 0.18);
+
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.professorUploadButton:hover {
+  transform: translateY(-1px);
+  background: #72b985;
+  box-shadow: 0 8px 18px rgba(71, 132, 87, 0.23);
+}
+
+.professorUploadButton i {
+  font-size: 14px;
+}
+
+.professorFileName {
+  min-width: 0;
+  max-width: 340px;
+
+  overflow: hidden;
+
+  color: #69766f;
+
+  font-family: "Jersey 15", sans-serif;
+  font-size: 14px;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   UPLOADED ID PREVIEW
+   ========================================================= */
+
+.professorProofPreview {
+  margin-top: 14px;
+  padding: 14px;
+
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  border: 1px solid #dde4df;
+  border-radius: 15px;
+
+  background: #ffffff;
+
+  box-shadow: 0 5px 14px rgba(59, 74, 64, 0.05);
+}
+
+.professorProofPreview img {
+  width: 150px;
+  height: 96px;
+
+  flex-shrink: 0;
+
+  border: 1px solid #d3dad5;
+  border-radius: 11px;
+
+  background: #f4f6f5;
+  object-fit: cover;
+}
+
+.professorProofPreview button {
+  min-height: 40px;
+  padding: 0 14px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  border: 1px solid #efcccc;
+  border-radius: 9px;
+
+  background: #fff7f7;
+  color: #c34e4e;
+
+  font-family: "Jersey 15", sans-serif;
+  font-size: 14px;
+
+  cursor: pointer;
+
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.professorProofPreview button:hover:not(:disabled) {
+  border-color: #e8aaaa;
+  background: #ffeaea;
+}
+
+.professorProofPreview button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+
+/* =========================================================
+   PASSWORD INPUTS
+   ========================================================= */
+
+.professorPasswordWrapper {
+  width: 100%;
+  position: relative;
+}
+
+.professorPasswordWrapper input {
+  padding-right: 48px;
+}
+
+.professorToggleEye {
+  width: 38px;
+  height: 38px;
+  padding: 0;
+
+  position: absolute;
+  top: 50%;
+  right: 5px;
+
+  display: grid;
+  place-items: center;
+
+  transform: translateY(-50%);
+
+  border: none;
+  border-radius: 8px;
+
+  background: transparent;
+  color: #7d8982;
+
+  font-size: 15px;
+  cursor: pointer;
+
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.professorToggleEye:hover {
+  color: #4f7659;
+  background: #eff7f1;
+}
+
+.professorToggleEye:focus-visible {
+  outline: 2px solid rgba(130, 201, 148, 0.55);
+  outline-offset: 2px;
+}
+
+.professorToggleEye:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.professorToggleEye svg {
+  width: 18px;
+  height: 18px;
+}
+
+
+/* =========================================================
+   PASSWORD REQUIREMENTS
+   ========================================================= */
+
+.professorPasswordPanel {
+  padding: 16px;
+
+  border: 1px solid #dde4df;
+  border-radius: 14px;
+
+  background: #f7f9f8;
+}
+
+.professorPasswordRules {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px 16px;
+}
+
+.professorPasswordRules p {
+  margin: 0;
+
+  font-family: "Jersey 15", sans-serif;
+  font-size: 14px;
+}
+
+.valid {
+  color: #278344;
+}
+
+.invalid {
+  color: #d04c4c;
+}
+
+.professorStrengthMessage,
+.professorMatchMessage {
+  margin-top: 14px;
+  padding: 10px 12px;
+
+  border-radius: 9px;
+
+  font-family: "Jersey 15", sans-serif;
+  font-size: 14px;
+  text-align: center;
+}
+
+.professorMatchMessage {
+  margin-top: 0;
+}
+
+.professorStrengthMessage.error,
+.professorMatchMessage.error {
+  background: #ffe8e8;
+  color: #c73e3e;
+}
+
+.professorStrengthMessage.warning {
+  background: #fff5d9;
+  color: #8c6400;
+}
+
+.professorStrengthMessage.success,
+.professorMatchMessage.success {
+  background: #e6f7e9;
+  color: #277a3b;
+}
+
+
+/* =========================================================
+   SIGNUP ACTIONS
+   ========================================================= */
+
+.professorSignupActions {
+  margin-top: 30px;
+  padding-top: 24px;
+
+  border-top: 1px solid #e2e7e3;
+
+  text-align: center;
+}
+
+.professorSignupButton {
+  width: 100%;
+  min-height: 50px;
+  padding: 10px 20px;
+
+  border: none;
+  border-radius: 12px;
+
+  background: #82c994;
+  color: #ffffff;
+
+  font-family: "Jersey 15", sans-serif;
+  font-size: 18px;
+
+  cursor: pointer;
+
+  box-shadow: 0 7px 16px rgba(71, 132, 87, 0.19);
+
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.professorSignupButton:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: #72b985;
+  box-shadow: 0 9px 20px rgba(71, 132, 87, 0.25);
+}
+
+.professorSignupButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+  box-shadow: none;
+}
+
+.professorSignupActions p {
+  margin: 12px 0 0;
+
+  color: #7a857f;
+
+  font-family: "Jersey 15", sans-serif;
+  font-size: 14px;
+}
+
+.professorSignupActions p + p {
+  margin-top: 7px;
+}
+
+.professorSignupActions a {
+  color: #558363;
+  text-decoration: none;
+}
+
+.professorSignupActions a:hover {
+  text-decoration: underline;
+}
+
+
+/* =========================================================
+   PROFESSOR SIGNUP RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 760px) {
+  .loginNavbar {
+    margin-bottom: 46px;
+  }
+
+  .professorSignupContainer {
+    padding: 0 16px 55px;
+  }
+
+  .professorSignupCard {
+    padding: 26px 20px;
+    border-radius: 20px;
+  }
+
+  .professorSignupHeading {
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+  }
+
+  .professorSignupHeading h1 {
+    font-size: 30px;
+  }
+
+  .professorSignupHeading p {
+    font-size: 15px;
+  }
+
+  .professorSignupFormGrid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .professorFullWidth {
+    grid-column: auto;
+  }
+
+  .professorUploadArea {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .professorUploadButton {
+    width: 100%;
+  }
+
+  .professorFileName {
+    width: 100%;
+    max-width: none;
+    text-align: center;
+  }
+
+  .professorProofPreview {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .professorProofPreview img {
+    width: 100%;
+    height: 190px;
+  }
+
+  .professorProofPreview button {
+    width: 100%;
+  }
+
+  .professorPasswordRules {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================================
+  OTP 
+   ========================================================= */
+
+.otpContainer {
+  min-height: calc(100vh - 180px);
+  margin: 0;
+  padding: 70px 24px 100px;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+
+  position: relative;
+  z-index: 5;
+  box-sizing: border-box;
+}
+
+.otpContainer::before {
+  width: 300px;
+  height: 300px;
+  top: 5px;
+  left: 18%;
+
+  background: rgba(130, 201, 148, 0.16);
+}
+
+.otpContainer::after {
+  width: 220px;
+  height: 220px;
+  right: 20%;
+  bottom: 45px;
+
+  background: rgba(140, 175, 132, 0.12);
+}
+
+.otpCard {
+  width: min(100%, 470px);
+  min-height: auto;
+  margin: 0;
+  padding: 0 38px 38px;
+
+  position: relative;
+  z-index: 2;
+  overflow: hidden;
+
+  border: 1px solid rgba(130, 153, 138, 0.38);
+  border-radius: 24px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.99),
+      rgba(248, 252, 249, 0.98)
+    );
+
+  box-shadow:
+    0 24px 55px rgba(61, 85, 68, 0.13),
+    0 8px 20px rgba(61, 85, 68, 0.08);
+
+  box-sizing: border-box;
+}
+
+/* Green accent strip */
+.otpCard::before {
+  content: "";
+  width: 100%;
+  height: 6px;
+
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  background: linear-gradient(
+    90deg,
+    #73b883,
+    #9bd5a8,
+    #73b883
+  );
+}
+
+.otpCard h2 {
+  width: auto;
+  height: auto;
+  margin: 0 -38px 0;
+  padding: 39px 30px 23px;
+
+  display: block;
+
+  border-bottom: 1px solid #e3ebe5;
+
+  background: rgba(247, 251, 248, 0.75);
+  color: #4d6555;
+
+  font-family: "Jersey 15", sans-serif;
+  font-size: 33px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.2px;
+  text-align: center;
+}
+
+.verifySubtext {
+  max-width: 330px;
+  margin: 27px auto 8px;
+
+  color: #79867e;
+
+  font-family: "Jersey 15", sans-serif;
+  font-size: 16px;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.otpWrapper {
+  width: 100%;
+  margin: 28px 0 23px;
+
+  display: grid;
+  grid-template-columns: repeat(4, 62px);
+  justify-content: center;
+  gap: 14px;
+}
+
+.otpInput {
+  width: 62px;
+  height: 66px;
+  padding: 0;
+
+  border: 1.5px solid #d6dfd8;
+  border-radius: 15px;
+  outline: none;
+
+  background: #ffffff;
+  color: #33463a;
+
+  font-family: "Jersey 15", sans-serif;
+  font-size: 29px;
+  font-weight: 400;
+  line-height: 66px;
+  text-align: center;
+  caret-color: #68aa78;
+
+  box-shadow:
+    inset 0 1px 2px rgba(49, 72, 56, 0.04),
+    0 4px 10px rgba(49, 72, 56, 0.04);
+
+  box-sizing: border-box;
+
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.otpInput:hover {
+  border-color: #adc8b4;
+  background: #fbfefc;
+}
+
+.otpInput:focus {
+  transform: translateY(-2px);
+
+  border-color: #76bd87;
+  background: #ffffff;
+
+  box-shadow:
+    0 0 0 4px rgba(130, 201, 148, 0.18),
+    0 8px 17px rgba(72, 124, 84, 0.11);
+}
+.otpRow {
+  width: 100%;
+  min-height: 48px;
+  margin: 4px 0 20px;
+  padding: 8px 10px 8px 16px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+
+  border: 1px solid #e1e9e3;
+  border-radius: 13px;
+
+  background: #f6f9f7;
+
+  box-sizing: border-box;
+}
+
+.otpTimer {
+  color: #68766d;
+
+  font-family: "Jersey 15", sans-serif;
+  font-size: 15px;
+  white-space: nowrap;
+}
+
+.resendBtn {
+  min-width: 90px;
+  min-height: 35px;
+  padding: 0 15px;
+
+  border: 1px solid transparent;
+  border-radius: 10px;
+
+  background: #e6f4e9;
+  color: #4d7b58;
+
+  font-family: "Jersey 15", sans-serif;
+  font-size: 14px;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.resendBtn:hover:not(:disabled) {
+  transform: translateY(-1px);
+
+  border-color: #b9d7c0;
+  background: #dcefe0;
+  color: #3d6747;
+}
+
+.resendBtn:disabled {
+  border-color: #e3e7e4;
+  background: #eef1ef;
+  color: #a3aaa5;
+
+  cursor: not-allowed;
+  opacity: 1;
+}
+.verifyBtn {
+  width: 100%;
+  min-height: 50px;
+  margin: 0;
+  padding: 10px 22px;
+
+  border: none;
+  border-radius: 13px;
+
+  background: linear-gradient(
+    135deg,
+    #82c994,
+    #70b981
+  );
+
+  color: #ffffff;
+
+  font-family: "Jersey 15", sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  letter-spacing: 0.2px;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 8px 18px rgba(74, 139, 89, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    filter 0.2s ease;
+}
+
+.verifyBtn:hover {
+  transform: translateY(-2px);
+  filter: brightness(0.98);
+
+  box-shadow:
+    0 12px 24px rgba(74, 139, 89, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.verifyBtn:active {
+  transform: translateY(0);
+  box-shadow: 0 5px 12px rgba(74, 139, 89, 0.2);
+}
+
+.otpInlineError {
+  width: 100%;
+  margin: -8px 0 16px;
+  padding: 10px 13px;
+
+  border: 1px solid #f0cccc;
+  border-radius: 10px;
+
+  background: #fff3f3;
+  color: #c14b4b;
+
+  font-family: "Jersey 15", sans-serif;
+  font-size: 14px;
+  line-height: 1.35;
+  text-align: center;
+
+  box-sizing: border-box;
+}
+
+@media (max-width: 760px) {
+  .otpContainer {
+    min-height: auto;
+    margin-top: 0;
+    padding: 35px 18px 65px;
+  }
+
+  .otpContainer::before {
+    width: 180px;
+    height: 180px;
+    left: -40px;
+  }
+
+  .otpContainer::after {
+    width: 150px;
+    height: 150px;
+    right: -30px;
+  }
+
+  .otpCard {
+    width: 100%;
+    max-width: 410px;
+    padding: 0 24px 30px;
+
+    border-radius: 21px;
+  }
+
+  .otpCard h2 {
+    margin-right: -24px;
+    margin-left: -24px;
+    padding: 34px 20px 21px;
+
+    font-size: 29px;
+  }
+
+  .verifySubtext {
+    margin-top: 24px;
+    font-size: 15px;
+  }
+
+  .otpWrapper {
+    grid-template-columns: repeat(4, minmax(45px, 58px));
+    gap: 10px;
+  }
+
+  .otpInput {
+    width: 100%;
+    height: 59px;
+
+    border-radius: 13px;
+
+    font-size: 25px;
+    line-height: 59px;
+  }
+
+  .otpRow {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 9px;
+
+    padding: 12px;
+  }
+
+  .otpTimer {
+    text-align: center;
+  }
+
+  .resendBtn {
+    width: 100%;
+    min-height: 40px;
+  }
+
+  .verifyBtn {
+    min-height: 48px;
+  }
+}
+
+@media (max-width: 390px) {
+  .otpContainer {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .otpCard {
+    padding-right: 18px;
+    padding-left: 18px;
+  }
+
+  .otpCard h2 {
+    margin-right: -18px;
+    margin-left: -18px;
+  }
+
+  .otpWrapper {
+    grid-template-columns: repeat(4, minmax(42px, 52px));
+    gap: 8px;
+  }
+
+  .otpInput {
+    height: 54px;
+    font-size: 23px;
+    line-height: 54px;
   }
 }

@@ -11,6 +11,7 @@ import {
   FiSettings,
   FiShield,
   FiSidebar,
+  FiSun,
   FiUsers,
 } from 'react-icons/fi';
 import RoleNotificationMenu from '../../../components/RoleNotificationMenu';
@@ -34,8 +35,9 @@ export default function SuperAdminLayout({ children }) {
     { label: 'Dashboard', path: '/super-admin/dashboard', icon: FiGrid },
     { label: 'User Management', path: '/super-admin/users', icon: FiUsers },
     { label: 'Course Management', path: '/super-admin/courses', icon: FiBook },
+    { label: 'Modes Management', path: '/super-admin/mode', icon: FiSun },
     { label: 'System Analytics', path: '/super-admin/analytics', icon: FiActivity },
-    { label: 'Announcements', path: '/super-admin/announcements', icon: FiBell },
+    { label: 'Announcements & Notifications', path: '/super-admin/announcements', icon: FiBell },
     { label: 'Audit Logs', path: '/super-admin/audit-logs', icon: FiShield },
     { label: 'Backup and Restore', path: '/super-admin/backup', icon: FiDownload },
   ];

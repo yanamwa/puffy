@@ -2,6 +2,12 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Avatar, Icon, SortToggle } from './EnrolledCourses';
 import JoinCourseModal from './JoinCourseModal';
+import {
+  clearStudentSession,
+  getStudentAccountLabel,
+  getStudentProfileHandle,
+  useStudentProfile,
+} from './studentProfileData';
 import './EnrolledCourses.css';
 
 
@@ -53,6 +59,7 @@ export default function ArchivedCourses() {
   const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
   const [notifications, setNotifications] = useState(notificationItems);
   const [joinModalOpen, setJoinModalOpen] = useState(false);
+  const studentProfile = useStudentProfile();
 
   useEffect(() => {
     const closeOpenMenus = (event) => {
@@ -102,6 +109,15 @@ export default function ArchivedCourses() {
           : notification,
       ),
     );
+  };
+
+  const profileHandle = getStudentProfileHandle(studentProfile);
+  const accountLabel = getStudentAccountLabel(studentProfile);
+
+  const handleLogout = () => {
+    setProfileMenuOpen(false);
+    clearStudentSession();
+    navigate('/login');
   };
 
   return (
@@ -180,6 +196,7 @@ export default function ArchivedCourses() {
           type="button"
           className="logout-button"
           title={sidebarCollapsed ? 'Log-out' : undefined}
+          onClick={handleLogout}
         >
           <span className="logout-icon" aria-hidden="true" />
           <span className="logout-label">Log-out</span>
@@ -359,12 +376,12 @@ export default function ArchivedCourses() {
                 aria-label="Open your profile"
               >
                 <span className="profile-avatar">
-                  <Avatar />
+                  <Avatar src={studentProfile.profileImage} alt="" />
                   <span className="profile-status-dot" />
                 </span>
 
                 <span className="profile-user-info">
-                  <strong>@meiko</strong>
+                  <strong>{profileHandle}</strong>
                   <small>Student</small>
                 </span>
               </button>
@@ -398,11 +415,11 @@ export default function ArchivedCourses() {
                 onClick={(event) => event.stopPropagation()}
               >
                 <div className="profile-dropdown-header">
-                  <Avatar />
+                  <Avatar src={studentProfile.profileImage} alt="" />
 
                   <div>
-                    <strong>@meiko</strong>
-                    <span>Student account</span>
+                    <strong>{profileHandle}</strong>
+                    <span>{accountLabel}</span>
                   </div>
                 </div>
 
@@ -443,14 +460,7 @@ export default function ArchivedCourses() {
                 <button
                   type="button"
                   className="profile-logout-option"
-                  onClick={() => {
-                    setProfileMenuOpen(false);
-
-                    localStorage.removeItem('token');
-                    sessionStorage.clear();
-
-                    navigate('/login');
-                  }}
+                  onClick={handleLogout}
                 >
                   <svg viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M10 5H5v14h5" />

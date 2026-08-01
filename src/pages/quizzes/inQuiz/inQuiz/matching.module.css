@@ -1,0 +1,732 @@
+:root{
+  --purple-light: #f5f0f9;
+  --purple-main: #9c6cbe51;
+  --green-match: #86f98a;
+  --red-match: #ffaaa3;
+  --card-bg: #ffffff;
+  --text-color: #111;
+}
+
+.wrapper {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.paperBackground {
+  width: 100%;
+  min-height: 100vh;
+
+  background-image: url("/images/background_notebook.png"); 
+  background-size: cover;      
+  background-position: center;  
+  background-repeat: no-repeat; 
+
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+.siteHeader {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.courseTitle {
+  font-size: 28px;
+  letter-spacing: 2px;
+}
+
+.pageTitle {
+  font-size: 25px;
+}
+
+.progressContainer {
+  width: 100%;
+  height: 12px;
+  background: #ddd;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 10px 0;
+}
+
+.progressBar {
+  height: 100%;
+  background: #c0b2e3;
+  width: 20%;
+  transition: 0.4s;
+}
+
+.quizAppContainer {
+  width: 90%;
+  max-width: 1100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.matchingWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 20px;
+  width: 100%;
+}
+
+table {
+  width: 50%;
+  max-width: none;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+td {
+  padding: 15px;
+}
+
+.card {
+  padding: 15px;
+  border-radius: 20px;
+  background: #f7f7f7;
+  font-size: 20px;
+  line-height: 1.35;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+  border: 1.5px solid #11111143;
+  transition: all 0.25s ease;
+}
+
+.card:hover:not(.matched) {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.matched {
+  background: var(--green-match);
+  opacity: 0.7;
+  transform: scale(0.98);
+  cursor: default;
+}
+
+.selected {
+  outline: 3px solid var(--purple-main);
+  background: #f3e7ff;
+}
+
+.correct {
+  background: var(--green-match) !important;
+  color: #000;
+}
+
+.wrong {
+  background: var(--red-match) !important;
+}
+
+.wrongShake {
+  background-color: #ffb3b3 !important;
+  border: 2px solid #e53935 !important;
+  color: #7a0000 !important;
+  animation: wrongShake 0.35s ease;
+}
+
+@keyframes wrongShake {
+  0% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-6px);
+  }
+  50% {
+    transform: translateX(6px);
+  }
+  75% {
+    transform: translateX(-4px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+.settingsBtn {
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  height: 24px;
+  padding: 15px 50px 10px 40px;
+  border: 1.5px solid #acacac;
+  border-radius: 6px;
+  background: #e9e9e9;
+  color: #222;
+  font-size: 15px;
+  font-weight: 800;
+  font-family: "Jersey 15", sans-serif;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.12);
+}
+
+.cardAudioBtn {
+  width: 30px;
+  height: 30px;
+  margin-right: 8px;
+  border: none;
+  border-radius: 8px;
+  background: #f8f8f8;
+  color: #8d8d8d;
+  cursor: pointer;
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.cardAudioBtn i {
+  font-size: 17px;
+}
+
+.cardAudioBtn:hover {
+  background: #808080;
+}
+
+.settingsOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 20, 25, 0.45);
+  backdrop-filter: blur(3px);
+  display: grid;
+  place-items: center;
+  z-index: 9999;
+}
+
+.settingsModal {
+  width: 430px;
+  background: #ffffff;
+  border: 2px solid #c9a2ff;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+}
+
+.settingsHeader {
+  background: #f3eaff;
+  padding: 20px 24px;
+  border-bottom: 2px solid #decaff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.settingsHeader h2 {
+  margin: 0;
+  font-size: 24px;
+  color: var(--font-color);
+  font-family: "Jersey 15", sans-serif;
+  font-weight: normal;
+}
+
+.closeSettings {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #5c4a7d;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+}
+
+.settingsBody {
+  padding: 22px 24px 26px;
+}
+
+.settingRow,
+.speedBox {
+  background: #fafafa;
+  border: 1.5px solid #e6e0f5;
+  border-radius: 16px;
+  padding: 15px 16px;
+  margin-bottom: 14px;
+}
+
+.settingRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.settingInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.settingIcon {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: #f1e7ff;
+  color: #7c3cff;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+}
+
+.settingText strong,
+.settingText span,
+.speedHeader label,
+.speedValue {
+  font-family: "Jersey 15", sans-serif;
+  font-weight: normal;
+  color: var(--font-color);
+}
+
+.settingText strong {
+  display: block;
+  font-size: 20px;
+}
+
+.settingText span {
+  font-size: 16px;
+  color: #3f3f3f;
+}
+
+.switchBtn {
+  width: 74px;
+  height: 34px;
+  border-radius: 999px;
+  background: #b5b5b5;
+  color: #171717;
+  cursor: pointer;
+  font-family: "Jersey 15", sans-serif;
+  font-size: 20px;
+  border: 1px solid #353535;
+  box-shadow: 0 4px 0 #373737;
+}
+
+.switchOn {
+  background: #6b4baa;
+  color: #ffffff;
+  border-color: #5c4a7d;
+  box-shadow: 0 4px 0 #4d347e;
+}
+
+.speedHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.speedHeader label,
+.speedValue {
+  font-size: 20px;
+}
+
+.speedValue {
+  background: #b3b3b3;
+  padding: 5px 12px;
+  border-radius: 999px;
+}
+
+.speedBox input {
+  width: 100%;
+  accent-color: #7c3cff;
+  cursor: pointer;
+}
+
+.emptyWrapper {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.emptyCard {
+  width: 420px;
+  background: white;
+  border-radius: 20px;
+  padding: 35px;
+  text-align: center;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+.emptyImage {
+  width: 160px;
+  margin-bottom: 16px;
+}
+
+.emptyTitle {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.emptyText {
+  font-size: 15px;
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.emptyBtn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 12px;
+  background: #d7a7ff;
+  color: white;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 900px) {
+  .matchingWrapper {
+    gap: 12px;
+  }
+
+  table {
+    width: 50%;
+  }
+
+  .card {
+    padding: 12px;
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 768px) {
+  .quizAppContainer {
+    width: 100%;
+  }
+
+  .matchingWrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    width: 100%;
+  }
+
+  table {
+    width: 100%;
+  }
+
+  td {
+    padding: 6px;
+  }
+
+  .card {
+    min-height: 70px;
+    font-size: 18px;
+    padding: 10px;
+    border-radius: 14px;
+  }
+
+  .cardAudioBtn {
+    width: 24px;
+    height: 24px;
+  }
+
+  .cardAudioBtn i {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .matchingWrapper {
+    gap: 6px;
+  }
+
+  .card {
+    font-size: 16px;
+    padding: 8px;
+    min-height: 60px;
+  }
+}
+
+/* =========================
+   ACCESSIBILITY MODAL RESPONSIVE
+========================= */
+
+/* iPad */
+@media (max-width: 1024px) {
+  .settingsModal {
+    width: 90%;
+    max-width: 550px;
+  }
+
+  .settingsHeader h2 {
+    font-size: 22px;
+  }
+
+  .settingText strong {
+    font-size: 18px;
+  }
+
+  .settingText span {
+    font-size: 15px;
+  }
+}
+
+/* Phone */
+@media (max-width: 768px) {
+  .settingsOverlay {
+    padding: 15px;
+  }
+
+  .settingsModal {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 20px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .settingsHeader {
+    padding: 16px;
+  }
+
+  .settingsHeader h2 {
+    font-size: 20px;
+  }
+
+  .settingsBody {
+    padding: 16px;
+  }
+
+  .settingRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .settingInfo {
+    width: 100%;
+  }
+
+  .switchBtn,
+  .switchOn {
+    width: 100%;
+    height: 42px;
+    font-size: 18px;
+  }
+
+  .speedHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .speedHeader label {
+    font-size: 18px;
+  }
+
+  .speedValue {
+    font-size: 16px;
+  }
+
+  .settingIcon {
+    width: 34px;
+    height: 34px;
+    font-size: 18px;
+  }
+}
+
+/* Small Phones */
+@media (max-width: 480px) {
+  .settingsModal {
+    border-radius: 16px;
+  }
+
+  .settingsHeader h2 {
+    font-size: 18px;
+  }
+
+  .settingText strong {
+    font-size: 16px;
+  }
+
+  .settingText span {
+    font-size: 13px;
+  }
+
+  .switchBtn,
+  .switchOn {
+    font-size: 16px;
+    height: 40px;
+  }
+
+  .speedHeader label,
+  .speedValue {
+    font-size: 14px;
+  }
+
+  .closeSettings {
+    width: 32px;
+    height: 32px;
+    font-size: 20px;
+  }
+}
+
+.checkpointWrapper {
+  width: min(92%, 980px);
+  margin: 42px auto 0;
+  padding: 34px;
+  box-sizing: border-box;
+  border-radius: 28px;
+  background: #ffffff;
+  border: 1px solid #cfcfcf;
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.checkpointHeader {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.checkpointEyebrow {
+  display: block;
+  margin-bottom: 8px;
+  color: #696969;
+  font-size: 18px;
+}
+
+.checkpointHeader h2 {
+  margin: 0 0 18px;
+  color: var(--font-color);
+  font-size: 32px;
+  font-weight: normal;
+}
+
+.checkpointProgressBar {
+  height: 9px;
+  width: 100%;
+  background: #ddd;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 0 auto 10px;
+}
+
+.checkpointProgressFill {
+  height: 100%;
+  background: #dba8ff;
+  border-radius: 10px;
+  transition: width 0.4s ease;
+}
+
+.checkpointQuestionCount {
+  font-size: 18px;
+  color: #444;
+}
+
+.checkpointCards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  max-height: 340px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.checkpointCard {
+  min-height: 84px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid #dfdfdf;
+  background: #f8f8f8;
+  box-sizing: border-box;
+}
+
+.checkpointCard span {
+  display: block;
+  margin-bottom: 8px;
+  color: #7c3cff;
+  font-size: 16px;
+}
+
+.checkpointCard p {
+  margin: 0;
+  color: #222;
+  font-size: 20px;
+  line-height: 1.25;
+  overflow-wrap: break-word;
+}
+
+.checkpointActions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 26px;
+}
+
+.checkpointActions button {
+  min-width: 130px;
+  padding: 10px 18px;
+  border-radius: 18px;
+  border: 1px solid #8f7cc9;
+  background: #a997dd;
+  box-shadow: 0 4px 0 #8f7cc9;
+  color: #ffffff;
+  cursor: pointer;
+  font-family: "Jersey 15", sans-serif;
+  font-size: 18px;
+  transition: 0.2s ease;
+}
+
+.checkpointActions button:hover {
+  transform: translateY(-2px);
+}
+
+.checkpointActions button:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
+}
+
+.checkpointActions .repeatCardsBtn {
+  border-color: #b63f3f;
+  background: #e65f5f;
+  box-shadow: 0 4px 0 #b63f3f;
+}
+
+.checkpointActions .nextCardsBtn {
+  border-color: #3f9f62;
+  background: #5fcf83;
+  box-shadow: 0 4px 0 #3f9f62;
+}
+
+.checkpointActions .doneCardsBtn {
+  border-color: #7f7f86;
+  background: #a9a9b1;
+  box-shadow: 0 4px 0 #7f7f86;
+}
+
+@media (max-width: 700px) {
+  .checkpointWrapper {
+    width: min(94%, 980px);
+    padding: 22px;
+  }
+
+  .checkpointCards {
+    grid-template-columns: 1fr;
+  }
+
+  .checkpointCard p {
+    font-size: 17px;
+  }
+
+  .checkpointActions button {
+    min-width: 116px;
+    font-size: 16px;
+  }
+}

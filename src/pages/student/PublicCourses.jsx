@@ -1,16 +1,23 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 import { Avatar, Icon, SortToggle } from './EnrolledCourses';
 import JoinCourseModal from './JoinCourseModal';
 import {
   PROFESSOR_COURSES_EVENT,
 } from '../professor/professorData';
 import {
-  enrollStudentInCourse,
+  enrollStudentInCourseAsync,
   getPublicStudentCourses,
   findJoinableCourseByCodeAsync,
   loadPublicStudentCourses,
 } from './studentCourseData';
+import {
+  clearStudentSession,
+  getStudentAccountLabel,
+  getStudentProfileHandle,
+  useStudentProfile,
+} from './studentProfileData';
 import './EnrolledCourses.css';
 
 
@@ -41,6 +48,14 @@ const notificationItems = [
   },
 ];
 
+function getCourseTitle(course) {
+  return course.title || course.courseName || course.course_name || 'Untitled course';
+}
+
+function getProfessorDepartment(course) {
+  return course.professorDepartment || course.professor_department || 'Department not set';
+}
+
 export default function PublicCourses() {
   const navigate = useNavigate();
   const [joinModalOpen, setJoinModalOpen] = useState(false);
@@ -54,6 +69,7 @@ export default function PublicCourses() {
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
   const [notifications, setNotifications] = useState(notificationItems);
+  const studentProfile = useStudentProfile();
 
   useEffect(() => {
     const closeOpenMenus = (event) => {
@@ -126,9 +142,28 @@ export default function PublicCourses() {
     setCourseCode('');
   };
 
-  const startLearning = (course) => {
-    enrollStudentInCourse(course);
-    navigate(`/introduction/${course.id || course.course_id || course.code}`);
+  const confirmEnrollment = async (course) => {
+    const courseTitle = getCourseTitle(course);
+
+    const result = await Swal.fire({
+      icon: 'question',
+      title: 'Enroll in this course?',
+      text: `Do you want to enroll on this course? '${courseTitle}'`,
+      showCancelButton: true,
+      confirmButtonText: 'Yes',
+      cancelButtonText: 'No',
+      confirmButtonColor: '#25714E',
+      cancelButtonColor: '#858d9b',
+    });
+
+    if (!result.isConfirmed) {
+      return false;
+    }
+
+    await enrollStudentInCourseAsync(course);
+    navigate('/student/enrolled-courses');
+
+    return true;
   };
 
   const joinByCourseCode = async () => {
@@ -139,8 +174,11 @@ export default function PublicCourses() {
       return;
     }
 
-    closeJoinModal();
-    startLearning(course);
+    const enrolled = await confirmEnrollment(course);
+
+    if (enrolled) {
+      closeJoinModal();
+    }
   };
 
   const unreadNotificationCount = notifications.filter(
@@ -164,6 +202,15 @@ export default function PublicCourses() {
           : notification,
       ),
     );
+  };
+
+  const profileHandle = getStudentProfileHandle(studentProfile);
+  const accountLabel = getStudentAccountLabel(studentProfile);
+
+  const handleLogout = () => {
+    setProfileMenuOpen(false);
+    clearStudentSession();
+    navigate('/login');
   };
 
   return (
@@ -263,6 +310,7 @@ export default function PublicCourses() {
             type="button"
             className="logout-button"
             title={sidebarCollapsed ? 'Log-out' : undefined}
+            onClick={handleLogout}
           >
             <span
               className="logout-icon"
@@ -447,12 +495,12 @@ export default function PublicCourses() {
                 aria-label="Open your profile"
               >
                 <span className="profile-avatar">
-                  <Avatar />
+                  <Avatar src={studentProfile.profileImage} alt="" />
                   <span className="profile-status-dot" />
                 </span>
 
                 <span className="profile-user-info">
-                  <strong>@meiko</strong>
+                  <strong>{profileHandle}</strong>
                   <small>Student</small>
                 </span>
               </button>
@@ -486,11 +534,11 @@ export default function PublicCourses() {
                 onClick={(event) => event.stopPropagation()}
               >
                 <div className="profile-dropdown-header">
-                  <Avatar />
+                  <Avatar src={studentProfile.profileImage} alt="" />
 
                   <div>
-                    <strong>@meiko</strong>
-                    <span>Student account</span>
+                    <strong>{profileHandle}</strong>
+                    <span>{accountLabel}</span>
                   </div>
                 </div>
 
@@ -531,14 +579,7 @@ export default function PublicCourses() {
                 <button
                   type="button"
                   className="profile-logout-option"
-                  onClick={() => {
-                    setProfileMenuOpen(false);
-
-                    localStorage.removeItem('token');
-                    sessionStorage.clear();
-
-                    navigate('/login');
-                  }}
+                  onClick={handleLogout}
                 >
                   <svg viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M10 5H5v14h5" />
@@ -575,27 +616,34 @@ export default function PublicCourses() {
             <div className="student-empty-state">No public courses available yet.</div>
           ) : (
             publicCourses.map((course) => (
-              <article key={course.id} className="course-folder public-course-folder">
+              <article
+                key={course.id || course.course_id || course.code}
+                className="course-folder public-course-folder"
+              >
                 <button
                   type="button"
                   className="add-course-button"
-                  aria-label="Add public course"
-                  onClick={() => startLearning(course)}
+                  aria-label={`Enroll in ${getCourseTitle(course)}`}
+                  onClick={() => confirmEnrollment(course)}
                 >
                   +
                 </button>
                 <div className="course-card-body">
-                  <h2>{course.code} - {course.title}</h2>
+                  <h2>{getCourseTitle(course)}</h2>
                 </div>
                 <div className="course-card-footer">
                   <Avatar />
-                  <span>{course.instructor}</span>
+                  <div className="public-course-meta">
+                    <span>{course.instructor}</span>
+                    <small>{getProfessorDepartment(course)}</small>
+                  </div>
                   <button
                     type="button"
                     className="start-learning-button"
-                    onClick={() => startLearning(course)}
+                    onClick={() => confirmEnrollment(course)}
+                    aria-label={`Enroll in ${getCourseTitle(course)}`}
                   >
-                    Start Learning
+                    Enroll
                   </button>
                 </div>
               </article>

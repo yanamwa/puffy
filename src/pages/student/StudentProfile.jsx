@@ -3,9 +3,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Avatar, Icon } from './EnrolledCourses';
 import JoinCourseModal from './JoinCourseModal';
 import {
-  enrollStudentInCourse,
+  enrollStudentInCourseAsync,
   findJoinableCourseByCodeAsync,
 } from './studentCourseData';
+import { API_BASE } from '../../config.js';
 import './EnrolledCourses.css';
 
 const notificationItems = [
@@ -38,15 +39,120 @@ const notificationItems = [
   },
 ];
 
-const temporaryStudentData = {
-  name: 'Meiko Santos',
-  studentNumber: '2026-001234',
-  year: '3rd Year',
-  section: 'BSIT 3A',
-  email: 'meiko.santos@puffybrain.fun',
-  course: 'Bachelor of Science in Information Technology',
-  temporaryPassword: 'PuffyBrain@2026',
-};
+const DEFAULT_PROFILE_IMAGE = '/images/temporary profile.jpg';
+
+function cleanText(value) {
+  return String(value || '').trim();
+}
+
+function valueOrFallback(value, fallback) {
+  const cleaned = cleanText(value);
+  return cleaned || fallback;
+}
+
+function normalizeProfileImage(image) {
+  const cleaned = cleanText(image);
+
+  if (!cleaned || cleaned.includes('temporary profile.jpg')) {
+    return DEFAULT_PROFILE_IMAGE;
+  }
+
+  if (
+    cleaned.startsWith('blob:') ||
+    cleaned.startsWith('http://') ||
+    cleaned.startsWith('https://') ||
+    cleaned.startsWith('/images/')
+  ) {
+    return cleaned;
+  }
+
+  return `${API_BASE}/${cleaned.replace(/^\/+/, '')}`;
+}
+
+function getStoredToken() {
+  return (
+    localStorage.getItem('puffy-token') ||
+    localStorage.getItem('token') ||
+    localStorage.getItem('authToken') ||
+    sessionStorage.getItem('puffy-token') ||
+    sessionStorage.getItem('token') ||
+    sessionStorage.getItem('authToken') ||
+    ''
+  );
+}
+
+function getStoredUser() {
+  const storageKeys = ['puffy-user', 'user', 'currentUser'];
+
+  for (const key of storageKeys) {
+    const rawUser =
+      localStorage.getItem(key) || sessionStorage.getItem(key);
+
+    if (!rawUser) continue;
+
+    try {
+      return JSON.parse(rawUser);
+    } catch (error) {
+      console.error('Unable to read stored student profile:', error);
+    }
+  }
+
+  return {
+    displayName: localStorage.getItem('username') || '',
+    email: localStorage.getItem('user_email') || '',
+    role: localStorage.getItem('user_role') || 'student',
+    yearLevel: localStorage.getItem('year_level') || '',
+    sectionName: localStorage.getItem('section_name') || '',
+  };
+}
+
+function buildStudentProfile(user = {}) {
+  const displayName =
+    user.displayName ||
+    user.display_name ||
+    user.name ||
+    user.username;
+
+  return {
+    name: valueOrFallback(displayName, 'Student'),
+    studentNumber: valueOrFallback(
+      user.studentId ||
+        user.student_id ||
+        user.verificationId ||
+        user.verification_id,
+      'Student number not set',
+    ),
+    year: valueOrFallback(
+      user.yearLevel || user.year_level,
+      'Year level not set',
+    ),
+    section: valueOrFallback(
+      user.sectionName || user.section_name,
+      'Section not set',
+    ),
+    email: valueOrFallback(user.email, 'Email not set'),
+    course: valueOrFallback(
+      user.program ||
+        user.programName ||
+        user.program_name ||
+        user.course ||
+        user.courseName ||
+        user.course_name,
+      'Program not set',
+    ),
+    temporaryPassword: cleanText(
+      user.temporaryPassword || user.temporary_password,
+    ),
+    profileImage: normalizeProfileImage(
+      user.profileImage || user.profile_image,
+    ),
+  };
+}
+
+function getProfileHandle(name) {
+  const cleanedName = cleanText(name);
+  return cleanedName ? `@${cleanedName}` : '@student';
+}
 
 export default function StudentProfile() {
   const navigate = useNavigate();
@@ -60,13 +166,91 @@ export default function StudentProfile() {
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
   const [notifications, setNotifications] = useState(notificationItems);
+  const [studentProfile, setStudentProfile] = useState(() =>
+    buildStudentProfile(getStoredUser()),
+  );
 
   const [showTemporaryPassword, setShowTemporaryPassword] =
     useState(false);
 
   const [profileImage, setProfileImage] = useState(
-    '/images/temporary profile.jpg',
+    () => studentProfile.profileImage,
   );
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadStudentProfile() {
+      const token = getStoredToken();
+
+      if (!token) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE}/users/me`, {
+          method: 'GET',
+          headers: {
+            Accept: 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          throw new Error(
+            data.message || 'Could not load your student profile.',
+          );
+        }
+
+        const loadedUser = data.user || data.data || null;
+
+        if (!active || !loadedUser) {
+          return;
+        }
+
+        const nextProfile = buildStudentProfile(loadedUser);
+
+        setStudentProfile(nextProfile);
+        setProfileImage((currentImage) =>
+          currentImage?.startsWith('blob:')
+            ? currentImage
+            : nextProfile.profileImage,
+        );
+
+        localStorage.setItem('puffy-user', JSON.stringify(loadedUser));
+        localStorage.setItem('user', JSON.stringify(loadedUser));
+        localStorage.setItem('currentUser', JSON.stringify(loadedUser));
+        localStorage.setItem('user_role', loadedUser.role || 'student');
+        localStorage.setItem('user_email', cleanText(loadedUser.email));
+        localStorage.setItem(
+          'username',
+          cleanText(
+            loadedUser.displayName ||
+              loadedUser.display_name ||
+              loadedUser.name,
+          ),
+        );
+        localStorage.setItem(
+          'year_level',
+          cleanText(loadedUser.yearLevel || loadedUser.year_level),
+        );
+        localStorage.setItem(
+          'section_name',
+          cleanText(loadedUser.sectionName || loadedUser.section_name),
+        );
+      } catch (error) {
+        console.error('Student profile loading error:', error);
+      }
+    }
+
+    loadStudentProfile();
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     const closeOpenMenus = (event) => {
@@ -106,6 +290,16 @@ export default function StudentProfile() {
   const unreadNotificationCount = notifications.filter(
     (notification) => notification.unread,
   ).length;
+  const profileHandle = getProfileHandle(studentProfile.name);
+  const profileAccountLabel =
+    studentProfile.email === 'Email not set'
+      ? 'Student account'
+      : studentProfile.email;
+  const temporaryPasswordText =
+    studentProfile.temporaryPassword || 'Not available';
+  const hiddenTemporaryPasswordText = studentProfile.temporaryPassword
+    ? '**************'
+    : 'Not available';
 
   const toggleSidebar = () => {
     setSidebarCollapsed((currentValue) => {
@@ -135,7 +329,7 @@ export default function StudentProfile() {
       return;
     }
 
-    enrollStudentInCourse(course);
+    await enrollStudentInCourseAsync(course);
     closeJoinModal();
 
     navigate(
@@ -207,7 +401,19 @@ export default function StudentProfile() {
   };
 
   const logOut = () => {
-    localStorage.removeItem('token');
+    [
+      'puffy-token',
+      'puffy-user',
+      'token',
+      'authToken',
+      'user',
+      'currentUser',
+      'user_email',
+      'user_role',
+      'username',
+      'year_level',
+      'section_name',
+    ].forEach((key) => localStorage.removeItem(key));
     sessionStorage.clear();
 
     navigate('/login');
@@ -551,13 +757,13 @@ export default function StudentProfile() {
                   aria-label="Open your profile"
                 >
                   <span className="profile-avatar">
-                    <Avatar />
+                    <Avatar src={profileImage} alt="" />
 
                     <span className="profile-status-dot" />
                   </span>
 
                   <span className="profile-user-info">
-                    <strong>@meiko</strong>
+                    <strong>{profileHandle}</strong>
                     <small>Student</small>
                   </span>
                 </button>
@@ -615,11 +821,11 @@ export default function StudentProfile() {
                   }
                 >
                   <div className="profile-dropdown-header">
-                    <Avatar />
+                    <Avatar src={profileImage} alt="" />
 
                     <div>
-                      <strong>@meiko</strong>
-                      <span>Student account</span>
+                      <strong>{profileHandle}</strong>
+                      <span>{profileAccountLabel}</span>
                     </div>
                   </div>
 
@@ -727,7 +933,7 @@ export default function StudentProfile() {
         <div className="student-id-photo-frame">
           <img
             src={profileImage}
-            alt={`${temporaryStudentData.name}'s profile`}
+            alt={`${studentProfile.name}'s profile`}
             className="student-id-photo"
           />
 
@@ -758,18 +964,18 @@ export default function StudentProfile() {
             Official student profile
           </span>
 
-          <h2>{temporaryStudentData.name}</h2>
+          <h2>{studentProfile.name}</h2>
 
           <strong className="student-identity-number">
-            {temporaryStudentData.studentNumber}
+            {studentProfile.studentNumber}
           </strong>
 
-          <p>{temporaryStudentData.course}</p>
+          <p>{studentProfile.course}</p>
 
           <div className="student-identity-academic-row">
-            <span>{temporaryStudentData.year}</span>
+            <span>{studentProfile.year}</span>
             <i aria-hidden="true" />
-            <span>{temporaryStudentData.section}</span>
+            <span>{studentProfile.section}</span>
           </div>
         </div>
       </div>
@@ -848,7 +1054,7 @@ export default function StudentProfile() {
               Full Name
             </span>
 
-            <strong>{temporaryStudentData.name}</strong>
+            <strong>{studentProfile.name}</strong>
           </div>
 
           <div className="student-info-item">
@@ -857,7 +1063,7 @@ export default function StudentProfile() {
             </span>
 
             <strong>
-              {temporaryStudentData.studentNumber}
+              {studentProfile.studentNumber}
             </strong>
           </div>
 
@@ -866,7 +1072,7 @@ export default function StudentProfile() {
               Email Address
             </span>
 
-            <strong>{temporaryStudentData.email}</strong>
+            <strong>{studentProfile.email}</strong>
           </div>
         </div>
       </section>
@@ -896,7 +1102,7 @@ export default function StudentProfile() {
               Course
             </span>
 
-            <strong>{temporaryStudentData.course}</strong>
+            <strong>{studentProfile.course}</strong>
           </div>
 
           <div className="student-info-item">
@@ -904,7 +1110,7 @@ export default function StudentProfile() {
               Year Level
             </span>
 
-            <strong>{temporaryStudentData.year}</strong>
+            <strong>{studentProfile.year}</strong>
           </div>
 
           <div className="student-info-item">
@@ -912,7 +1118,7 @@ export default function StudentProfile() {
               Section
             </span>
 
-            <strong>{temporaryStudentData.section}</strong>
+            <strong>{studentProfile.section}</strong>
           </div>
         </div>
       </section>
@@ -956,8 +1162,8 @@ export default function StudentProfile() {
               }
             >
               {showTemporaryPassword
-                ? temporaryStudentData.temporaryPassword
-                : '••••••••••••••'}
+                ? temporaryPasswordText
+                : hiddenTemporaryPasswordText}
             </strong>
           </div>
 

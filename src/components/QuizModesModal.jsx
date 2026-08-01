@@ -15,13 +15,49 @@ function resolveModeImage(mode) {
 }
 
 function getModeKind(mode) {
-  const text = `${mode.title || ""} ${mode.mode_name || ""} ${mode.route || ""}`.toLowerCase();
+  const text = `${mode.kind || ""} ${mode.quizMode || ""} ${
+    mode.title || ""
+  } ${mode.mode_name || ""} ${mode.route || ""}`.toLowerCase();
 
+  if (text.includes("survival")) return "survival";
   if (text.includes("timed")) return "timed";
   if (text.includes("multiple")) return "multiple";
   if (text.includes("matching")) return "matching";
   if (text.includes("q")) return "qna";
   return "flashcard";
+}
+
+const modeRouteFallbacks = {
+  flashcard: "/flashcards-tutorial",
+  qna: "/QandA-tutorial",
+  multiple: "/multipleChoice-tutorial",
+  matching: "/Matching-tutorial",
+  timed: "/timedquiz-tutorial",
+  survival: "/survival-tutorial",
+};
+
+function getModeRoute(mode, modeKind) {
+  const route = String(mode.route || "").trim();
+  return route || modeRouteFallbacks[modeKind] || modeRouteFallbacks.flashcard;
+}
+
+function buildPracticeRoute(route, source, id) {
+  const cleanRoute = String(route || "").replace(/\/+$/, "");
+
+  if (!cleanRoute) return "";
+  if (!id) return cleanRoute;
+
+  if (cleanRoute.includes(":lessonId")) {
+    return cleanRoute.replace(":lessonId", encodeURIComponent(id));
+  }
+
+  if (cleanRoute.includes(":deckId")) {
+    return cleanRoute.replace(":deckId", encodeURIComponent(id));
+  }
+
+  return `${cleanRoute}/${source === "deck" ? "deck" : "lesson"}/${encodeURIComponent(
+    id
+  )}`;
 }
 
 export default function QuizModesModal({
@@ -37,7 +73,7 @@ export default function QuizModesModal({
   const [loading, setLoading] = useState(true);
 
   const isDeck = source === "deck";
-  const isLesson = source === "lesson";
+  const isLesson = ["lesson", "module", "course"].includes(source);
 
   useEffect(() => {
     let active = true;
@@ -88,9 +124,11 @@ export default function QuizModesModal({
 
   const handleStartPractice = (mode) => {
     const modeKind = getModeKind(mode);
+    const route = getModeRoute(mode, modeKind);
     const selectedMode = {
       ...mode,
       quizMode: modeKind,
+      route,
     };
 
     if (modeKind === "timed") {
@@ -106,8 +144,10 @@ export default function QuizModesModal({
       localStorage.setItem("practiceDeckId", deckId || "");
       localStorage.setItem("practiceCards", JSON.stringify(cards));
 
-      if (mode.route) {
-        navigate(`${mode.route}/deck/${deckId}`);
+      const nextRoute = buildPracticeRoute(route, "deck", deckId);
+
+      if (nextRoute) {
+        navigate(nextRoute);
       } else {
         onClose?.();
       }
@@ -115,12 +155,14 @@ export default function QuizModesModal({
     }
 
     if (isLesson) {
-      localStorage.setItem("practiceSource", "lesson");
+      localStorage.setItem("practiceSource", source || "lesson");
       localStorage.setItem("practiceLessonId", lessonId || "");
       localStorage.setItem("practiceQuizzes", JSON.stringify(quizzes));
 
-      if (mode.route) {
-        navigate(`${mode.route}/lesson/${lessonId}`);
+      const nextRoute = buildPracticeRoute(route, source || "lesson", lessonId);
+
+      if (nextRoute) {
+        navigate(nextRoute);
       } else {
         onClose?.();
       }

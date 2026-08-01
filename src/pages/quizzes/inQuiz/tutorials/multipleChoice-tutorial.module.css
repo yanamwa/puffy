@@ -1,0 +1,535 @@
+/* =========================
+   MULTIPLE CHOICE UPDATED
+========================= */
+
+:root {
+  --color-primary: #EBD3FA;
+  --color-secondary: #b26adf;
+  --color-shadow: rgba(0,0,0,0.15);
+}
+
+/* =========================
+   PAGE
+========================= */
+
+.page {
+  width: 100%;
+  min-height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  background-image: url("/images/background_notebook.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  padding-bottom: 40px;
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.headerBox {
+  width: 70%;
+
+  margin: 50px auto 30px;
+
+  background: #fff;
+
+  border-radius: 40px;
+
+  padding: 100px 20px 35px;
+
+  text-align: center;
+
+  position: relative;
+
+  box-shadow: 5px 8px 0px var(--color-shadow);
+}
+
+.headerTop {
+  width: 100%;
+  height: 90px;
+
+  background: #e3c2ff;
+
+  border-top-left-radius: 40px;
+  border-top-right-radius: 40px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.title {
+  font-family: 'Jersey 15', sans-serif;
+
+  font-size: 48px;
+
+  font-weight: normal;
+  font-style: normal;
+
+  color: #111;
+}
+
+.subtitles {
+  margin-top: 10px;
+}
+
+.subtitle {
+  font-size: 18px;
+
+  margin: 5px 0;
+
+  color: #222;
+
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* =========================
+   START BUTTON
+========================= */
+
+.startBtn {
+  margin-top: 20px;
+  width: 60%;
+  padding: 14px;
+}
+
+.startBtn {
+  background: #9f89c2;
+  border: 1px solid #533a7a;
+  box-shadow: 0 4px rgb(114, 90, 153);
+  padding: 10px 35px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-family: "Jersey 15", sans-serif;
+  font-size: 24px;
+  color: white;
+  font-weight: normal;
+  font-size: normal;
+  transition: 0.2s ease;
+}
+
+.startBtn:hover {
+  transform: translateY(-2px);
+}
+
+.startBtn:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px rgb(162, 140, 197);
+}
+
+/* =========================
+   SLIDESHOW BOX
+========================= */
+
+.slideshowBox {
+  width: 70%;
+
+  margin: 20px auto;
+
+  background: #fff;
+
+  padding: 40px 30px;
+
+  border-radius: 40px;
+
+  text-align: center;
+
+  box-shadow: 0 8px 20px var(--color-shadow);
+
+  position: relative;
+}
+
+/* =========================
+   SLIDES
+========================= */
+
+.slide {
+  opacity: 0;
+  visibility: hidden;
+
+  position: absolute;
+
+  width: 100%;
+
+  transition: opacity 0.6s ease;
+}
+
+.slide.active {
+  opacity: 1;
+  visibility: visible;
+
+  position: relative;
+}
+
+/* =========================
+   QUESTION
+========================= */
+
+.question {
+  width: 85%;
+
+  margin: 0 auto 25px;
+
+  padding: 18px;
+
+  border: 2px solid #b26adf;
+
+  border-radius: 18px;
+
+  background: white;
+
+  font-size: 22px;
+
+  font-weight: normal;
+  font-style: normal;
+
+  color: #111;
+
+  box-shadow: 0 4px rgb(220,220,220);
+}
+
+/* =========================
+   OPTIONS
+========================= */
+
+.options {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  gap: 16px;
+}
+
+.options button {
+  width: 55%;
+
+  padding: 16px;
+
+  border-radius: 18px;
+
+  border: 2px solid #b26adf;
+
+  background: #fff;
+
+  font-size: 18px;
+
+  font-family: inherit;
+
+  font-weight: normal;
+  font-style: normal;
+
+  color: #222;
+
+  cursor: pointer;
+
+  box-shadow: 0 4px rgb(220,220,220);
+
+  transition: 0.25s ease;
+}
+
+.options button:hover {
+  transform: translateY(-2px);
+  background: #f8f4ff;
+}
+
+/* =========================
+   CORRECT / WRONG
+========================= */
+
+.correct {
+  background-color: #8fffa1 !important;
+  border-color: #3abf51 !important;
+  color: #000;
+}
+
+.wrong {
+  background-color: #ff9e9e !important;
+  border-color: #d64545 !important;
+  color: #000;
+}
+
+/* =========================
+   RESULT TEXT
+========================= */
+
+.correctText {
+  margin-top: 15px;
+
+  color: #1f9d39;
+
+  font-size: 18px;
+
+  font-weight: normal;
+}
+
+.wrongText {
+  margin-top: 15px;
+
+  color: #d11a2a;
+
+  font-size: 18px;
+
+  font-weight: normal;
+}
+
+/* =========================
+   DOTS
+========================= */
+
+.dots {
+  margin-top: 20px;
+}
+
+.dot {
+  height: 10px;
+  width: 10px;
+
+  background: #d7c1f3;
+
+  border-radius: 50%;
+
+  display: inline-block;
+
+  margin: 0 4px;
+
+  transition: 0.3s;
+}
+
+.activeDot {
+  background: #b26adf;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 768px) {
+
+  .headerBox,
+  .slideshowBox {
+    width: 95%;
+  }
+
+  .title {
+    font-size: 34px;
+  }
+
+  .subtitle {
+    font-size: 15px;
+  }
+
+  .question {
+    width: 100%;
+    font-size: 16px;
+    padding: 15px;
+  }
+
+  .options button {
+    width: 100%;
+    font-size: 15px;
+    padding: 14px;
+  }
+
+  .startBtn {
+    width: 80%;
+    font-size: 18px;
+  }
+
+  .slideshowBox {
+    padding: 30px 18px;
+  }
+}
+
+.introScreen {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: #efd9ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.multipleIntroImage {
+  width: 380px;
+  height: auto;
+  image-rendering: pixelated;
+  animation: multiplePop 0.2s ease;
+}
+
+.circleLoader {
+  width: 10px;
+  height: 10px;
+  background: white;
+  border-radius: 50%;
+  animation: growCircle 0.7s ease-out forwards;
+}
+
+@keyframes multiplePop {
+  from {
+    transform: scale(0.9);
+    opacity: 0.7;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes growCircle {
+  0% {
+    width: 8px;
+    height: 8px;
+  }
+
+  35% {
+    width: 55px;
+    height: 55px;
+  }
+
+  70% {
+    width: 170px;
+    height: 170px;
+  }
+
+  100% {
+    width: 1400px;
+    height: 1400px;
+  }
+}
+
+.page {
+  padding: 20px;
+}
+
+.headerBox,
+.slideshowBox {
+  max-width: 950px;
+}
+
+.question,
+.options button {
+  max-width: 100%;
+  word-wrap: break-word;
+}
+
+@media (max-width: 1024px) {
+  .headerBox,
+  .slideshowBox {
+    width: 85%;
+  }
+
+  .title {
+    font-size: 42px;
+  }
+
+  .options button {
+    width: 70%;
+  }
+}
+
+@media (max-width: 768px) {
+  .page {
+    padding: 15px;
+  }
+
+  .headerBox,
+  .slideshowBox {
+    width: 100%;
+    border-radius: 28px;
+  }
+
+  .headerBox {
+    margin: 25px auto 20px;
+    padding: 90px 18px 28px;
+  }
+
+  .headerTop {
+    height: 75px;
+    border-top-left-radius: 28px;
+    border-top-right-radius: 28px;
+  }
+
+  .title {
+    font-size: 34px;
+    line-height: 1;
+  }
+
+  .subtitle {
+    font-size: 15px;
+  }
+
+  .slideshowBox {
+    padding: 25px 16px;
+  }
+
+  .question {
+    width: 100%;
+    font-size: 16px;
+    padding: 14px;
+  }
+
+  .options button {
+    width: 100%;
+    font-size: 15px;
+    padding: 13px;
+  }
+
+  .startBtn {
+    width: 90%;
+    font-size: 20px;
+  }
+
+  .multipleIntroImage {
+    width: 75%;
+    max-width: 320px;
+  }
+}
+
+@media (max-width: 480px) {
+  .headerBox {
+    padding-top: 80px;
+  }
+
+  .headerTop {
+    height: 65px;
+  }
+
+  .title {
+    font-size: 28px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+  }
+
+  .question {
+    font-size: 15px;
+  }
+
+  .options {
+    gap: 12px;
+  }
+
+  .options button {
+    font-size: 14px;
+  }
+
+  .startBtn {
+    font-size: 18px;
+    padding: 10px 20px;
+  }
+}

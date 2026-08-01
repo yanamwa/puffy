@@ -2,6 +2,12 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Avatar, Icon } from './EnrolledCourses';
 import JoinCourseModal from './JoinCourseModal';
+import { API_BASE } from '../../config.js';
+import {
+  getStudentAccountLabel,
+  getStudentProfileHandle,
+  useStudentProfile,
+} from './studentProfileData';
 import './EnrolledCourses.css';
 
 const notificationItems = [
@@ -70,6 +76,9 @@ function clearStudentSession() {
   localStorage.removeItem('section_name');
   localStorage.removeItem('school_name');
   localStorage.removeItem('token');
+  localStorage.removeItem('authToken');
+  localStorage.removeItem('user');
+  localStorage.removeItem('currentUser');
   sessionStorage.clear();
 }
 
@@ -78,7 +87,11 @@ export default function StudentSettings() {
 
   const [joinModalOpen, setJoinModalOpen] = useState(false);
   const [courseCode, setCourseCode] = useState('');
-  const [studentAccount] = useState(getStudentAccount);
+  const studentProfile = useStudentProfile();
+  const studentAccount = {
+    fullName: studentProfile.name === 'Student' ? '' : studentProfile.name,
+    email: studentProfile.email === 'Email not set' ? '' : studentProfile.email,
+  };
   const [passwordForm, setPasswordForm] = useState(initialPasswordForm);
   const [visiblePasswords, setVisiblePasswords] = useState({
     currentPassword: false,
@@ -163,20 +176,29 @@ export default function StudentSettings() {
       return;
     }
 
+    if (!studentAccount.email) {
+      setPasswordNotice({
+        type: 'error',
+        message: 'Your account email was not found. Please log in again.',
+      });
+      return;
+    }
+
     setIsSubmittingPassword(true);
 
     try {
       const token =
         localStorage.getItem('puffy-token') || localStorage.getItem('token');
 
-      const response = await fetch('/api/change-password', {
-        method: 'PUT',
+      const response = await fetch(`${API_BASE}/users/change-password`, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         credentials: 'include',
         body: JSON.stringify({
+          email: studentAccount.email,
           currentPassword: passwordForm.currentPassword,
           newPassword: passwordForm.newPassword,
         }),
@@ -260,10 +282,8 @@ export default function StudentSettings() {
     );
   };
 
-  const displayUsername = studentAccount.fullName
-    ? `@${studentAccount.fullName.replace(/^@/, '')}`
-    : '@meiko';
-  const accountLabel = studentAccount.email ? 'Student account' : 'Link-only preview';
+  const displayUsername = getStudentProfileHandle(studentProfile);
+  const accountLabel = getStudentAccountLabel(studentProfile);
 
   return (
     <div
@@ -546,7 +566,7 @@ export default function StudentSettings() {
                 aria-label="Open your profile"
               >
                 <span className="profile-avatar">
-                  <Avatar />
+                  <Avatar src={studentProfile.profileImage} alt="" />
                   <span className="profile-status-dot" />
                 </span>
 
@@ -585,7 +605,7 @@ export default function StudentSettings() {
                 onClick={(event) => event.stopPropagation()}
               >
                 <div className="profile-dropdown-header">
-                  <Avatar />
+                  <Avatar src={studentProfile.profileImage} alt="" />
 
                   <div>
                     <strong>{displayUsername}</strong>

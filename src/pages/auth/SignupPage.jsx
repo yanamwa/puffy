@@ -1,23 +1,27 @@
-import styles from "./login.module.css";
 import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 import Swal from "sweetalert2";
-import { useNavigate, Link } from "react-router-dom";
+
 import { API_BASE } from "../../config.js";
-import LandingNavbar from "../../components/LandingNavbar";
+import styles from "./login.module.css";
 
 function Signup() {
   const navigate = useNavigate();
 
-  const [username, setUsername] = useState("");
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
-  const [facultyId, setFacultyId] = useState("");
   const [department, setDepartment] = useState("");
-  const [employmentProof, setEmploymentProof] = useState("");
+  const [employmentProof, setEmploymentProof] = useState(null);
+  const [proofPreview, setProofPreview] = useState("");
+
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] =
+    useState(false);
+
   const [isSigningUp, setIsSigningUp] = useState(false);
 
   const hasLength = password.length >= 12;
@@ -27,9 +31,16 @@ function Signup() {
   const hasSymbol = /[^A-Za-z0-9]/.test(password);
 
   const isPasswordValid =
-    hasLength && hasUpper && hasLower && hasNumber && hasSymbol;
+    hasLength &&
+    hasUpper &&
+    hasLower &&
+    hasNumber &&
+    hasSymbol;
 
-  const passwordsMatch = password === confirmPassword;
+  const passwordsMatch =
+    password.length > 0 &&
+    confirmPassword.length > 0 &&
+    password === confirmPassword;
 
   const showError = (title, text) => {
     Swal.fire({
@@ -44,112 +55,220 @@ function Signup() {
   const getPasswordStrength = (value) => {
     let strength = 0;
 
-    if (value.length >= 12) strength++;
-    if (/[A-Z]/.test(value)) strength++;
-    if (/[a-z]/.test(value)) strength++;
-    if (/[0-9]/.test(value)) strength++;
-    if (/[^A-Za-z0-9]/.test(value)) strength++;
+    if (value.length >= 12) strength += 1;
+    if (/[A-Z]/.test(value)) strength += 1;
+    if (/[a-z]/.test(value)) strength += 1;
+    if (/[0-9]/.test(value)) strength += 1;
+    if (/[^A-Za-z0-9]/.test(value)) strength += 1;
 
     if (strength <= 2) return "weak";
     if (strength <= 4) return "medium";
+
     return "strong";
   };
 
   const resetForm = () => {
-    setUsername("");
+    setFullName("");
     setEmail("");
-    setFacultyId("");
     setDepartment("");
-    setEmploymentProof("");
+    setEmploymentProof(null);
+    setProofPreview("");
     setPassword("");
     setConfirmPassword("");
+    setShowPassword(false);
+    setShowConfirmPassword(false);
   };
 
-  const handleSignup = async () => {
-    if (isSigningUp) return;
+  const handleProofUpload = (event) => {
+    const file = event.target.files?.[0];
 
-    const cleanUsername = username.trim();
-    const cleanEmail = email.trim().toLowerCase();
-
-    if (!cleanUsername) {
-      return showError("Username Required", "Please enter your username.");
+    if (!file) {
+      setEmploymentProof(null);
+      setProofPreview("");
+      return;
     }
+
+    const allowedTypes = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/webp",
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      showError(
+        "Invalid File",
+        "Please upload a JPG, PNG, or WEBP image."
+      );
+
+      event.target.value = "";
+      return;
+    }
+
+    const maximumSize = 5 * 1024 * 1024;
+
+    if (file.size > maximumSize) {
+      showError(
+        "File Too Large",
+        "The uploaded ID photo must not exceed 5 MB."
+      );
+
+      event.target.value = "";
+      return;
+    }
+
+    setEmploymentProof(file);
+    setProofPreview(URL.createObjectURL(file));
+  };
+
+  const removeProofImage = () => {
+    if (proofPreview) {
+      URL.revokeObjectURL(proofPreview);
+    }
+
+    setEmploymentProof(null);
+    setProofPreview("");
+  };
+
+  const handleSignup = async (event) => {
+    event.preventDefault();
+
+    if (isSigningUp) {
+      return;
+    }
+
+    const cleanFullName = fullName.trim();
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanDepartment = department.trim();
+
+if (!cleanFullName) {
+  showError(
+    "Full Name Required",
+    "Please enter your full name."
+  );
+  return;
+}
 
     if (!cleanEmail) {
-      return showError("Email Required", "Please enter your email.");
+      showError(
+        "Email Required",
+        "Please enter your email."
+      );
+      return;
     }
 
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailPattern =
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!emailPattern.test(cleanEmail)) {
-      return showError("Invalid Email", "Please enter a valid email address.");
-    }
-
-    if (!facultyId.trim()) {
-      return showError(
-        "Faculty ID Required",
-        "Please enter your employee or faculty ID."
+      showError(
+        "Invalid Email",
+        "Please enter a valid email address."
       );
+      return;
     }
 
-    if (!department.trim()) {
-      return showError("Department Required", "Please enter your department.");
+    if (!cleanDepartment) {
+      showError(
+        "Department Required",
+        "Please select your department."
+      );
+      return;
+    }
+
+    if (!employmentProof) {
+      showError(
+        "ID Photo Required",
+        "Please upload a clear photo of your faculty or employee ID."
+      );
+      return;
     }
 
     if (!password) {
-      return showError("Password Required", "Please enter your password.");
+      showError(
+        "Password Required",
+        "Please enter your password."
+      );
+      return;
     }
 
     if (!isPasswordValid) {
-      return showError(
+      showError(
         "Weak Password",
         "Password must meet all security requirements."
       );
+      return;
     }
 
     if (!confirmPassword) {
-      return showError(
+      showError(
         "Confirm Password Required",
         "Please confirm your password."
       );
+      return;
     }
 
-    if (!passwordsMatch) {
-      return showError("Password Mismatch", "Passwords do not match.");
+    if (password !== confirmPassword) {
+      showError(
+        "Password Mismatch",
+        "Passwords do not match."
+      );
+      return;
     }
 
     try {
       setIsSigningUp(true);
 
-      const res = await fetch(`${API_BASE}/signup`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: cleanUsername,
-          email: cleanEmail,
-          password,
-          role: "professor",
-          facultyId: facultyId.trim(),
-          department: department.trim(),
-          employmentProof: employmentProof.trim(),
-        }),
-      });
+      const formData = new FormData();
 
-      const data = await res.json().catch(() => ({
-        success: false,
-        message: "Server returned an invalid response.",
-      }));
+      formData.append("name", cleanFullName);
+      formData.append("email", cleanEmail);
+      formData.append("password", password);
+      formData.append("role", "professor");
+      formData.append("department", cleanDepartment);
+      formData.append("employmentProof", employmentProof);
 
-      if (!res.ok || !data.success) {
-        return showError(
+      const response = await fetch(
+        `${API_BASE}/signup`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      const data = await response
+        .json()
+        .catch(() => ({
+          success: false,
+          message:
+            "Server returned an invalid response.",
+        }));
+
+      if (!response.ok || !data.success) {
+        showError(
           "Signup Failed",
-          data.message || "Unable to create account."
+          data.message ||
+            "Unable to create account."
         );
+        return;
       }
 
-      sessionStorage.setItem("otp_email", cleanEmail);
+      sessionStorage.setItem(
+        "otp_email",
+        cleanEmail
+      );
+
+      const otpSecondsRemaining = Number(
+        data.otpSecondsRemaining || 300
+      );
+      const otpExpiresAt =
+        Date.now() +
+        Math.max(0, otpSecondsRemaining) * 1000;
+
+      sessionStorage.setItem(
+        "otp_expires_at",
+        String(otpExpiresAt)
+      );
 
       await Swal.fire({
         imageUrl: "/images/success.png",
@@ -157,181 +276,516 @@ function Signup() {
         imageHeight: 170,
         title: "Verification Code Sent",
         text:
-          "Please verify your email. After that, the Super Admin will approve or decline your professor account.",
+          "Please verify your email. After verification, the Super Admin will review your professor account and uploaded ID.",
         confirmButtonText: "Continue",
       });
 
       resetForm();
 
       navigate("/otp", {
-        state: { email: cleanEmail },
+        state: {
+          email: cleanEmail,
+          otpExpiresAt,
+        },
       });
-    } catch (err) {
+    } catch (error) {
+      console.error("SIGNUP ERROR:", error);
+
       showError(
         "Server Error",
-        "Cannot connect to the server. Make sure your Node.js backend is running."
+        "Cannot connect to the server. Make sure your backend is running."
       );
     } finally {
       setIsSigningUp(false);
     }
   };
 
-  const passwordStrength = getPasswordStrength(password);
+  const passwordStrength =
+    getPasswordStrength(password);
 
   return (
     <div className={styles.wrapper}>
       <section className={styles.container}>
-        <div className={styles.background}></div>
-        <LandingNavbar />
+        <div
+          className={styles.background}
+          aria-hidden="true"
+        />
 
-        <div className={styles.signupContainer}>
-          <div className={styles.signupCard} style={{ marginTop: "50px" }}>
-            <div className={styles.roleHeader}>
-              <span className={styles.selectedRolePill}>Professor</span>
-            </div>
-
-            <h2>Create a Professor Account</h2>
-            <p className={styles.roleIntro}>
-              Register your professor account for Super Admin review.
-            </p>
-
-            <label>Username</label>
-            <input
-              type="text"
-              placeholder="Enter your username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-
-            <label>Email</label>
-            <input
-              type="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-
-            <label>Employee or Faculty ID</label>
-            <input
-              type="text"
-              placeholder="Enter your employee or faculty ID"
-              value={facultyId}
-              onChange={(e) => setFacultyId(e.target.value)}
-            />
-
-            <label>Department</label>
-            <input
-              type="text"
-              placeholder="Enter your department"
-              value={department}
-              onChange={(e) => setDepartment(e.target.value)}
-            />
-
-            <label>Proof of Employment</label>
-            <input
-              type="text"
-              placeholder="Paste a document link or proof reference"
-              value={employmentProof}
-              onChange={(e) => setEmploymentProof(e.target.value)}
-            />
-
-            <label>Password</label>
-            <div className={styles.passwordWrapper}>
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-
-              <i
-                className={`fa-solid ${
-                  showPassword ? "fa-eye-slash" : "fa-eye"
-                } ${styles.toggleEye}`}
-                onClick={() => setShowPassword(!showPassword)}
-              ></i>
-            </div>
-
-            {password.length > 0 && (
-              <div className={styles.passwordChecklist}>
-                <p className={hasLength ? styles.valid : styles.invalid}>
-                  {hasLength ? "OK" : "X"} At least 12 characters
-                </p>
-                <p className={hasUpper ? styles.valid : styles.invalid}>
-                  {hasUpper ? "OK" : "X"} Has uppercase letter
-                </p>
-                <p className={hasLower ? styles.valid : styles.invalid}>
-                  {hasLower ? "OK" : "X"} Has lowercase letter
-                </p>
-                <p className={hasNumber ? styles.valid : styles.invalid}>
-                  {hasNumber ? "OK" : "X"} Has number
-                </p>
-                <p className={hasSymbol ? styles.valid : styles.invalid}>
-                  {hasSymbol ? "OK" : "X"} Has special character
-                </p>
-              </div>
-            )}
-
-            {password.length > 0 && (
-              <div
-                className={`${styles.validationMessage} ${
-                  passwordStrength === "strong"
-                    ? styles.success
-                    : passwordStrength === "medium"
-                    ? styles.warning
-                    : styles.error
-                }`}
-              >
-                {passwordStrength === "weak" && "Weak password"}
-                {passwordStrength === "medium" && "Medium strength password"}
-                {passwordStrength === "strong" && "Strong password"}
-              </div>
-            )}
-
-            <label>Confirm Password</label>
-            <div className={styles.passwordWrapper}>
-              <input
-                type={showConfirmPassword ? "text" : "password"}
-                placeholder="Confirm your password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-              />
-
-              <i
-                className={`fa-solid ${
-                  showConfirmPassword ? "fa-eye-slash" : "fa-eye"
-                } ${styles.toggleEye}`}
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              ></i>
-            </div>
-
-            {confirmPassword.length > 0 && (
-              <div
-                className={`${styles.validationMessage} ${
-                  passwordsMatch ? styles.success : styles.error
-                }`}
-              >
-                {passwordsMatch ? "Passwords match" : "Passwords do not match"}
-              </div>
-            )}
-
-            <button
-              className={styles.loginBtn}
-              onClick={handleSignup}
-              disabled={isSigningUp}
+        <header className={styles.loginNavbar}>
+          <nav className={styles.loginNavbarInner}>
+            <Link
+              to="/"
+              className={styles.loginNavLink}
             >
-              {isSigningUp ? "Registering..." : "Register Professor Account"}
-            </button>
+              Home
+            </Link>
 
-            <p className={styles.termsText}>
-              Student accounts are created by the Super Admin.
-            </p>
+            <Link
+              to="/about"
+              className={styles.loginNavLink}
+            >
+              About
+            </Link>
 
-            <p className={styles.signinText}>
-              Already have an account? <Link to="/login">Sign in</Link>
-            </p>
-          </div>
-        </div>
+            <Link
+              to="/"
+              className={styles.loginBrand}
+            >
+              <img
+                src="/images/logo_solo.png"
+                alt="PuffyBrain logo"
+              />
+
+              <span>PuffyBrain</span>
+            </Link>
+
+            <Link
+              to="/faq"
+              className={styles.loginNavLink}
+            >
+              FAQ
+            </Link>
+
+            <Link
+              to="/contact"
+              className={styles.loginNavLink}
+            >
+              Contact us
+            </Link>
+          </nav>
+        </header>
+
+        <main
+          className={
+            styles.professorSignupContainer
+          }
+        >
+          <form
+            className={styles.professorSignupCard}
+            onSubmit={handleSignup}
+          >
+            <div
+              className={
+                styles.professorSignupHeading
+              }
+            >
+              <div>
+                <h1>Create a Professor Account</h1>
+
+                <p>
+                  Register your professor account for
+                  Super Admin review.
+                </p>
+              </div>
+            </div>
+
+            <div
+              className={
+                styles.professorSignupFormGrid
+              }
+            >
+              <div
+                className={
+                  styles.professorFormGroup
+                }
+              >
+                  <label htmlFor="professor-fullname">
+                  Full Name
+                </label>
+
+                <input
+                  id="professor-fullname"
+                  type="text"
+                  placeholder="Enter your full name"
+                  value={fullName}
+                  disabled={isSigningUp}
+                  autoComplete="name"
+                  onChange={(event) =>
+                    setFullName(event.target.value)
+                  }
+                />
+              </div>
+
+              <div
+                className={
+                  styles.professorFormGroup
+                }
+              >
+                <label htmlFor="professor-email">
+                  Email Address
+                </label>
+
+                <input
+                  id="professor-email"
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  disabled={isSigningUp}
+                  autoComplete="email"
+                  onChange={(event) =>
+                    setEmail(event.target.value)
+                  }
+                />
+              </div>
+
+              <div
+                className={`${styles.professorFormGroup} ${styles.professorFullWidth}`}
+              >
+                <label htmlFor="department">
+                  Department
+                </label>
+
+                <select
+                  id="department"
+                  value={department}
+                  disabled={isSigningUp}
+                  onChange={(event) =>
+                    setDepartment(event.target.value)
+                  }
+                >
+                  <option value="">
+                    Select your department
+                  </option>
+
+                  <option value="Computer Science Department">
+                    Computer Science Department
+                  </option>
+
+                  <option value="Information Technology Department">
+                    Information Technology Department
+                  </option>
+                </select>
+              </div>
+
+              <div
+                className={`${styles.professorFormGroup} ${styles.professorFullWidth}`}
+              >
+                <label htmlFor="employment-proof">
+                  Upload Your Faculty or Employee ID
+                </label>
+
+                <p
+                  className={
+                    styles.professorUploadDescription
+                  }
+                >
+                  Upload a clear photo of the front of
+                  your valid school faculty or employee
+                  ID. Accepted formats are JPG, PNG, and
+                  WEBP, up to 5 MB.
+                </p>
+
+                <div
+                  className={
+                    styles.professorUploadArea
+                  }
+                >
+                  <input
+                    id="employment-proof"
+                    type="file"
+                    accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                    disabled={isSigningUp}
+                    className={
+                      styles.professorFileInput
+                    }
+                    onChange={handleProofUpload}
+                  />
+
+                  <label
+                    htmlFor="employment-proof"
+                    className={
+                      styles.professorUploadButton
+                    }
+                  >
+                    <i className="fa-solid fa-image" />
+
+                    <span>
+                      {employmentProof
+                        ? "Change ID Photo"
+                        : "Choose ID Photo"}
+                    </span>
+                  </label>
+
+                  {employmentProof && (
+                    <span
+                      className={
+                        styles.professorFileName
+                      }
+                    >
+                      {employmentProof.name}
+                    </span>
+                  )}
+                </div>
+
+                {proofPreview && (
+                  <div
+                    className={
+                      styles.professorProofPreview
+                    }
+                  >
+                    <img
+                      src={proofPreview}
+                      alt="Uploaded faculty or employee ID preview"
+                    />
+
+                    <button
+                      type="button"
+                      disabled={isSigningUp}
+                      onClick={removeProofImage}
+                    >
+                      <i className="fa-solid fa-trash" />
+                      Remove Photo
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <div
+                className={
+                  styles.professorFormGroup
+                }
+              >
+                <label htmlFor="professor-password">
+                  Password
+                </label>
+
+                <div
+                  className={
+                    styles.professorPasswordWrapper
+                  }
+                >
+                  <input
+                    id="professor-password"
+                    type={
+                      showPassword
+                        ? "text"
+                        : "password"
+                    }
+                    placeholder="Enter your password"
+                    value={password}
+                    disabled={isSigningUp}
+                    autoComplete="new-password"
+                    onChange={(event) =>
+                      setPassword(event.target.value)
+                    }
+                  />
+
+                  <button
+                    type="button"
+                    className={
+                      styles.professorToggleEye
+                    }
+                    aria-label={
+                      showPassword
+                        ? "Hide password"
+                        : "Show password"
+                    }
+                    aria-pressed={showPassword}
+                    disabled={isSigningUp}
+                    onClick={() =>
+                      setShowPassword(
+                        (current) => !current
+                      )
+                    }
+                  >
+                    {showPassword ? (
+                      <FiEyeOff aria-hidden="true" />
+                    ) : (
+                      <FiEye aria-hidden="true" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <div
+                className={
+                  styles.professorFormGroup
+                }
+              >
+                <label htmlFor="confirm-password">
+                  Confirm Password
+                </label>
+
+                <div
+                  className={
+                    styles.professorPasswordWrapper
+                  }
+                >
+                  <input
+                    id="confirm-password"
+                    type={
+                      showConfirmPassword
+                        ? "text"
+                        : "password"
+                    }
+                    placeholder="Confirm your password"
+                    value={confirmPassword}
+                    disabled={isSigningUp}
+                    autoComplete="new-password"
+                    onChange={(event) =>
+                      setConfirmPassword(
+                        event.target.value
+                      )
+                    }
+                  />
+
+                  <button
+                    type="button"
+                    className={
+                      styles.professorToggleEye
+                    }
+                    aria-label={
+                      showConfirmPassword
+                        ? "Hide password"
+                        : "Show password"
+                    }
+                    aria-pressed={showConfirmPassword}
+                    disabled={isSigningUp}
+                    onClick={() =>
+                      setShowConfirmPassword(
+                        (current) => !current
+                      )
+                    }
+                  >
+                    {showConfirmPassword ? (
+                      <FiEyeOff aria-hidden="true" />
+                    ) : (
+                      <FiEye aria-hidden="true" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {password.length > 0 && (
+                <div
+                  className={`${styles.professorPasswordPanel} ${styles.professorFullWidth}`}
+                >
+                  <div
+                    className={
+                      styles.professorPasswordRules
+                    }
+                  >
+                    <p
+                      className={
+                        hasLength
+                          ? styles.valid
+                          : styles.invalid
+                      }
+                    >
+                      {hasLength ? "✓" : "×"} At least
+                      12 characters
+                    </p>
+
+                    <p
+                      className={
+                        hasUpper
+                          ? styles.valid
+                          : styles.invalid
+                      }
+                    >
+                      {hasUpper ? "✓" : "×"} One
+                      uppercase letter
+                    </p>
+
+                    <p
+                      className={
+                        hasLower
+                          ? styles.valid
+                          : styles.invalid
+                      }
+                    >
+                      {hasLower ? "✓" : "×"} One
+                      lowercase letter
+                    </p>
+
+                    <p
+                      className={
+                        hasNumber
+                          ? styles.valid
+                          : styles.invalid
+                      }
+                    >
+                      {hasNumber ? "✓" : "×"} One
+                      number
+                    </p>
+
+                    <p
+                      className={
+                        hasSymbol
+                          ? styles.valid
+                          : styles.invalid
+                      }
+                    >
+                      {hasSymbol ? "✓" : "×"} One
+                      special character
+                    </p>
+                  </div>
+
+                  <div
+                    className={`${styles.professorStrengthMessage} ${
+                      passwordStrength === "strong"
+                        ? styles.success
+                        : passwordStrength === "medium"
+                          ? styles.warning
+                          : styles.error
+                    }`}
+                  >
+                    {passwordStrength === "weak" &&
+                      "Weak password"}
+
+                    {passwordStrength === "medium" &&
+                      "Medium-strength password"}
+
+                    {passwordStrength === "strong" &&
+                      "Strong password"}
+                  </div>
+                </div>
+              )}
+
+              {confirmPassword.length > 0 && (
+                <div
+                  className={`${styles.professorMatchMessage} ${
+                    passwordsMatch
+                      ? styles.success
+                      : styles.error
+                  } ${styles.professorFullWidth}`}
+                >
+                  {passwordsMatch
+                    ? "Passwords match"
+                    : "Passwords do not match"}
+                </div>
+              )}
+            </div>
+
+            <div
+              className={
+                styles.professorSignupActions
+              }
+            >
+              <button
+                type="submit"
+                className={
+                  styles.professorSignupButton
+                }
+                disabled={isSigningUp}
+              >
+                {isSigningUp
+                  ? "Registering..."
+                  : "Register Professor Account"}
+              </button>
+
+              <p>
+                Professor accounts require Super Admin
+                approval.
+              </p>
+
+              <p>
+                Already have an account?{" "}
+                <Link to="/login">Sign in</Link>
+              </p>
+            </div>
+          </form>
+        </main>
       </section>
     </div>
   );

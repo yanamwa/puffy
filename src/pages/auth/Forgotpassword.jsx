@@ -1,17 +1,21 @@
-import styles from "./login.module.css";
 import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import { useNavigate, Link } from "react-router-dom";
+
 import { API_BASE } from "../../config.js";
 import LandingNavbar from "../../components/LandingNavbar";
 import LandingFooter from "../../components/LandingFooter";
 
+import styles from "./login.module.css";
+
 function ForgotPassword() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
     const cleanEmail = email.trim();
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -24,88 +28,123 @@ function ForgotPassword() {
         imageWidth: 200,
         imageHeight: 200,
       });
+
       return;
     }
 
-    fetch(`${API_BASE}/forgot-password.php`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email: cleanEmail }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        // EMAIL NOT FOUND
-        if (!data.success) {
-          Swal.fire({
-            title: "Email Not Found",
-            text: data.message || "This email does not exist.",
-            imageUrl: "/images/error.png",
-            imageWidth: 200,
-            imageHeight: 200,
-          });
-          return;
-        }
+    try {
+      setIsSubmitting(true);
 
-        // SUCCESS
+      const response = await fetch(
+        `${API_BASE}/forgot-password`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: cleanEmail,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
         Swal.fire({
-          title: "Email Sent!",
-          text: "Check your email, a reset link has been sent.",
-          imageUrl: "/images/3.png",
-          imageWidth: 200,
-          imageHeight: 200,
-        }).then(() => {
-          navigate("/login");
-        });
-      })
-      .catch(() => {
-        Swal.fire({
-          title: "Server Error",
-          text: "Please try again later.",
+          title: "Request Failed",
+          text:
+            data.message ||
+            "We could not send a password reset email right now.",
           imageUrl: "/images/error.png",
           imageWidth: 200,
           imageHeight: 200,
         });
+
+        return;
+      }
+
+      await Swal.fire({
+        title: "Email Sent!",
+        text:
+          data.message ||
+          "If an account exists for that email, a password reset link has been sent.",
+        imageUrl: "/images/3.png",
+        imageWidth: 200,
+        imageHeight: 200,
       });
-  }; // ← THIS WAS MISSING
+
+      navigate("/login");
+    } catch (error) {
+      Swal.fire({
+        title: "Server Error",
+        text: "Please try again later.",
+        imageUrl: "/images/error.png",
+        imageWidth: 200,
+        imageHeight: 200,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className={styles.wrapper}>
       <section className={styles.container}>
-        <div className={styles.background}></div>
-  <LandingNavbar />
-        <div className={styles.signupContainer}>
-          <div className={styles.signupCard}>
+        <div
+          className={styles.background}
+          aria-hidden="true"
+        />
+
+        <header className={styles.pageHeader}>
+          <LandingNavbar />
+        </header>
+
+        <main className={styles.signupContainer}>
+          <form
+            className={styles.signupCard}
+            onSubmit={handleSubmit}
+          >
             <h2>Forgot Password</h2>
 
-            <label>Email Address</label>
+            <label htmlFor="forgot-password-email">
+              Email Address
+            </label>
+
             <input
+              id="forgot-password-email"
+              name="email"
               type="email"
               placeholder="Enter your email address"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(event) =>
+                setEmail(event.target.value)
+              }
+              autoComplete="email"
+              required
             />
 
-            <button className={styles.submitBtn} onClick={handleSubmit}>
-              Submit
+            <button
+              type="submit"
+              className={styles.submitBtn}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Sending..." : "Submit"}
             </button>
 
             <p className={styles.forgotText}>
               Already remembered?
+
               <Link
                 to="/login"
-                style={{
-                  textDecoration: "none",
-                  color: "#A993D8",
-                  marginLeft: "5px",
-                }}
+                className={styles.forgotLoginLink}
               >
                 Login
               </Link>
             </p>
-          </div>
-        </div>
+          </form>
+        </main>
+
         <LandingFooter />
       </section>
     </div>

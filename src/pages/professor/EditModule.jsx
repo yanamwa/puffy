@@ -5,7 +5,6 @@ import {
   Users,
   Layers,
   LibraryBig,
-  Gamepad2,
   LogOut,
   Search,
   User,
@@ -25,6 +24,18 @@ const GENERATE_COOLDOWN_KEY = "editModuleQuizGenerateCooldown";
 
 function parseDeckCards(raw) {
   if (!raw) return [];
+
+  if (Array.isArray(raw)) {
+    return raw.map((item, index) =>
+      normalizeQuizItem({
+        id: item.id || index + 1,
+        question: String(item.question || "").trim(),
+        options: item.options,
+        correct_answer: item.correct_answer || item.correctAnswer,
+        explanation: String(item.explanation || "").trim(),
+      })
+    );
+  }
 
   const text = String(raw).trim();
   if (!text) return [];
@@ -65,6 +76,14 @@ function serializeQuizItems(items) {
 
 function parseLessonPages(raw) {
   if (!raw) return [];
+
+  if (Array.isArray(raw)) {
+    return raw.map((page, index) => ({
+      id: page.id || index + 1,
+      title: String(page.title || `Lesson Page ${index + 1}`).trim(),
+      content: String(page.content || page.description || "").trim(),
+    }));
+  }
 
   try {
     const parsed = JSON.parse(raw);
@@ -235,8 +254,8 @@ export default function EditModule() {
   const navigate = useNavigate();
 
   const API_URL = `${API_BASE}/adminLearningModule.php`;
-  const AI_API_URL = `${API_BASE}/generateQuiz.php`;
-  const EXTRACT_API_URL = `${API_BASE}/processLessonFile.php`;
+  const AI_API_URL = `${API_BASE}/lessons/generate-quiz`;
+  const EXTRACT_API_URL = `${API_BASE}/lessons/process-file`;
 
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -282,7 +301,6 @@ export default function EditModule() {
     { label: "User Management", path: "/admin/users", icon: <Users size={20} /> },
     { label: "Module Management", path: "/admin/modules", icon: <Layers size={20} /> },
     { label: "Decks Management", path: "/admin/decks", icon: <LibraryBig size={20} /> },
-    { label: "Modes Management", path: "/admin/modes", icon: <Gamepad2 size={20} /> },
     { label: "Notification Management", path: "/admin/notifications", icon: <i className="bx bx-bell"></i> },
     { label: "Backup & Restore", path: "/admin/backup-restore", icon: <Database size={20} /> },
   ];
@@ -403,9 +421,24 @@ export default function EditModule() {
           setEditDesc(mod.description || "");
           setEditSubject(mod.subject || "");
           setEditLearningObjectives(mod.learning_objectives || "");
-          setEditLessonPages(parseLessonPages(mod.lesson_content || ""));
+          setEditLessonPages(
+            parseLessonPages(
+              mod.lesson_content ||
+                mod.lessonContent ||
+                mod.lesson_pages ||
+                mod.lessonPages ||
+                ""
+            )
+          );
           setEditStatus(String(mod.status || "draft").toLowerCase());
-          setEditQuizItems(parseDeckCards(mod.quiz_contents));
+          setEditQuizItems(
+            parseDeckCards(
+              mod.quiz_contents ||
+                mod.quizModule ||
+                mod.quiz_items ||
+                mod.quizItems
+            )
+          );
         }
       } catch (err) {
         console.error("LOAD ERROR:", err);
@@ -502,19 +535,14 @@ export default function EditModule() {
       try {
         data = JSON.parse(text);
       } catch {
-        throw new Error("Unavailable to generate, please try again later.");
+        throw new Error("Server did not return valid lesson content.");
       }
 
       Swal.close();
 
-      if (!data.success) {
+      if (!res.ok || !data.success) {
         throw new Error(data.message || "Could not extract module content.");
       }
-
-      setEditTitle(data.module_title || "");
-      setEditSubject(data.subject || "");
-      setEditDesc(data.description || "");
-      setEditLearningObjectives(data.learning_objectives || "");
 
       const pages =
         Array.isArray(data.lesson_pages) && data.lesson_pages.length > 0
@@ -525,7 +553,19 @@ export default function EditModule() {
             }))
           : parseLessonPages(data.lesson_content || "");
 
+      if (pages.length === 0) {
+        throw new Error(
+          data.message ||
+            "The file uploaded, but no lesson pages were created. Try a searchable PDF, DOCX, or TXT file."
+        );
+      }
+
+      setEditTitle(data.module_title || "");
+      setEditSubject(data.subject || "");
+      setEditDesc(data.description || "");
+      setEditLearningObjectives(data.learning_objectives || "");
       setEditLessonPages(pages);
+      setUploadedFile(null);
 
       await Swal.fire({
         icon: "success",
@@ -579,10 +619,10 @@ export default function EditModule() {
     try {
       data = JSON.parse(text);
     } catch {
-      throw new Error("PHP did not return valid JSON.");
+      throw new Error("Server did not return valid quiz content.");
     }
 
-    if (!data.success) {
+    if (!res.ok || !data.success) {
       throw new Error(data.message || "Could not generate quiz.");
     }
 
@@ -930,7 +970,7 @@ export default function EditModule() {
       try {
         data = JSON.parse(text);
       } catch {
-        throw new Error("PHP did not return valid JSON.");
+        throw new Error("Server did not return valid JSON.");
       }
 
       if (data.success) {
@@ -1386,6 +1426,7 @@ const updateEditExplanation = (index, value) => {
                 <input
                   type="file"
                   accept=".pdf,.docx,.txt"
+                  disabled={extractingFile}
                   onChange={(e) => setUploadedFile(e.target.files?.[0] || null)}
                 />
               </label>
@@ -1398,7 +1439,7 @@ const updateEditExplanation = (index, value) => {
                 type="button"
                 className={styles.popupAddBtn}
                 onClick={handleUploadAndExtract}
-                disabled={extractingFile}
+                disabled={extractingFile || !uploadedFile}
               >
                 {extractingFile ? "Sorting..." : "Upload and Auto Sort"}
               </button>
