@@ -11,33 +11,120 @@ import "./EnrolledCourses.css";
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
-const initialTodos = [
-  { id: 1, text: "finish assignment", done: false },
-  { id: 2, text: "finish assignment", done: false },
-  { id: 3, text: "finish assignment", done: false },
-  { id: 4, text: "finish assignment", done: false },
-];
+const DEFAULT_PROFILE_IMAGE =
+  "/images/temporary profile.jpg";
 
-const progressCards = [
-  {
-    id: 1,
-    label: "Courses on track",
-    value: "4/5",
-    accent: "BK",
-  },
-  {
-    id: 2,
-    label: "Studied this week",
-    value: "6.5 hrs",
-    accent: "TM",
-  },
-  {
-    id: 3,
-    label: "Avg. quiz accuracy",
-    value: "84%",
-    accent: "OK",
-  },
-];
+function resolveProfileImage(imagePath) {
+  if (!imagePath) {
+    return DEFAULT_PROFILE_IMAGE;
+  }
+
+  if (
+    imagePath.startsWith("http://") ||
+    imagePath.startsWith("https://") ||
+    imagePath.startsWith("blob:") ||
+    imagePath.startsWith("data:")
+  ) {
+    return imagePath;
+  }
+
+  const serverOrigin = API_BASE_URL.replace(/\/api\/?$/, "");
+
+  return `${serverOrigin}${
+    imagePath.startsWith("/") ? "" : "/"
+  }${imagePath}`;
+}
+
+function saveUpdatedUser(updatedUser) {
+  if (!updatedUser) return;
+
+  const serializedUser = JSON.stringify(updatedUser);
+
+  localStorage.setItem("puffy-user", serializedUser);
+  localStorage.setItem("user", serializedUser);
+  localStorage.setItem("currentUser", serializedUser);
+
+  if (sessionStorage.getItem("user")) {
+    sessionStorage.setItem("user", serializedUser);
+  }
+
+  if (sessionStorage.getItem("currentUser")) {
+    sessionStorage.setItem("currentUser", serializedUser);
+  }
+
+  window.dispatchEvent(
+    new CustomEvent("puffy-user-updated", {
+      detail: updatedUser,
+    })
+  );
+}
+
+const initialTodos = [];
+
+const progressData = {
+  week: [
+    {
+      id: 1,
+      label: "Courses on track",
+      value: "4/5",
+      accent: "BK",
+    },
+    {
+      id: 2,
+      label: "Studied this week",
+      value: "6.5 hrs",
+      accent: "TM",
+    },
+    {
+      id: 3,
+      label: "Avg. quiz accuracy",
+      value: "84%",
+      accent: "OK",
+    },
+  ],
+
+  month: [
+    {
+      id: 1,
+      label: "Courses on track",
+      value: "4/5",
+      accent: "BK",
+    },
+    {
+      id: 2,
+      label: "Studied this month",
+      value: "24 hrs",
+      accent: "TM",
+    },
+    {
+      id: 3,
+      label: "Avg. quiz accuracy",
+      value: "87%",
+      accent: "OK",
+    },
+  ],
+
+  year: [
+    {
+      id: 1,
+      label: "Courses completed",
+      value: "8",
+      accent: "BK",
+    },
+    {
+      id: 2,
+      label: "Studied this year",
+      value: "142 hrs",
+      accent: "TM",
+    },
+    {
+      id: 3,
+      label: "Avg. quiz accuracy",
+      value: "89%",
+      accent: "OK",
+    },
+  ],
+};
 
 const notificationItems = [
   {
@@ -73,6 +160,7 @@ function getStoredToken() {
   return (
     localStorage.getItem("token") ||
     localStorage.getItem("authToken") ||
+    localStorage.getItem("puffy-token") ||
     sessionStorage.getItem("token") ||
     sessionStorage.getItem("authToken")
   );
@@ -81,6 +169,7 @@ function getStoredToken() {
 function getStoredUser() {
   try {
     const storedUser =
+      localStorage.getItem("puffy-user") ||
       localStorage.getItem("user") ||
       localStorage.getItem("currentUser") ||
       sessionStorage.getItem("user") ||
@@ -130,6 +219,9 @@ function normalizeCourse(course) {
 
 export default function StudentHome() {
   const navigate = useNavigate();
+  const [progressPeriod, setProgressPeriod] = useState("week");
+  const progressCards = progressData[progressPeriod];
+
 
   const [shownMonth, setShownMonth] = useState(
     new Date(new Date().getFullYear(), new Date().getMonth(), 1)
@@ -137,7 +229,32 @@ export default function StudentHome() {
 
   const [selectedDate, setSelectedDate] = useState(new Date());
 
-  const [todos, setTodos] = useState(initialTodos);
+ const getTodoStorageKey = () => {
+  const user = getStoredUser();
+
+  return `student-todos-${
+    user?.userId ||
+    user?.id ||
+    user?.email ||
+    "guest"
+  }`;
+};
+
+const [todos, setTodos] = useState(() => {
+  try {
+    const saved = localStorage.getItem(getTodoStorageKey());
+
+    return saved ? JSON.parse(saved) : [];
+  } catch {
+    return [];
+  }
+});
+useEffect(() => {
+  localStorage.setItem(
+    getTodoStorageKey(),
+    JSON.stringify(todos)
+  );
+}, [todos]);
   const [newTodo, setNewTodo] = useState("");
 
   const [joinModalOpen, setJoinModalOpen] = useState(false);
@@ -156,6 +273,7 @@ export default function StudentHome() {
   const [currentUser, setCurrentUser] = useState(() =>
     getStoredUser()
   );
+  
 
   const [enrolledCourses, setEnrolledCourses] = useState([]);
 
@@ -216,6 +334,14 @@ export default function StudentHome() {
   ]
     .filter(Boolean)
     .join(" • ");
+
+  const profileImage = resolveProfileImage(
+    currentUser?.profileImage ||
+      currentUser?.profile_image ||
+      currentUser?.avatar ||
+      currentUser?.image ||
+      ""
+  );
 
   useEffect(() => {
     let active = true;
@@ -296,10 +422,7 @@ export default function StudentHome() {
         );
 
         if (loadedUser) {
-          localStorage.setItem(
-            "user",
-            JSON.stringify(loadedUser)
-          );
+          saveUpdatedUser(loadedUser);
         }
       } catch (error) {
         console.error(
@@ -324,6 +447,57 @@ export default function StudentHome() {
 
     return () => {
       active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleUserUpdated = (event) => {
+      const updatedUser =
+        event.detail || getStoredUser();
+
+      if (updatedUser) {
+        setCurrentUser(updatedUser);
+      }
+    };
+
+    const handleStorageUpdate = (event) => {
+      if (
+        ![
+          "puffy-user",
+          "user",
+          "currentUser",
+        ].includes(event.key)
+      ) {
+        return;
+      }
+
+      const updatedUser = getStoredUser();
+
+      if (updatedUser) {
+        setCurrentUser(updatedUser);
+      }
+    };
+
+    window.addEventListener(
+      "puffy-user-updated",
+      handleUserUpdated
+    );
+
+    window.addEventListener(
+      "storage",
+      handleStorageUpdate
+    );
+
+    return () => {
+      window.removeEventListener(
+        "puffy-user-updated",
+        handleUserUpdated
+      );
+
+      window.removeEventListener(
+        "storage",
+        handleStorageUpdate
+      );
     };
   }, []);
 
@@ -499,6 +673,8 @@ export default function StudentHome() {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("authToken");
+    localStorage.removeItem("puffy-token");
+    localStorage.removeItem("puffy-user");
     localStorage.removeItem("user");
     localStorage.removeItem("currentUser");
 
@@ -511,7 +687,21 @@ export default function StudentHome() {
       replace: true,
     });
   };
+const progressPeriods = [
+  "week",
+  "month",
+  "year",
+];
 
+const nextProgressPeriod = () => {
+  setProgressPeriod((current) => {
+    const index = progressPeriods.indexOf(current);
+
+    return progressPeriods[
+      (index + 1) % progressPeriods.length
+    ];
+  });
+};
   return (
     <div
       className={`student-home-dashboard striped-dashboard ${
@@ -1002,12 +1192,21 @@ export default function StudentHome() {
                 Progress overview
               </h2>
 
-              <button
-                type="button"
-                className="week-filter"
-              >
-                This week v
-              </button>
+              <label className="progress-filter-wrapper">
+                  
+
+                  <button
+              type="button"
+              className="week-filter"
+              onClick={nextProgressPeriod}
+            >
+              {progressPeriod === "week"
+                ? "week"
+                : progressPeriod === "month"
+                ? "month"
+                : "year"}
+            </button>
+                </label>
             </div>
 
             <div className="progress-overview-grid">
@@ -1035,7 +1234,16 @@ export default function StudentHome() {
       </main>
 
       <aside className="student-profile-panel">
-        <Avatar large />
+        <span className="anime-avatar large">
+          <img
+            src={profileImage}
+            alt={`${displayName}'s profile`}
+            onError={(event) => {
+              event.currentTarget.src =
+                DEFAULT_PROFILE_IMAGE;
+            }}
+          />
+        </span>
 
         <strong>{displayName}</strong>
 
@@ -1135,34 +1343,34 @@ export default function StudentHome() {
             />
           </div>
 
-          {todos.map((todo) => (
-            <label
-              key={todo.id}
-              className={
-                todo.done ? "done" : ""
-              }
+         {todos.length === 0 ? (
+        <div className="todo-empty-message">
+          No tasks yet. Add your first task.
+        </div>
+      ) : (
+        todos.map((todo) => (
+          <label
+            key={todo.id}
+            className={todo.done ? "done" : ""}
+          >
+            <input
+              type="checkbox"
+              checked={todo.done}
+              onChange={() => toggleTodo(todo.id)}
+            />
+
+            <span>{todo.text}</span>
+
+            <button
+              type="button"
+              onClick={() => removeTodo(todo.id)}
+              aria-label={`Remove ${todo.text}`}
             >
-              <input
-                type="checkbox"
-                checked={todo.done}
-                onChange={() =>
-                  toggleTodo(todo.id)
-                }
-              />
-
-              <span>{todo.text}</span>
-
-              <button
-                type="button"
-                onClick={() =>
-                  removeTodo(todo.id)
-                }
-                aria-label={`Remove ${todo.text}`}
-              >
-                x
-              </button>
-            </label>
-          ))}
+              x
+            </button>
+          </label>
+        ))
+      )}
         </section>
       </aside>
 

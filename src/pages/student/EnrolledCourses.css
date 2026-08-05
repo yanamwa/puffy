@@ -865,8 +865,28 @@
 
 .profile-avatar {
   position: relative;
-  display: flex;
-  flex: 0 0 auto;
+
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+
+  display: block;
+
+  overflow: visible;
+
+  border-radius: 50%;
+  background: #fafafa;
+}
+
+.profile-header-image {
+  display: block;
+
+  width: 40px;
+  height: 40px;
+
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center;
 }
 
 .profile-main-button .anime-avatar {
@@ -879,16 +899,18 @@
 
 .profile-status-dot {
   position: absolute;
-  right: 0;
-  bottom: 1px;
 
-  width: 10px;
-  height: 10px;
+  right: -2px;
+  bottom: -2px;
 
+  width: 12px;
+  height: 12px;
+
+  background: #2ea86b;
   border: 2px solid #fff;
   border-radius: 50%;
 
-  background: #2ea86b;
+  z-index: 3;
 }
 
 .profile-user-info {
@@ -997,7 +1019,24 @@
   height: 40px;
   flex-basis: 40px;
 }
+.profile-dropdown-image {
+  display: block;
 
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  max-width: 40px;
+  min-height: 40px;
+  max-height: 40px;
+
+  flex: 0 0 40px;
+
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center;
+
+  background: #fafafa;
+}
 .profile-dropdown-header div {
   min-width: 0;
   display: flex;
@@ -5136,4 +5175,34 @@ a.course-folder:focus-visible {
   .student-module-practice-button {
     width: 100%;
   }
+}
+.todo-empty-message {
+  padding: 18px 12px;
+  text-align: center;
+  color: #7b7b7b;
+  font-size: 14px;
+}
+.progress-filter-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.week-filter {
+  min-width: 80px;
+  padding: 9px 10px;
+  border: 1px solid #d8e4dc;
+  border-radius: 10px;
+  background: #fff;
+  color: #31443a;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.week-filter:hover {
+  border-color: #7dac8c;
+  background: #f7fbf8;
 }
