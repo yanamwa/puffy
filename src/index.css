@@ -56,3 +56,8 @@ code {
   font-weight: 400 !important;
   line-height: 1.2 !important;
 }
+
+body .swal2-container .swal2-popup,
+body .swal2-container .swal2-popup * {
+  font-family: 'Merriweather', Georgia, serif !important;
+}

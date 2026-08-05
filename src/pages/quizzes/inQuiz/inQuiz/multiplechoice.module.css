@@ -1,0 +1,867 @@
+.wrapper {
+  margin: 0;
+  font-family: "Jersey 15", sans-serif;
+  min-height: 100vh;
+  position: relative;
+  padding-top: 34px;
+}
+
+.wrapper::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: url('/images/background_notebook.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: -1;
+}
+
+/* TOP SETTINGS */
+.settingsBtn {
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+
+  height: 24px;
+  padding: 15px 50px 10px 40px;
+
+  border: 1.5px solid #acacac;
+  border-radius: 6px;
+
+  background: #e9e9e9;
+  color: #222;
+
+  font-size: 15px;
+  font-weight: 800;
+  font-family: 'Jersey 15', sans-serif;
+
+
+  cursor: pointer;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  box-shadow: 0 3px 0px rgba(0,0,0,0.12);
+}
+
+.settingsBtn i {
+  font-size: 15px;
+  color: #222;
+}
+
+.settingsBtn:hover {
+  background: #878787;
+}
+
+/* HEADER */
+.wrapper {
+  margin: 0;
+  min-height: 100vh;
+  position: relative;
+  padding-top: 0;
+}
+
+.header {
+  width: 70%;
+  margin: 0 auto;
+  padding: 18px 5px 5px;
+  text-align: center;
+  position: relative;
+}
+
+.title {
+  font-family: 'Jersey 15', sans-serif;
+  font-size: 55px;
+  margin: 0 0 8px;
+  font-style: normal;
+  font-weight: normal;
+  margin-top: 5vh;
+  color: var(--font-color);
+}
+
+.progressContainer {
+  width: 70%;
+  height: 12px;
+  background: #dcdcdc;
+  border-radius: 10px;
+  margin: 10px auto 5px;
+  overflow: hidden;
+}
+
+.progressBar {
+  height: 100%;
+  width: 0%;
+  background: #c9a2ff;
+  border-radius: 10px;
+  transition: width 0.6s ease;
+}
+
+.subtitle {
+  font-size: 25px;
+  margin: 15px 0;
+  font-family: 'Jersey 15', sans-serif;
+  font-weight: normal;
+  font-style: normal;
+  color: #303030;
+}
+
+/* QUIZ BOX */
+.questionBox {
+  width: 90%;
+  margin: 30px auto;
+  border-radius: 25px;
+  padding: 25px;
+  text-align: center;
+}
+
+.questionTextBox {
+  width: 80%;
+  margin: 0 auto 30px;
+  border: 1px solid #aeaeae;
+  border-radius: 15px;
+  padding: 14px 18px;
+  background: #ffffff;
+
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.question {
+  flex: 1;
+  font-size: 25px;
+  font-weight: 600;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  text-align: center;
+  font-family: 'Jersey 15', sans-serif;
+  color: var(--font-color);
+}
+
+/* SPEAKER BUTTONS */
+.audioIconBtn,
+.optionAudioIcon {
+  border: none;
+  background: #f8f8f8;
+  color: #8d8d8d;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  transition: 0.2s ease;
+}
+
+.audioIconBtn {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+}
+
+.optionAudioIcon {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+}
+
+.audioIconBtn i,
+.optionAudioIcon i {
+  font-size: 19px;
+}
+
+.audioIconBtn:hover,
+.optionAudioIcon:hover {
+  background: #808080;
+}
+
+.audioIconBtn:disabled,
+.disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* OPTIONS */
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  align-items: center;
+}
+
+.option {
+  width: 60%;
+  min-height: 58px;
+  padding: 12px 18px;
+  font-size: 22px;
+  background: #ffffff;
+  border: 1px solid #777777;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: 0.25s;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+  user-select: none;
+  font-family: 'Jersey 15', sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-align: left;
+  font-weight: normal;
+  font-style: normal;
+  color: var(--font-color);
+}
+
+.option:hover {
+  background: #e5e5e5;
+}
+
+.option span:last-child {
+  flex: 1;
+  text-align: center;
+}
+
+.correct {
+  background: #c8f7c5 !important;
+  border-color: #2ecc71;
+}
+
+.wrong {
+  background: #f7c5c5 !important;
+  border-color: #e74c3c;
+}
+
+/* SETTINGS MODAL */
+.settingsOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 20, 25, 0.45);
+  backdrop-filter: blur(3px);
+  display: grid;
+  place-items: center;
+  z-index: 9999;
+}
+
+.settingsModal {
+  width: 430px;
+  background: #ffffff;
+  border: 2px solid #c9a2ff;
+  border-radius: 24px;
+  padding: 0;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+}
+
+.settingsHeader {
+  background: #f3eaff;
+  padding: 20px 24px;
+  border-bottom: 2px solid #decaff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.settingsHeader h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 900;
+  color: #2b2b2b;
+  color: var(--font-color);
+  font-family: 'Jersey 15', sans-serif;
+  font-weight: normal;
+  font-style: normal;
+  align-items: center;
+}
+  
+
+.closeSettings {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #5c4a7d;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+}
+
+.settingsBody {
+  padding: 22px 24px 26px;
+}
+
+.settingRow {
+  background: #fafafa;
+  border: 1.5px solid #e6e0f5;
+  border-radius: 16px;
+  padding: 15px 16px;
+  margin-bottom: 14px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.settingInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.settingIcon {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: #f1e7ff;
+  color: #7c3cff;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+}
+
+.settingText strong {
+  display: block;
+  font-size: 20px;
+  color: var(--font-color);
+  font-family: 'Jersey 15', sans-serif;
+  font-weight: normal;
+  font-style: normal;
+
+}
+
+.settingText span {
+  font-size: 16px;
+  color: #3f3f3f;
+  font-family: 'Jersey 15', sans-serif;
+  font-weight: normal;
+  font-style: normal;
+}
+
+.switchBtn {
+  width: 74px;
+  height: 34px;
+  border: none;
+  border-radius: 999px;
+  background: #b5b5b5;
+  color: #171717;
+  cursor: pointer;
+
+  font-family: 'Jersey 15', sans-serif;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 20px;
+  border: 1px solid #353535;
+  box-shadow: 0 4px 0px #373737;
+}
+
+.switchOn {
+  background: #6b4baa;
+  color: #ffffff;
+  font-family: 'Jersey 15', sans-serif;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 20px;
+  border: 1px solid #5c4a7d;
+  box-shadow: 0 4px 0px #4d347e;
+}
+
+.speedBox {
+  background: #fafafa;
+  border: 1.5px solid #e6e0f5;
+  border-radius: 16px;
+  padding: 18px;
+  margin-top: 4px;
+  font-family: 'Jersey 15', sans-serif;
+  font-weight: normal;
+  color: var(--font-color);
+  font-style: normal;
+  font-size: 20px;
+}
+
+.speedHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.speedHeader label {
+  font-family: 'Jersey 15', sans-serif;
+  font-weight: normal;
+  color: var(--font-color);
+  font-style: normal;
+  font-size: 20px;
+}
+
+.speedValue {
+  background: #b3b3b3;
+  color: #6d6d6d;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-family: 'Jersey 15', sans-serif;
+  font-weight: normal;
+  color: var(--font-color);
+  font-style: normal;
+  font-size: 20px;
+}
+
+.speedBox input {
+  width: 100%;
+  accent-color: #7c3cff;
+  cursor: pointer;
+}
+
+.selected {
+  background: rgba(160, 160, 160, 0.35) !important;
+  border-color: rgba(120, 120, 120, 0.7) !important;
+  color: rgba(17, 17, 17, 0.65);
+  box-shadow: none !important;
+  transform: translateY(1px);
+}
+
+.option:disabled {
+  cursor: not-allowed;
+}
+
+.option:disabled:not(.selected) {
+  opacity: 0.55;
+}
+.introScreen {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background: #efd9ff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+
+  text-align: center;
+  padding: 20px;
+}
+
+.multipleIntroImage {
+  width: 320px;
+  height: auto;
+
+  image-rendering: pixelated;
+
+  animation: multiplePop 0.2s ease;
+
+  margin-bottom: 10px;
+}
+
+.generatingTitle {
+  font-family: "Jersey 15", sans-serif;
+  font-size: 52px;
+  color: #3f2a5f;
+
+  margin: 0;
+  line-height: 1;
+}
+
+.generatingText {
+  font-family: "Jersey 15", sans-serif;
+  font-size: 24px;
+
+  color: #5f5f5f;
+
+  margin-top: 8px;
+}
+
+@keyframes multiplePop {
+  from {
+    transform: scale(0.9);
+    opacity: 0.7;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.emptyWrapper {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.emptyCard {
+  width: 420px;
+  background: white;
+  border-radius: 20px;
+  padding: 35px;
+  text-align: center;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+.emptyImage {
+  width: 160px;
+  margin-bottom: 16px;
+}
+
+.emptyTitle {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.emptyText {
+  font-size: 15px;
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.emptyBtn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 12px;
+  background: #d7a7ff;
+  color: white;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+/* TABLET */
+@media (max-width: 1024px) {
+  .header {
+    width: 90%;
+  }
+
+  .progressContainer {
+    width: 90%;
+  }
+
+  .questionTextBox {
+    width: 95%;
+  }
+
+  .option {
+    width: 80%;
+  }
+
+  .title {
+    font-size: 48px;
+  }
+
+  .subtitle {
+    font-size: 22px;
+  }
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+  .wrapper {
+    padding: 15px;
+  }
+
+  .header {
+    width: 100%;
+    padding: 10px;
+  }
+
+  .title {
+    font-size: 34px;
+    margin-top: 60px;
+  }
+
+  .subtitle {
+    font-size: 18px;
+  }
+
+  .progressContainer {
+    width: 100%;
+  }
+
+  .questionBox {
+    width: 100%;
+    padding: 15px;
+  }
+
+  .questionTextBox {
+    width: 100%;
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .question {
+    font-size: 18px;
+  }
+
+  .option {
+    width: 100%;
+    font-size: 18px;
+    padding: 14px;
+    min-height: 55px;
+  }
+
+  .audioIconBtn {
+    width: 34px;
+    height: 34px;
+  }
+
+  .optionAudioIcon {
+    width: 30px;
+    height: 30px;
+  }
+
+  .settingsBtn {
+    width: auto;
+    min-width: 130px;
+    padding: 12px 20px;
+    font-size: 14px;
+  }
+
+  .settingsModal {
+    width: 95%;
+    max-width: 420px;
+  }
+
+  .settingsHeader h2 {
+    font-size: 22px;
+  }
+
+  .settingRow {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .switchBtn,
+  .switchOn {
+    width: 100%;
+  }
+
+  .generatingTitle {
+    font-size: 36px;
+  }
+
+  .generatingText {
+    font-size: 18px;
+  }
+
+  .multipleIntroImage {
+    width: 220px;
+  }
+
+  .emptyCard {
+    width: 100%;
+    padding: 25px;
+  }
+}
+
+/* SMALL PHONES */
+@media (max-width: 480px) {
+  .title {
+    font-size: 28px;
+  }
+
+  .subtitle {
+    font-size: 16px;
+  }
+
+  .question {
+    font-size: 16px;
+  }
+
+  .option {
+    font-size: 16px;
+    padding: 12px;
+  }
+
+  .settingsHeader {
+    padding: 16px;
+  }
+
+  .settingsBody {
+    padding: 16px;
+  }
+
+  .settingText strong {
+    font-size: 18px;
+  }
+
+  .settingText span {
+    font-size: 14px;
+  }
+
+  .speedHeader label,
+  .speedValue,
+  .speedBox {
+    font-size: 16px;
+  }
+
+  .emptyTitle {
+    font-size: 22px;
+  }
+
+  .emptyText {
+    font-size: 14px;
+  }
+}
+
+.checkpointWrapper {
+  width: min(92%, 980px);
+  margin: 42px auto 0;
+  padding: 34px;
+  box-sizing: border-box;
+  border-radius: 28px;
+  background: #ffffff;
+  border: 1px solid #cfcfcf;
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.checkpointHeader {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.checkpointEyebrow {
+  display: block;
+  margin-bottom: 8px;
+  color: #696969;
+  font-size: 18px;
+}
+
+.checkpointHeader h2 {
+  margin: 0 0 18px;
+  color: var(--font-color);
+  font-size: 32px;
+  font-weight: normal;
+}
+
+.checkpointProgressBar {
+  height: 9px;
+  width: 100%;
+  background: #ddd;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 0 auto 10px;
+}
+
+.checkpointProgressFill {
+  height: 100%;
+  background: #dba8ff;
+  border-radius: 10px;
+  transition: width 0.4s ease;
+}
+
+.checkpointQuestionCount {
+  font-size: 18px;
+  color: #444;
+}
+
+.checkpointCards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  max-height: 340px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.checkpointCard {
+  min-height: 84px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid #dfdfdf;
+  background: #f8f8f8;
+  box-sizing: border-box;
+}
+
+.checkpointCard span {
+  display: block;
+  margin-bottom: 8px;
+  color: #7c3cff;
+  font-size: 16px;
+}
+
+.checkpointCard p {
+  margin: 0;
+  color: #222;
+  font-size: 20px;
+  line-height: 1.25;
+  overflow-wrap: break-word;
+}
+
+.checkpointActions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 26px;
+}
+
+.checkpointActions button {
+  min-width: 130px;
+  padding: 10px 18px;
+  border-radius: 18px;
+  border: 1px solid #8f7cc9;
+  background: #a997dd;
+  box-shadow: 0 4px 0 #8f7cc9;
+  color: #ffffff;
+  cursor: pointer;
+  font-family: "Jersey 15", sans-serif;
+  font-size: 18px;
+  transition: 0.2s ease;
+}
+
+.checkpointActions button:hover {
+  transform: translateY(-2px);
+}
+
+.checkpointActions button:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
+}
+
+.checkpointActions .repeatCardsBtn {
+  border-color: #b63f3f;
+  background: #e65f5f;
+  box-shadow: 0 4px 0 #b63f3f;
+}
+
+.checkpointActions .nextCardsBtn {
+  border-color: #3f9f62;
+  background: #5fcf83;
+  box-shadow: 0 4px 0 #3f9f62;
+}
+
+.checkpointActions .doneCardsBtn {
+  border-color: #7f7f86;
+  background: #a9a9b1;
+  box-shadow: 0 4px 0 #7f7f86;
+}
+
+@media (max-width: 700px) {
+  .checkpointWrapper {
+    width: min(94%, 980px);
+    padding: 22px;
+  }
+
+  .checkpointCards {
+    grid-template-columns: 1fr;
+  }
+
+  .checkpointCard p {
+    font-size: 17px;
+  }
+
+  .checkpointActions button {
+    min-width: 116px;
+    font-size: 16px;
+  }
+}

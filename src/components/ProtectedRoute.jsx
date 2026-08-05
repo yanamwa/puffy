@@ -31,8 +31,14 @@ function isTemporaryExpired(user) {
 
 function clearStoredAuth() {
   localStorage.removeItem('puffy-token');
+  localStorage.removeItem('token');
+  localStorage.removeItem('authToken');
   localStorage.removeItem('puffy-user');
+  localStorage.removeItem('user');
+  localStorage.removeItem('currentUser');
+  localStorage.removeItem('user_id');
   localStorage.removeItem('user_email');
+  localStorage.removeItem('email');
   localStorage.removeItem('user_role');
   localStorage.removeItem('username');
   localStorage.removeItem('year_level');

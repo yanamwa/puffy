@@ -1,11 +1,11 @@
 import { Navigate, Route, Routes, useParams } from 'react-router-dom';
 import Layout from '../components/Layout';
+import ProtectedRoute from '../components/ProtectedRoute';
 
 import LoginPage from '../pages/auth/LoginPage';
 import SignupPage from '../pages/auth/SignupPage';
 import ForgotPasswordPage from '../pages/auth/Forgotpassword';
-import ForgotUsernamePage from '../pages/auth/forgotuser';
-import CannotSignInPage from '../pages/auth/Cant_sign';
+import ChangePasswordPage from '../pages/auth/Changepassword';
 import OtpPage from '../pages/auth/Otp';
 import RecoverAccountPage from '../pages/auth/RecoverAccount';
 
@@ -19,7 +19,6 @@ import ModePage from '../pages/admin/mode/ModePage';
 import DecksPage from '../pages/admin/decks/DecksPage';
 import ReportsPage from '../pages/admin/reports/ReportsPage';
 import AdminAccountPage from '../pages/admin/settings/AdminAccountPage';
-import SettingsPage from '../pages/admin/settings/SettingsPage';
 import SuperAdminHome from '../pages/superadmin/SuperAdminHome';
 import SuperAdminLayout from '../pages/superadmin/shared/SuperAdminLayout';
 import SuperAdminUserManagementPage from '../pages/superadmin/users/SuperAdminUserManagementPage';
@@ -48,12 +47,18 @@ import Introduction from '../pages/course/Introduction';
 import Lesson from '../pages/course/Lesson';
 import LessonResult from '../pages/course/LessonResult';
 
-import Welcome from '../pages/new user/Welcome';
-import HowItWorks from '../pages/new user/HowItWorks';
-import Name from '../pages/new user/Name';
-import Year from '../pages/new user/Year';
-import Section from '../pages/new user/Section';
-import Profile from '../pages/new user/Profile';
+import FlashcardsTutorial from '../pages/quizzes/inQuiz/tutorials/flashcards-tutorial';
+import MatchingTutorial from '../pages/quizzes/inQuiz/tutorials/matching-tutorial';
+import MultipleChoiceTutorial from '../pages/quizzes/inQuiz/tutorials/multipleChoice-Tutorial';
+import QandATutorial from '../pages/quizzes/inQuiz/tutorials/QandA-tutorial';
+import SurvivalTutorial from '../pages/quizzes/inQuiz/tutorials/survival-tutorial';
+import TimedQuizTutorial from '../pages/quizzes/inQuiz/tutorials/timedquiz-tutorial';
+import FlashcardQuiz from '../pages/quizzes/inQuiz/inQuiz/realFlashcard';
+import MatchingQuiz from '../pages/quizzes/inQuiz/inQuiz/matching';
+import MultipleChoiceQuiz from '../pages/quizzes/inQuiz/inQuiz/multiplechoice';
+import QandAQuiz from '../pages/quizzes/inQuiz/inQuiz/qanda';
+import SurvivalQuiz from '../pages/quizzes/inQuiz/inQuiz/survival';
+import TimedQuiz from '../pages/quizzes/inQuiz/inQuiz/timedinquiz';
 
 function LearningRedirect() {
   const { lessonId } = useParams();
@@ -71,8 +76,7 @@ export default function AppRoutes() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/forgot" element={<ForgotPasswordPage />} />
-      <Route path="/forgot-username" element={<ForgotUsernamePage />} />
-      <Route path="/cant-signin" element={<CannotSignInPage />} />
+      <Route path="/change-password" element={<ChangePasswordPage />} />
       <Route path="/otp" element={<OtpPage />} />
       <Route path="/recover-account" element={<RecoverAccountPage />} />
 
@@ -80,16 +84,6 @@ export default function AppRoutes() {
             APP ROUTES
             Temporarily public while link-only account flows are tested.
         ========================== */}
-
-        {/* ==========================
-            NEW USER ONBOARDING
-        ========================== */}
-        <Route path="/welcome" element={<Welcome />} />
-        <Route path="/how-it-works" element={<HowItWorks />} />
-        <Route path="/name" element={<Name />} />
-        <Route path="/year" element={<Year />} />
-        <Route path="/section" element={<Section />} />
-        <Route path="/profile" element={<Profile />} />
 
         {/* ==========================
             SUPER ADMIN
@@ -143,9 +137,23 @@ export default function AppRoutes() {
             path="/super-admin/announcements"
             element={
               <SuperAdminLayout>
-                <SuperAdminFeaturePage type="announcements" />
+                <NotificationPage variant="announcement" />
               </SuperAdminLayout>
             }
+          />
+
+          <Route
+            path="/super-admin/mode"
+            element={
+              <SuperAdminLayout>
+                <ModePage />
+              </SuperAdminLayout>
+            }
+          />
+
+          <Route
+            path="/super-admin/modes"
+            element={<Navigate to="/super-admin/mode" replace />}
           />
 
           <Route
@@ -262,11 +270,7 @@ export default function AppRoutes() {
 
           <Route
             path="/admin/settings"
-            element={
-              <AdminLayout>
-                <SettingsPage />
-              </AdminLayout>
-            }
+            element={<Navigate to="/admin/profile" replace />}
           />
 
           <Route
@@ -280,16 +284,12 @@ export default function AppRoutes() {
 
           <Route
             path="/admin/mode"
-            element={
-              <AdminLayout>
-                <ModePage />
-              </AdminLayout>
-            }
+            element={<Navigate to="/admin/dashboard" replace />}
           />
 
           <Route
             path="/admin/modes"
-            element={<Navigate to="/admin/mode" replace />}
+            element={<Navigate to="/admin/dashboard" replace />}
           />
 
           <Route
@@ -305,6 +305,8 @@ export default function AppRoutes() {
             path="/admin/backup"
             element={<Navigate to="/admin/dashboard" replace />}
           />
+
+          <Route element={<ProtectedRoute />}>
 
           {/* ==========================
               PROFESSOR
@@ -364,13 +366,63 @@ export default function AppRoutes() {
           element={<StudentProfile />} 
           />
 
+        </Route>
+
           {/* ==========================
               COURSE STUDY FLOW
           ========================== */}
           <Route path="/learning/:lessonId" element={<LearningRedirect />} />
           <Route path="/introduction/:lessonId" element={<Introduction />} />
           <Route path="/lesson/:lessonId" element={<Lesson />} />
+          <Route path="/review/deck/:deckId" element={<LessonResult />} />
           <Route path="/review/:lessonId" element={<LessonResult />} />
+
+          {/* ==========================
+              QUIZ MODE TUTORIALS
+          ========================== */}
+          <Route path="/flashcards-tutorial" element={<FlashcardsTutorial />} />
+          <Route path="/flashcards-tutorial/lesson/:lessonId" element={<FlashcardsTutorial />} />
+          <Route path="/flashcards-tutorial/deck/:deckId" element={<FlashcardsTutorial />} />
+          <Route path="/QandA-tutorial" element={<QandATutorial />} />
+          <Route path="/QandA-tutorial/lesson/:lessonId" element={<QandATutorial />} />
+          <Route path="/QandA-tutorial/deck/:deckId" element={<QandATutorial />} />
+          <Route path="/qna-tutorial" element={<QandATutorial />} />
+          <Route path="/qna-tutorial/lesson/:lessonId" element={<QandATutorial />} />
+          <Route path="/qna-tutorial/deck/:deckId" element={<QandATutorial />} />
+          <Route path="/multipleChoice-tutorial" element={<MultipleChoiceTutorial />} />
+          <Route path="/multipleChoice-tutorial/lesson/:lessonId" element={<MultipleChoiceTutorial />} />
+          <Route path="/multipleChoice-tutorial/deck/:deckId" element={<MultipleChoiceTutorial />} />
+          <Route path="/multiple-choice-tutorial" element={<MultipleChoiceTutorial />} />
+          <Route path="/multiple-choice-tutorial/lesson/:lessonId" element={<MultipleChoiceTutorial />} />
+          <Route path="/multiple-choice-tutorial/deck/:deckId" element={<MultipleChoiceTutorial />} />
+          <Route path="/Matching-tutorial" element={<MatchingTutorial />} />
+          <Route path="/Matching-tutorial/lesson/:lessonId" element={<MatchingTutorial />} />
+          <Route path="/Matching-tutorial/deck/:deckId" element={<MatchingTutorial />} />
+          <Route path="/matching-tutorial" element={<MatchingTutorial />} />
+          <Route path="/matching-tutorial/lesson/:lessonId" element={<MatchingTutorial />} />
+          <Route path="/matching-tutorial/deck/:deckId" element={<MatchingTutorial />} />
+          <Route path="/timedquiz-tutorial" element={<TimedQuizTutorial />} />
+          <Route path="/timedquiz-tutorial/lesson/:lessonId" element={<TimedQuizTutorial />} />
+          <Route path="/timedquiz-tutorial/deck/:deckId" element={<TimedQuizTutorial />} />
+          <Route path="/survival-tutorial" element={<SurvivalTutorial />} />
+          <Route path="/survival-tutorial/lesson/:lessonId" element={<SurvivalTutorial />} />
+          <Route path="/survival-tutorial/deck/:deckId" element={<SurvivalTutorial />} />
+
+          {/* ==========================
+              QUIZ MODE PLAYERS
+          ========================== */}
+          <Route path="/flashcard/lesson/:lessonId" element={<FlashcardQuiz />} />
+          <Route path="/flashcard/deck/:deckId" element={<FlashcardQuiz />} />
+          <Route path="/qna/lesson/:lessonId" element={<QandAQuiz />} />
+          <Route path="/qna/deck/:deckId" element={<QandAQuiz />} />
+          <Route path="/multiple-choice/lesson/:lessonId" element={<MultipleChoiceQuiz />} />
+          <Route path="/multiple-choice/deck/:deckId" element={<MultipleChoiceQuiz />} />
+          <Route path="/matching-type/lesson/:lessonId" element={<MatchingQuiz />} />
+          <Route path="/matching-type/deck/:deckId" element={<MatchingQuiz />} />
+          <Route path="/timedquiz/lesson/:lessonId" element={<TimedQuiz />} />
+          <Route path="/timedquiz/deck/:deckId" element={<TimedQuiz />} />
+          <Route path="/survival/lesson/:lessonId" element={<SurvivalQuiz />} />
+          <Route path="/survival/deck/:deckId" element={<SurvivalQuiz />} />
 
         {/* ==========================
             DEFAULT ROUTE

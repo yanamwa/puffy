@@ -4,7 +4,6 @@ const adminCapabilities = [
   'Manage approved professors and registered students',
   'Manage courses',
   'Manage learning modules',
-  'Manage quiz modes',
   'Manage course quizzes',
   'Manage notifications and announcements',
   'Monitor reports and system statistics',

@@ -1,11 +1,13 @@
 import styles from "./lesson.module.css";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useState, useEffect, useMemo } from "react";
 import Swal from "sweetalert2";
 import { API_BASE } from "../../config.js";
 import LoadingState from "../../components/LoadingState.jsx";
+import QuizModesModal from "../../components/QuizModesModal.jsx";
 import {
   fetchCourseContent,
+  getCourseContentModules,
   getCourseLessonPages,
   getCourseQuizItems,
 } from "./courseContent.js";
@@ -36,6 +38,7 @@ const getStoredUserId = () => {
 
 function Lesson() {
   const { lessonId } = useParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
   const [lesson, setLesson] = useState(null);
@@ -43,8 +46,24 @@ function Lesson() {
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [quizResults, setQuizResults] = useState([]);
   const [hasTakenQuiz, setHasTakenQuiz] = useState(false);
+  const [quizModesOpen, setQuizModesOpen] = useState(false);
 
-  const quizResultKey = `lessonQuizResults_${lessonId}`;
+  const modules = useMemo(() => getCourseContentModules(lesson), [lesson]);
+  const requestedModuleIndex = Number(searchParams.get("module") || 0);
+  const moduleIndex = Math.min(
+    Math.max(Number.isInteger(requestedModuleIndex) ? requestedModuleIndex : 0, 0),
+    Math.max(modules.length - 1, 0)
+  );
+  const activeModule = modules[moduleIndex] || null;
+  const moduleNumber = moduleIndex + 1;
+  const moduleCount = Math.max(modules.length, 1);
+  const nextModule = modules[moduleIndex + 1] || null;
+  const modulePracticeId = `${lessonId}-${
+    activeModule?.id || `module-${moduleNumber}`
+  }`;
+  const moduleTitle = activeModule?.title || lesson?.title || "Untitled module";
+
+  const quizResultKey = `lessonQuizResults_${lessonId}_module_${moduleIndex}`;
 
   useEffect(() => {
     let active = true;
@@ -64,44 +83,36 @@ function Lesson() {
   }, [lessonId]);
 
   const lessonSlides = useMemo(() => {
-    return getCourseLessonPages(lesson);
-  }, [lesson]);
+    return activeModule?.lessonPages?.length
+      ? activeModule.lessonPages
+      : getCourseLessonPages(lesson);
+  }, [activeModule, lesson]);
 
   const quizSlides = useMemo(() => {
-    return getCourseQuizItems(lesson);
-  }, [lesson]);
+    return activeModule?.quizItems?.length
+      ? activeModule.quizItems
+      : getCourseQuizItems(lesson);
+  }, [activeModule, lesson]);
 
   const allSlides = useMemo(() => {
-    const combined = [];
-    let quizIndex = 0;
-
-    lessonSlides.forEach((slide, index) => {
-      combined.push({
+    return [
+      ...lessonSlides.map((slide) => ({
         type: "lesson",
         content: slide,
-      });
-
-      if ((index + 1) % 2 === 0 && quizIndex < quizSlides.length) {
-        combined.push({
-          type: "quiz",
-          content: quizSlides[quizIndex],
-        });
-
-        quizIndex++;
-      }
-    });
-
-    while (quizIndex < quizSlides.length) {
-      combined.push({
+      })),
+      ...quizSlides.map((slide) => ({
         type: "quiz",
-        content: quizSlides[quizIndex],
-      });
-
-      quizIndex++;
-    }
-
-    return combined;
+        content: slide,
+      })),
+    ];
   }, [lessonSlides, quizSlides]);
+
+  useEffect(() => {
+    setCurrentSlide(0);
+    setSelectedAnswers({});
+    setQuizResults([]);
+    setHasTakenQuiz(false);
+  }, [lessonId, moduleIndex]);
 
   useEffect(() => {
     if (allSlides.length === 0) return;
@@ -120,7 +131,12 @@ function Lesson() {
     try {
       const parsed = JSON.parse(savedResults);
 
-      if (Number(parsed.lessonId) !== Number(lessonId)) {
+      const savedModuleIndex = Number(parsed.moduleIndex ?? parsed.module_index ?? 0);
+
+      if (
+        Number(parsed.lessonId) !== Number(lessonId) ||
+        savedModuleIndex !== moduleIndex
+      ) {
         setHasTakenQuiz(false);
         setQuizResults([]);
         setSelectedAnswers({});
@@ -152,7 +168,7 @@ function Lesson() {
       setQuizResults([]);
       setSelectedAnswers({});
     }
-  }, [quizResultKey, allSlides, lessonId]);
+  }, [quizResultKey, allSlides, lessonId, moduleIndex]);
 
   const totalSlides = allSlides.length;
 
@@ -165,24 +181,46 @@ function Lesson() {
   const selectedAnswer = selectedAnswers[currentSlide];
 
   const saveProgress = async (slideIndexToSave) => {
-    const studiedSlides = slideIndexToSave + 1;
+    const studiedSlides = totalSlides
+      ? Math.min(Math.max(slideIndexToSave + 1, 0), totalSlides)
+      : 0;
     const progressToSave = totalSlides
       ? Math.round((studiedSlides / totalSlides) * 100)
-      : 0;
+      : 100;
+    const courseProgressToSave = Math.min(
+      100,
+      Math.round(((moduleIndex + progressToSave / 100) / moduleCount) * 100)
+    );
 
-    saveStudentReadingProgress(lessonId, progressToSave, {
+    saveStudentReadingProgress(lessonId, courseProgressToSave, {
+      moduleIndex,
+      moduleCount,
+      moduleTitle,
+      moduleProgress: progressToSave,
       totalSlides,
       studiedSlides,
       lastViewedSlide: studiedSlides,
     });
 
+    const progressRecord = {
+      module_index: moduleIndex,
+      module_title: moduleTitle,
+      total_cards: totalSlides,
+      studied_cards: studiedSlides,
+      progress_percent: progressToSave,
+      course_progress_percent: courseProgressToSave,
+      last_viewed_card: studiedSlides,
+    };
+
+    localStorage.setItem(
+      `lessonProgress_${lessonId}_module_${moduleIndex}`,
+      JSON.stringify(progressRecord)
+    );
     localStorage.setItem(
       `lessonProgress_${lessonId}`,
       JSON.stringify({
-        total_cards: totalSlides,
-        studied_cards: studiedSlides,
-        progress_percent: progressToSave,
-        last_viewed_card: studiedSlides,
+        ...progressRecord,
+        progress_percent: courseProgressToSave,
       })
     );
 
@@ -206,15 +244,11 @@ function Lesson() {
     }
   };
 
-  const goBackToLearning = () => {
-    navigate(`/introduction/${lessonId}`);
-  };
-
-  const saveLessonResultsAndGoReview = async (latestResults = quizResults) => {
+  const saveLessonResults = async (latestResults = quizResults) => {
     const finalScore = latestResults.filter((item) => item.isCorrect).length;
 
     const finalResult = {
-      source: "lesson",
+      source: "module",
       lessonId: Number(lessonId),
       deckId: null,
       quizMode: "lesson",
@@ -222,25 +256,131 @@ function Lesson() {
       score: finalScore,
       total: latestResults.length,
       answers: latestResults,
+      courseId: lessonId,
+      moduleIndex,
+      moduleTitle,
+      scopeType: "module",
+      scopeTitle: moduleTitle,
+      contentTitle: moduleTitle,
     };
 
     localStorage.setItem(quizResultKey, JSON.stringify(finalResult));
     localStorage.setItem("lessonQuizResults", JSON.stringify(finalResult));
 
+    const completedCourseProgress = Math.min(
+      100,
+      Math.round(((moduleIndex + 1) / moduleCount) * 100)
+    );
+    const completedRecord = {
+      module_index: moduleIndex,
+      module_title: moduleTitle,
+      total_cards: totalSlides,
+      studied_cards: totalSlides,
+      progress_percent: 100,
+      course_progress_percent: completedCourseProgress,
+      last_viewed_card: totalSlides,
+    };
+
+    localStorage.setItem(
+      `lessonProgress_${lessonId}_module_${moduleIndex}`,
+      JSON.stringify(completedRecord)
+    );
     localStorage.setItem(
       `lessonProgress_${lessonId}`,
       JSON.stringify({
-        total_cards: totalSlides,
-        studied_cards: totalSlides,
-        progress_percent: 100,
-        last_viewed_card: totalSlides,
+        ...completedRecord,
+        progress_percent: completedCourseProgress,
       })
     );
 
     setHasTakenQuiz(true);
 
     await saveProgress(totalSlides - 1);
-    navigate(`/review/${lessonId}`);
+  };
+
+  const openModulePracticeModes = () => {
+    if (!quizSlides.length) {
+      Swal.fire({
+        icon: "info",
+        title: "No Module Quiz Yet",
+        text: "This module does not have quiz questions to practice yet.",
+        confirmButtonText: "OK",
+      });
+      return;
+    }
+
+    localStorage.setItem(
+      "practiceScope",
+      JSON.stringify({
+        courseId: lessonId,
+        courseCode: lesson?.code,
+        scopeId: activeModule?.id || `module-${moduleNumber}`,
+        scopeType: "module",
+        moduleIndex,
+        moduleNumber,
+        moduleCount,
+        nextModuleIndex: nextModule ? moduleIndex + 1 : null,
+        nextModuleTitle: nextModule?.title || "",
+        scopeTitle: moduleTitle,
+        scopeDetail: `${lessonSlides.length} lesson page(s)`,
+      })
+    );
+
+    setQuizModesOpen(true);
+  };
+
+  const continueToNextModule = () => {
+    if (nextModule) {
+      navigate(`/introduction/${lessonId}?module=${moduleIndex + 1}`);
+      return;
+    }
+
+    navigate(`/student/enrolled-courses/${lessonId}`);
+  };
+
+  const completeModuleAndPrompt = async (latestResults = quizResults) => {
+    await saveLessonResults(latestResults);
+
+    if (!quizSlides.length) {
+      const result = await Swal.fire({
+        icon: "success",
+        title: `Module ${moduleNumber} Complete`,
+        text: nextModule
+          ? `Ready to continue to Module ${moduleNumber + 1}?`
+          : "You completed the final module.",
+        confirmButtonText: nextModule
+          ? `Continue to Module ${moduleNumber + 1}`
+          : "Back to Course",
+        allowOutsideClick: false,
+      });
+
+      if (result.isConfirmed) {
+        continueToNextModule();
+      }
+      return;
+    }
+
+    const result = await Swal.fire({
+      icon: "success",
+      title: `Module ${moduleNumber} Complete`,
+      text: nextModule
+        ? `Do you want to practice Module ${moduleNumber}, or continue to Module ${moduleNumber + 1}?`
+        : "You completed the final module. You can practice it now or return to the course.",
+      showCancelButton: true,
+      confirmButtonText: `Practice Module ${moduleNumber}`,
+      cancelButtonText: nextModule
+        ? `Continue to Module ${moduleNumber + 1}`
+        : "Back to Course",
+      allowOutsideClick: false,
+      reverseButtons: false,
+    });
+
+    if (result.isConfirmed) {
+      openModulePracticeModes();
+      return;
+    }
+
+    continueToNextModule();
   };
 
   const handleOptionSelect = async (slideIndex, option) => {
@@ -314,7 +454,7 @@ function Lesson() {
       await saveProgress(nextSlide);
       setCurrentSlide(nextSlide);
     } else {
-      await saveLessonResultsAndGoReview(updatedResults);
+      await completeModuleAndPrompt(updatedResults);
     }
   };
 
@@ -341,12 +481,11 @@ function Lesson() {
     }
 
     if (hasTakenQuiz) {
-      await saveProgress(totalSlides - 1);
-      goBackToLearning();
+      await completeModuleAndPrompt(quizResults);
       return;
     }
 
-    await saveLessonResultsAndGoReview();
+    await completeModuleAndPrompt();
   };
 
   const handlePrevious = async () => {
@@ -386,7 +525,11 @@ function Lesson() {
         </div>
 
         <div className={styles.greets}>
-          <h2>{lesson.title}</h2>
+          <p className={styles.moduleEyebrow}>
+            Module {moduleNumber} of {moduleCount}
+          </p>
+
+          <h2>Module {moduleNumber}: {moduleTitle}</h2>
 
           <h3>
             Slide {totalSlides > 0 ? currentSlide + 1 : 0} of {totalSlides}
@@ -471,11 +614,22 @@ function Lesson() {
             </button>
 
             <button className={styles.button} onClick={handleNext}>
-              {currentSlide === totalSlides - 1 ? "Finish" : "Next"}
+              {totalSlides === 0 || currentSlide === totalSlides - 1
+                ? "Finish"
+                : "Next"}
             </button>
           </div>
         </div>
       </div>
+
+      {quizModesOpen && (
+        <QuizModesModal
+          source="module"
+          lessonId={modulePracticeId}
+          quizzes={quizSlides}
+          onClose={() => setQuizModesOpen(false)}
+        />
+      )}
     </div>
   );
 }

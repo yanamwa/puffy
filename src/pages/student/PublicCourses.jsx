@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 import { Avatar, Icon, SortToggle } from './EnrolledCourses';
 import JoinCourseModal from './JoinCourseModal';
 import { PROFESSOR_COURSES_EVENT } from '../professor/professorData';
 import {
-  enrollStudentInCourse,
+  enrollStudentInCourseAsync,
   getPublicStudentCourses,
   findJoinableCourseByCodeAsync,
   loadPublicStudentCourses,
@@ -165,6 +166,14 @@ const notificationItems = [
     icon: 'announcement',
   },
 ];
+
+function getCourseTitle(course) {
+  return course.title || course.courseName || course.course_name || 'Untitled course';
+}
+
+function getProfessorDepartment(course) {
+  return course.professorDepartment || course.professor_department || 'Department not set';
+}
 
 export default function PublicCourses() {
   const navigate = useNavigate();
@@ -427,8 +436,11 @@ export default function PublicCourses() {
       return;
     }
 
-    closeJoinModal();
-    startLearning(course);
+    const enrolled = await confirmEnrollment(course);
+
+    if (enrolled) {
+      closeJoinModal();
+    }
   };
 
   const unreadNotificationCount = notifications.filter(
@@ -1079,7 +1091,7 @@ export default function PublicCourses() {
                       startLearning(course)
                     }
                   >
-                    Start Learning
+                    Enroll
                   </button>
                 </div>
               </article>

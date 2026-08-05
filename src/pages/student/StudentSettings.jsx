@@ -612,6 +612,14 @@ export default function StudentSettings() {
       return;
     }
 
+    if (!studentAccount.email) {
+      setPasswordNotice({
+        type: 'error',
+        message: 'Your account email was not found. Please log in again.',
+      });
+      return;
+    }
+
     setIsSubmittingPassword(true);
 
     try {

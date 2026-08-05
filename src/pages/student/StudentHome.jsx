@@ -3,9 +3,11 @@ import { Link, useNavigate } from "react-router-dom";
 import { Avatar, Icon } from "./EnrolledCourses";
 import JoinCourseModal from "./JoinCourseModal";
 import {
-  enrollStudentInCourse,
+  enrollStudentInCourseAsync,
   findJoinableCourseByCodeAsync,
+  loadStudentEnrolledCourses,
 } from "./studentCourseData";
+import { API_BASE } from "../../config.js";
 import "./EnrolledCourses.css";
 
 const API_BASE_URL =
@@ -183,6 +185,13 @@ function getStoredUser() {
 }
 
 function normalizeCourse(course) {
+  const title =
+    course.title ||
+    course.courseName ||
+    course.course_name ||
+    course.name ||
+    "Untitled course";
+
   return {
     id:
       course.id ||
@@ -197,12 +206,9 @@ function normalizeCourse(course) {
       course.course_code ||
       "COURSE",
 
-    title:
-      course.title ||
-      course.courseName ||
-      course.course_name ||
-      course.name ||
-      "Untitled course",
+    title,
+    courseName: course.courseName || title,
+    course_name: course.course_name || title,
 
     description: course.description || "",
 
@@ -214,7 +220,18 @@ function normalizeCourse(course) {
       course.createdBy ||
       course.created_by ||
       "Professor",
+
+    professorDepartment:
+      course.professorDepartment ||
+      course.professor_department ||
+      course.database_professor_department ||
+      course.department ||
+      "",
   };
+}
+
+function getProfessorDepartment(course) {
+  return course.professorDepartment || course.professor_department || "Department not set";
 }
 
 export default function StudentHome() {
@@ -261,6 +278,8 @@ useEffect(() => {
   const [courseCode, setCourseCode] = useState("");
 
   const [notificationMenuOpen, setNotificationMenuOpen] =
+    useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] =
     useState(false);
 
   const [notifications, setNotifications] =
@@ -316,24 +335,31 @@ useEffect(() => {
     currentUser?.displayName ||
     currentUser?.display_name ||
     currentUser?.name ||
+    currentUser?.fullName ||
+    currentUser?.full_name ||
+    currentUser?.username ||
     "Student";
 
   const yearLevel =
     currentUser?.yearLevel ||
     currentUser?.year_level ||
+    currentUser?.year ||
     "";
 
   const sectionName =
     currentUser?.sectionName ||
     currentUser?.section_name ||
+    currentUser?.section ||
     "";
 
-  const studentInformation = [
-    yearLevel,
-    sectionName,
-  ]
+  const studentInformation = [yearLevel, sectionName]
     .filter(Boolean)
     .join(" • ");
+
+  const profileHandle = displayName.replace(/^@/, "");
+  const accountLabel =
+    currentUser?.email ||
+    "Student account";
 
   const profileImage = resolveProfileImage(
     currentUser?.profileImage ||
@@ -367,24 +393,17 @@ useEffect(() => {
           },
         };
 
-        const [userResponse, coursesResponse] =
+        const [userResponse, loadedCourses] =
           await Promise.all([
             fetch(
-              `${API_BASE_URL}/users/me`,
+              `${API_BASE}/users/me`,
               requestOptions
             ),
 
-            fetch(
-              `${API_BASE_URL}/courses/enrolled/me`,
-              requestOptions
-            ),
+            loadStudentEnrolledCourses(),
           ]);
 
         const userData = await userResponse
-          .json()
-          .catch(() => ({}));
-
-        const coursesData = await coursesResponse
           .json()
           .catch(() => ({}));
 
@@ -395,33 +414,17 @@ useEffect(() => {
           );
         }
 
-        if (!coursesResponse.ok) {
-          throw new Error(
-            coursesData.message ||
-              "Failed to load your enrolled courses."
-          );
-        }
-
         if (!active) return;
 
         const loadedUser =
           userData.user || userData.data || null;
-
-        const loadedCourses = Array.isArray(
-          coursesData.courses
-        )
-          ? coursesData.courses
-          : Array.isArray(coursesData.data)
-            ? coursesData.data
-            : [];
-
-        setCurrentUser(loadedUser);
 
         setEnrolledCourses(
           loadedCourses.map(normalizeCourse)
         );
 
         if (loadedUser) {
+          setCurrentUser(loadedUser);
           saveUpdatedUser(loadedUser);
         }
       } catch (error) {
@@ -502,7 +505,7 @@ useEffect(() => {
   }, []);
 
   useEffect(() => {
-    const closeNotificationMenu = (event) => {
+    const closeOpenMenus = (event) => {
       if (
         !event.target.closest(
           ".notification-menu-wrapper"
@@ -510,17 +513,22 @@ useEffect(() => {
       ) {
         setNotificationMenuOpen(false);
       }
+
+      if (!event.target.closest(".profile-menu-wrapper")) {
+        setProfileMenuOpen(false);
+      }
     };
 
     const closeWithEscape = (event) => {
       if (event.key === "Escape") {
         setNotificationMenuOpen(false);
+        setProfileMenuOpen(false);
       }
     };
 
     document.addEventListener(
       "mousedown",
-      closeNotificationMenu
+      closeOpenMenus
     );
 
     document.addEventListener(
@@ -531,7 +539,7 @@ useEffect(() => {
     return () => {
       document.removeEventListener(
         "mousedown",
-        closeNotificationMenu
+        closeOpenMenus
       );
 
       document.removeEventListener(
@@ -606,7 +614,7 @@ useEffect(() => {
         return;
       }
 
-      enrollStudentInCourse(course);
+      await enrollStudentInCourseAsync(course);
 
       closeJoinModal();
 
@@ -671,29 +679,44 @@ useEffect(() => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("puffy-token");
-    localStorage.removeItem("puffy-user");
-    localStorage.removeItem("user");
-    localStorage.removeItem("currentUser");
+    setProfileMenuOpen(false);
+    setNotificationMenuOpen(false);
 
-    sessionStorage.removeItem("token");
-    sessionStorage.removeItem("authToken");
-    sessionStorage.removeItem("user");
-    sessionStorage.removeItem("currentUser");
+    [
+      "token",
+      "authToken",
+      "puffy-token",
+      "puffy-user",
+      "user",
+      "currentUser",
+      "user_email",
+      "user_role",
+      "username",
+      "year_level",
+      "section_name",
+      "school_name",
+    ].forEach((key) => localStorage.removeItem(key));
+
+    [
+      "token",
+      "authToken",
+      "puffy-token",
+      "user",
+      "currentUser",
+    ].forEach((key) => sessionStorage.removeItem(key));
 
     navigate("/login", {
       replace: true,
     });
   };
-const progressPeriods = [
+
+  const progressPeriods = [
   "week",
   "month",
   "year",
 ];
 
-const nextProgressPeriod = () => {
+  const nextProgressPeriod = () => {
   setProgressPeriod((current) => {
     const index = progressPeriods.indexOf(current);
 
@@ -1088,6 +1111,133 @@ const nextProgressPeriod = () => {
             >
               + Join course
             </button>
+
+            <div className="profile-menu-wrapper">
+              <div className="profile-chip">
+                <button
+                  type="button"
+                  className="profile-main-button"
+                  onClick={() => navigate("/student/profile")}
+                  aria-label="Open your profile"
+                >
+                  <span className="profile-avatar">
+                    <img
+                      src={profileImage}
+                      alt={`${displayName}'s profile`}
+                      className="profile-header-image"
+                      onError={(event) => {
+                        event.currentTarget.src =
+                          DEFAULT_PROFILE_IMAGE;
+                      }}
+                    />
+                    <span className="profile-status-dot" />
+                  </span>
+
+                  <span className="profile-user-info">
+                    <strong>{profileHandle}</strong>
+                    <small>Student</small>
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  className={`profile-dropdown-button ${
+                    profileMenuOpen ? "open" : ""
+                  }`}
+                  aria-label={
+                    profileMenuOpen
+                      ? "Close profile menu"
+                      : "Open profile menu"
+                  }
+                  aria-expanded={profileMenuOpen}
+                  aria-haspopup="menu"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setNotificationMenuOpen(false);
+                    setProfileMenuOpen((current) => !current);
+                  }}
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="5" r="1.6" />
+                    <circle cx="12" cy="12" r="1.6" />
+                    <circle cx="12" cy="19" r="1.6" />
+                  </svg>
+                </button>
+              </div>
+
+              {profileMenuOpen && (
+                <div
+                  className="profile-dropdown-menu"
+                  role="menu"
+                  onClick={(event) => event.stopPropagation()}
+                >
+                  <div className="profile-dropdown-header">
+                    <img
+                      src={profileImage}
+                      alt={`${displayName}'s profile`}
+                      className="profile-dropdown-image"
+                      onError={(event) => {
+                        event.currentTarget.src =
+                          DEFAULT_PROFILE_IMAGE;
+                      }}
+                    />
+
+                    <div>
+                      <strong>{profileHandle}</strong>
+                      <span>{accountLabel}</span>
+                    </div>
+                  </div>
+
+                  <div className="profile-dropdown-divider" />
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setProfileMenuOpen(false);
+                      navigate("/student/profile");
+                    }}
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <circle cx="12" cy="8" r="4" />
+                      <path d="M5 20c.8-4 3.2-6 7-6s6.2 2 7 6" />
+                    </svg>
+
+                    <span>View profile</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setProfileMenuOpen(false);
+                      navigate("/student/settings");
+                    }}
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <circle cx="12" cy="12" r="3" />
+                      <path d="M19 13.5v-3l-2-.6a7 7 0 0 0-.7-1.6l1-1.8-2.1-2.1-1.8 1a7 7 0 0 0-1.6-.7L11.5 3h-3l-.6 2a7 7 0 0 0-1.6.7l-1.8-1-2.1 2.1 1 1.8a7 7 0 0 0-.7 1.6L1 10.5v3l2 .6a7 7 0 0 0 .7 1.6l-1 1.8 2.1 2.1 1.8-1a7 7 0 0 0 1.6.7l.6 2h3l.6-2a7 7 0 0 0 1.6-.7l1.8 1 2.1-2.1-1-1.8a7 7 0 0 0 .7-1.6Z" />
+                    </svg>
+
+                    <span>Settings</span>
+                  </button>
+
+                  <div className="profile-dropdown-divider" />
+
+                  <button
+                    type="button"
+                    className="profile-logout-option"
+                    onClick={handleLogout}
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M10 5H5v14h5" />
+                      <path d="m14 8 4 4-4 4" />
+                      <path d="M18 12H9" />
+                    </svg>
+
+                    <span>Log out</span>
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </header>
 
@@ -1161,21 +1311,16 @@ const nextProgressPeriod = () => {
                       }
                     >
                       <div className="course-card-body">
-                        <h2>
-                          {course.code} -{" "}
-                          {course.title}
-                        </h2>
+                        <h2>{course.title}</h2>
                       </div>
 
                       <div className="course-card-footer">
                         <Avatar />
 
-                        <span>
-                          Created by{" "}
-                          {
-                            course.professorName
-                          }
-                        </span>
+                        <div className="enrolled-course-meta">
+                          <span>{course.professorName}</span>
+                          <small>{getProfessorDepartment(course)}</small>
+                        </div>
                       </div>
                     </article>
                   ))

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import JoinCourseModal from './JoinCourseModal';
 import {
-  enrollStudentInCourse,
+  enrollStudentInCourseAsync,
   findJoinableCourseByCodeAsync,
 } from './studentCourseData';
 import './EnrolledCourses.css';
@@ -193,6 +193,14 @@ const notificationItems = [
   },
 ];
 
+function getCourseTitle(course) {
+  return course.title || course.courseName || course.course_name || 'Untitled course';
+}
+
+function getProfessorDepartment(course) {
+  return course.professorDepartment || course.professor_department || 'Department not set';
+}
+
 export function Icon({ name }) {
   if (name === 'home') {
     return (
@@ -369,7 +377,11 @@ export function SortToggle({ options }) {
   );
 }
 
-export function Avatar({ large = false }) {
+export function Avatar({
+  large = false,
+  src = '/images/temporaryimg.png',
+  alt = '',
+}) {
   return (
     <span className={`anime-avatar${large ? ' large' : ''}`}>
       <img
@@ -768,7 +780,7 @@ export default function EnrolledCourses() {
         return;
       }
 
-      await enrollStudentInCourse(course);
+     await enrollStudentInCourseAsync(course);
 
       closeJoinModal();
 
@@ -831,6 +843,8 @@ export default function EnrolledCourses() {
         )
     );
   };
+
+
 
   return (
     <div
@@ -1475,7 +1489,7 @@ export default function EnrolledCourses() {
                   course.id || course.code
                 }`}
                 className="course-folder enrolled-course-folder"
-                aria-label={`Open ${course.code} - ${course.title}`}
+                aria-label={`Open ${getCourseTitle(course)}`}
               >
                 <span
                   className="menu-button"
@@ -1487,10 +1501,7 @@ export default function EnrolledCourses() {
                 </span>
 
                 <div className="course-card-body">
-                  <h2>
-                    {course.code} -{' '}
-                    {course.title}
-                  </h2>
+                  
                 </div>
 
                 <div className="course-card-footer">
@@ -1500,6 +1511,10 @@ export default function EnrolledCourses() {
                     Created by{' '}
                     {course.instructor}
                   </span>
+                  <div className="enrolled-course-meta">
+                    <span>{course.instructor}</span>
+                    <small>{getProfessorDepartment(course)}</small>
+                  </div>
                 </div>
               </Link>
             ))

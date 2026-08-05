@@ -2,6 +2,7 @@ import styles from './login.module.css';
 import { useState } from "react";
 import Swal from "sweetalert2";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 import { API_BASE } from "../../config.js";
 function ChangePassword() {
 
@@ -13,6 +14,8 @@ function ChangePassword() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   /* PASSWORD RULES */
   const hasLength = password.length >= 12;
@@ -43,8 +46,19 @@ function ChangePassword() {
 
   const passwordStrength = getPasswordStrength(password);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!token) {
+      Swal.fire({
+        title: "Invalid Link",
+        text: "Please request a new password reset link.",
+        imageUrl: "/images/error.png",
+        imageWidth: 200,
+        imageHeight: 200,
+      });
+      return;
+    }
 
     if (!isPasswordValid) {
       Swal.fire({
@@ -79,39 +93,46 @@ function ChangePassword() {
       return;
     }
 
-    fetch(`${API_BASE}/change-password.php`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ token, password }),
-    })
-      .then(res => res.json())
-      .then(data => {
+    try {
+      setIsSubmitting(true);
 
-        if (!data.success) {
-          Swal.fire({
-            title: "Error",
-            text: data.message,
-            imageUrl: "/images/error.png",
-            imageWidth: 200,
-            imageHeight: 200,
-          });
-          return;
-        }
+      const response = await fetch(`${API_BASE}/reset-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ token, password }),
+      });
 
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
         Swal.fire({
-          title: "Success!",
-          text: "Your password has been updated.",
-          imageUrl: "/images/3.png",
+          title: "Error",
+          text:
+            data.message ||
+            "This password reset link is invalid or has expired.",
+          imageUrl: "/images/error.png",
           imageWidth: 200,
           imageHeight: 200,
-        }).then(() => navigate("/login"));
+        });
+        return;
+      }
 
-      })
-      .catch(() => {
-        Swal.fire("Server Error", "Please try again later.", "error");
+      await Swal.fire({
+        title: "Success!",
+        text: "Your password has been updated.",
+        imageUrl: "/images/3.png",
+        imageWidth: 200,
+        imageHeight: 200,
       });
+
+      navigate("/login");
+    } catch (error) {
+      Swal.fire("Server Error", "Please try again later.", "error");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
 
@@ -133,13 +154,26 @@ function ChangePassword() {
                 type={showPassword ? "text" : "password"}
                 placeholder="Enter new password"
                 value={password}
+                autoComplete="new-password"
                 onChange={(e) => setPassword(e.target.value)}
               />
 
-              <i
-                className={`fa-solid ${showPassword ? "fa-eye-slash" : "fa-eye"} ${styles.toggleEye}`}
-                onClick={() => setShowPassword(!showPassword)}
-              ></i>
+              <button
+                type="button"
+                className={styles.toggleEye}
+                aria-label={
+                  showPassword ? "Hide password" : "Show password"
+                }
+                aria-pressed={showPassword}
+                disabled={isSubmitting}
+                onClick={() => setShowPassword((current) => !current)}
+              >
+                {showPassword ? (
+                  <FiEyeOff aria-hidden="true" />
+                ) : (
+                  <FiEye aria-hidden="true" />
+                )}
+              </button>
             </div>
 
 
@@ -197,16 +231,33 @@ function ChangePassword() {
 
             <div className={styles.passwordWrapper}>
               <input
-                type={showPassword ? "text" : "password"}
+                type={showConfirmPassword ? "text" : "password"}
                 placeholder="Re-type new password"
                 value={confirmPassword}
+                autoComplete="new-password"
                 onChange={(e) => setConfirmPassword(e.target.value)}
               />
 
-              <i
-                className={`fa-solid ${showPassword ? "fa-eye-slash" : "fa-eye"} ${styles.toggleEye}`}
-                onClick={() => setShowPassword(!showPassword)}
-              ></i>
+              <button
+                type="button"
+                className={styles.toggleEye}
+                aria-label={
+                  showConfirmPassword
+                    ? "Hide confirm password"
+                    : "Show confirm password"
+                }
+                aria-pressed={showConfirmPassword}
+                disabled={isSubmitting}
+                onClick={() =>
+                  setShowConfirmPassword((current) => !current)
+                }
+              >
+                {showConfirmPassword ? (
+                  <FiEyeOff aria-hidden="true" />
+                ) : (
+                  <FiEye aria-hidden="true" />
+                )}
+              </button>
             </div>
 
 
@@ -225,9 +276,14 @@ function ChangePassword() {
             )}
 
 
-          <button type="button" className={styles.loginBtn} onClick={handleSubmit}>
-  Update Password
-</button>
+          <button
+            type="button"
+            className={styles.loginBtn}
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Updating..." : "Update Password"}
+          </button>
 
           </div>
         </div>

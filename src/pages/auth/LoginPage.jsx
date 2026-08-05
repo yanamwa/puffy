@@ -5,6 +5,7 @@ import {
   useNavigate,
   Link,
 } from "react-router-dom";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 import { API_BASE } from "../../config.js";
 import LandingNavbar from "../../components/LandingNavbar";
 import { useAuth } from "../../context/AuthContext.jsx";
@@ -29,8 +30,27 @@ function Login() {
     useState(false);
 
   const MAX_ATTEMPTS = 10;
+  const LOGIN_TIMEOUT_MS = 15000;
+
+  const [loginFeedback, setLoginFeedback] =
+    useState(null);
+
+  const setLoginError = (message) => {
+    setLoginFeedback({
+      type: "error",
+      message,
+    });
+  };
+
+  const clearLoginFeedback = () => {
+    if (loginFeedback) {
+      setLoginFeedback(null);
+    }
+  };
 
   const showLoginError = (message) => {
+    setLoginError(message);
+
     Swal.fire({
       imageUrl: "/images/error.png",
       imageWidth: 170,
@@ -187,23 +207,6 @@ function Login() {
       return;
     }
 
-    if (data.isNewUser) {
-      await Swal.fire({
-        imageUrl:
-          "/images/success.png",
-        imageWidth: 170,
-        imageHeight: 170,
-        title: "Welcome!",
-        text: "Let's get you started",
-      });
-
-      navigate("/welcome", {
-        replace: true,
-      });
-
-      return;
-    }
-
     await Swal.fire({
       imageUrl:
         "/images/success.png",
@@ -235,19 +238,25 @@ function Login() {
     }
   };
 
-  const handleLogin = async () => {
+  const handleLogin = async (event) => {
+    event?.preventDefault();
+
     const email = username
       .trim()
       .toLowerCase();
 
     if (!email || !password) {
+      const message =
+        "Please enter email and password";
+
+      setLoginError(message);
+
       Swal.fire({
         imageUrl: "/images/error.png",
         imageWidth: 170,
         imageHeight: 170,
         title: "Missing Fields",
-        text:
-          "Please enter email and password",
+        text: message,
       });
 
       return;
@@ -256,13 +265,17 @@ function Login() {
     if (
       loginAttempts >= MAX_ATTEMPTS
     ) {
+      const message =
+        "You reached the maximum login attempts. Please try again later.";
+
+      setLoginError(message);
+
       Swal.fire({
         imageUrl: "/images/error.png",
         imageWidth: 170,
         imageHeight: 170,
         title: "Too Many Attempts",
-        text:
-          "You reached the maximum login attempts. Please try again later.",
+        text: message,
       });
 
       return;
@@ -274,27 +287,47 @@ function Login() {
 
     try {
       setIsLoggingIn(true);
+      setLoginFeedback({
+        type: "warning",
+        message: "Checking your login...",
+      });
 
-      const res = await fetch(
-        `${API_BASE}/login`,
-        {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type":
-              "application/json",
-            Accept: "application/json",
-          },
-          body: JSON.stringify({
-            email,
-            password,
-          }),
-        }
-      );
+      const controller =
+        new AbortController();
 
-      const data = await res
-        .json()
-        .catch(() => ({}));
+      const timeoutId =
+        window.setTimeout(() => {
+          controller.abort();
+        }, LOGIN_TIMEOUT_MS);
+
+      let res;
+      let data;
+
+      try {
+        res = await fetch(
+          `${API_BASE}/login`,
+          {
+            method: "POST",
+            credentials: "include",
+            headers: {
+              "Content-Type":
+                "application/json",
+              Accept: "application/json",
+            },
+            body: JSON.stringify({
+              email,
+              password,
+            }),
+            signal: controller.signal,
+          }
+        );
+
+        data = await res
+          .json()
+          .catch(() => ({}));
+      } finally {
+        window.clearTimeout(timeoutId);
+      }
 
       console.log(
         "LOGIN RESPONSE:",
@@ -340,6 +373,12 @@ function Login() {
       }
 
       setLoginAttempts(0);
+      setLoginFeedback({
+        type: "success",
+        message:
+          "Login successful. Redirecting...",
+      });
+
       const token =
         data.token ||
         data.accessToken ||
@@ -391,13 +430,19 @@ function Login() {
         error
       );
 
+      const message =
+        error.name === "AbortError"
+          ? "Login took too long. Please check that the backend is running and try again."
+          : "Could not connect to the server. Please check that your backend is running.";
+
+      setLoginError(message);
+
       Swal.fire({
         imageUrl: "/images/error.png",
         imageWidth: 170,
         imageHeight: 170,
         title: "Server Error",
-        text:
-          "Could not connect to the server. Please check that your backend is running.",
+        text: message,
       });
     } finally {
       setIsLoggingIn(false);
@@ -447,10 +492,13 @@ function Login() {
             styles.signupContainer
           }
         >
-          <div
+          <form
             className={
               styles.signupCard
             }
+            onSubmit={handleLogin}
+            noValidate
+            aria-busy={isLoggingIn}
           >
             <h2>Login</h2>
 
@@ -463,9 +511,13 @@ function Login() {
               autoComplete="email"
               disabled={isLoggingIn}
               onChange={(e) =>
-                setUsername(
-                  e.target.value
-                )
+                {
+                  clearLoginFeedback();
+
+                  setUsername(
+                    e.target.value
+                  );
+                }
               }
             />
 
@@ -487,56 +539,39 @@ function Login() {
                 autoComplete="current-password"
                 disabled={isLoggingIn}
                 onChange={(e) =>
-                  setPassword(
-                    e.target.value
-                  )
-                }
-                onKeyDown={(e) => {
-                  if (
-                    e.key ===
-                    "Enter"
-                  ) {
-                    handleLogin();
+                  {
+                    clearLoginFeedback();
+
+                    setPassword(
+                      e.target.value
+                    );
                   }
-                }}
+                }
               />
 
-              <i
-                role="button"
-                tabIndex={0}
+              <button
+                type="button"
                 aria-label={
                   showPassword
                     ? "Hide password"
                     : "Show password"
                 }
-                className={`fa-solid ${
-                  showPassword
-                    ? "fa-eye-slash"
-                    : "fa-eye"
-                } ${
-                  styles.toggleEye
-                }`}
+                aria-pressed={showPassword}
+                className={styles.toggleEye}
+                disabled={isLoggingIn}
                 onClick={() =>
                   setShowPassword(
                     (current) =>
                       !current
                   )
                 }
-                onKeyDown={(e) => {
-                  if (
-                    e.key ===
-                      "Enter" ||
-                    e.key === " "
-                  ) {
-                    e.preventDefault();
-
-                    setShowPassword(
-                      (current) =>
-                        !current
-                    );
-                  }
-                }}
-              />
+              >
+                {showPassword ? (
+                  <FiEyeOff aria-hidden="true" />
+                ) : (
+                  <FiEye aria-hidden="true" />
+                )}
+              </button>
             </div>
 
             <p
@@ -548,17 +583,32 @@ function Login() {
             </p>
 
             <button
-              type="button"
+              type="submit"
               className={
                 styles.loginBtn
               }
               disabled={isLoggingIn}
-              onClick={handleLogin}
             >
               {isLoggingIn
                 ? "Logging in..."
                 : "Login"}
             </button>
+
+            {loginFeedback && (
+              <p
+                className={`${styles.validationMessage} ${
+                  styles[loginFeedback.type]
+                }`}
+                role={
+                  loginFeedback.type ===
+                  "error"
+                    ? "alert"
+                    : "status"
+                }
+              >
+                {loginFeedback.message}
+              </p>
+            )}
 
             <p
               className={
@@ -581,7 +631,7 @@ function Login() {
                 Can&apos;t sign in?
               </Link>
             </p>
-          </div>
+          </form>
         </div>
       </section>
     </div>

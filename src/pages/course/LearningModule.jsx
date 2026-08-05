@@ -14,7 +14,7 @@ import {
   getCourseSlideCount,
 } from "./courseContent.js";
 import {
-  enrollStudentInCourse,
+  enrollStudentInCourseAsync,
   loadStudentEnrolledCourses,
 } from "../student/studentCourseData.js";
 
@@ -306,14 +306,14 @@ function LearningModule() {
     }
 
     try {
-      const added = enrollStudentInCourse(
+      const addedCourse = await enrollStudentInCourseAsync(
         lesson || {
           id: cleanLessonId,
           title: "Untitled course",
         }
       );
 
-      if (!added) {
+      if (!addedCourse) {
         Swal.fire({
           title: "Could not add course",
           text: "Something went wrong.",

@@ -14,7 +14,23 @@ export default function Otp() {
   const email = location.state?.email || sessionStorage.getItem("otp_email");
 
   const OTP_DURATION = 300;
-  const [timeLeft, setTimeLeft] = useState(OTP_DURATION);
+  const getInitialOtpDeadline = () => {
+    const stateDeadline = Number(location.state?.otpExpiresAt);
+    const storedDeadline = Number(sessionStorage.getItem("otp_expires_at"));
+    const deadline =
+      stateDeadline ||
+      storedDeadline ||
+      Date.now() + OTP_DURATION * 1000;
+
+    sessionStorage.setItem("otp_expires_at", String(deadline));
+    return deadline;
+  };
+
+  const initialOtpDeadline = getInitialOtpDeadline();
+  const [otpDeadline, setOtpDeadline] = useState(initialOtpDeadline);
+  const [timeLeft, setTimeLeft] = useState(() =>
+    Math.max(0, Math.ceil((initialOtpDeadline - Date.now()) / 1000))
+  );
   const [resending, setResending] = useState(false);
   const [inlineError, setInlineError] = useState("");
 
@@ -59,14 +75,17 @@ export default function Otp() {
   }, [email, navigate]);
 
   useEffect(() => {
-    if (timeLeft <= 0) return;
+    const updateTimeLeft = () => {
+      setTimeLeft(
+        Math.max(0, Math.ceil((otpDeadline - Date.now()) / 1000))
+      );
+    };
 
-    const interval = setInterval(() => {
-      setTimeLeft((prev) => Math.max(prev - 1, 0));
-    }, 1000);
+    updateTimeLeft();
+    const interval = setInterval(updateTimeLeft, 1000);
 
     return () => clearInterval(interval);
-  }, [timeLeft]);
+  }, [otpDeadline]);
 
   const formatTime = () => {
     const minutes = String(Math.floor(timeLeft / 60)).padStart(2, "0");
@@ -79,6 +98,7 @@ export default function Otp() {
     if (message === "Invalid verification code") return "Wrong Code";
     if (message === "Invalid email address") return "Wrong Email";
     if (message === "Verification code expired") return "Code Expired";
+    if (message === "OTP has expired.") return "Code Expired";
     if (message === "Account not found or already verified") {
       return "Account Not Found";
     }
@@ -128,10 +148,14 @@ export default function Otp() {
             "Your email is verified. The Super Admin will review your professor registration."
           ).then(() => {
             sessionStorage.removeItem("otp_email");
+            sessionStorage.removeItem("otp_expires_at");
             navigate("/login");
           });
         } else {
-          if (data.message === "Verification code expired") {
+          if (
+            data.message === "Verification code expired" ||
+            data.message === "OTP has expired."
+          ) {
             setInlineError("Verification code expired");
             return;
           }
@@ -148,6 +172,12 @@ export default function Otp() {
   };
 
   const handleResend = () => {
+    if (!email) {
+      showThinkAlert("Session Expired", "Please sign up again.");
+      navigate("/signup");
+      return;
+    }
+
     setResending(true);
 
     fetch(`${API_BASE}/resend-otp`, {
@@ -160,7 +190,15 @@ export default function Otp() {
       .then((data) => {
         if (data.success) {
           showSuccessAlert("Sent!", "New verification code sent.");
-          setTimeLeft(OTP_DURATION);
+          const secondsRemaining = Number(
+            data.otpSecondsRemaining || OTP_DURATION
+          );
+          const nextDeadline =
+            Date.now() + Math.max(0, secondsRemaining) * 1000;
+
+          sessionStorage.setItem("otp_expires_at", String(nextDeadline));
+          setOtpDeadline(nextDeadline);
+          setTimeLeft(Math.max(0, secondsRemaining));
           setInlineError("");
           inputsRef.current.forEach((input) => {
             if (input) input.value = "";
@@ -181,8 +219,8 @@ export default function Otp() {
         <div className={styles.background}></div>
         <LandingNavbar />
 
-        <div className={styles.signupContainer}>
-          <div className={styles.signupCard}>
+    <div className={`${styles.signupContainer} ${styles.otpContainer}`}>
+  <div className={`${styles.signupCard} ${styles.otpCard}`}>
             <h2>Email Verification</h2>
 
             <p className={styles.verifySubtext}>
@@ -219,7 +257,7 @@ export default function Otp() {
               <button
                 type="button"
                 className={styles.resendBtn}
-                disabled={timeLeft > 0 || resending}
+                disabled={resending || !email}
                 onClick={handleResend}
               >
                 {resending ? "Sending..." : "Resend"}

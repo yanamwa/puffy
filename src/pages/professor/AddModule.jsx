@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
 import { useAuth } from '../../context/AuthContext';
+import { API_BASE } from '../../config.js';
 import {
   fetchCourse,
   saveCourse,
@@ -16,14 +17,26 @@ const LONG_LIMIT = 750;
 const LESSON_LIMIT = 6000;
 const QUIZ_LIMIT = 500;
 
-const API_BASE =
-  import.meta.env.VITE_API_BASE_URL ||
-  'http://localhost:5000';
-
 function createId(prefix = 'item') {
   return `${prefix}-${Date.now()}-${Math.random()
     .toString(36)
     .slice(2, 9)}`;
+}
+
+function createCourseCode() {
+  const timestamp = Date.now()
+    .toString(36)
+    .toUpperCase()
+    .slice(-5);
+
+  const randomPart = Math.random()
+    .toString(36)
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, '')
+    .slice(0, 4)
+    .padEnd(4, '0');
+
+  return `PB-${timestamp}-${randomPart}`;
 }
 
 function createEmptyLessonPage() {
@@ -69,6 +82,31 @@ const emptyCourse = {
 
 function limit(value, max) {
   return String(value || '').slice(0, max);
+}
+
+function parseList(value) {
+  if (Array.isArray(value)) {
+    return value;
+  }
+
+  try {
+    const parsed = JSON.parse(value || '[]');
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function readList(...values) {
+  for (const value of values) {
+    const parsed = parseList(value);
+
+    if (parsed.length) {
+      return parsed;
+    }
+  }
+
+  return [];
 }
 
 function counterClass(current, max) {
@@ -131,6 +169,7 @@ function normalizeContentModule(module, index) {
   return {
     id:
       module?.id ||
+      module?.lesson_id ||
       module?.module_id ||
       createId('module'),
 
@@ -150,30 +189,147 @@ function normalizeContentModule(module, index) {
         ''
     ),
 
-    lessonPages: Array.isArray(
-      module?.lessonPages
-    )
-      ? module.lessonPages.map(
-          normalizeLessonPage
-        )
-      : Array.isArray(module?.lesson_pages)
-        ? module.lesson_pages.map(
-            normalizeLessonPage
-          )
-        : [],
+    lessonPages: readList(
+      module?.lessonPages,
+      module?.lesson_pages,
+      module?.lessonContent,
+      module?.lesson_content,
+      module?.lesson_contents
+    ).map(normalizeLessonPage),
 
-    quizItems: Array.isArray(
-      module?.quizItems
-    )
-      ? module.quizItems.map(
-          normalizeQuizItem
-        )
-      : Array.isArray(module?.quiz_items)
-        ? module.quiz_items.map(
-            normalizeQuizItem
-          )
-        : [],
+    quizItems: readList(
+      module?.quizItems,
+      module?.quiz_items,
+      module?.quizModule,
+      module?.quiz_contents
+    ).map(normalizeQuizItem),
   };
+}
+
+function getModuleKeyFromItem(item, fallbackIndex) {
+  const moduleIndex = Number(
+    item?.moduleIndex ?? item?.module_index
+  );
+
+  if (Number.isInteger(moduleIndex)) {
+    return `index-${moduleIndex}`;
+  }
+
+  const moduleId =
+    item?.moduleId || item?.module_id;
+
+  if (moduleId) {
+    return `id-${moduleId}`;
+  }
+
+  const moduleTitle = String(
+    item?.moduleTitle ||
+      item?.module_title ||
+      ''
+  ).trim();
+
+  if (moduleTitle) {
+    return `title-${moduleTitle.toLowerCase()}`;
+  }
+
+  return 'legacy-module';
+}
+
+function rebuildModulesFromFlatContent(course) {
+  const lessonPages = readList(
+    course?.lessonPages,
+    course?.lesson_pages,
+    course?.lessonContent,
+    course?.lesson_content
+  );
+
+  const quizItems = readList(
+    course?.quizItems,
+    course?.quiz_items,
+    course?.quizModule,
+    course?.quiz_contents
+  );
+
+  const modules = new Map();
+
+  const ensureModule = (item, fallbackIndex = 0) => {
+    const key = getModuleKeyFromItem(item, fallbackIndex);
+
+    if (!key) {
+      return null;
+    }
+
+    if (!modules.has(key)) {
+      const moduleIndex = Number(
+        item?.moduleIndex ?? item?.module_index
+      );
+
+      modules.set(key, {
+        id:
+          item?.moduleId ||
+          item?.module_id ||
+          createId('module'),
+
+        order: Number.isInteger(moduleIndex)
+          ? moduleIndex
+          : modules.size,
+
+        title:
+          String(
+            item?.moduleTitle ||
+              item?.module_title ||
+              ''
+          ).trim() ||
+          `Module ${modules.size + 1}`,
+
+        description: String(
+          item?.moduleDescription ||
+            item?.module_description ||
+            course?.summary ||
+            ''
+        ),
+
+        learningObjectives: String(
+          item?.moduleLearningObjectives ||
+            item?.module_learning_objectives ||
+            course?.learningObjectives ||
+            course?.learning_objectives ||
+            ''
+        ),
+
+        lessonPages: [],
+        quizItems: [],
+      });
+    }
+
+    return modules.get(key);
+  };
+
+  lessonPages.forEach((page, index) => {
+    const module = ensureModule(page, index);
+
+    if (module) {
+      module.lessonPages.push(
+        normalizeLessonPage(page)
+      );
+    }
+  });
+
+  quizItems.forEach((item, index) => {
+    const module = ensureModule(item, index);
+
+    if (module) {
+      module.quizItems.push(
+        normalizeQuizItem(item)
+      );
+    }
+  });
+
+  return [...modules.values()]
+    .sort((left, right) => left.order - right.order)
+    .map(({ order, ...module }, index) =>
+      normalizeContentModule(module, index)
+    );
 }
 
 function normalizeCourse(course) {
@@ -182,7 +338,11 @@ function normalizeCourse(course) {
       ? course.contentModules
       : Array.isArray(course?.content_modules)
         ? course.content_modules
-        : null;
+        : Array.isArray(course?.learningModules)
+          ? course.learningModules
+          : Array.isArray(course?.learning_modules)
+            ? course.learning_modules
+            : null;
 
   let contentModules = [];
 
@@ -192,6 +352,38 @@ function normalizeCourse(course) {
         normalizeContentModule
       );
   } else {
+    contentModules =
+      rebuildModulesFromFlatContent(course);
+
+    if (contentModules.length) {
+      return {
+        ...emptyCourse,
+        ...course,
+
+        code: String(course?.code || course?.courseCode || course?.course_code || ''),
+
+        summary: String(
+          course?.summary || ''
+        ),
+
+        subject: String(
+          course?.subject || ''
+        ),
+
+        status:
+          course?.status === 'published'
+            ? 'published'
+            : 'draft',
+
+        visibility:
+          course?.visibility === 'public'
+            ? 'public'
+            : 'private',
+
+        contentModules,
+      };
+    }
+
     const oldLessonPages =
       Array.isArray(course?.lessonPages)
         ? course.lessonPages
@@ -230,7 +422,7 @@ function normalizeCourse(course) {
     ...emptyCourse,
     ...course,
 
-    code: String(course?.code || ''),
+    code: String(course?.code || course?.courseCode || course?.course_code || ''),
 
     summary: String(
       course?.summary || ''
@@ -274,7 +466,14 @@ export default function AddModule() {
   const isEditing = Boolean(id);
 
   const [form, setForm] =
-    useState(emptyCourse);
+    useState(() =>
+      isEditing
+        ? emptyCourse
+        : {
+            ...emptyCourse,
+            code: createCourseCode(),
+          }
+    );
 
   const [loading, setLoading] =
     useState(isEditing);
@@ -877,7 +1076,7 @@ export default function AddModule() {
 
         const response =
           await fetch(
-            `${API_BASE}/api/lessons/process-file`,
+            `${API_BASE}/lessons/process-file`,
             {
               method: 'POST',
               credentials:
@@ -926,6 +1125,13 @@ export default function AddModule() {
                     page.content
                 )
             : [];
+
+        if (generatedPages.length === 0) {
+          throw new Error(
+            data.message ||
+              'The file uploaded, but no lesson pages were created. Try a searchable PDF, DOCX, or TXT file.'
+          );
+        }
 
         updateContentModule(
           moduleId,
@@ -1214,7 +1420,7 @@ export default function AddModule() {
 
         const response =
           await fetch(
-            `${API_BASE}/api/lessons/generate-quiz`,
+            `${API_BASE}/lessons/generate-quiz`,
             {
               method: 'POST',
               credentials:
@@ -1329,7 +1535,6 @@ export default function AddModule() {
 
       if (
         !form.title.trim() ||
-        !form.code.trim() ||
         !form.summary.trim() ||
         !form.subject.trim()
       ) {
@@ -1338,7 +1543,7 @@ export default function AddModule() {
           title:
             'Required Fields Missing',
           text:
-            'Course title, course code, description, and subject are required.',
+            'Course title, description, and subject are required.',
           confirmButtonText: 'OK',
         });
 
@@ -1390,7 +1595,7 @@ export default function AddModule() {
       }
 
       const normalizedCode =
-        form.code
+        (form.code || createCourseCode())
           .trim()
           .toUpperCase();
 
@@ -1413,6 +1618,12 @@ export default function AddModule() {
 
       const professorEmail =
         currentProfessor.email ||
+        '';
+
+      const professorDepartment =
+        currentProfessor.professorDepartment ||
+        currentProfessor.professor_department ||
+        currentProfessor.department ||
         '';
 
       const professorId =
@@ -1439,6 +1650,18 @@ export default function AddModule() {
 
                 module_title:
                   module.title,
+
+                moduleDescription:
+                  module.description,
+
+                module_description:
+                  module.description,
+
+                moduleLearningObjectives:
+                  module.learningObjectives,
+
+                module_learning_objectives:
+                  module.learningObjectives,
 
                 moduleIndex,
 
@@ -1472,6 +1695,18 @@ export default function AddModule() {
                 module_title:
                   module.title,
 
+                moduleDescription:
+                  module.description,
+
+                module_description:
+                  module.description,
+
+                moduleLearningObjectives:
+                  module.learningObjectives,
+
+                module_learning_objectives:
+                  module.learningObjectives,
+
                 moduleIndex,
 
                 module_index:
@@ -1493,6 +1728,22 @@ export default function AddModule() {
 
         subject:
           form.subject.trim(),
+
+        learningObjectives:
+          form.contentModules
+            .map((module) =>
+              module.learningObjectives.trim()
+            )
+            .filter(Boolean)
+            .join('\n\n'),
+
+        learning_objectives:
+          form.contentModules
+            .map((module) =>
+              module.learningObjectives.trim()
+            )
+            .filter(Boolean)
+            .join('\n\n'),
 
         visibility:
           form.visibility ===
@@ -1537,6 +1788,10 @@ export default function AddModule() {
         professorEmail,
         professor_email:
           professorEmail,
+
+        professorDepartment,
+        professor_department:
+          professorDepartment,
       };
 
       try {
@@ -1667,7 +1922,7 @@ export default function AddModule() {
                   styles.required
                 }
               >
-                *Required
+                Auto-generated
               </span>
             </label>
 
@@ -1730,7 +1985,7 @@ export default function AddModule() {
                   event.target.value
                 )
               }
-              placeholder="e.g. ITEC-106"
+              placeholder="Auto-generated course code"
             />
 
             <div

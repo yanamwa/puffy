@@ -7,6 +7,7 @@ export default function Layout() {
     "/login",
     "/signup",
     "/forgot",
+    "/change-password",
     "/forgot-username",
     "/cant-signin",
     "/otp",
@@ -34,23 +35,13 @@ export default function Layout() {
     location.pathname.startsWith(path)
   );
 
-  const isOnboardingPage = [
-    "/welcome",
-    "/how-it-works",
-    "/name",
-    "/year",
-    "/section",
-    "/profile",
-  ].includes(location.pathname);
-
   if (
     isAuthPage ||
     isStudentDashboard ||
     isSuperAdminArea ||
     isAdminArea ||
     isProfessorArea ||
-    isCourseArea ||
-    isOnboardingPage
+    isCourseArea
   ) {
     return <Outlet />;
   }

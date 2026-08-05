@@ -1,0 +1,713 @@
+.page {
+  min-height: 100vh;
+  padding: 45px 20px;
+  box-sizing: border-box;
+  position: relative;
+  overflow-x: hidden;
+
+  background-image:
+    linear-gradient(
+      rgba(255,255,255,0.20),
+      rgba(255,255,255,0.20)
+    ),
+    url("/images/background_notebook.png");
+
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.quizHeader {
+  width: 70%;
+  margin: 0 auto 25px;
+  text-align: center;
+}
+
+.title {
+  font-family: "Jersey 15", sans-serif;
+  font-size: 48px;
+  font-weight: 400;
+  margin: 0 0 25px;
+  color: var(--font-color);
+}
+
+.subtitle {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 10px 0;
+  text-align: center;
+  color: #898989;
+}
+
+.progressContainer {
+  width: 70%;
+  height: 12px;
+  margin: 0 auto 18px;
+  background: #e3e3e3;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.progressBar {
+  height: 100%;
+  background: #c3c7f3;
+  border-radius: 20px;
+  transition: width 0.35s ease;
+}
+
+.questionBox {
+  position: relative;
+  width: 82%;
+  margin: 25px auto 0;
+  padding: 55px 45px 45px;
+  border-radius: 45px;
+  box-sizing: border-box;
+}
+
+.timerBox {
+  position: absolute;
+  top: -24px;
+  right: 65px;
+  padding: 6px 18px 9px;
+  border-radius: 25px;
+}
+
+.timer {
+  width: 130px;
+  height: 48px;
+  background: #ffffff;
+  border: 2px solid #c3c7f3;
+  border-radius: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 21px;
+  font-weight: 700;
+  color: #111;
+  box-shadow: 3px 3px 0 #d6d5ff;
+  transition: all 0.25s ease;
+}
+
+.warningTimer {
+  border-color: #ffbf69;
+  background: #fff3d6;
+  box-shadow: 3px 3px 0 #ffd68a;
+}
+
+.dangerTimer {
+  border-color: #ff6b6b;
+  background: #ffe0e0;
+  color: #c91818;
+  box-shadow: 3px 3px 0 #ffaaaa;
+  animation: timerPulse 0.7s infinite;
+}
+
+@keyframes timerPulse {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.08);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.questionTextBox {
+  width: 90%;
+  margin: 0 auto 30px;
+  position: relative;
+}
+
+.question {
+  width: 100%;
+  min-height: 98px;
+  margin: 0;
+  padding: 27px 64px;
+  background: #ffffff;
+  border: 1px solid #7a7b7d6c;
+  border-radius: 12px;
+  box-sizing: border-box;
+  font-size: 28px;
+  line-height: 1.4;
+  font-weight: 700;
+  text-align: center;
+  color: #111;
+  box-shadow: 0 4px 8px rgba(195, 199, 243, 0.45);
+}
+
+.options {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+}
+
+.option {
+  width: 82%;
+  min-height: 80px;
+  padding: 21px 64px;
+  background: #ffffff;
+  border: 1px solid #65656955;
+  border-radius: 15px;
+  font-size: 28px;
+  line-height: 1.35;
+  font-weight: 500;
+  color: var(--font-color);
+  cursor: pointer;
+  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.12);
+  transition: 0.2s ease;
+  position: relative;
+  display: block;
+  text-align: center;
+
+  font-family: inherit;
+}
+
+.option:hover {
+  transform: translateY(-2px);
+  background: #f7f7ff;
+}
+
+.option span:last-child {
+  display: block;
+  width: 100%;
+}
+
+.correct {
+  background: #c8f7c5 !important;
+  border-color: #2ecc71 !important;
+}
+
+.wrong {
+  background: #f7c5c5 !important;
+  border-color: #e74c3c !important;
+}
+
+.settingsBtn {
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  height: 24px;
+  padding: 15px 50px 10px 40px;
+  border: 1.5px solid #acacac;
+  border-radius: 6px;
+  background: #e9e9e9;
+  color: #222;
+  font-size: 15px;
+  font-weight: 800;
+  font-family: "Jersey 15", sans-serif;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.12);
+}
+
+.audioIconBtn,
+.optionAudioIcon {
+  border: none;
+  background: #f8f8f8;
+  color: #8d8d8d;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: 0.2s ease;
+}
+
+.audioIconBtn {
+  position: absolute;
+  top: 50%;
+  left: 14px;
+  transform: translateY(-50%);
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  z-index: 2;
+}
+
+.optionAudioIcon {
+  position: absolute;
+  top: 50%;
+  left: 16px;
+  transform: translateY(-50%);
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+}
+
+.audioIconBtn i,
+.optionAudioIcon i {
+  font-size: 19px;
+}
+
+.audioIconBtn:hover,
+.optionAudioIcon:hover {
+  background: #808080;
+}
+
+.settingsOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 20, 25, 0.45);
+  backdrop-filter: blur(3px);
+  display: grid;
+  place-items: center;
+  z-index: 9999;
+}
+
+.settingsModal {
+  width: 430px;
+  background: #ffffff;
+  border: 2px solid #c9a2ff;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+}
+
+.settingsHeader {
+  background: #f3eaff;
+  padding: 20px 24px;
+  border-bottom: 2px solid #decaff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.settingsHeader h2 {
+  margin: 0;
+  font-size: 24px;
+  color: var(--font-color);
+  font-family: "Jersey 15", sans-serif;
+  font-weight: normal;
+}
+
+.closeSettings {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #5c4a7d;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+}
+
+.settingsBody {
+  padding: 22px 24px 26px;
+}
+
+.settingRow,
+.speedBox {
+  background: #fafafa;
+  border: 1.5px solid #e6e0f5;
+  border-radius: 16px;
+  padding: 15px 16px;
+  margin-bottom: 14px;
+}
+
+.settingRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.settingInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.settingIcon {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: #f1e7ff;
+  color: #7c3cff;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+}
+
+.settingText strong,
+.settingText span,
+.speedHeader label,
+.speedValue {
+  font-family: "Jersey 15", sans-serif;
+  font-weight: normal;
+  color: var(--font-color);
+}
+
+.settingText strong {
+  display: block;
+  font-size: 20px;
+}
+
+.settingText span {
+  font-size: 16px;
+  color: #3f3f3f;
+}
+
+.switchBtn {
+  width: 74px;
+  height: 34px;
+  border-radius: 999px;
+  background: #b5b5b5;
+  color: #171717;
+  cursor: pointer;
+  font-family: "Jersey 15", sans-serif;
+  font-size: 20px;
+  border: 1px solid #353535;
+  box-shadow: 0 4px 0 #373737;
+}
+
+.switchOn {
+  background: #6b4baa;
+  color: #ffffff;
+  border-color: #5c4a7d;
+  box-shadow: 0 4px 0 #4d347e;
+}
+
+.speedHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.speedHeader label,
+.speedValue {
+  font-size: 20px;
+}
+
+.speedValue {
+  background: #b3b3b3;
+  padding: 5px 12px;
+  border-radius: 999px;
+}
+
+.speedBox input {
+  width: 100%;
+  accent-color: #7c3cff;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .quizHeader,
+  .questionBox {
+    width: 92%;
+  }
+
+  .title {
+    font-size: 36px;
+  }
+
+  .questionBox {
+    padding: 50px 22px 35px;
+    border-radius: 35px;
+  }
+
+  .timerBox {
+    right: 25px;
+  }
+
+  .questionTextBox {
+    width: 100%;
+  }
+
+  .question {
+    min-height: 88px;
+    font-size: 23px;
+    padding: 22px 52px;
+  }
+
+  .option {
+    width: 90%;
+    min-height: 72px;
+    font-size: 23px;
+    padding: 18px 52px;
+  }
+}
+
+
+.selectedOption {
+  background: rgba(160, 160, 160, 0.35) !important;
+  border-color: rgba(120, 120, 120, 0.7) !important;
+  color: rgba(17, 17, 17, 0.65);
+  box-shadow: none;
+  transform: translateY(1px);
+}
+
+.option:disabled {
+  cursor: not-allowed;
+}
+
+.option:disabled:not(.selectedOption) {
+  opacity: 0.55;
+}
+
+
+.timedLoadingImage {
+  width: 140px;
+
+  image-rendering: pixelated;
+
+  animation: timedFloat 0.6s ease-in-out infinite alternate;
+}
+
+.generatingTitle {
+  margin-top: 20px;
+
+  font-size: 42px;
+
+  color: #222;
+
+  text-align: center;
+}
+
+.generatingText {
+  margin-top: 10px;
+
+  font-size: 20px;
+
+  color: #555;
+
+  text-align: center;
+}
+
+@keyframes timedFloat {
+  from {
+    transform: translateY(0px);
+  }
+
+  to {
+    transform: translateY(-8px);
+  }
+}
+
+.emptyWrapper {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+    background-image:
+    linear-gradient(
+      rgba(255, 255, 255, 0.12),
+      rgba(255, 255, 255, 0.12)
+    ),
+    url("/images/background_notebook.png");
+  overflow-x: hidden;
+}
+
+.emptyCard {
+  width: 430px;
+  background: #ffffff;
+  border-radius: 25px;
+  padding: 40px;
+  text-align: center;
+  box-shadow: 0 10px 0 #757575;
+}
+
+.emptyImage {
+  width: 300px;
+  margin-bottom: 15px;
+  pointer-events: none;
+}
+
+.emptyTitle {
+  font-size: 46px;
+  font-family: "Jersey 15", sans-serif;
+  font-weight: normal;
+  margin: 10px 0;
+  color: var(--font-color);
+}
+
+.emptyText {
+  font-size: 20px;
+  color: #666;
+  margin: 14px 0 25px;
+}
+
+.emptyBtn {
+  width: 100%;
+  padding: 10px;
+  background: rgb(234, 202, 244);
+  color: var(--font-color);
+  border: 1px solid #ae9db3;
+  border-radius: 25px;
+  font-family: "Jersey 15", sans-serif;
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: 0 3px 0 #764784;
+}
+
+.emptyBtn:hover {
+  transform: translateY(-2px);
+}
+
+.checkpointWrapper {
+  width: min(92%, 980px);
+  margin: 42px auto 0;
+  padding: 34px;
+  box-sizing: border-box;
+  border-radius: 28px;
+  background: #ffffff;
+  border: 1px solid #cfcfcf;
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.checkpointHeader {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.checkpointEyebrow {
+  display: block;
+  margin-bottom: 8px;
+  color: #696969;
+  font-size: 18px;
+}
+
+.checkpointHeader h2 {
+  margin: 0 0 18px;
+  color: var(--font-color);
+  font-size: 32px;
+  font-weight: normal;
+}
+
+.checkpointProgressBar {
+  height: 9px;
+  width: 100%;
+  background: #ddd;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 0 auto 10px;
+}
+
+.checkpointProgressFill {
+  height: 100%;
+  background: #dba8ff;
+  border-radius: 10px;
+  transition: width 0.4s ease;
+}
+
+.checkpointQuestionCount {
+  font-size: 18px;
+  color: #444;
+}
+
+.checkpointCards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  max-height: 340px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.checkpointCard {
+  min-height: 84px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid #dfdfdf;
+  background: #f8f8f8;
+  box-sizing: border-box;
+}
+
+.checkpointCard span {
+  display: block;
+  margin-bottom: 8px;
+  color: #7c3cff;
+  font-size: 16px;
+}
+
+.checkpointCard p {
+  margin: 0;
+  color: #222;
+  font-size: 20px;
+  line-height: 1.25;
+  overflow-wrap: break-word;
+}
+
+.checkpointActions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 26px;
+}
+
+.checkpointActions button {
+  min-width: 130px;
+  padding: 10px 18px;
+  border-radius: 18px;
+  border: 1px solid #8f7cc9;
+  background: #a997dd;
+  box-shadow: 0 4px 0 #8f7cc9;
+  color: #ffffff;
+  cursor: pointer;
+  font-family: "Jersey 15", sans-serif;
+  font-size: 18px;
+  transition: 0.2s ease;
+}
+
+.checkpointActions button:hover {
+  transform: translateY(-2px);
+}
+
+.checkpointActions button:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
+}
+
+.checkpointActions .repeatCardsBtn {
+  border-color: #b63f3f;
+  background: #e65f5f;
+  box-shadow: 0 4px 0 #b63f3f;
+}
+
+.checkpointActions .nextCardsBtn {
+  border-color: #3f9f62;
+  background: #5fcf83;
+  box-shadow: 0 4px 0 #3f9f62;
+}
+
+.checkpointActions .doneCardsBtn {
+  border-color: #7f7f86;
+  background: #a9a9b1;
+  box-shadow: 0 4px 0 #7f7f86;
+}
+
+@media (max-width: 700px) {
+  .checkpointWrapper {
+    width: min(94%, 980px);
+    padding: 22px;
+  }
+
+  .checkpointCards {
+    grid-template-columns: 1fr;
+  }
+
+  .checkpointCard p {
+    font-size: 17px;
+  }
+
+  .checkpointActions button {
+    min-width: 116px;
+    font-size: 16px;
+  }
+}

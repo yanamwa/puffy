@@ -1,0 +1,174 @@
+.wrapper {
+  background-image: url("/images/background_notebook.png");
+  background-position: center;
+  background-size: cover;  
+  background-repeat: no-repeat;
+  min-height: 100vh;
+  width: 100%;
+  font-family: "Jersey 15", sans-serif;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 15px;
+  padding-bottom: 40px;
+    height: 100vh; 
+  box-sizing: border-box; 
+  overflow: hidden; 
+}
+
+/* HEADER */
+
+.headerBox {
+    width: 70%;
+    margin: 20px auto ;
+    background: white;
+    border-radius: 40px;
+    padding: 60px 30px 30px; /* less top padding */
+    text-align: center;
+    box-shadow: 0 8px 15px rgba(0,0,0,0.12);
+    position: relative;
+}
+
+.headerTop {
+    width: 100%;
+    height: 70px;
+    background: #e3c2ff;
+    border-top-left-radius: 40px;
+    border-top-right-radius: 40px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.title {
+    font-family: 'Jersey 15';
+    font-size: 45px;
+}
+
+.subtitle {
+    font-size: 16px;
+    opacity: 0.8;
+   padding-top: 10px; 
+}
+
+/* BUTTON */
+
+.startBtn {
+    margin-top: 10px;
+    width: 60%;
+    padding: 12px;
+    background: #EBD3FA;
+    border: none;
+    border-radius: 23px;
+    cursor: pointer;
+    font-family: "Jersey 15";
+    font-size: 22px;
+    box-shadow: 0 4px 0 #a45de3;
+}
+
+/* QUIZ */
+
+.slideshowBox {
+    width: 70%;
+    margin: 20px auto;
+    background: white;
+    border-radius: 40px;
+    text-align: center;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    position: relative;
+    padding: 30px 20px;
+}
+
+.slide {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.5s ease;
+    position: absolute;
+    width: 100%;
+    display: none;
+}
+
+.active {
+    opacity: 1;
+    visibility: visible;
+    position: relative;
+    display: block;
+}
+
+/* QUESTION */
+
+.question {
+    font-size: 22px;
+    font-weight: 600;
+    padding: 15px;
+    border: 1.2px solid #E3AADD;
+    border-radius: 15px;
+    background: white;
+    margin-bottom: 20px;
+}
+
+/* OPTIONS */
+
+.options button {
+    padding: 15px 20px;
+    width: 50%;
+    margin-bottom: 15px;
+    border-radius: 20px;
+    border: 1.5px solid #E3AADD;
+    background: white;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+/* DOTS */
+
+.dots {
+    margin-top: 15px;
+}
+
+.dot {
+    height: 10px;
+    width: 10px;
+    background: #EBD3FA;
+    border-radius: 50%;
+    display: inline-block;
+    margin: 0 4px;
+}
+
+.activeDot {
+    background: #E3AADD;
+}
+
+/* ANSWERS */
+
+.correct {
+    background: #8fffa1 !important;
+}
+
+.wrong {
+    background: #ff9e9e !important;
+}
+
+/* LIVES */
+
+.lives {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 20px;
+    justify-content: right;
+}
+
+.heart {
+    width: 70px;
+}
+
+.lost {
+    opacity: 0.25;
+    transform: scale(0.7);
+}

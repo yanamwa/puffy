@@ -48,6 +48,7 @@ const getQuizTypeLabel = (quizMode) => {
     qna: "Question and Answer",
     matching: "Matching",
     timed: "Timed Quiz",
+    survival: "Survival Mode",
     lesson: "Lesson Quick Check",
   };
 
@@ -61,6 +62,7 @@ const getQuizTypeIcon = (quizMode) => {
     qna: "/images/qna.png",
     matching: "/images/matching.png",
     timed: "/images/timedquiz.png",
+    survival: "/images/needpractice.png",
     lesson: "/images/qna.png",
   };
 
@@ -85,6 +87,7 @@ const getAdaptiveRecommendation = (
       qna: "practice recalling the answers without hints",
       matching: "review the related terms and definitions",
       timed: "review the concepts before another timed attempt",
+      survival: "review the missed questions before trying another three-life run",
       lesson: "review the lesson concepts",
     };
 
@@ -237,6 +240,15 @@ const getStoredUserId = () => {
   }
 };
 
+const toNumericId = (value) =>
+  /^\d+$/.test(String(value || "")) ? Number(value) : null;
+
+const toOptionalNumber = (value) => {
+  if (value === null || value === undefined || value === "") return null;
+  const number = Number(value);
+  return Number.isInteger(number) ? number : null;
+};
+
 export default function LessonResult() {
   const navigate = useNavigate();
   const { lessonId, deckId } = useParams();
@@ -250,6 +262,14 @@ export default function LessonResult() {
   const [attempts, setAttempts] = useState(0);
   const [source, setSource] = useState(deckId ? "deck" : "lesson");
   const [resultDeckId, setResultDeckId] = useState(deckId || null);
+  const [resultCourseId, setResultCourseId] = useState(null);
+  const [moduleNavigation, setModuleNavigation] = useState({
+    moduleIndex: null,
+    moduleNumber: null,
+    moduleCount: null,
+    nextModuleIndex: null,
+    nextModuleTitle: "",
+  });
 
   const [quizMode, setQuizMode] = useState("");
   const [isTimedOut, setIsTimedOut] = useState(false);
@@ -342,6 +362,31 @@ export default function LessonResult() {
         savedResults.deck_id ||
         deckId ||
         null;
+      const detectedCourseId =
+        savedResults.courseId ||
+        savedResults.course_id ||
+        savedResults.scope?.courseId ||
+        null;
+      const detectedModuleIndex = toOptionalNumber(
+        savedResults.moduleIndex ??
+          savedResults.module_index ??
+          savedResults.scope?.moduleIndex
+      );
+      const detectedModuleNumber = toOptionalNumber(
+        savedResults.moduleNumber ??
+          savedResults.module_number ??
+          savedResults.scope?.moduleNumber
+      );
+      const detectedModuleCount = toOptionalNumber(
+        savedResults.moduleCount ??
+          savedResults.module_count ??
+          savedResults.scope?.moduleCount
+      );
+      const detectedNextModuleIndex = toOptionalNumber(
+        savedResults.nextModuleIndex ??
+          savedResults.next_module_index ??
+          savedResults.scope?.nextModuleIndex
+      );
 
       setResults({
         score: savedResults.score || 0,
@@ -351,6 +396,28 @@ export default function LessonResult() {
 
       setSource(detectedSource);
       setResultDeckId(savedResults.deckId || savedResults.deck_id || deckId || null);
+      setResultCourseId(detectedCourseId);
+      setModuleNavigation({
+        moduleIndex: Number.isInteger(detectedModuleIndex)
+          ? detectedModuleIndex
+          : null,
+        moduleNumber: Number.isInteger(detectedModuleNumber)
+          ? detectedModuleNumber
+          : Number.isInteger(detectedModuleIndex)
+            ? detectedModuleIndex + 1
+            : null,
+        moduleCount: Number.isInteger(detectedModuleCount)
+          ? detectedModuleCount
+          : null,
+        nextModuleIndex: Number.isInteger(detectedNextModuleIndex)
+          ? detectedNextModuleIndex
+          : null,
+        nextModuleTitle:
+          savedResults.nextModuleTitle ||
+          savedResults.next_module_title ||
+          savedResults.scope?.nextModuleTitle ||
+          "",
+      });
       setQuizMode(detectedQuizMode);
       setIsTimedOut(Boolean(savedResults.isTimedOut || savedResults.timedOut));
 
@@ -371,9 +438,9 @@ export default function LessonResult() {
             body: JSON.stringify({
               user_id: getStoredUserId(),
               source: detectedSource,
-              lesson_id: detectedLessonId,
+              lesson_id: toNumericId(detectedLessonId),
               deck_id: detectedDeckId,
-              course_id: savedResults.courseId || savedResults.course_id || null,
+              course_id: detectedCourseId,
               quiz_mode: detectedQuizMode,
               score: Number(savedResults.score || 0),
               total: attemptTotal,
@@ -415,7 +482,9 @@ export default function LessonResult() {
         const generateFeedback = async () => {
           try {
             let resolvedTitle = String(
-              savedResults.contentTitle ||
+                savedResults.contentTitle ||
+                savedResults.scopeTitle ||
+                savedResults.scope_title ||
                 savedResults.lessonTitle ||
                 savedResults.deckTitle ||
                 savedResults.title ||
@@ -450,7 +519,13 @@ export default function LessonResult() {
 
             if (!resolvedTitle) {
               resolvedTitle =
-                detectedSource === "deck" ? "This deck" : "This lesson";
+                detectedSource === "deck"
+                  ? "This deck"
+                  : detectedSource === "course"
+                    ? "This course"
+                    : detectedSource === "module"
+                      ? "This module"
+                      : "This lesson";
             }
 
             const titledAnswers = savedAnswers.map((answer) => {
@@ -466,7 +541,9 @@ export default function LessonResult() {
                 ...answer,
                 topic: isGenericTopic ? "" : savedTopic,
                 lessonTitle:
-                  detectedSource === "lesson" ? resolvedTitle : undefined,
+                  ["lesson", "module", "course"].includes(detectedSource)
+                    ? resolvedTitle
+                    : undefined,
                 deckTitle:
                   detectedSource === "deck" ? resolvedTitle : undefined,
               };
@@ -778,8 +855,22 @@ export default function LessonResult() {
   const goBack = () => {
     if (source === "deck") {
       navigate(`/deck/${resultDeckId || deckId}`);
+    } else if (source === "module" || source === "course") {
+      navigate(
+        resultCourseId
+          ? `/student/enrolled-courses/${resultCourseId}`
+          : "/student/enrolled-courses"
+      );
     } else {
       navigate(`/introduction/${lessonId}`);
+    }
+  };
+
+  const continueToNextModule = () => {
+    if (resultCourseId && moduleNavigation.nextModuleIndex !== null) {
+      navigate(
+        `/introduction/${resultCourseId}?module=${moduleNavigation.nextModuleIndex}`
+      );
     }
   };
 
@@ -828,8 +919,23 @@ export default function LessonResult() {
             Practice Again
           </button>
 
+          {source === "module" &&
+            resultCourseId &&
+            moduleNavigation.nextModuleIndex !== null && (
+              <button className={styles.lesson} onClick={continueToNextModule}>
+                Continue to Module {moduleNavigation.nextModuleIndex + 1}
+                {moduleNavigation.nextModuleTitle
+                  ? `: ${moduleNavigation.nextModuleTitle}`
+                  : ""}
+              </button>
+            )}
+
           <button className={styles.lesson} onClick={goBack}>
-            {source === "deck" ? "Back to Deck" : "Review Lesson"}
+            {source === "deck"
+              ? "Back to Deck"
+              : source === "module" || source === "course"
+                ? "Back to Course"
+                : "Review Lesson"}
           </button>
 
           <button className={styles.home} onClick={goHome}>
@@ -1121,7 +1227,7 @@ export default function LessonResult() {
       {showQuizModal && (
         <QuizModesModal
           source={source}
-          lessonId={source === "lesson" ? lessonId : undefined}
+          lessonId={source === "deck" ? undefined : lessonId}
           deckId={source === "deck" ? resultDeckId || deckId : undefined}
           quizzes={results.answers}
           cards={results.answers}
