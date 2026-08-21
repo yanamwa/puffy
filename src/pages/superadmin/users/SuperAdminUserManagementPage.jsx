@@ -66,6 +66,8 @@ const initialProfessorForm = {
   email: '',
   facultyId: '',
   department: '',
+  position: '',
+  specialization: '',
   employmentProof: '',
 };
 
@@ -158,9 +160,24 @@ function normalizeUser(user) {
     professorFacultyId:
       user.professorFacultyId || user.professor_faculty_id || '',
     professorDepartment:
-      user.professorDepartment || user.professor_department || '',
+      user.professorDepartment ||
+      user.professor_department ||
+      '',
+
+    professorPosition:
+      user.professorPosition ||
+      user.professor_position ||
+      '',
+
+    professorSpecialization:
+      user.professorSpecialization ||
+      user.professor_specialization ||
+      '',
+
     professorEmploymentProof:
-      user.professorEmploymentProof || user.professor_employment_proof || '',
+      user.professorEmploymentProof ||
+      user.professor_employment_proof ||
+      '',
     verified:
       user.verified === true ||
       user.is_verified === 1 ||
@@ -1486,6 +1503,35 @@ export default function SuperAdminUserManagementPage() {
                 Department
                 <input type="text" value={professorForm.department} onChange={(event) => setProfessorForm((form) => ({ ...form, department: event.target.value }))} />
               </label>
+              <label>
+                  Position
+                  <input
+                    type="text"
+                    value={professorForm.position}
+                    onChange={(event) =>
+                      setProfessorForm((form) => ({
+                        ...form,
+                        position: event.target.value,
+                      }))
+                    }
+                    placeholder="Example: Associate Professor"
+                  />
+                </label>
+
+                <label>
+                  Specialization
+                  <input
+                    type="text"
+                    value={professorForm.specialization}
+                    onChange={(event) =>
+                      setProfessorForm((form) => ({
+                        ...form,
+                        specialization: event.target.value,
+                      }))
+                    }
+                    placeholder="Example: Database Systems"
+                  />
+                </label>
               <label>
                 Employment Proof
                 <input type="text" value={professorForm.employmentProof} onChange={(event) => setProfessorForm((form) => ({ ...form, employmentProof: event.target.value }))} placeholder="URL or note" />
