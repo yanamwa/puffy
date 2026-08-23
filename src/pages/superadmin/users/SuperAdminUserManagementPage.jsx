@@ -66,6 +66,8 @@ const initialProfessorForm = {
   email: '',
   facultyId: '',
   department: '',
+  position: '',
+  specialization: '',
   employmentProof: '',
 };
 
@@ -166,9 +168,24 @@ function normalizeUser(user) {
     professorFacultyId:
       user.professorFacultyId || user.professor_faculty_id || '',
     professorDepartment:
-      user.professorDepartment || user.professor_department || '',
+      user.professorDepartment ||
+      user.professor_department ||
+      '',
+
+    professorPosition:
+      user.professorPosition ||
+      user.professor_position ||
+      '',
+
+    professorSpecialization:
+      user.professorSpecialization ||
+      user.professor_specialization ||
+      '',
+
     professorEmploymentProof:
-      user.professorEmploymentProof || user.professor_employment_proof || '',
+      user.professorEmploymentProof ||
+      user.professor_employment_proof ||
+      '',
     verified:
       user.verified === true ||
       user.is_verified === 1 ||
@@ -1468,6 +1485,75 @@ export default function SuperAdminUserManagementPage() {
               </label>
               {renderAccountTypeFields(adminForm, setAdminForm)}
               <button className="users-submit-btn" type="submit">Create Admin Account</button>
+            </form>
+          </section>
+        </div>
+      )}
+
+      {professorModalOpen && (
+        <div className="users-modal-backdrop" onClick={() => setProfessorModalOpen(false)}>
+          <section className="users-modal" onClick={(event) => event.stopPropagation()}>
+            <button className="users-modal-close" type="button" onClick={() => setProfessorModalOpen(false)} aria-label="Close professor form">
+              x
+            </button>
+            <div className="users-modal-profile">
+              <span className="users-modal-avatar"><FiFileText /></span>
+              <div>
+                <h2>Add Professor</h2>
+                <p>Create a permanent approved professor account with generated credentials.</p>
+              </div>
+            </div>
+            <form className="users-student-form" onSubmit={handleCreateProfessor}>
+              <label>
+                Professor Name
+                <input type="text" value={professorForm.name} onChange={(event) => setProfessorForm((form) => ({ ...form, name: event.target.value }))} required />
+              </label>
+              <label>
+                Professor Email
+                <input type="email" value={professorForm.email} onChange={(event) => setProfessorForm((form) => ({ ...form, email: event.target.value }))} required />
+              </label>
+              <label>
+                Faculty ID
+                <input type="text" value={professorForm.facultyId} onChange={(event) => setProfessorForm((form) => ({ ...form, facultyId: event.target.value }))} />
+              </label>
+              <label>
+                Department
+                <input type="text" value={professorForm.department} onChange={(event) => setProfessorForm((form) => ({ ...form, department: event.target.value }))} />
+              </label>
+              <label>
+                  Position
+                  <input
+                    type="text"
+                    value={professorForm.position}
+                    onChange={(event) =>
+                      setProfessorForm((form) => ({
+                        ...form,
+                        position: event.target.value,
+                      }))
+                    }
+                    placeholder="Example: Associate Professor"
+                  />
+                </label>
+
+                <label>
+                  Specialization
+                  <input
+                    type="text"
+                    value={professorForm.specialization}
+                    onChange={(event) =>
+                      setProfessorForm((form) => ({
+                        ...form,
+                        specialization: event.target.value,
+                      }))
+                    }
+                    placeholder="Example: Database Systems"
+                  />
+                </label>
+              <label>
+                Employment Proof
+                <input type="text" value={professorForm.employmentProof} onChange={(event) => setProfessorForm((form) => ({ ...form, employmentProof: event.target.value }))} placeholder="URL or note" />
+              </label>
+              <button className="users-submit-btn" type="submit">Create Professor Account</button>
             </form>
           </section>
         </div>

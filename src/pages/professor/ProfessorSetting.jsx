@@ -195,7 +195,7 @@ export default function ProfessorSetting() {
       const response = await fetch(
         `${API_BASE}/users/change-password`,
         {
-          method: 'POST',
+          method: 'PUT',
 
           headers: {
             'Content-Type': 'application/json',
