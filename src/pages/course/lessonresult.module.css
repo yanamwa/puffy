@@ -98,13 +98,17 @@
 }
 
 .resultButtons {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px 14px;
   margin: 20px 0 30px;
 }
 
 .resultButtons button {
   padding: 8px 24px;
   border-radius: 25px;
-  margin: 0 8px;
+  margin: 0;
   cursor: pointer;
   transition: transform 0.1s ease;
   font-family: inherit;
@@ -117,9 +121,9 @@
 }
 
 .retry {
-  background: #e6b7ff;
-  border: 1px solid #a380c5;
-  box-shadow: 2px 4px 0 #c8a8e9;
+  background: #7bd473;
+  border: 1px solid #80c586;
+  box-shadow: 2px 4px 0 #a8e9b3;
 }
 
 .lesson {
@@ -135,7 +139,6 @@
 }
 
 /* REVIEW SECTION */
-
 .reviewWrapper {
   max-width: 900px;
   margin: 25px auto;
@@ -912,9 +915,6 @@
   color: #c14646;
 }
 
-.retry,
-.lesson,
-.home,
 .understandingBadge,
 .quizTypeIcon,
 .feedbackNavigation button,
@@ -925,9 +925,6 @@
   color: #ffffff;
 }
 
-.retry:hover,
-.lesson:hover,
-.home:hover,
 .feedbackNavigation button:hover,
 .modeGrid button:hover {
   background: var(--course-accent-dark);

@@ -630,13 +630,8 @@
 .passwordChecklist {
   margin: 10px 18px 0;
   padding: 10px 12px;
-
   border-radius: 8px;
-
-  background: var(--color-secondary);
-
-  font-family: "Jersey 15", sans-serif;
-  font-size: 13px;
+  background: #eeeded;
 }
 
 .passwordChecklist p {
@@ -645,12 +640,13 @@
 
 .valid {
   color: #2e7d32;
+  font-size: 14px;
 }
 
 .invalid {
-  color: #d32f2f;
+  color: #e95d5d;
+  font-size: 14px;
 }
-
 
 /* =========================================================
    OTP VERIFICATION
@@ -710,24 +706,16 @@
   width: calc(100% - 36px);
   margin: 0 18px;
   padding: 12px;
-
   border: none;
   border-radius: 12px;
-
   background: var(--color-secondary);
-
-  font-family: "Jersey 15", sans-serif;
   font-size: 15px;
-
   cursor: pointer;
 }
 
 .verifySubtext {
   margin: 14px 18px 22px;
-
   color: #555555;
-
-  font-family: "Jersey 15", sans-serif;
   font-size: 14px;
   text-align: center;
 }
@@ -739,8 +727,7 @@
 
 .forgotText {
   margin: 0 18px;
-
-  font-family: "Jersey 15", sans-serif;
+  margin-top: 20px;
   font-size: 14px;
   text-align: center;
 }
@@ -1130,39 +1117,28 @@
 /* =========================================================
    POLISHED PROFESSOR SIGNUP PAGE
    ========================================================= */
-
 .professorSignupContainer {
   width: 100%;
-  padding: 0 24px 90px;
-
+  padding: 0 4px 90px;
   display: flex;
   justify-content: center;
-
   position: relative;
   z-index: 5;
-
   box-sizing: border-box;
 }
 
 .professorSignupCard {
-  width: min(100%, 780px);
-  margin: 0;
   padding: 34px 36px;
-
   position: relative;
   z-index: 6;
-
   border: 1px solid #ccd3ce;
   border-radius: 26px;
-
   background: rgba(255, 255, 255, 0.97);
   box-shadow:
     0 18px 45px rgba(54, 68, 59, 0.1),
     0 4px 12px rgba(54, 68, 59, 0.05);
-
   box-sizing: border-box;
 }
-
 
 /* =========================================================
    SIGNUP HEADING
@@ -1171,21 +1147,16 @@
 .professorSignupHeading {
   margin-bottom: 28px;
   padding-bottom: 24px;
-
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 18px;
-
   border-bottom: 1px solid #e2e7e3;
 }
 
 .professorSignupHeading h1 {
   margin: 0;
-
   color: #53635a;
-
-  font-family: "Jersey 15", sans-serif;
   font-size: clamp(30px, 4vw, 38px);
   font-weight: 400;
   line-height: 1;
@@ -1193,14 +1164,10 @@
 
 .professorSignupHeading p {
   margin: 9px 0 0;
-
   color: #7a857f;
-
-  font-family: "Jersey 15", sans-serif;
   font-size: 16px;
   line-height: 1.4;
 }
-
 
 /* =========================================================
    FORM GRID
@@ -1609,10 +1576,8 @@
 
 .professorPasswordPanel {
   padding: 16px;
-
   border: 1px solid #dde4df;
   border-radius: 14px;
-
   background: #f7f9f8;
 }
 
@@ -1624,8 +1589,6 @@
 
 .professorPasswordRules p {
   margin: 0;
-
-  font-family: "Jersey 15", sans-serif;
   font-size: 14px;
 }
 
@@ -1641,9 +1604,7 @@
 .professorMatchMessage {
   margin-top: 14px;
   padding: 10px 12px;
-
   border-radius: 9px;
-
   font-family: "Jersey 15", sans-serif;
   font-size: 14px;
   text-align: center;
@@ -2224,4 +2185,14 @@
     font-size: 23px;
     line-height: 54px;
   }
+}
+
+.passwordDivider {
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+.passwordDivider span {
+  font-size: 14px;
+  font-weight: 600;
 }

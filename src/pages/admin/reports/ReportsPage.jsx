@@ -1,21 +1,20 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   FiActivity,
-  FiArchive,
+  FiAward,
   FiBarChart2,
   FiBookOpen,
   FiCalendar,
-  FiCheckCircle,
-  FiClock,
   FiDownload,
   FiFileText,
-  FiFilter,
-  FiPieChart,
+  FiLayers,
   FiPrinter,
+  FiSearch,
   FiShield,
-  FiTrendingUp,
+  FiTarget,
   FiUserCheck,
   FiUsers,
+  FiZap,
 } from 'react-icons/fi';
 import { API_BASE } from '../../../config';
 import { fetchCourses } from '../../../services/courseApi';
@@ -24,9 +23,42 @@ import { getProfessorCourseOwner } from '../../professor/professorData';
 import './ReportsPage.css';
 
 const rangeOptions = [
-  { id: 'week', label: 'This Week', factor: 0.35, labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] },
-  { id: 'month', label: 'This Month', factor: 1, labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'] },
-  { id: 'semester', label: 'This Semester', factor: 2.8, labels: ['Prelim', 'Midterm', 'Prefinal', 'Final'] },
+  {
+    id: 'today',
+    label: 'Today',
+    factor: 0.12,
+    labels: ['8 AM', '10 AM', '12 PM', '2 PM', '4 PM'],
+  },
+  {
+    id: 'week',
+    label: 'This Week',
+    factor: 0.35,
+    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+  },
+  {
+    id: 'month',
+    label: 'This Month',
+    factor: 1,
+    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+  },
+  {
+    id: 'semester',
+    label: 'Semester',
+    factor: 2.8,
+    labels: ['Prelim', 'Midterm', 'Prefinal', 'Final'],
+  },
+  {
+    id: 'school-year',
+    label: 'School Year',
+    factor: 4.6,
+    labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+  },
+  {
+    id: 'custom',
+    label: 'Custom Date Range',
+    factor: 1.4,
+    labels: ['Start', 'Middle', 'End'],
+  },
 ];
 
 const fallbackUsers = [
@@ -36,7 +68,7 @@ const fallbackUsers = [
     role: 'student',
     status: 'Active',
     joined: '2026-07-01',
-    lastLogin: '2026-07-17 09:12',
+    lastLogin: '2026-08-06 09:12',
     yearSection: 'BSIT 3A',
   },
   {
@@ -45,8 +77,7 @@ const fallbackUsers = [
     role: 'professor',
     status: 'Active',
     joined: '2026-06-21',
-    lastLogin: '2026-07-16 18:44',
-    yearSection: '',
+    lastLogin: '2026-08-06 18:44',
   },
   {
     id: 3,
@@ -54,25 +85,24 @@ const fallbackUsers = [
     role: 'student',
     status: 'Active',
     joined: '2026-07-04',
-    lastLogin: '2026-07-16 12:08',
+    lastLogin: '2026-08-05 12:08',
     yearSection: 'BSIT 2B',
   },
   {
     id: 4,
     name: 'Diana Reyes',
     role: 'professor',
-    status: 'Pending',
+    status: 'Active',
     joined: '2026-07-08',
-    lastLogin: '2026-07-15 14:31',
-    yearSection: '',
+    lastLogin: '2026-08-05 14:31',
   },
   {
     id: 5,
     name: 'Nighjri Tan',
     role: 'student',
-    status: 'Inactive',
+    status: 'Active',
     joined: '2026-06-11',
-    lastLogin: '2026-06-30 20:03',
+    lastLogin: '2026-08-04 20:03',
     yearSection: 'BSCS 1A',
   },
   {
@@ -81,18 +111,33 @@ const fallbackUsers = [
     role: 'admin',
     status: 'Active',
     joined: '2026-05-18',
-    lastLogin: '2026-07-17 10:20',
-    yearSection: '',
+    lastLogin: '2026-08-06 10:20',
   },
 ];
 
-const reportTypes = [
-  'User Activity Report',
-  'Course Usage Report',
-  'Quiz Usage Report',
-  'Learning Progress Summary',
-  'Professor Activity Report',
-  'System Activity Report',
+const sampleCourses = [
+  {
+    id: 'sample-im',
+    title: 'Information Management',
+    code: 'IM101',
+    professorName: 'Ashborn Reyes',
+    students: 52,
+    modules: 7,
+    quizzes: 6,
+    status: 'published',
+    updatedAt: '2026-08-04',
+  },
+  {
+    id: 'sample-db',
+    title: 'Database Systems',
+    code: 'DBS204',
+    professorName: 'Diana Reyes',
+    students: 38,
+    modules: 5,
+    quizzes: 4,
+    status: 'published',
+    updatedAt: '2026-08-01',
+  },
 ];
 
 function titleCase(value) {
@@ -101,9 +146,28 @@ function titleCase(value) {
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function numberFrom(...values) {
+  for (const value of values) {
+    const parsed = Number(value);
+
+    if (Number.isFinite(parsed) && parsed >= 0) {
+      return parsed;
+    }
+  }
+
+  return 0;
+}
+
 function normalizeUser(user) {
   const role = String(user.role || user.user_role || 'student').toLowerCase();
-  const status = user.status || user.account_status || (user.is_archived ? 'Inactive' : 'Active');
+  const status =
+    user.status ||
+    user.account_status ||
+    (user.is_archived || user.isArchived ? 'Inactive' : 'Active');
 
   return {
     id: user.id || user.userId || user.user_id || user.email || user.name,
@@ -111,27 +175,55 @@ function normalizeUser(user) {
     role,
     status: titleCase(status),
     joined: user.joined || user.created_at || user.createdAt || '',
-    lastLogin: user.lastLogin || user.last_login || user.updated_at || '',
+    lastActivity:
+      user.lastActivity ||
+      user.last_activity ||
+      user.lastLogin ||
+      user.last_login ||
+      user.updated_at ||
+      '',
     yearSection: user.yearSection || user.year_section || user.section || '',
+    modulesCompleted: numberFrom(
+      user.modulesCompleted,
+      user.modules_completed,
+      user.completed_modules,
+      user.modules,
+    ),
+    averageScore: numberFrom(
+      user.averageScore,
+      user.average_score,
+      user.overallAverage,
+      user.overall_average,
+    ),
   };
 }
 
-function getCourseMetric(course, key) {
-  const rawValue = course[key];
-  if (Array.isArray(rawValue)) return rawValue.length;
-  return Number(rawValue || 0);
+function getCourseTitle(course) {
+  return course.title || course.courseName || course.course_name || course.subject || 'Untitled course';
 }
 
-function getCourseModules(course) {
-  return getCourseMetric(course, 'modules') || getCourseMetric(course, 'lessonPages');
-}
-
-function getCourseQuizzes(course) {
-  return getCourseMetric(course, 'quizzes') || getCourseMetric(course, 'quizItems');
+function getCourseCode(course) {
+  return course.code || course.courseCode || course.course_code || 'COURSE';
 }
 
 function getCourseStudents(course) {
-  return Number(course.students || course.enrolled_students || course.student_count || 0);
+  return numberFrom(course.students, course.enrolled_students, course.student_count);
+}
+
+function getCourseModules(course) {
+  const contentModules = Array.isArray(course.contentModules)
+    ? course.contentModules
+    : course.content_modules;
+
+  if (Array.isArray(contentModules) && contentModules.length) {
+    return contentModules.length;
+  }
+
+  return numberFrom(course.modules, course.moduleCount, course.module_count, course.lessonPages?.length);
+}
+
+function getCourseQuizzes(course) {
+  return numberFrom(course.quizzes, course.quiz_count, course.quizItems?.length, course.quiz_items?.length);
 }
 
 function getCourseStatus(course) {
@@ -148,40 +240,94 @@ function isCourseArchived(course) {
   );
 }
 
-function formatDate(value) {
-  if (!value) return 'No date';
+function getScore(value, fallback) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? clamp(Math.round(parsed), 0, 100) : fallback;
+}
+
+function getCourseAverageScore(course, index) {
+  return getScore(
+    course.averageQuizScore || course.average_quiz_score || course.averageScore || course.average_score,
+    clamp(87 - index * 4 + (getCourseQuizzes(course) % 3), 68, 94),
+  );
+}
+
+function getCourseCompletionRate(course, index) {
+  return getScore(
+    course.completionRate || course.completion_rate || course.progressRate || course.progress_rate,
+    clamp(91 - index * 5 + (getCourseModules(course) % 4), 60, 97),
+  );
+}
+
+function getModuleList(course) {
+  const contentModules = Array.isArray(course.contentModules)
+    ? course.contentModules
+    : course.content_modules;
+
+  if (Array.isArray(contentModules) && contentModules.length) {
+    return contentModules;
+  }
+
+  return Array.from({ length: Math.max(1, getCourseModules(course)) }, (_, index) => ({
+    id: `${course.id || getCourseCode(course)}-module-${index + 1}`,
+    title: `Module ${index + 1}`,
+  }));
+}
+
+function formatDateTime(value) {
+  if (!value) return 'No activity yet';
+
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return 'No date';
-  return date.toLocaleDateString('en-US', {
+
+  if (Number.isNaN(date.getTime())) return String(value);
+
+  return date.toLocaleString('en-US', {
     month: 'short',
     day: '2-digit',
-    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
   });
 }
 
-function daysSince(value) {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return 999;
-  return Math.max(0, Math.round((Date.now() - date.getTime()) / 86400000));
+function makeSeries(labels, total, offset = 1) {
+  const base = Math.max(1, Number(total) || 1);
+  const count = labels.length || 1;
+
+  return labels.map((label, index) => ({
+    label,
+    value: Math.max(1, Math.round((base / count) * (0.72 + ((index + offset) % 4) * 0.16))),
+  }));
 }
 
 function toPercent(value, total) {
   if (!total) return 0;
-  return Math.min(100, Math.round((value / total) * 100));
+  return clamp(Math.round((value / total) * 100), 0, 100);
 }
 
-function makeSeries(labels, total, offset = 1) {
-  const count = labels.length || 1;
-  return labels.map((label, index) => ({
-    label,
-    value: Math.max(1, Math.round((total / count) * (0.72 + ((index + offset) % 4) * 0.16))),
-  }));
+function getAdaptiveLevel(score, modulesCompleted) {
+  if (score >= 90 && modulesCompleted >= 5) return 'Advanced';
+  if (score >= 82) return 'Proficient';
+  if (score >= 74) return 'Developing';
+  if (score >= 66) return 'Foundation';
+  return 'Needs Intervention';
+}
+
+function slug(value) {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
+}
+
+function csvEscape(value) {
+  return `"${String(value ?? '').replace(/"/g, '""')}"`;
 }
 
 function downloadFile(filename, content, type) {
   const blob = new Blob([content], { type });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
+
   link.href = url;
   link.download = filename;
   document.body.appendChild(link);
@@ -190,14 +336,10 @@ function downloadFile(filename, content, type) {
   URL.revokeObjectURL(url);
 }
 
-function csvEscape(value) {
-  return `"${String(value ?? '').replace(/"/g, '""')}"`;
-}
-
-function StatCard({ icon: Icon, label, value, detail }) {
+function MetricCard({ icon: Icon, label, value, detail }) {
   return (
-    <article className="report-stat-card">
-      <span className="report-stat-icon" aria-hidden="true">
+    <article className="report-metric-card">
+      <span className="report-metric-icon" aria-hidden="true">
         <Icon />
       </span>
       <div>
@@ -209,27 +351,25 @@ function StatCard({ icon: Icon, label, value, detail }) {
   );
 }
 
-function BarList({ items }) {
-  const max = Math.max(...items.map((item) => Number(item.value) || 0), 1);
-
+function ReportSection({ icon: Icon, title, subtitle, action, children }) {
   return (
-    <div className="report-bar-list">
-      {items.map((item) => (
-        <div className="report-bar-row" key={item.label}>
-          <div>
-            <span>{item.label}</span>
-            <strong>{item.value}</strong>
-          </div>
-          <i>
-            <b style={{ width: `${Math.max(6, (item.value / max) * 100)}%` }} />
-          </i>
+    <section className="report-section">
+      <div className="report-section-header">
+        <span className="report-section-icon" aria-hidden="true">
+          <Icon />
+        </span>
+        <div>
+          <h2>{title}</h2>
+          <p>{subtitle}</p>
         </div>
-      ))}
-    </div>
+        {action}
+      </div>
+      {children}
+    </section>
   );
 }
 
-function MiniTable({ columns, rows }) {
+function ReportTable({ columns, rows, emptyMessage }) {
   return (
     <div className="report-table-wrap">
       <table className="report-table">
@@ -241,53 +381,77 @@ function MiniTable({ columns, rows }) {
           </tr>
         </thead>
         <tbody>
-          {rows.map((row, index) => (
-            <tr key={`${row[0]}-${index}`}>
-              {row.map((cell, cellIndex) => (
-                <td key={`${row[0]}-${cellIndex}`}>{cell}</td>
-              ))}
+          {rows.length === 0 ? (
+            <tr>
+              <td className="report-table-empty" colSpan={columns.length}>
+                {emptyMessage}
+              </td>
             </tr>
-          ))}
+          ) : (
+            rows.map((row, rowIndex) => (
+              <tr key={row.key || rowIndex}>
+                {row.cells.map((cell, cellIndex) => (
+                  <td key={`${row.key || rowIndex}-${cellIndex}`}>{cell}</td>
+                ))}
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
     </div>
   );
 }
 
-function ReportPanel({ title, subtitle, icon: Icon, children }) {
+function BarChart({ items }) {
+  const max = Math.max(...items.map((item) => Number(item.value) || 0), 1);
+
   return (
-    <section className="report-panel">
-      <div className="report-panel-header">
-        <span aria-hidden="true">
-          <Icon />
-        </span>
-        <div>
-          <h2>{title}</h2>
-          <p>{subtitle}</p>
+    <div className="report-bars">
+      {items.map((item) => (
+        <div className="report-bar-row" key={item.label}>
+          <div>
+            <span>{item.label}</span>
+            <strong>{item.value}</strong>
+          </div>
+          <i>
+            <b style={{ width: `${Math.max(8, ((Number(item.value) || 0) / max) * 100)}%` }} />
+          </i>
         </div>
-      </div>
-      {children}
-    </section>
+      ))}
+    </div>
   );
 }
 
+function SmallMetric({ label, value, tone = 'neutral' }) {
+  return (
+    <div className={`report-small-metric tone-${tone}`}>
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
+  );
+}
+
+function ScorePill({ value }) {
+  const tone = value >= 85 ? 'high' : value >= 75 ? 'mid' : 'low';
+
+  return <span className={`score-pill tone-${tone}`}>{value}%</span>;
+}
+
+function LevelPill({ level }) {
+  return <span className={`level-pill level-${slug(level)}`}>{level}</span>;
+}
+
 export default function ReportsPage() {
-  const [range, setRange] = useState('month');
-  const [courses, setCourses] = useState([]);
-  const [users, setUsers] = useState(fallbackUsers);
-  const [modes, setModes] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [reportType, setReportType] = useState(reportTypes[0]);
-  const [filters, setFilters] = useState({
-    startDate: '2026-07-01',
-    endDate: '2026-07-17',
-    role: 'all',
-    course: 'all',
-    professor: 'all',
-    yearSection: 'all',
-    quizMode: 'all',
-    accountStatus: 'all',
+  const [dateFilter, setDateFilter] = useState('month');
+  const [customRange, setCustomRange] = useState({
+    startDate: '2026-08-01',
+    endDate: '2026-08-07',
   });
+  const [courses, setCourses] = useState(sampleCourses);
+  const [users, setUsers] = useState(fallbackUsers.map(normalizeUser));
+  const [modes, setModes] = useState([]);
+  const [studentSearch, setStudentSearch] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let active = true;
@@ -296,8 +460,8 @@ export default function ReportsPage() {
       setLoading(true);
 
       const [courseData, modeData, userData] = await Promise.all([
-        fetchCourses({ includeArchived: true }),
-        fetchQuizModes(),
+        fetchCourses({ includeArchived: true }).catch(() => sampleCourses),
+        fetchQuizModes().catch(() => []),
         fetch(`${API_BASE}/users`)
           .then((response) => (response.ok ? response.json() : null))
           .then((data) => data?.users || data?.data || [])
@@ -306,7 +470,7 @@ export default function ReportsPage() {
 
       if (!active) return;
 
-      setCourses(Array.isArray(courseData) ? courseData : []);
+      setCourses(Array.isArray(courseData) && courseData.length ? courseData : sampleCourses);
       setModes(Array.isArray(modeData) ? modeData : []);
       setUsers((Array.isArray(userData) && userData.length ? userData : fallbackUsers).map(normalizeUser));
       setLoading(false);
@@ -319,556 +483,337 @@ export default function ReportsPage() {
     };
   }, []);
 
-  const analytics = useMemo(() => {
-    const selectedRange = rangeOptions.find((item) => item.id === range) || rangeOptions[1];
+  const reportData = useMemo(() => {
+    const selectedRange = rangeOptions.find((item) => item.id === dateFilter) || rangeOptions[2];
     const normalizedUsers = users.map(normalizeUser);
-    const activeUsers = normalizedUsers.filter((user) => String(user.status).toLowerCase() === 'active');
-    const inactiveUsers = normalizedUsers.filter((user) => String(user.status).toLowerCase() !== 'active');
     const studentUsers = normalizedUsers.filter((user) => user.role === 'student');
     const professorUsers = normalizedUsers.filter((user) => user.role === 'professor');
-    const adminUsers = normalizedUsers.filter((user) => user.role.includes('admin'));
     const activeCourses = courses.filter((course) => !isCourseArchived(course));
-    const archivedCourses = courses.filter(isCourseArchived);
     const publishedCourses = activeCourses.filter((course) => getCourseStatus(course) === 'published');
-    const totalModules = courses.reduce((sum, course) => sum + getCourseModules(course), 0);
-    const totalDecks = Math.max(14, normalizedUsers.reduce((sum, user) => sum + Number(user.decks || 0), 0));
-    const totalQuizzes = courses.reduce((sum, course) => sum + getCourseQuizzes(course), 0);
-    const totalQuizQuestions = Math.max(totalQuizzes * 12, modes.length * 8);
-    const publishedQuizzes = publishedCourses.reduce((sum, course) => sum + getCourseQuizzes(course), 0);
-    const totalEnrolled = activeCourses.reduce((sum, course) => sum + getCourseStudents(course), 0);
-    const totalAttempts = Math.max(0, Math.round((totalQuizzes * 18 + activeUsers.length * 7 + 24) * selectedRange.factor));
-    const uniqueQuizStudents = Math.min(
-      Math.max(0, studentUsers.length),
-      Math.max(1, Math.round(studentUsers.length * (range === 'week' ? 0.45 : range === 'month' ? 0.72 : 0.9)))
-    );
-    const completionRate = Math.min(96, Math.max(64, 72 + Math.round(totalQuizzes * 1.5)));
-    const averageScore = Math.min(92, Math.max(60, 68 + Math.round(totalQuizzes * 1.3)));
-    const improvingStudents = Math.min(89, Math.max(45, 52 + Math.round(activeUsers.length * 3)));
-    const courseProgressRate = Math.min(94, Math.max(48, 55 + Math.round(totalModules * 1.8)));
     const courseRows = activeCourses.map((course, index) => {
-      const quizzes = getCourseQuizzes(course);
       const students = getCourseStudents(course);
-      const attempts = Math.round((quizzes * 22 + students * 1.4 + index * 3) * selectedRange.factor);
+      const modules = getCourseModules(course);
+      const quizzes = getCourseQuizzes(course);
+      const averageScore = getCourseAverageScore(course, index);
+      const completionRate = getCourseCompletionRate(course, index);
+      const attempts = Math.max(
+        1,
+        Math.round((quizzes * 18 + students * 1.6 + modules * 3 + index * 5) * selectedRange.factor),
+      );
 
       return {
+        id: course.id || course.course_id || getCourseCode(course),
         course,
-        label: `${course.code || 'COURSE'} - ${course.title || course.courseName || 'Untitled course'}`,
+        name: getCourseTitle(course),
+        code: getCourseCode(course),
+        professor: getProfessorCourseOwner(course),
         students,
-        modules: getCourseModules(course),
+        modules,
         quizzes,
+        averageScore,
+        completionRate,
         attempts,
-        updatedAt: course.updatedAt || course.updated_at || course.created_at,
       };
     });
-    const roleCounts = [
-      { label: 'Students', value: studentUsers.length },
-      { label: 'Professors', value: professorUsers.length },
-      { label: 'Admins', value: adminUsers.length },
+    const moduleRows = courseRows.flatMap((courseRow, courseIndex) =>
+      getModuleList(courseRow.course).map((module, moduleIndex) => {
+        const averageScore = getScore(
+          module.averageScore || module.average_score,
+          clamp(courseRow.averageScore - 4 + ((moduleIndex + courseIndex) % 5) * 2, 58, 98),
+        );
+        const attempts = Math.max(
+          1,
+          Math.round((courseRow.students * 0.8 + courseRow.quizzes * 6 + moduleIndex * 2) * selectedRange.factor),
+        );
+        const highestScore = getScore(module.highestScore || module.highest_score, clamp(averageScore + 9, 0, 100));
+        const lowestScore = getScore(module.lowestScore || module.lowest_score, clamp(averageScore - 18, 0, 100));
+        const completionRate = getScore(
+          module.completionRate || module.completion_rate,
+          clamp(courseRow.completionRate - 6 + (moduleIndex % 4) * 2, 48, 99),
+        );
+
+        return {
+          key: `${courseRow.id}-${module.id || moduleIndex}`,
+          title: module.title || module.module_title || `Module ${moduleIndex + 1}`,
+          course: courseRow.name,
+          attempts,
+          averageScore,
+          highestScore,
+          lowestScore,
+          completionRate,
+        };
+      }),
+    );
+    const totalModules = courseRows.reduce((sum, course) => sum + course.modules, 0);
+    const totalQuizAttempts = courseRows.reduce((sum, course) => sum + course.attempts, 0);
+    const averageStudentPerformance =
+      courseRows.length > 0
+        ? Math.round(courseRows.reduce((sum, course) => sum + course.averageScore, 0) / courseRows.length)
+        : 0;
+    const studentRows = studentUsers.map((student, index) => {
+      const course = courseRows[index % Math.max(courseRows.length, 1)];
+      const courseModules = course?.modules || 5;
+      const modulesCompleted =
+        student.modulesCompleted ||
+        clamp(courseModules - (index % 3), 1, Math.max(1, courseModules));
+      const overallAverage =
+        student.averageScore ||
+        clamp((course?.averageScore || 82) - 5 + ((index + 1) % 5) * 3, 58, 98);
+      const adaptiveLevel = getAdaptiveLevel(overallAverage, modulesCompleted);
+
+      return {
+        key: student.id,
+        student: student.name,
+        course: course?.name || 'Information Management',
+        overallAverage,
+        modulesCompleted,
+        totalModules: courseModules,
+        adaptiveLevel,
+        lastActivity: student.lastActivity,
+      };
+    });
+    const professorNames = [
+      ...new Set([
+        ...professorUsers.map((professor) => professor.name),
+        ...courseRows.map((course) => course.professor),
+      ].filter(Boolean)),
     ];
-    const statusRows = [
-      { label: 'Active students', value: studentUsers.filter((user) => user.status === 'Active').length },
-      { label: 'Inactive students', value: studentUsers.filter((user) => user.status !== 'Active').length },
-      { label: 'Active professors', value: professorUsers.filter((user) => user.status === 'Active').length },
-      { label: 'Pending professors', value: professorUsers.filter((user) => user.status === 'Pending').length },
-    ];
+    const professorRows = professorNames.map((professor, index) => {
+      const ownedCourses = courseRows.filter((course) => course.professor === professor);
+      const assignedCourses = ownedCourses.length
+        ? ownedCourses
+        : courseRows.filter((_, courseIndex) => courseIndex % Math.max(professorNames.length, 1) === index);
+      const coursesHandled = Math.max(assignedCourses.length, professorUsers[index] ? 1 : 0);
+      const modulesCreated = assignedCourses.reduce((sum, course) => sum + course.modules, 0);
+      const studentsHandled = assignedCourses.reduce((sum, course) => sum + course.students, 0);
+      const quizCompletionRate = assignedCourses.length
+        ? Math.round(
+            assignedCourses.reduce((sum, course) => sum + course.completionRate, 0) /
+              assignedCourses.length,
+          )
+        : clamp(82 - index * 4, 62, 94);
+
+      return {
+        key: professor,
+        professor,
+        coursesHandled,
+        modulesCreated,
+        studentsHandled,
+        quizCompletionRate,
+      };
+    });
+    const averageAttemptsBeforeMastery = totalQuizAttempts
+      ? Math.max(1, (totalQuizAttempts / Math.max(1, studentRows.length * 6)).toFixed(1))
+      : '0.0';
+    const interventionRows = studentRows.filter(
+      (student) => student.overallAverage < 70 || student.adaptiveLevel === 'Needs Intervention',
+    );
+    const quizAverage = moduleRows.length
+      ? Math.round(moduleRows.reduce((sum, row) => sum + row.averageScore, 0) / moduleRows.length)
+      : averageStudentPerformance;
+    const highestScore = moduleRows.length
+      ? Math.max(...moduleRows.map((row) => row.highestScore))
+      : Math.min(100, quizAverage + 10);
+    const lowestScore = moduleRows.length
+      ? Math.min(...moduleRows.map((row) => row.lowestScore))
+      : Math.max(0, quizAverage - 20);
+    const passRate = clamp(Math.round(quizAverage + 8), 0, 98);
+    const failedRate = 100 - passRate;
 
     return {
-      range: selectedRange,
+      selectedRange,
       normalizedUsers,
-      activeUsers,
-      inactiveUsers,
       studentUsers,
       professorUsers,
-      activeCourses,
-      archivedCourses,
-      publishedCourses,
-      totalModules,
-      totalDecks,
-      totalQuizzes,
-      totalQuizQuestions,
-      publishedQuizzes,
-      totalEnrolled,
-      totalAttempts,
-      uniqueQuizStudents,
-      averageAttemptsPerStudent: uniqueQuizStudents ? (totalAttempts / uniqueQuizStudents).toFixed(1) : '0.0',
-      completionRate,
-      averageScore,
-      improvingStudents,
-      courseProgressRate,
       courseRows,
-      roleCounts,
-      statusRows,
-      registrationSeries: makeSeries(selectedRange.labels, Math.max(3, normalizedUsers.length), 2),
-      quizActivitySeries: makeSeries(selectedRange.labels, Math.max(5, totalAttempts), 1),
-      loginSeries: makeSeries(selectedRange.labels, Math.max(3, activeUsers.length * 3), 3),
-      recentLogins: [...normalizedUsers]
-        .sort((a, b) => new Date(b.lastLogin || 0) - new Date(a.lastLogin || 0))
-        .slice(0, 5),
-      quizModeUsage: modes.map((mode, index) => ({
-        label: mode.title || mode.mode_name || `Mode ${index + 1}`,
-        value: Math.max(1, Math.round(totalAttempts * (0.12 + ((index + 2) % 5) * 0.04))),
-      })),
-      masteryDistribution: [
-        { label: 'Mastered', value: Math.round(activeUsers.length * 0.28) },
-        { label: 'Developing', value: Math.round(activeUsers.length * 0.46) },
-        { label: 'Needs review', value: Math.max(1, Math.round(activeUsers.length * 0.26)) },
-      ],
-      strugglingTopics: ['Responsive CSS', 'SQL joins', 'JavaScript events', 'Usability testing'],
-      systemEvents: [
-        { label: 'Failed login attempts', value: Math.max(1, Math.round(activeUsers.length * 0.3)) },
-        { label: 'Accounts created', value: normalizedUsers.filter((user) => daysSince(user.joined) < 31).length },
-        { label: 'Approved accounts', value: activeUsers.length },
-        { label: 'Declined or deactivated', value: inactiveUsers.length },
-        { label: 'Archived records', value: archivedCourses.length },
-        { label: 'Restored records', value: Math.max(0, Math.round(archivedCourses.length * 0.4)) },
-      ],
+      moduleRows,
+      studentRows,
+      professorRows,
+      totalStudents: studentUsers.length,
+      totalProfessors: professorUsers.length || professorRows.length,
+      totalCourses: activeCourses.length,
+      totalPublishedCourses: publishedCourses.length,
+      totalModules,
+      totalQuizAttempts,
+      averageStudentPerformance,
+      adaptive: {
+        difficultyLevels: [
+          { label: 'Foundation', value: studentRows.filter((row) => row.adaptiveLevel === 'Foundation').length },
+          { label: 'Developing', value: studentRows.filter((row) => row.adaptiveLevel === 'Developing').length },
+          { label: 'Proficient', value: studentRows.filter((row) => row.adaptiveLevel === 'Proficient').length },
+          { label: 'Advanced', value: studentRows.filter((row) => row.adaptiveLevel === 'Advanced').length },
+        ],
+        improvementOverTime: makeSeries(selectedRange.labels, Math.max(8, averageStudentPerformance), 2),
+        averageAttemptsBeforeMastery,
+        studentsNeedingIntervention: interventionRows.length,
+        interventionRows,
+      },
+      quiz: {
+        totalTaken: totalQuizAttempts,
+        averageScore: quizAverage,
+        highestScore,
+        lowestScore,
+        passRate,
+        failedRate,
+        modeRows: (modes.length ? modes : [{ title: 'Flashcards' }, { title: 'Multiple Choice' }, { title: 'Q & A' }])
+          .slice(0, 6)
+          .map((mode, index) => ({
+            label: mode.title || mode.mode_name || `Quiz Mode ${index + 1}`,
+            value: Math.max(1, Math.round(totalQuizAttempts * (0.16 + index * 0.04))),
+          })),
+      },
     };
-  }, [courses, modes, range, users]);
+  }, [courses, dateFilter, modes, users]);
 
-  const professors = useMemo(() => {
-    const names = courses.map(getProfessorCourseOwner).filter(Boolean);
-    return [...new Set(names)];
-  }, [courses]);
+  const filteredStudentRows = useMemo(() => {
+    const query = studentSearch.trim().toLowerCase();
 
-  const yearSections = useMemo(() => {
-    const sections = users.map((user) => user.yearSection).filter(Boolean);
-    return [...new Set(sections)];
-  }, [users]);
+    if (!query) return reportData.studentRows;
+
+    return reportData.studentRows.filter((student) =>
+      [student.student, student.course, student.adaptiveLevel]
+        .join(' ')
+        .toLowerCase()
+        .includes(query),
+    );
+  }, [reportData.studentRows, studentSearch]);
 
   const overviewCards = [
     {
-      label: 'Total registered users',
-      value: analytics.normalizedUsers.length,
-      detail: `${analytics.range.label} view`,
+      label: 'Total Students',
+      value: reportData.totalStudents,
+      detail: `${toPercent(reportData.totalStudents, reportData.normalizedUsers.length)}% of users`,
       icon: FiUsers,
     },
     {
-      label: 'Active students',
-      value: analytics.studentUsers.filter((user) => user.status === 'Active').length,
-      detail: `${toPercent(analytics.studentUsers.filter((user) => user.status === 'Active').length, analytics.studentUsers.length)}% of students`,
-      icon: FiUserCheck,
-    },
-    {
-      label: 'Active professors',
-      value: analytics.professorUsers.filter((user) => user.status === 'Active').length,
-      detail: `${analytics.professorUsers.length} professor account(s)`,
+      label: 'Total Professors',
+      value: reportData.totalProfessors,
+      detail: `${reportData.professorRows.length} active report owner(s)`,
       icon: FiShield,
     },
     {
-      label: 'Total active courses',
-      value: analytics.activeCourses.length,
-      detail: `${analytics.archivedCourses.length} archived`,
+      label: 'Total Courses',
+      value: reportData.totalCourses,
+      detail: `${reportData.totalPublishedCourses} published`,
       icon: FiBookOpen,
     },
     {
-      label: 'Total published quizzes',
-      value: analytics.publishedQuizzes,
-      detail: `${analytics.totalQuizzes} total quizzes`,
-      icon: FiCheckCircle,
+      label: 'Total Modules',
+      value: reportData.totalModules,
+      detail: 'Learning content tracked',
+      icon: FiLayers,
     },
     {
-      label: 'Total quiz attempts',
-      value: analytics.totalAttempts,
-      detail: `${analytics.uniqueQuizStudents} unique students`,
+      label: 'Total Quiz Attempts',
+      value: reportData.totalQuizAttempts,
+      detail: reportData.selectedRange.label,
       icon: FiActivity,
+    },
+    {
+      label: 'Average Student Performance',
+      value: `${reportData.averageStudentPerformance}%`,
+      detail: 'Across active courses',
+      icon: FiAward,
     },
   ];
 
   const buildReportCsv = () => {
     const rows = [
-      ['Report Type', reportType],
-      ['Date Filter', analytics.range.label],
-      ['Date Range', `${filters.startDate} to ${filters.endDate}`],
-      ['Role', filters.role],
-      ['Course', filters.course],
-      ['Professor', filters.professor],
-      ['Year and Section', filters.yearSection],
-      ['Quiz Mode', filters.quizMode],
-      ['Account Status', filters.accountStatus],
+      ['Reports Dashboard'],
+      ['Date Filter', reportData.selectedRange.label],
+      ['Custom Range', `${customRange.startDate} to ${customRange.endDate}`],
       [],
+      ['Overview Cards'],
       ['Metric', 'Value', 'Detail'],
       ...overviewCards.map((card) => [card.label, card.value, card.detail]),
-      ['System-wide average quiz score', `${analytics.averageScore}%`, 'Anonymous summary'],
-      ['Course completion or study progress rate', `${analytics.courseProgressRate}%`, 'Anonymous summary'],
+      [],
+      ['Course Reports'],
+      ['Course', 'Professor', 'Enrolled Students', 'Modules', 'Average Quiz Score', 'Completion Rate'],
+      ...reportData.courseRows.map((course) => [
+        course.name,
+        course.professor,
+        course.students,
+        course.modules,
+        `${course.averageScore}%`,
+        `${course.completionRate}%`,
+      ]),
+      [],
+      ['Module Reports'],
+      ['Module', 'Course', 'Attempts', 'Average Score', 'Highest Score', 'Lowest Score', 'Completion Rate'],
+      ...reportData.moduleRows.map((module) => [
+        module.title,
+        module.course,
+        module.attempts,
+        `${module.averageScore}%`,
+        `${module.highestScore}%`,
+        `${module.lowestScore}%`,
+        `${module.completionRate}%`,
+      ]),
+      [],
+      ['Student Performance'],
+      ['Student', 'Course', 'Overall Average', 'Modules Completed', 'Adaptive Level', 'Last Activity'],
+      ...reportData.studentRows.map((student) => [
+        student.student,
+        student.course,
+        `${student.overallAverage}%`,
+        `${student.modulesCompleted}/${student.totalModules}`,
+        student.adaptiveLevel,
+        student.lastActivity,
+      ]),
+      [],
+      ['Professor Activity'],
+      ['Professor', 'Courses Handled', 'Modules Created', 'Students Handled', 'Quiz Completion Rate'],
+      ...reportData.professorRows.map((professor) => [
+        professor.professor,
+        professor.coursesHandled,
+        professor.modulesCreated,
+        professor.studentsHandled,
+        `${professor.quizCompletionRate}%`,
+      ]),
+      [],
+      ['Quiz Statistics'],
+      ['Total Quizzes Taken', 'Average Score', 'Highest Score', 'Lowest Score', 'Pass Rate', 'Failed Rate'],
+      [
+        reportData.quiz.totalTaken,
+        `${reportData.quiz.averageScore}%`,
+        `${reportData.quiz.highestScore}%`,
+        `${reportData.quiz.lowestScore}%`,
+        `${reportData.quiz.passRate}%`,
+        `${reportData.quiz.failedRate}%`,
+      ],
     ];
 
     return rows.map((row) => row.map(csvEscape).join(',')).join('\n');
   };
 
   const exportExcel = () => {
-    downloadFile(
-      `${reportType.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.csv`,
-      buildReportCsv(),
-      'text/csv;charset=utf-8'
-    );
+    downloadFile('puffybrain-reports-dashboard.csv', buildReportCsv(), 'text/csv;charset=utf-8');
   };
 
   const printReport = () => {
     window.print();
   };
 
-  const updateFilter = (key, value) => {
-    setFilters((current) => ({
-      ...current,
-      [key]: value,
-    }));
-  };
-
   return (
     <div className="admin-page reports-page">
-      <section className="reports-hero">
+      <section className="reports-dashboard-header">
         <div>
           <span className="reports-kicker">
-            <FiBarChart2 />
-            Reports & Statistics
+            <FiBarChart2 aria-hidden="true" />
+            Admin reports
           </span>
-          <h1>Platform reports and statistics</h1>
-          <p>
-            View system-wide users, courses, quiz usage, learning trends, content,
-            and operational activity in one admin dashboard.
-          </p>
+          <h1>Reports Dashboard</h1>
+          <p>Performance, activity, adaptive learning, and quiz results for PuffyBrain.</p>
         </div>
 
-        <div className="report-range-filter" aria-label="Date filter">
-          {rangeOptions.map((option) => (
-            <button
-              key={option.id}
-              type="button"
-              className={range === option.id ? 'active' : ''}
-              onClick={() => setRange(option.id)}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      {loading && <div className="reports-loading">Loading reports data...</div>}
-
-      <section className="report-stat-grid" aria-label="Overview cards">
-        {overviewCards.map((card) => (
-          <StatCard key={card.label} {...card} />
-        ))}
-      </section>
-
-      <div className="reports-grid">
-        <ReportPanel
-          title="User Statistics"
-          subtitle="Account status, activity, registrations, recent logins, and role distribution."
-          icon={FiUsers}
-        >
-          <div className="report-split">
-            <BarList items={analytics.statusRows} />
-            <div className="report-mini-metrics">
-              <span>Daily active users <strong>{Math.max(1, Math.round(analytics.activeUsers.length * 0.42))}</strong></span>
-              <span>Weekly active users <strong>{Math.max(1, Math.round(analytics.activeUsers.length * 0.74))}</strong></span>
-              <span>Monthly active users <strong>{analytics.activeUsers.length}</strong></span>
-              <span>Inactive users <strong>{analytics.inactiveUsers.length}</strong></span>
-            </div>
-          </div>
-          <div className="report-two-col">
-            <div>
-              <h3>New registrations over time</h3>
-              <BarList items={analytics.registrationSeries} />
-            </div>
-            <div>
-              <h3>User distribution by role</h3>
-              <BarList items={analytics.roleCounts} />
-            </div>
-          </div>
-          <MiniTable
-            columns={['Recent login', 'Role', 'Status', 'Last login']}
-            rows={analytics.recentLogins.map((user) => [
-              user.name,
-              titleCase(user.role),
-              user.status,
-              user.lastLogin || 'No login yet',
-            ])}
-          />
-        </ReportPanel>
-
-        <ReportPanel
-          title="Course Statistics"
-          subtitle="System-wide course activity, enrollment, course activity, and course content counts."
-          icon={FiBookOpen}
-        >
-          <div className="report-mini-metrics">
-            <span>Active courses <strong>{analytics.activeCourses.length}</strong></span>
-            <span>Archived courses <strong>{analytics.archivedCourses.length}</strong></span>
-            <span>Total enrolled seats <strong>{analytics.totalEnrolled}</strong></span>
-            <span>Published courses <strong>{analytics.publishedCourses.length}</strong></span>
-          </div>
-          <MiniTable
-            columns={['Course', 'Students', 'Modules', 'Quizzes', 'Quiz activity']}
-            rows={[...analytics.courseRows]
-              .sort((a, b) => b.students - a.students)
-              .slice(0, 6)
-              .map((course) => [
-                course.label,
-                course.students,
-                course.modules,
-                course.quizzes,
-                course.attempts,
-              ])}
-          />
-          <div className="report-two-col">
-            <div>
-              <h3>Courses with little or no recent activity</h3>
-              <ul className="report-list">
-                {analytics.courseRows
-                  .filter((course) => daysSince(course.updatedAt) > 14 || course.attempts < 5)
-                  .slice(0, 4)
-                  .map((course) => (
-                    <li key={course.label}>
-                      <span>{course.label}</span>
-                      <strong>{formatDate(course.updatedAt)}</strong>
-                    </li>
-                  ))}
-              </ul>
-            </div>
-            <div>
-              <h3>Courses with most quiz activity</h3>
-              <BarList
-                items={[...analytics.courseRows]
-                  .sort((a, b) => b.attempts - a.attempts)
-                  .slice(0, 4)
-                  .map((course) => ({ label: course.label, value: course.attempts }))}
-              />
-            </div>
-          </div>
-        </ReportPanel>
-
-        <ReportPanel
-          title="Quiz Usage Statistics"
-          subtitle="Usage-focused quiz reporting, independent from detailed individual grading."
-          icon={FiPieChart}
-        >
-          <div className="report-mini-metrics">
-            <span>Total attempts <strong>{analytics.totalAttempts}</strong></span>
-            <span>Unique students <strong>{analytics.uniqueQuizStudents}</strong></span>
-            <span>Average attempts per student <strong>{analytics.averageAttemptsPerStudent}</strong></span>
-            <span>Completion rate <strong>{analytics.completionRate}%</strong></span>
-          </div>
-          <div className="report-two-col">
-            <div>
-              <h3>Most commonly used quiz modes</h3>
-              <BarList items={analytics.quizModeUsage} />
-            </div>
-            <div>
-              <h3>Quiz activity over time</h3>
-              <BarList items={analytics.quizActivitySeries} />
-            </div>
-          </div>
-          <MiniTable
-            columns={['Quiz source', 'Share', 'Notes']}
-            rows={[
-              ['AI-generated quizzes', '62%', 'Available when generated quiz content is saved'],
-              ['Manually created quizzes', '38%', 'Professor or admin-authored content'],
-              [
-                'Least attempted quizzes',
-                [...analytics.courseRows].sort((a, b) => a.attempts - b.attempts)[0]?.label || 'No quiz activity',
-                'Prioritize reminders or content review',
-              ],
-            ]}
-          />
-        </ReportPanel>
-
-        <ReportPanel
-          title="Overall Learning Statistics"
-          subtitle="Anonymous learning trends only. Detailed individual performance stays with the relevant professor."
-          icon={FiTrendingUp}
-        >
-          <div className="report-mini-metrics">
-            <span>Average quiz score <strong>{analytics.averageScore}%</strong></span>
-            <span>Students improving <strong>{analytics.improvingStudents}%</strong></span>
-            <span>Study progress rate <strong>{analytics.courseProgressRate}%</strong></span>
-          </div>
-          <div className="report-two-col">
-            <div>
-              <h3>Overall mastery distribution</h3>
-              <BarList items={analytics.masteryDistribution} />
-            </div>
-            <div>
-              <h3>Topics students commonly struggle with</h3>
-              <ul className="report-list compact">
-                {analytics.strugglingTopics.map((topic) => (
-                  <li key={topic}>
-                    <span>{topic}</span>
-                    <strong>Needs review</strong>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-          <MiniTable
-            columns={['Course', 'Average mastery', 'Study progress']}
-            rows={analytics.courseRows.slice(0, 5).map((course, index) => [
-              course.label,
-              `${Math.min(94, 61 + index * 7)}%`,
-              `${Math.min(96, analytics.courseProgressRate + index * 2)}%`,
-            ])}
-          />
-        </ReportPanel>
-
-        <ReportPanel
-          title="Content Statistics"
-          subtitle="Learning content inventory, usage, and content with no recent activity."
-          icon={FiArchive}
-        >
-          <div className="report-mini-metrics">
-            <span>Total learning modules <strong>{analytics.totalModules}</strong></span>
-            <span>Total decks <strong>{analytics.totalDecks}</strong></span>
-            <span>Total quiz questions <strong>{analytics.totalQuizQuestions}</strong></span>
-            <span>Unpublished content <strong>{courses.filter((course) => getCourseStatus(course) !== 'published').length}</strong></span>
-          </div>
-          <MiniTable
-            columns={['Content', 'Usage signal', 'Status']}
-            rows={[
-              ['Most viewed learning modules', analytics.courseRows[0]?.label || 'No modules yet', 'Active'],
-              ['Most practiced decks', 'Student flashcard decks', 'Active'],
-              ['Content with no recent usage', analytics.courseRows.find((course) => course.attempts < 5)?.label || 'No low usage content', 'Review'],
-              ['Published versus unpublished content', `${analytics.publishedCourses.length} published course(s)`, 'Tracked'],
-            ]}
-          />
-        </ReportPanel>
-
-        <ReportPanel
-          title="System Activity"
-          subtitle="Operational activity, account events, peak usage, and recent publishing."
-          icon={FiClock}
-        >
-          <div className="report-two-col">
-            <div>
-              <h3>Logins over time</h3>
-              <BarList items={analytics.loginSeries} />
-            </div>
-            <div>
-              <h3>Account and record activity</h3>
-              <BarList items={analytics.systemEvents} />
-            </div>
-          </div>
-          <MiniTable
-            columns={['Operational signal', 'Value', 'Details']}
-            rows={[
-              ['Peak usage day', 'Wednesday', '10:00 AM to 1:00 PM'],
-              ['Recently created courses', analytics.courseRows[0]?.label || 'No course yet', 'Latest course activity'],
-              ['Recently published quizzes', `${analytics.publishedQuizzes}`, 'Published quiz count'],
-              ['Archived and restored records', `${analytics.archivedCourses.length} / ${Math.round(analytics.archivedCourses.length * 0.4)}`, 'Archived / restored'],
-            ]}
-          />
-        </ReportPanel>
-      </div>
-
-      <section className="report-generator">
-        <div className="report-panel-header">
-          <span aria-hidden="true">
-            <FiFilter />
-          </span>
-          <div>
-            <h2>Report Generation</h2>
-            <p>Generate reports by date range, user role, course, professor, year and section, quiz mode, and account status.</p>
-          </div>
-        </div>
-
-        <div className="report-type-list">
-          {reportTypes.map((type) => (
-            <button
-              key={type}
-              type="button"
-              className={reportType === type ? 'active' : ''}
-              onClick={() => setReportType(type)}
-            >
-              {type}
-            </button>
-          ))}
-        </div>
-
-        <div className="report-filter-grid">
-          <label>
-            <span>Date from</span>
-            <input
-              type="date"
-              value={filters.startDate}
-              onChange={(event) => updateFilter('startDate', event.target.value)}
-            />
-          </label>
-          <label>
-            <span>Date to</span>
-            <input
-              type="date"
-              value={filters.endDate}
-              onChange={(event) => updateFilter('endDate', event.target.value)}
-            />
-          </label>
-          <label>
-            <span>User role</span>
-            <select value={filters.role} onChange={(event) => updateFilter('role', event.target.value)}>
-              <option value="all">All roles</option>
-              <option value="student">Students</option>
-              <option value="professor">Professors</option>
-              <option value="admin">Admins</option>
-            </select>
-          </label>
-          <label>
-            <span>Course</span>
-            <select value={filters.course} onChange={(event) => updateFilter('course', event.target.value)}>
-              <option value="all">All courses</option>
-              {courses.map((course) => (
-                <option key={course.id || course.code} value={course.id || course.code}>
-                  {course.code || 'COURSE'} - {course.title || course.courseName || 'Untitled course'}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            <span>Professor</span>
-            <select value={filters.professor} onChange={(event) => updateFilter('professor', event.target.value)}>
-              <option value="all">All professors</option>
-              {professors.map((professor) => (
-                <option key={professor} value={professor}>{professor}</option>
-              ))}
-            </select>
-          </label>
-          <label>
-            <span>Year and section</span>
-            <select value={filters.yearSection} onChange={(event) => updateFilter('yearSection', event.target.value)}>
-              <option value="all">All year and sections</option>
-              {yearSections.map((section) => (
-                <option key={section} value={section}>{section}</option>
-              ))}
-            </select>
-          </label>
-          <label>
-            <span>Quiz mode</span>
-            <select value={filters.quizMode} onChange={(event) => updateFilter('quizMode', event.target.value)}>
-              <option value="all">All quiz modes</option>
-              {modes.map((mode) => (
-                <option key={mode.id} value={mode.title || mode.mode_name}>
-                  {mode.title || mode.mode_name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            <span>Account status</span>
-            <select value={filters.accountStatus} onChange={(event) => updateFilter('accountStatus', event.target.value)}>
-              <option value="all">All statuses</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-              <option value="pending">Pending</option>
-              <option value="archived">Archived</option>
-            </select>
-          </label>
-        </div>
-
-        <div className="report-export-actions">
+        <div className="report-export-actions" aria-label="Export reports">
           <button type="button" onClick={printReport}>
             <FiDownload />
-            Export as PDF
+            Export PDF
           </button>
           <button type="button" onClick={exportExcel}>
             <FiFileText />
-            Export as Excel
+            Export Excel
           </button>
           <button type="button" onClick={printReport}>
             <FiPrinter />
@@ -876,6 +821,232 @@ export default function ReportsPage() {
           </button>
         </div>
       </section>
+
+      <section className="report-date-filter" aria-label="Date filter">
+        <div className="report-date-filter-heading">
+          <FiCalendar aria-hidden="true" />
+          <span>Date Filter</span>
+        </div>
+
+        <div className="report-range-filter">
+          {rangeOptions.map((option) => (
+            <button
+              key={option.id}
+              type="button"
+              className={dateFilter === option.id ? 'active' : ''}
+              onClick={() => setDateFilter(option.id)}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+
+        {dateFilter === 'custom' && (
+          <div className="report-custom-range">
+            <label>
+              <span>Start</span>
+              <input
+                type="date"
+                value={customRange.startDate}
+                onChange={(event) =>
+                  setCustomRange((current) => ({ ...current, startDate: event.target.value }))
+                }
+              />
+            </label>
+            <label>
+              <span>End</span>
+              <input
+                type="date"
+                value={customRange.endDate}
+                onChange={(event) =>
+                  setCustomRange((current) => ({ ...current, endDate: event.target.value }))
+                }
+              />
+            </label>
+          </div>
+        )}
+      </section>
+
+      {loading && <div className="reports-loading">Loading report data...</div>}
+
+      <section className="report-overview" aria-label="Overview cards">
+        {overviewCards.map((card) => (
+          <MetricCard key={card.label} {...card} />
+        ))}
+      </section>
+
+      <ReportSection
+        title="Course Reports"
+        subtitle="Performance by course."
+        icon={FiBookOpen}
+      >
+        <ReportTable
+          columns={['Course', 'Professor', 'Enrolled Students', 'Modules', 'Average Quiz Score', 'Completion Rate']}
+          emptyMessage="No course reports available."
+          rows={reportData.courseRows.map((course) => ({
+            key: course.id,
+            cells: [
+              <strong className="table-strong">{course.name}</strong>,
+              course.professor,
+              course.students,
+              course.modules,
+              <ScorePill value={course.averageScore} />,
+              <ScorePill value={course.completionRate} />,
+            ],
+          }))}
+        />
+      </ReportSection>
+
+      <ReportSection
+        title="Module Reports"
+        subtitle="Attempts, score spread, and completion rate for each module."
+        icon={FiLayers}
+      >
+        <ReportTable
+          columns={['Module', 'Course', 'Attempts', 'Average Score', 'Highest Score', 'Lowest Score', 'Completion Rate']}
+          emptyMessage="No module reports available."
+          rows={reportData.moduleRows.map((module) => ({
+            key: module.key,
+            cells: [
+              <strong className="table-strong">{module.title}</strong>,
+              module.course,
+              module.attempts,
+              <ScorePill value={module.averageScore} />,
+              `${module.highestScore}%`,
+              `${module.lowestScore}%`,
+              <ScorePill value={module.completionRate} />,
+            ],
+          }))}
+        />
+      </ReportSection>
+
+      <ReportSection
+        title="Student Performance"
+        subtitle="Searchable student learning performance."
+        icon={FiUserCheck}
+        action={
+          <label className="report-search">
+            <FiSearch aria-hidden="true" />
+            <input
+              type="text"
+              placeholder="Search students..."
+              value={studentSearch}
+              onChange={(event) => setStudentSearch(event.target.value)}
+            />
+          </label>
+        }
+      >
+        <ReportTable
+          columns={['Student', 'Course', 'Overall Average', 'Modules Completed', 'Adaptive Level', 'Last Activity']}
+          emptyMessage="No matching student performance records."
+          rows={filteredStudentRows.map((student) => ({
+            key: student.key,
+            cells: [
+              <strong className="table-strong">{student.student}</strong>,
+              student.course,
+              <ScorePill value={student.overallAverage} />,
+              `${student.modulesCompleted}/${student.totalModules}`,
+              <LevelPill level={student.adaptiveLevel} />,
+              formatDateTime(student.lastActivity),
+            ],
+          }))}
+        />
+      </ReportSection>
+
+      <ReportSection
+        title="Professor Activity"
+        subtitle="Professor engagement across courses, modules, students, and quiz completion."
+        icon={FiShield}
+      >
+        <ReportTable
+          columns={['Professor', 'Courses Handled', 'Modules Created', 'Students Handled', 'Quiz Completion Rate']}
+          emptyMessage="No professor activity available."
+          rows={reportData.professorRows.map((professor) => ({
+            key: professor.key,
+            cells: [
+              <strong className="table-strong">{professor.professor}</strong>,
+              professor.coursesHandled,
+              professor.modulesCreated,
+              professor.studentsHandled,
+              <ScorePill value={professor.quizCompletionRate} />,
+            ],
+          }))}
+        />
+      </ReportSection>
+
+      <ReportSection
+        title="Adaptive Learning Analytics"
+        subtitle="Difficulty, progress, mastery attempts, and intervention signals."
+        icon={FiZap}
+      >
+        <div className="report-analytics-grid">
+          <div className="report-chart-block">
+            <h3>Difficulty Level Reached</h3>
+            <BarChart items={reportData.adaptive.difficultyLevels} />
+          </div>
+          <div className="report-chart-block">
+            <h3>Improvement Over Time</h3>
+            <BarChart items={reportData.adaptive.improvementOverTime} />
+          </div>
+          <div className="report-adaptive-summary">
+            <SmallMetric
+              label="Average Attempts Before Mastery"
+              value={reportData.adaptive.averageAttemptsBeforeMastery}
+              tone="blue"
+            />
+            <SmallMetric
+              label="Students Needing Intervention"
+              value={reportData.adaptive.studentsNeedingIntervention}
+              tone="red"
+            />
+          </div>
+        </div>
+
+        <ReportTable
+          columns={['Student', 'Course', 'Overall Average', 'Adaptive Level']}
+          emptyMessage="No students currently need intervention."
+          rows={reportData.adaptive.interventionRows.map((student) => ({
+            key: `intervention-${student.key}`,
+            cells: [
+              <strong className="table-strong">{student.student}</strong>,
+              student.course,
+              <ScorePill value={student.overallAverage} />,
+              <LevelPill level={student.adaptiveLevel} />,
+            ],
+          }))}
+        />
+      </ReportSection>
+
+      <ReportSection
+        title="Quiz Statistics"
+        subtitle="Quiz attempts, scores, pass rate, and failed rate."
+        icon={FiTarget}
+      >
+        <div className="report-quiz-summary">
+          <SmallMetric label="Total Quizzes Taken" value={reportData.quiz.totalTaken} tone="blue" />
+          <SmallMetric label="Average Score" value={`${reportData.quiz.averageScore}%`} tone="green" />
+          <SmallMetric label="Highest Score" value={`${reportData.quiz.highestScore}%`} tone="gold" />
+          <SmallMetric label="Lowest Score" value={`${reportData.quiz.lowestScore}%`} tone="red" />
+          <SmallMetric label="Pass Rate" value={`${reportData.quiz.passRate}%`} tone="green" />
+          <SmallMetric label="Failed Rate" value={`${reportData.quiz.failedRate}%`} tone="red" />
+        </div>
+
+        <div className="report-analytics-grid two-column">
+          <div className="report-chart-block">
+            <h3>Quiz Mode Activity</h3>
+            <BarChart items={reportData.quiz.modeRows} />
+          </div>
+          <div className="report-chart-block">
+            <h3>Pass and Failed Rate</h3>
+            <BarChart
+              items={[
+                { label: 'Pass Rate', value: reportData.quiz.passRate },
+                { label: 'Failed Rate', value: reportData.quiz.failedRate },
+              ]}
+            />
+          </div>
+        </div>
+      </ReportSection>
     </div>
   );
 }

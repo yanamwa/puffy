@@ -19,6 +19,7 @@ import ModePage from '../pages/admin/mode/ModePage';
 import DecksPage from '../pages/admin/decks/DecksPage';
 import ReportsPage from '../pages/admin/reports/ReportsPage';
 import AdminAccountPage from '../pages/admin/settings/AdminAccountPage';
+import SettingsPage from '../pages/admin/settings/SettingsPage';
 import SuperAdminHome from '../pages/superadmin/SuperAdminHome';
 import SuperAdminLayout from '../pages/superadmin/shared/SuperAdminLayout';
 import SuperAdminUserManagementPage from '../pages/superadmin/users/SuperAdminUserManagementPage';
@@ -270,7 +271,11 @@ export default function AppRoutes() {
 
           <Route
             path="/admin/settings"
-            element={<Navigate to="/admin/profile" replace />}
+            element={
+              <AdminLayout>
+                <SettingsPage />
+              </AdminLayout>
+            }
           />
 
           <Route

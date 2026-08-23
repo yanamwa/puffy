@@ -7,7 +7,6 @@ import {
   enrollStudentInCourseAsync,
   findJoinableCourseByCodeAsync,
 } from './studentCourseData';
-import { API_BASE } from '../../config.js';
 import './EnrolledCourses.css';
 
 const API_BASE_URL =
@@ -353,81 +352,6 @@ export default function StudentProfile() {
         if (active) {
           setProfileLoading(false);
         }
-      }
-    }
-
-    loadStudentProfile();
-
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    let active = true;
-
-    async function loadStudentProfile() {
-      const token = getStoredToken();
-
-      if (!token) {
-        return;
-      }
-
-      try {
-        const response = await fetch(`${API_BASE}/users/me`, {
-          method: 'GET',
-          headers: {
-            Accept: 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        const data = await response.json().catch(() => ({}));
-
-        if (!response.ok) {
-          throw new Error(
-            data.message || 'Could not load your student profile.',
-          );
-        }
-
-        const loadedUser = data.user || data.data || null;
-
-        if (!active || !loadedUser) {
-          return;
-        }
-
-        const nextProfile = buildStudentProfile(loadedUser);
-
-        setStudentProfile(nextProfile);
-        setProfileImage((currentImage) =>
-          currentImage?.startsWith('blob:')
-            ? currentImage
-            : nextProfile.profileImage,
-        );
-
-        localStorage.setItem('puffy-user', JSON.stringify(loadedUser));
-        localStorage.setItem('user', JSON.stringify(loadedUser));
-        localStorage.setItem('currentUser', JSON.stringify(loadedUser));
-        localStorage.setItem('user_role', loadedUser.role || 'student');
-        localStorage.setItem('user_email', cleanText(loadedUser.email));
-        localStorage.setItem(
-          'username',
-          cleanText(
-            loadedUser.displayName ||
-              loadedUser.display_name ||
-              loadedUser.name,
-          ),
-        );
-        localStorage.setItem(
-          'year_level',
-          cleanText(loadedUser.yearLevel || loadedUser.year_level),
-        );
-        localStorage.setItem(
-          'section_name',
-          cleanText(loadedUser.sectionName || loadedUser.section_name),
-        );
-      } catch (error) {
-        console.error('Student profile loading error:', error);
       }
     }
 

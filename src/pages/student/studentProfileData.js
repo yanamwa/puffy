@@ -29,7 +29,21 @@ export function normalizeStudentProfileImage(image) {
     return cleaned;
   }
 
-  return `${API_BASE}/${cleaned.replace(/^\/+/, '')}`;
+  const serverOrigin = API_BASE.replace(/\/api\/?$/, '');
+  const normalizedPath = cleaned.replace(/^\/+/, '');
+
+  if (
+    normalizedPath.startsWith('uploads/') ||
+    normalizedPath.startsWith('api/uploads/')
+  ) {
+    return `${serverOrigin}/${normalizedPath}`;
+  }
+
+  if (cleaned.startsWith('/')) {
+    return cleaned;
+  }
+
+  return `${serverOrigin}/${normalizedPath}`;
 }
 
 export function getStoredStudentToken() {

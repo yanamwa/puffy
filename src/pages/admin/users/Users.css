@@ -326,7 +326,12 @@
   color: #ffffff;
 }
 
-.users-status.is-pending,
+.users-status.is-approving,
+.users-status.is-pending {
+  background: #ffd34d;
+  color: #5b4200;
+}
+
 .users-status.is-declined,
 .users-status.is-archived,
 .users-status.is-expired {
@@ -1095,7 +1100,13 @@
   color: #ffffff;
 }
 
-.users-page .users-status.is-pending,
+.users-page .users-status.is-approving,
+.users-page .users-status.is-pending {
+  background: #ffd34d;
+  border: 1px solid #e6b93f;
+  color: #5b4200;
+}
+
 .users-page .users-status.is-declined,
 .users-page .users-status.is-archived,
 .users-page .users-status.is-expired {

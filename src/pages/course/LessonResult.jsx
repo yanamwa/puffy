@@ -55,6 +55,25 @@ const getQuizTypeLabel = (quizMode) => {
   return labels[quizMode] || "Quiz";
 };
 
+const getContinueModuleTitle = (title) => {
+  const normalizedTitle = String(title || "").trim();
+
+  if (!normalizedTitle) return "";
+
+  if (/^Introduction\s+to\s+React\.js\s+with\s+Vite$/i.test(normalizedTitle)) {
+    return "Introduction.";
+  }
+
+  return normalizedTitle;
+};
+
+const getContinueModuleLabel = (moduleNavigation) => {
+  const moduleNumber = moduleNavigation.nextModuleIndex + 1;
+  const title = getContinueModuleTitle(moduleNavigation.nextModuleTitle);
+
+  return `Continue to Module ${moduleNumber}${title ? `: ${title}` : ""}`;
+};
+
 const getQuizTypeIcon = (quizMode) => {
   const icons = {
     flashcard: "/images/flashcard.png",
@@ -675,20 +694,17 @@ export default function LessonResult() {
     };
 
     const blockCopy = (e) => e.preventDefault();
-    const blockContextMenu = (e) => e.preventDefault();
 
     document.addEventListener("keydown", blockKeys);
     document.addEventListener("copy", blockCopy);
     document.addEventListener("cut", blockCopy);
     document.addEventListener("paste", blockCopy);
-    document.addEventListener("contextmenu", blockContextMenu);
 
     return () => {
       document.removeEventListener("keydown", blockKeys);
       document.removeEventListener("copy", blockCopy);
       document.removeEventListener("cut", blockCopy);
       document.removeEventListener("paste", blockCopy);
-      document.removeEventListener("contextmenu", blockContextMenu);
     };
   }, []);
 
@@ -923,10 +939,7 @@ export default function LessonResult() {
             resultCourseId &&
             moduleNavigation.nextModuleIndex !== null && (
               <button className={styles.lesson} onClick={continueToNextModule}>
-                Continue to Module {moduleNavigation.nextModuleIndex + 1}
-                {moduleNavigation.nextModuleTitle
-                  ? `: ${moduleNavigation.nextModuleTitle}`
-                  : ""}
+                {getContinueModuleLabel(moduleNavigation)}
               </button>
             )}
 

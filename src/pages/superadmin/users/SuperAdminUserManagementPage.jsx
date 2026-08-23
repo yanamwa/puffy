@@ -103,6 +103,7 @@ function isTemporaryExpired(user) {
 }
 
 function getStatusFromUser(user) {
+  const role = user.role || 'student';
   const archived =
     user.isArchived === true ||
     user.is_archived === 1 ||
@@ -115,9 +116,13 @@ function getStatusFromUser(user) {
   const verificationStatus = String(
     user.verificationStatus || user.verification_status || ''
   ).toLowerCase();
+  const currentStatus = String(user.status || '').toLowerCase();
 
-  if (user.role === 'professor' && verificationStatus === 'pending') {
-    return 'Pending';
+  if (
+    role === 'professor' &&
+    (verificationStatus === 'pending' || currentStatus === 'pending')
+  ) {
+    return 'Approving';
   }
   if (verificationStatus === 'declined') return 'Declined';
 
@@ -127,8 +132,11 @@ function getStatusFromUser(user) {
 function normalizeUser(user) {
   const displayName =
     user.name || user.displayName || user.display_name || user.username || 'Unnamed User';
+  const role = user.role || 'student';
   const verificationStatus =
-    user.verificationStatus || user.verification_status || 'approved';
+    user.verificationStatus ||
+    user.verification_status ||
+    (role === 'professor' ? 'pending' : 'approved');
   const isTemporary =
     user.isTemporary === true ||
     user.is_temporary === 1 ||
@@ -149,7 +157,7 @@ function normalizeUser(user) {
     id: user.id || user.userId || user.user_id || user.UserID || displayName,
     name: displayName,
     email: user.email || 'No email found',
-    role: user.role || 'student',
+    role,
     status: getStatusFromUser(user),
     verificationStatus,
     joined: user.joined || user.created_at || user.createdAt || '',
@@ -1089,6 +1097,19 @@ export default function SuperAdminUserManagementPage() {
     </div>
   );
 
+  const renderApprovalStatus = (user) => {
+    const status = String(user.status || '').toLowerCase();
+    const verificationStatus = String(user.verificationStatus || '').toLowerCase();
+    const isDeclined = status === 'declined' || verificationStatus === 'declined';
+    const label = isDeclined ? 'Declined' : 'Approving';
+
+    return (
+      <span className={`users-status is-${label.toLowerCase()}`}>
+        {label}
+      </span>
+    );
+  };
+
   const renderGenericRows = (rows) =>
     rows.map((user) => {
       const status = String(user.status).toLowerCase();
@@ -1161,7 +1182,7 @@ export default function SuperAdminUserManagementPage() {
               <td>{user.professorDepartment || 'Not submitted'}</td>
               <td>{renderProof(user, { compact: true })}</td>
               <td>{formatDate(user.joined)}</td>
-              <td><span className={`users-status is-${String(user.status).toLowerCase()}`}>{titleCase(user.status)}</span></td>
+              <td>{renderApprovalStatus(user)}</td>
               <td>{renderApprovalActions(user)}</td>
             </tr>
           ))}
@@ -1325,10 +1346,6 @@ export default function SuperAdminUserManagementPage() {
             <FiShield />
             Add Admin
           </button>
-          <button className="users-create-btn" type="button" onClick={() => setProfessorModalOpen(true)}>
-            <FiFileText />
-            Add Professor
-          </button>
           <button className="users-create-btn" type="button" onClick={() => setStudentModalOpen(true)}>
             <FiPlus />
             Add Student
@@ -1451,46 +1468,6 @@ export default function SuperAdminUserManagementPage() {
               </label>
               {renderAccountTypeFields(adminForm, setAdminForm)}
               <button className="users-submit-btn" type="submit">Create Admin Account</button>
-            </form>
-          </section>
-        </div>
-      )}
-
-      {professorModalOpen && (
-        <div className="users-modal-backdrop" onClick={() => setProfessorModalOpen(false)}>
-          <section className="users-modal" onClick={(event) => event.stopPropagation()}>
-            <button className="users-modal-close" type="button" onClick={() => setProfessorModalOpen(false)} aria-label="Close professor form">
-              x
-            </button>
-            <div className="users-modal-profile">
-              <span className="users-modal-avatar"><FiFileText /></span>
-              <div>
-                <h2>Add Professor</h2>
-                <p>Create a permanent approved professor account with generated credentials.</p>
-              </div>
-            </div>
-            <form className="users-student-form" onSubmit={handleCreateProfessor}>
-              <label>
-                Professor Name
-                <input type="text" value={professorForm.name} onChange={(event) => setProfessorForm((form) => ({ ...form, name: event.target.value }))} required />
-              </label>
-              <label>
-                Professor Email
-                <input type="email" value={professorForm.email} onChange={(event) => setProfessorForm((form) => ({ ...form, email: event.target.value }))} required />
-              </label>
-              <label>
-                Faculty ID
-                <input type="text" value={professorForm.facultyId} onChange={(event) => setProfessorForm((form) => ({ ...form, facultyId: event.target.value }))} />
-              </label>
-              <label>
-                Department
-                <input type="text" value={professorForm.department} onChange={(event) => setProfessorForm((form) => ({ ...form, department: event.target.value }))} />
-              </label>
-              <label>
-                Employment Proof
-                <input type="text" value={professorForm.employmentProof} onChange={(event) => setProfessorForm((form) => ({ ...form, employmentProof: event.target.value }))} placeholder="URL or note" />
-              </label>
-              <button className="users-submit-btn" type="submit">Create Professor Account</button>
             </form>
           </section>
         </div>
