@@ -106,7 +106,6 @@ function ForgotPassword() {
             onSubmit={handleSubmit}
           >
             <h2>Forgot Password</h2>
-
             <label htmlFor="forgot-password-email">
               Email Address
             </label>

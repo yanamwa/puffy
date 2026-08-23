@@ -105,6 +105,7 @@ function isTemporaryExpired(user) {
 }
 
 function getStatusFromUser(user) {
+  const role = user.role || 'student';
   const archived =
     user.isArchived === true ||
     user.is_archived === 1 ||
@@ -117,9 +118,13 @@ function getStatusFromUser(user) {
   const verificationStatus = String(
     user.verificationStatus || user.verification_status || ''
   ).toLowerCase();
+  const currentStatus = String(user.status || '').toLowerCase();
 
-  if (user.role === 'professor' && verificationStatus === 'pending') {
-    return 'Pending';
+  if (
+    role === 'professor' &&
+    (verificationStatus === 'pending' || currentStatus === 'pending')
+  ) {
+    return 'Approving';
   }
   if (verificationStatus === 'declined') return 'Declined';
 
@@ -129,8 +134,11 @@ function getStatusFromUser(user) {
 function normalizeUser(user) {
   const displayName =
     user.name || user.displayName || user.display_name || user.username || 'Unnamed User';
+  const role = user.role || 'student';
   const verificationStatus =
-    user.verificationStatus || user.verification_status || 'approved';
+    user.verificationStatus ||
+    user.verification_status ||
+    (role === 'professor' ? 'pending' : 'approved');
   const isTemporary =
     user.isTemporary === true ||
     user.is_temporary === 1 ||
@@ -151,7 +159,7 @@ function normalizeUser(user) {
     id: user.id || user.userId || user.user_id || user.UserID || displayName,
     name: displayName,
     email: user.email || 'No email found',
-    role: user.role || 'student',
+    role,
     status: getStatusFromUser(user),
     verificationStatus,
     joined: user.joined || user.created_at || user.createdAt || '',
@@ -1106,6 +1114,19 @@ export default function SuperAdminUserManagementPage() {
     </div>
   );
 
+  const renderApprovalStatus = (user) => {
+    const status = String(user.status || '').toLowerCase();
+    const verificationStatus = String(user.verificationStatus || '').toLowerCase();
+    const isDeclined = status === 'declined' || verificationStatus === 'declined';
+    const label = isDeclined ? 'Declined' : 'Approving';
+
+    return (
+      <span className={`users-status is-${label.toLowerCase()}`}>
+        {label}
+      </span>
+    );
+  };
+
   const renderGenericRows = (rows) =>
     rows.map((user) => {
       const status = String(user.status).toLowerCase();
@@ -1178,7 +1199,7 @@ export default function SuperAdminUserManagementPage() {
               <td>{user.professorDepartment || 'Not submitted'}</td>
               <td>{renderProof(user, { compact: true })}</td>
               <td>{formatDate(user.joined)}</td>
-              <td><span className={`users-status is-${String(user.status).toLowerCase()}`}>{titleCase(user.status)}</span></td>
+              <td>{renderApprovalStatus(user)}</td>
               <td>{renderApprovalActions(user)}</td>
             </tr>
           ))}
@@ -1341,10 +1362,6 @@ export default function SuperAdminUserManagementPage() {
           <button className="users-create-btn" type="button" onClick={() => setAdminModalOpen(true)}>
             <FiShield />
             Add Admin
-          </button>
-          <button className="users-create-btn" type="button" onClick={() => setProfessorModalOpen(true)}>
-            <FiFileText />
-            Add Professor
           </button>
           <button className="users-create-btn" type="button" onClick={() => setStudentModalOpen(true)}>
             <FiPlus />

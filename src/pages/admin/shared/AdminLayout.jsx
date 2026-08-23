@@ -6,6 +6,8 @@ import {
   FiBook,
   FiBell,
   FiActivity,
+  FiSettings,
+  FiUser,
   FiSearch,
   FiSidebar,
   FiLogOut,
@@ -31,8 +33,10 @@ export default function AdminLayout({ children }) {
     { label: 'Dashboard', path: '/admin/dashboard', icon: FiGrid },
     { label: 'User Management', path: '/admin/users', icon: FiUsers },
     { label: 'Course Management', path: '/admin/courses', icon: FiBook },
-    { label: 'Notifications & Announcements', path: '/admin/notification', icon: FiBell },
-    { label: 'Reports & Statistics', path: '/admin/reports', icon: FiActivity },
+    { label: 'Reports', path: '/admin/reports', icon: FiActivity },
+    { label: 'Announcements & Notifications', path: '/admin/notification', icon: FiBell },
+    { label: 'Profile', path: '/admin/profile', icon: FiUser },
+    { label: 'Settings', path: '/admin/settings', icon: FiSettings },
   ];
 
   return (
@@ -92,6 +96,7 @@ export default function AdminLayout({ children }) {
               profilePath="/admin/profile"
               menuItems={[
                 { label: 'Profile', path: '/admin/profile', icon: 'user' },
+                { label: 'Settings', path: '/admin/settings', icon: 'settings' },
               ]}
               onLogout={handleLogout}
             />

@@ -11,6 +11,7 @@ function Signup() {
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
+  const [facultyId, setFacultyId] = useState("");
   const [department, setDepartment] = useState("");
   const [employmentProof, setEmploymentProof] = useState(null);
   const [proofPreview, setProofPreview] = useState("");
@@ -70,6 +71,7 @@ function Signup() {
   const resetForm = () => {
     setFullName("");
     setEmail("");
+    setFacultyId("");
     setDepartment("");
     setEmploymentProof(null);
     setProofPreview("");
@@ -139,15 +141,16 @@ function Signup() {
 
     const cleanFullName = fullName.trim();
     const cleanEmail = email.trim().toLowerCase();
+    const cleanFacultyId = facultyId.trim();
     const cleanDepartment = department.trim();
 
-if (!cleanFullName) {
-  showError(
-    "Full Name Required",
-    "Please enter your full name."
-  );
-  return;
-}
+    if (!cleanFullName) {
+      showError(
+        "Full Name Required",
+        "Please enter your full name."
+      );
+      return;
+    }
 
     if (!cleanEmail) {
       showError(
@@ -164,6 +167,22 @@ if (!cleanFullName) {
       showError(
         "Invalid Email",
         "Please enter a valid email address."
+      );
+      return;
+    }
+
+    if (!cleanFacultyId) {
+      showError(
+        "Employee or Faculty ID Required",
+        "Please enter your employee or faculty ID."
+      );
+      return;
+    }
+
+    if (cleanFacultyId.length > 100) {
+      showError(
+        "Employee or Faculty ID Too Long",
+        "Employee or faculty ID must be 100 characters or fewer."
       );
       return;
     }
@@ -225,6 +244,7 @@ if (!cleanFullName) {
       formData.append("email", cleanEmail);
       formData.append("password", password);
       formData.append("role", "professor");
+      formData.append("facultyId", cleanFacultyId);
       formData.append("department", cleanDepartment);
       formData.append("employmentProof", employmentProof);
 
@@ -389,7 +409,7 @@ if (!cleanFullName) {
                   styles.professorFormGroup
                 }
               >
-                  <label htmlFor="professor-fullname">
+                <label htmlFor="professor-fullname">
                   Full Name
                 </label>
 
@@ -429,7 +449,33 @@ if (!cleanFullName) {
               </div>
 
               <div
-                className={`${styles.professorFormGroup} ${styles.professorFullWidth}`}
+                className={
+                  styles.professorFormGroup
+                }
+              >
+                <label htmlFor="professor-faculty-id">
+                  Employee or Faculty ID
+                </label>
+
+                <input
+                  id="professor-faculty-id"
+                  type="text"
+                  placeholder="Enter your employee or faculty ID"
+                  value={facultyId}
+                  disabled={isSigningUp}
+                  autoComplete="off"
+                  maxLength={100}
+                  required
+                  onChange={(event) =>
+                    setFacultyId(event.target.value)
+                  }
+                />
+              </div>
+
+              <div
+                className={
+                  styles.professorFormGroup
+                }
               >
                 <label htmlFor="department">
                   Department

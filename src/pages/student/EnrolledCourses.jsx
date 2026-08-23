@@ -91,6 +91,35 @@ function getSavedUser() {
   }
 }
 
+function getUserProfileImage(user = {}) {
+  return (
+    user.profileImage ||
+    user.profile_image ||
+    user.avatar ||
+    user.image ||
+    ''
+  );
+}
+
+function mergeWithSavedProfileImage(user = {}) {
+  const savedUser = getSavedUser() || {};
+  const profileImage =
+    getUserProfileImage(user) ||
+    getUserProfileImage(savedUser);
+
+  const mergedUser = {
+    ...savedUser,
+    ...user,
+  };
+
+  if (profileImage) {
+    mergedUser.profileImage = profileImage;
+    mergedUser.profile_image = profileImage;
+  }
+
+  return mergedUser;
+}
+
 function getStudentAccount(user) {
   const savedUser = user || getSavedUser() || {};
 
@@ -383,11 +412,16 @@ export function Avatar({
   src = '/images/temporaryimg.png',
   alt = '',
 }) {
+  const imageSrc = src || '/images/temporaryimg.png';
+
   return (
     <span className={`anime-avatar${large ? ' large' : ''}`}>
       <img
-        src="/images/temporaryimg.png"
-        alt=""
+        src={imageSrc}
+        alt={alt}
+        onError={(event) => {
+          event.currentTarget.src = '/images/temporaryimg.png';
+        }}
       />
     </span>
   );
@@ -633,13 +667,14 @@ export default function EnrolledCourses() {
 
         if (!active) return;
 
-        const account = getStudentAccount(currentUser);
+        const mergedUser = mergeWithSavedProfileImage(currentUser);
+        const account = getStudentAccount(mergedUser);
 
         setStudentAccount(account);
         setProfileImage(
           resolveProfileImage(account.profileImage),
         );
-        saveUpdatedUser(currentUser);
+        saveUpdatedUser(mergedUser);
       } catch (error) {
         console.error(
           'Unable to load the current user:',
@@ -657,7 +692,8 @@ export default function EnrolledCourses() {
 
   useEffect(() => {
     const updateProfileFromUser = (updatedUser) => {
-      const account = getStudentAccount(updatedUser);
+      const mergedUser = mergeWithSavedProfileImage(updatedUser);
+      const account = getStudentAccount(mergedUser);
 
       setStudentAccount(account);
       setProfileImage(
@@ -1502,16 +1538,14 @@ export default function EnrolledCourses() {
                 </span>
 
                 <div className="course-card-body">
-                  
+                  <h2 title={getCourseTitle(course)}>
+                    {getCourseTitle(course)}
+                  </h2>
                 </div>
 
                 <div className="course-card-footer">
                   <Avatar />
 
-                  <span>
-                    Created by{' '}
-                    {course.instructor}
-                  </span>
                   <div className="enrolled-course-meta">
                     <span>{course.instructor}</span>
                     <small>{getProfessorDepartment(course)}</small>

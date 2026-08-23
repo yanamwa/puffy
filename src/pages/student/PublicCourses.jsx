@@ -176,6 +176,17 @@ function getProfessorDepartment(course) {
   return course.professorDepartment || course.professor_department || 'Department not set';
 }
 
+function getCourseNavigationId(course) {
+  return (
+    course.id ||
+    course.courseId ||
+    course.course_id ||
+    course.code ||
+    course.courseCode ||
+    course.course_code
+  );
+}
+
 export default function PublicCourses() {
   const navigate = useNavigate();
 
@@ -415,16 +426,70 @@ export default function PublicCourses() {
     setCourseCode('');
   };
 
-  const startLearning = (course) => {
-    enrollStudentInCourse(course);
+const confirmEnrollment = async (course) => {
+  const courseTitle = getCourseTitle(course);
+  const result = await Swal.fire({
+    title: 'Do you want to enroll in this course?',
+    text: courseTitle,
+    imageUrl: '/images/asking.png',
+    imageWidth: 180,
+    imageHeight: 180,
+    showCancelButton: true,
+    confirmButtonText: 'Enroll',
+    cancelButtonText: 'Cancel',
+    
+    customClass: {
+      popup: 'enroll-popup',
+      confirmButton: 'enroll-confirm-btn',
+      cancelButton: 'enroll-cancel-btn',
+    },
 
-    navigate(
-      `/introduction/${
-        course.id ||
-        course.course_id ||
-        course.code
-      }`,
-    );
+    buttonsStyling: false,
+  });
+
+    if (!result.isConfirmed) {
+      return false;
+    }
+
+    try {
+      const enrolledCourse = await enrollStudentInCourseAsync(course);
+      const nextCourse = enrolledCourse || course;
+      const courseId = getCourseNavigationId(nextCourse);
+
+      await Swal.fire({
+        title: 'Enrolled!',
+        text: `You are now enrolled in ${getCourseTitle(nextCourse)}.`,
+        imageUrl: '/images/success.png',
+        imageWidth: 170,
+        imageHeight: 170,
+        confirmButtonText: 'Continue',
+        confirmButtonColor: '#198754',
+      });
+
+      navigate(
+        courseId
+          ? `/student/enrolled-courses/${courseId}`
+          : '/student/enrolled-courses',
+      );
+
+      return true;
+    } catch (error) {
+      console.error('Enroll course error:', error);
+
+      await Swal.fire({
+        title: 'Unable to enroll',
+        text:
+          error.message ||
+          'Could not enroll in this course. Please try again.',
+        imageUrl: '/images/error.png',
+        imageWidth: 170,
+        imageHeight: 170,
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#858d9b',
+      });
+
+      return false;
+    }
   };
 
   const joinByCourseCode = async () => {
@@ -1062,10 +1127,10 @@ export default function PublicCourses() {
                   type="button"
                   className="add-course-button"
                   aria-label={`Add ${
-                    course.title || 'public course'
+                    getCourseTitle(course)
                   }`}
                   onClick={() =>
-                    startLearning(course)
+                    confirmEnrollment(course)
                   }
                 >
                   +
@@ -1073,7 +1138,7 @@ export default function PublicCourses() {
 
                 <div className="course-card-body">
                   <h2>
-                    {course.code} - {course.title}
+                    {getCourseTitle(course)}
                   </h2>
                 </div>
 
@@ -1089,7 +1154,7 @@ export default function PublicCourses() {
                     type="button"
                     className="start-learning-button"
                     onClick={() =>
-                      startLearning(course)
+                      confirmEnrollment(course)
                     }
                   >
                     Enroll
