@@ -11,6 +11,7 @@ import {
   loadPublicStudentCourses,
 } from './studentCourseData';
 import './EnrolledCourses.css';
+import { FiLogOut } from 'react-icons/fi';
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL ||
@@ -579,24 +580,24 @@ export default function PublicCourses() {
         </nav>
 
         <button
-          type="button"
-          className="logout-button"
-          title={
-            sidebarCollapsed
-              ? 'Log-out'
-              : undefined
-          }
-          onClick={handleLogout}
-        >
-          <span
-            className="logout-icon"
-            aria-hidden="true"
-          />
+            type="button"
+            className="logout-button"
+            title={
+              sidebarCollapsed
+                ? 'Logout'
+                : undefined
+            }
+            onClick={handleLogout}
+          >
+            <FiLogOut
+              className="logout-icon"
+              aria-hidden="true"
+            />
 
-          <span className="logout-label">
-            Log-out
-          </span>
-        </button>
+            <span className="logout-label">
+              Logout
+            </span>
+          </button>
       </aside>
 
       <main className="enrolled-main public-main">

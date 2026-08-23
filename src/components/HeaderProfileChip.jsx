@@ -41,7 +41,7 @@ export default function HeaderProfileChip({
   const navigate = useNavigate();
   const wrapperRef = useRef(null);
   const [open, setOpen] = useState(false);
-  const handle = username.startsWith('@') ? username : `@${username}`;
+  const handle = username?.replace(/^@+/, '') || 'Professor';
 
   const goTo = (path) => {
     setOpen(false);

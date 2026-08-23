@@ -9,6 +9,7 @@ import {
 } from './studentCourseData';
 import { API_BASE } from '../../config.js';
 import './EnrolledCourses.css';
+import { FiLogOut } from 'react-icons/fi';
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL ||
@@ -873,18 +874,18 @@ export default function StudentProfile() {
           className="logout-button"
           title={
             sidebarCollapsed
-              ? 'Log-out'
+              ? 'Logout'
               : undefined
           }
-          onClick={logOut}
+          onClick={handleLogout}
         >
-          <span
+          <FiLogOut
             className="logout-icon"
             aria-hidden="true"
           />
 
           <span className="logout-label">
-            Log-out
+            Logout
           </span>
         </button>
       </aside>

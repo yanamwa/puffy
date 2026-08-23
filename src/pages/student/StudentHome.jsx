@@ -9,6 +9,7 @@ import {
 } from "./studentCourseData";
 import { API_BASE } from "../../config.js";
 import "./EnrolledCourses.css";
+import { FiLogOut } from 'react-icons/fi';
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || "http://localhost:5000/api";
@@ -852,18 +853,18 @@ useEffect(() => {
           className="logout-button"
           title={
             sidebarCollapsed
-              ? "Log-out"
+              ? 'Logout'
               : undefined
           }
           onClick={handleLogout}
         >
-          <span
+          <FiLogOut
             className="logout-icon"
             aria-hidden="true"
           />
 
           <span className="logout-label">
-            Log-out
+            Logout
           </span>
         </button>
       </aside>
