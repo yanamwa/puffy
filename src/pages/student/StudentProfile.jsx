@@ -33,7 +33,26 @@ function resolveProfileImage(imagePath) {
   return `${serverOrigin}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
 }
 
+function getUserRole(user) {
+  return user?.role || user?.userRole || user?.user_role || '';
+}
+
+function isStudentUser(user) {
+  return getUserRole(user) === 'student';
+}
+
+function getHomePath(role) {
+  if (role === 'super_admin') return '/super-admin';
+  if (role === 'admin') return '/admin';
+  if (role === 'professor') return '/professor';
+  return '/student';
+}
+
 function saveUpdatedUser(updatedUser) {
+  if (!isStudentUser(updatedUser)) {
+    return;
+  }
+
   const serializedUser = JSON.stringify(updatedUser);
 
   localStorage.setItem('user', serializedUser);
@@ -75,9 +94,12 @@ function getSavedUser() {
       sessionStorage.getItem('user') ||
       sessionStorage.getItem('currentUser');
 
-    return storedUser
-      ? JSON.parse(storedUser)
-      : null;
+    if (!storedUser) {
+      return null;
+    }
+
+    const savedUser = JSON.parse(storedUser);
+    return isStudentUser(savedUser) ? savedUser : null;
   } catch (error) {
     console.error(
       'Unable to read saved user:',
@@ -170,6 +192,10 @@ function clearStudentSession() {
   localStorage.removeItem('year_level');
   localStorage.removeItem('section_name');
   localStorage.removeItem('school_name');
+  localStorage.removeItem('admin');
+  localStorage.removeItem('admin_id');
+  localStorage.removeItem('admin_email');
+  localStorage.removeItem('admin_username');
 
   localStorage.removeItem('token');
   localStorage.removeItem('authToken');
@@ -320,6 +346,24 @@ export default function StudentProfile() {
           data.user ||
           data.data ||
           data;
+
+        if (!loggedInUser) {
+          throw new Error(
+            'Student account information was not found.',
+          );
+        }
+
+        const loggedInRole = getUserRole(loggedInUser);
+
+        if (loggedInRole && loggedInRole !== 'student') {
+          if (active) {
+            navigate(getHomePath(loggedInRole), {
+              replace: true,
+            });
+          }
+
+          return;
+        }
 
         const normalizedUser =
           normalizeStudent(loggedInUser);
@@ -801,7 +845,7 @@ export default function StudentProfile() {
               ? 'Logout'
               : undefined
           }
-          onClick={handleLogout}
+          onClick={logOut}
         >
           <FiLogOut
             className="logout-icon"

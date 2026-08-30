@@ -52,13 +52,13 @@ import FlashcardsTutorial from '../pages/quizzes/inQuiz/tutorials/flashcards-tut
 import MatchingTutorial from '../pages/quizzes/inQuiz/tutorials/matching-tutorial';
 import MultipleChoiceTutorial from '../pages/quizzes/inQuiz/tutorials/multipleChoice-Tutorial';
 import QandATutorial from '../pages/quizzes/inQuiz/tutorials/QandA-tutorial';
-import SurvivalTutorial from '../pages/quizzes/inQuiz/tutorials/survival-tutorial';
+import RandomModesTutorial from '../pages/quizzes/inQuiz/tutorials/randommodes';
 import TimedQuizTutorial from '../pages/quizzes/inQuiz/tutorials/timedquiz-tutorial';
 import FlashcardQuiz from '../pages/quizzes/inQuiz/inQuiz/realFlashcard';
 import MatchingQuiz from '../pages/quizzes/inQuiz/inQuiz/matching';
 import MultipleChoiceQuiz from '../pages/quizzes/inQuiz/inQuiz/multiplechoice';
 import QandAQuiz from '../pages/quizzes/inQuiz/inQuiz/qanda';
-import SurvivalQuiz from '../pages/quizzes/inQuiz/inQuiz/survival';
+import MixedModeQuiz from '../pages/quizzes/inQuiz/inQuiz/randommodes';
 import TimedQuiz from '../pages/quizzes/inQuiz/inQuiz/timedinquiz';
 
 function LearningRedirect() {
@@ -83,8 +83,8 @@ export default function AppRoutes() {
 
         {/* ==========================
             APP ROUTES
-            Temporarily public while link-only account flows are tested.
         ========================== */}
+        <Route element={<ProtectedRoute />}>
 
         {/* ==========================
             SUPER ADMIN
@@ -311,8 +311,6 @@ export default function AppRoutes() {
             element={<Navigate to="/admin/dashboard" replace />}
           />
 
-          <Route element={<ProtectedRoute />}>
-
           {/* ==========================
               PROFESSOR
           ========================== */}
@@ -409,9 +407,12 @@ export default function AppRoutes() {
           <Route path="/timedquiz-tutorial" element={<TimedQuizTutorial />} />
           <Route path="/timedquiz-tutorial/lesson/:lessonId" element={<TimedQuizTutorial />} />
           <Route path="/timedquiz-tutorial/deck/:deckId" element={<TimedQuizTutorial />} />
-          <Route path="/survival-tutorial" element={<SurvivalTutorial />} />
-          <Route path="/survival-tutorial/lesson/:lessonId" element={<SurvivalTutorial />} />
-          <Route path="/survival-tutorial/deck/:deckId" element={<SurvivalTutorial />} />
+          <Route path="/random-modes-tutorial" element={<RandomModesTutorial />} />
+          <Route path="/random-modes-tutorial/lesson/:lessonId" element={<RandomModesTutorial />} />
+          <Route path="/random-modes-tutorial/deck/:deckId" element={<RandomModesTutorial />} />
+          <Route path="/mixed-mode-tutorial" element={<RandomModesTutorial />} />
+          <Route path="/mixed-mode-tutorial/lesson/:lessonId" element={<RandomModesTutorial />} />
+          <Route path="/mixed-mode-tutorial/deck/:deckId" element={<RandomModesTutorial />} />
 
           {/* ==========================
               QUIZ MODE PLAYERS
@@ -426,8 +427,12 @@ export default function AppRoutes() {
           <Route path="/matching-type/deck/:deckId" element={<MatchingQuiz />} />
           <Route path="/timedquiz/lesson/:lessonId" element={<TimedQuiz />} />
           <Route path="/timedquiz/deck/:deckId" element={<TimedQuiz />} />
-          <Route path="/survival/lesson/:lessonId" element={<SurvivalQuiz />} />
-          <Route path="/survival/deck/:deckId" element={<SurvivalQuiz />} />
+          <Route path="/mixed-mode/lesson/:lessonId" element={<MixedModeQuiz />} />
+          <Route path="/mixed-mode/deck/:deckId" element={<MixedModeQuiz />} />
+          <Route path="/random-modes/lesson/:lessonId" element={<MixedModeQuiz />} />
+          <Route path="/random-modes/deck/:deckId" element={<MixedModeQuiz />} />
+          <Route path="/survival/lesson/:lessonId" element={<MixedModeQuiz />} />
+          <Route path="/survival/deck/:deckId" element={<MixedModeQuiz />} />
 
         {/* ==========================
             DEFAULT ROUTE

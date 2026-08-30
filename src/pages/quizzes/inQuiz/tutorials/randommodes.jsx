@@ -1,30 +1,32 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import styles from "./survival-tutorial.module.css";
+import styles from "./randommodes.module.css";
 
-export default function SurvivalMode() {
+export default function RandomModesTutorial() {
   const navigate = useNavigate();
   const { lessonId, deckId } = useParams();
 
   const [index, setIndex] = useState(0);
-  const [lives, setLives] = useState(3);
-  const [checkedSlides, setCheckedSlides] = useState(new Set());
 
   const slides = [
     {
+      type: "Multiple Choice",
       question: "Which keyword is used to prevent a class from being subclassed?",
       options: ["static", "final", "const", "sealed"],
       correct: "final"
     },
     {
-      question: "Which keyword is used to prevent a class from being subclassed?",
-      options: ["final", "static", "const", "sealed"],
-      correct: "final"
+      type: "Q&A",
+      question: "Type the keyword used to prevent a class from being subclassed.",
+      answer: "final"
     },
     {
-      question: "Which keyword is used to prevent a class from being subclassed?",
-      options: ["final", "static", "const", "sealed"],
-      wrong: "static"
+      type: "Matching Type",
+      pairs: [
+        ["final", "Prevents subclassing"],
+        ["static", "Belongs to the class"],
+        ["const", "Declares a constant"]
+      ]
     }
   ];
 
@@ -38,8 +40,6 @@ export default function SurvivalMode() {
 
         if (next >= slides.length) {
           next = 0;
-          setLives(3);
-          setCheckedSlides(new Set());
         }
 
         return next;
@@ -52,34 +52,14 @@ export default function SurvivalMode() {
 
   }, []);
 
-  useEffect(() => {
-
-    const slide = slides[index];
-
-    if (
-      slide.wrong &&
-      !checkedSlides.has(index) &&
-      lives > 0
-    ) {
-
-      const updated = new Set(checkedSlides);
-      updated.add(index);
-
-      setCheckedSlides(updated);
-      setLives((prev) => prev - 1);
-
-    }
-
-  }, [index]);
-
   const handleStart = () => {
     if (deckId) {
-      navigate(`/survival/deck/${deckId}`);
+      navigate(`/random-modes/deck/${deckId}`);
       return;
     }
 
     if (lessonId) {
-      navigate(`/survival/lesson/${lessonId}`);
+      navigate(`/random-modes/lesson/${lessonId}`);
     }
   };
 
@@ -92,18 +72,18 @@ export default function SurvivalMode() {
       <div className={styles.headerBox}>
 
         <div className={styles.headerTop}>
-          <h1 className={styles.title}>Survival Mode</h1>
+          <h1 className={styles.title}>Mixed Mode</h1>
         </div>
 
         <div className={styles.subtitles}>
 
           <p className={styles.subtitle}>
-            3 lives, 1 mission — don’t lose them!
+            Practice with matching type, multiple choice, and Q&A all at once.
           </p>
 
           <p className={styles.subtitle}>
-            Each wrong answer costs a life. Stay focused, keep your streak going,
-            and see how long you can survive!
+            Mixed Mode changes the question style as you play, so review feels
+            closer to the real quiz types.
           </p>
 
         </div>
@@ -117,20 +97,6 @@ export default function SurvivalMode() {
       {/* QUIZ */}
 
       <div className={styles.slideshowBox}>
-
-        {/* LIVES */}
-
-        <div className={styles.lives}>
-          {[0,1,2].map((i) => (
-            <img
-              key={i}
-              src="/images/hearts.png"
-              alt="life"
-              className={`${styles.heart} ${lives <= i ? styles.lost : ""}`}
-            />
-          ))}
-        </div>
-
         {/* SLIDES */}
 
         {slides.map((slide, i) => (
@@ -141,29 +107,52 @@ export default function SurvivalMode() {
           >
 
             <p className={styles.question}>
-              {slide.question}
+              {slide.type}
             </p>
 
-            <div className={styles.options}>
+            {slide.options && (
+              <>
+                <p className={styles.prompt}>{slide.question}</p>
 
-              {slide.options.map((option, j) => (
+                <div className={styles.options}>
 
-                <button
-                  key={j}
-                  className={
-                    option === slide.correct
-                      ? styles.correct
-                      : option === slide.wrong
-                      ? styles.wrong
-                      : ""
-                  }
-                >
-                  {option}
-                </button>
+                  {slide.options.map((option, j) => (
 
-              ))}
+                    <button
+                      key={j}
+                      className={option === slide.correct ? styles.correct : ""}
+                    >
+                      {option}
+                    </button>
 
-            </div>
+                  ))}
+
+                </div>
+              </>
+            )}
+
+            {slide.answer && (
+              <div className={styles.qnaPreview}>
+                <p className={styles.prompt}>{slide.question}</p>
+                <input value={slide.answer} readOnly />
+              </div>
+            )}
+
+            {slide.pairs && (
+              <div className={styles.matchPreview}>
+                <div>
+                  {slide.pairs.map(([term]) => (
+                    <span key={term}>{term}</span>
+                  ))}
+                </div>
+
+                <div>
+                  {slide.pairs.map(([term, definition]) => (
+                    <span key={`${term}-${definition}`}>{definition}</span>
+                  ))}
+                </div>
+              </div>
+            )}
 
           </div>
 

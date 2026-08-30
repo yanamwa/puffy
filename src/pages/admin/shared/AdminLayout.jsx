@@ -12,17 +12,61 @@ import {
   FiSidebar,
   FiLogOut,
 } from 'react-icons/fi';
+import { API_BASE } from '../../../config.js';
 import RoleNotificationMenu from '../../../components/RoleNotificationMenu';
 import HeaderProfileChip from '../../../components/HeaderProfileChip';
 import './AdminLayout.css';
 
+const DEFAULT_PROFILE_IMAGE = '/images/temporaryimg.png';
+
+function resolveProfileImage(imagePath) {
+  if (!imagePath) return DEFAULT_PROFILE_IMAGE;
+
+  if (
+    imagePath.startsWith('http://') ||
+    imagePath.startsWith('https://') ||
+    imagePath.startsWith('blob:') ||
+    imagePath.startsWith('data:') ||
+    imagePath.startsWith('/images/')
+  ) {
+    return imagePath;
+  }
+
+  let fixedPath = imagePath;
+
+  if (fixedPath.startsWith('/api/uploads/profile-images/')) {
+    fixedPath = fixedPath.replace(
+      '/api/uploads/profile-images/',
+      '/uploads/profile-images/',
+    );
+  }
+
+  if (!fixedPath.startsWith('/')) {
+    fixedPath = `/${fixedPath}`;
+  }
+
+  const serverOrigin = API_BASE.replace(/\/api\/?$/, '');
+  return `${serverOrigin}${fixedPath}`;
+}
+
 export default function AdminLayout({ children }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const avatarSrc =
+  const avatarSrc = resolveProfileImage(
     user?.profileImage ||
     user?.profile_image ||
-    '/images/temporaryimg.png';
+    user?.avatar ||
+    '',
+  );
+  const displayUsername = String(
+    user?.displayName ||
+      user?.display_name ||
+      user?.name ||
+      user?.fullName ||
+      user?.full_name ||
+      user?.username ||
+      'Admin',
+  ).replace(/^@+/, '');
 
   const handleLogout = () => {
     logout();
@@ -90,7 +134,7 @@ export default function AdminLayout({ children }) {
           <div className="admin-header-actions">
             <RoleNotificationMenu role="admin" />
             <HeaderProfileChip
-              username="admin"
+              username={displayUsername}
               accountLabel="Admin account"
               avatarSrc={avatarSrc}
               profilePath="/admin/profile"

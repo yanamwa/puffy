@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { deleteCourseById, fetchCourses } from '../../services/courseApi.js';
+import { archiveCourseById, fetchCourses } from '../../services/courseApi.js';
 import styles from './modulemanage.module.css';
 
 function formatCourseId(course) {
@@ -69,15 +69,19 @@ export default function ModuleManagement() {
     currentPage * rowsToShow
   );
 
-  const deleteCourse = async (course) => {
-    const ok = window.confirm(`Delete "${course.title}" from course management?`);
+  const archiveCourse = async (course) => {
+    const ok = window.confirm(`Archive "${course.title}" from course management?`);
     if (!ok) return;
 
     try {
-      await deleteCourseById(course.id);
-      setCourses((current) => current.filter((item) => item.id !== course.id));
+      await archiveCourseById(course.id, true);
+      setCourses((current) =>
+        current.map((item) =>
+          String(item.id) === String(course.id) ? { ...item, archived: true } : item
+        )
+      );
     } catch (error) {
-      window.alert(error.message || 'Could not delete course.');
+      window.alert(error.message || 'Could not archive course.');
     }
   };
 
@@ -170,9 +174,9 @@ export default function ModuleManagement() {
                   <button
                     type="button"
                     className={styles.actionDelete}
-                    onClick={() => deleteCourse(course)}
+                    onClick={() => archiveCourse(course)}
                   >
-                    Delete
+                    Archive
                   </button>
                   <button
                     type="button"

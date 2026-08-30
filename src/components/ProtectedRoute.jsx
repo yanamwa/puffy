@@ -16,6 +16,39 @@ function getStoredUser() {
   }
 }
 
+function getStoredToken() {
+  return (
+    localStorage.getItem('puffy-token') ||
+    localStorage.getItem('token') ||
+    localStorage.getItem('authToken') ||
+    ''
+  );
+}
+
+function getTokenUser(token) {
+  if (!token) {
+    return null;
+  }
+
+  try {
+    const payload = token.split('.')[1];
+
+    if (!payload) {
+      return null;
+    }
+
+    const normalizedPayload = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const paddedPayload = normalizedPayload.padEnd(
+      Math.ceil(normalizedPayload.length / 4) * 4,
+      '=',
+    );
+
+    return JSON.parse(atob(paddedPayload));
+  } catch {
+    return null;
+  }
+}
+
 function isTemporaryExpired(user) {
   const isTemporary =
     user?.isTemporary === true ||
@@ -43,17 +76,29 @@ function clearStoredAuth() {
   localStorage.removeItem('username');
   localStorage.removeItem('year_level');
   localStorage.removeItem('section_name');
+  localStorage.removeItem('admin');
+  localStorage.removeItem('admin_id');
+  localStorage.removeItem('admin_email');
+  localStorage.removeItem('admin_username');
+  localStorage.removeItem('school_name');
 }
 
 export default function ProtectedRoute() {
   const { user } = useAuth();
+  const token = getStoredToken();
+  const tokenUser = getTokenUser(token);
   const storedUser = getStoredUser();
-  const currentUser = storedUser || user;
+  const currentUser = user || storedUser || tokenUser;
   const location = useLocation();
-  const role = currentUser?.role;
+  const role = tokenUser?.role || currentUser?.role;
   const pathname = location.pathname;
 
-  if (!currentUser) {
+  if (!token || !currentUser) {
+    return <Navigate to="/login" replace state={{ from: location }} />;
+  }
+
+  if (tokenUser?.exp && tokenUser.exp * 1000 <= Date.now()) {
+    clearStoredAuth();
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
 

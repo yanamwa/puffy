@@ -228,6 +228,14 @@ function normalizeCourse(course) {
       course.database_professor_department ||
       course.department ||
       "",
+
+    professorProfileImage:
+      course.professorProfileImage ||
+      course.professor_profile_image ||
+      course.database_professor_profile_image ||
+      course.professorAvatar ||
+      course.professor_avatar ||
+      "",
   };
 }
 
@@ -1316,7 +1324,16 @@ useEffect(() => {
                       </div>
 
                       <div className="course-card-footer">
-                        <Avatar />
+                        <Avatar
+                          src={
+                            course.professorProfileImage
+                              ? resolveProfileImage(
+                                  course.professorProfileImage
+                                )
+                              : undefined
+                          }
+                          alt={`${course.professorName}'s profile`}
+                        />
 
                         <div className="enrolled-course-meta">
                           <span>{course.professorName}</span>

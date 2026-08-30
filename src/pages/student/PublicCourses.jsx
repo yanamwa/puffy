@@ -50,6 +50,20 @@ function getStoredToken() {
   );
 }
 
+function getUserRole(user) {
+  return user?.role || user?.userRole || user?.user_role || '';
+}
+
+function isStudentUser(user) {
+  return getUserRole(user) === 'student';
+}
+
+function getStoredStudentField(key) {
+  return localStorage.getItem('user_role') === 'student'
+    ? localStorage.getItem(key) || ''
+    : '';
+}
+
 function getSavedUser() {
   try {
     const storedUser =
@@ -59,7 +73,12 @@ function getSavedUser() {
       sessionStorage.getItem('user') ||
       sessionStorage.getItem('currentUser');
 
-    return storedUser ? JSON.parse(storedUser) : null;
+    if (!storedUser) {
+      return null;
+    }
+
+    const savedUser = JSON.parse(storedUser);
+    return isStudentUser(savedUser) ? savedUser : null;
   } catch (error) {
     console.error('Unable to read the saved user:', error);
     return null;
@@ -67,13 +86,14 @@ function getSavedUser() {
 }
 
 function saveUpdatedUser(updatedUser) {
-  if (!updatedUser) return;
+  if (!isStudentUser(updatedUser)) return;
 
   const serializedUser = JSON.stringify(updatedUser);
 
   localStorage.setItem('puffy-user', serializedUser);
   localStorage.setItem('user', serializedUser);
   localStorage.setItem('currentUser', serializedUser);
+  localStorage.setItem('user_role', updatedUser.role || 'student');
 
   if (sessionStorage.getItem('user')) {
     sessionStorage.setItem('user', serializedUser);
@@ -91,7 +111,8 @@ function saveUpdatedUser(updatedUser) {
 }
 
 function getStudentAccount(user) {
-  const savedUser = user || getSavedUser() || {};
+  const savedUser =
+    isStudentUser(user) ? user : getSavedUser() || {};
 
   return {
     fullName:
@@ -101,12 +122,12 @@ function getStudentAccount(user) {
       savedUser.fullName ||
       savedUser.full_name ||
       savedUser.username ||
-      localStorage.getItem('username') ||
+      getStoredStudentField('username') ||
       '',
 
     email:
       savedUser.email ||
-      localStorage.getItem('user_email') ||
+      getStoredStudentField('user_email') ||
       '',
 
     profileImage:
@@ -127,6 +148,10 @@ function clearStudentSession() {
   localStorage.removeItem('year_level');
   localStorage.removeItem('section_name');
   localStorage.removeItem('school_name');
+  localStorage.removeItem('admin');
+  localStorage.removeItem('admin_id');
+  localStorage.removeItem('admin_email');
+  localStorage.removeItem('admin_username');
   localStorage.removeItem('token');
   localStorage.removeItem('authToken');
   localStorage.removeItem('user');
@@ -266,6 +291,10 @@ export default function PublicCourses() {
           data.data ||
           data;
 
+        if (!isStudentUser(currentUser)) {
+          return;
+        }
+
         if (!active) return;
 
         const account = getStudentAccount(currentUser);
@@ -295,6 +324,10 @@ export default function PublicCourses() {
     const handleUserUpdated = (event) => {
       const updatedUser =
         event.detail || getSavedUser() || {};
+
+      if (!isStudentUser(updatedUser)) {
+        return;
+      }
 
       const updatedAccount =
         getStudentAccount(updatedUser);
@@ -1143,12 +1176,34 @@ const confirmEnrollment = async (course) => {
                 </div>
 
                 <div className="course-card-footer">
-                  <Avatar />
+                  <Avatar
+                    src={
+                      course.professorProfileImage ||
+                      course.professor_profile_image
+                        ? resolveProfileImage(
+                            course.professorProfileImage ||
+                              course.professor_profile_image,
+                          )
+                        : undefined
+                    }
+                    alt={`${
+                      course.instructor ||
+                      'Professor'
+                    }'s profile`}
+                  />
 
-                  <span>
-                    {course.instructor ||
-                      'Professor'}
-                  </span>
+                  <div className="public-course-meta">
+                    <span>
+                      {course.instructor ||
+                        'Professor'}
+                    </span>
+
+                    <small>
+                      {getProfessorDepartment(
+                        course,
+                      )}
+                    </small>
+                  </div>
 
                   <button
                     type="button"

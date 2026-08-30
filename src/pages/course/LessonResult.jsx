@@ -48,7 +48,8 @@ const getQuizTypeLabel = (quizMode) => {
     qna: "Question and Answer",
     matching: "Matching",
     timed: "Timed Quiz",
-    survival: "Survival Mode",
+    mixed: "Mixed Mode",
+    survival: "Mixed Mode",
     lesson: "Lesson Quick Check",
   };
 
@@ -81,6 +82,7 @@ const getQuizTypeIcon = (quizMode) => {
     qna: "/images/qna.png",
     matching: "/images/matching.png",
     timed: "/images/timedquiz.png",
+    mixed: "/images/needpractice.png",
     survival: "/images/needpractice.png",
     lesson: "/images/qna.png",
   };
@@ -106,7 +108,8 @@ const getAdaptiveRecommendation = (
       qna: "practice recalling the answers without hints",
       matching: "review the related terms and definitions",
       timed: "review the concepts before another timed attempt",
-      survival: "review the missed questions before trying another three-life run",
+      mixed: "review the missed mixed-mode questions",
+      survival: "review the missed mixed-mode questions",
       lesson: "review the lesson concepts",
     };
 

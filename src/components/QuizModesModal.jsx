@@ -19,7 +19,13 @@ function getModeKind(mode) {
     mode.title || ""
   } ${mode.mode_name || ""} ${mode.route || ""}`.toLowerCase();
 
-  if (text.includes("survival")) return "survival";
+  if (
+    text.includes("mixed") ||
+    text.includes("random") ||
+    text.includes("survival")
+  ) {
+    return "mixed";
+  }
   if (text.includes("timed")) return "timed";
   if (text.includes("multiple")) return "multiple";
   if (text.includes("matching")) return "matching";
@@ -33,7 +39,8 @@ const modeRouteFallbacks = {
   multiple: "/multipleChoice-tutorial",
   matching: "/Matching-tutorial",
   timed: "/timedquiz-tutorial",
-  survival: "/survival-tutorial",
+  mixed: "/random-modes-tutorial",
+  survival: "/random-modes-tutorial",
 };
 
 function getModeRoute(mode, modeKind) {

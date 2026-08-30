@@ -1708,7 +1708,7 @@
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: #c7c7c7;
+  background: #75a66c;
   transition: width 0.2s ease;
 }
 
@@ -2467,18 +2467,39 @@ a.course-folder:focus-visible {
 .archived-course-folder .course-card-footer {
   right: 17px;
   bottom: 12px;
-  height: 38px;
+  height: 48px;
   gap: 8px;
   color: #69717f;
   font-size: 14px;
 }
 
-.archived-course-folder .course-card-footer > span:not(.anime-avatar) {
+.archived-course-meta {
   min-width: 0;
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  line-height: 1.08;
+}
+
+.archived-course-meta span,
+.archived-course-meta small {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.archived-course-meta span {
+  color: #69717f;
+  font-size: 14px;
+}
+
+.archived-course-meta small {
+  color: #858d9b;
+  font-family: system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
 }
 
 .archived-course-folder .anime-avatar {

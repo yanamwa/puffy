@@ -3,7 +3,7 @@ import { API_BASE } from "../config.js";
 export const ADMIN_MODES_KEY = "admin-modes";
 export const ADMIN_MODES_EVENT = "admin-modes-updated";
 export const ADMIN_MODES_SEED_VERSION_KEY = "admin-modes-seed-version";
-export const ADMIN_MODES_SEED_VERSION = "2";
+export const ADMIN_MODES_SEED_VERSION = "3";
 
 export const quizModeSeeds = [
   {
@@ -53,11 +53,11 @@ export const quizModeSeeds = [
   },
   {
     id: 7291703,
-    kind: "survival",
-    title: "Survival Mode",
+    kind: "mixed",
+    title: "Mixed Mode",
     description:
-      "Practice with three lives. Each missed answer costs a life, so students stay focused while reviewing.",
-    route: "/survival-tutorial",
+      "Practice with matching type, multiple choice, and Q&A all at once.",
+    route: "/random-modes-tutorial",
     image: "/images/needpractice.png",
   },
 ];
@@ -77,6 +77,8 @@ function normalizeImagePath(value, title = "") {
   const lowerTitle = String(title).toLowerCase();
   if (lowerTitle.includes("multiple")) return "/images/multiplechoice.png";
   if (lowerTitle.includes("matching")) return "/images/matching.png";
+  if (lowerTitle.includes("mixed")) return "/images/needpractice.png";
+  if (lowerTitle.includes("random")) return "/images/needpractice.png";
   if (lowerTitle.includes("survival")) return "/images/needpractice.png";
   if (lowerTitle.includes("timed")) return "/images/timedquiz.png";
   if (lowerTitle.includes("q")) return "/images/qna.png";
@@ -88,7 +90,13 @@ function inferModeKind(mode, title) {
     mode?.mode_name || ""
   } ${mode?.route || ""}`.toLowerCase();
 
-  if (text.includes("survival")) return "survival";
+  if (
+    text.includes("mixed") ||
+    text.includes("random") ||
+    text.includes("survival")
+  ) {
+    return "mixed";
+  }
   if (text.includes("timed")) return "timed";
   if (text.includes("multiple")) return "multiple";
   if (text.includes("matching")) return "matching";
@@ -100,6 +108,13 @@ export function normalizeQuizMode(mode) {
   const id = mode?.id || mode?.mode_id || mode?.quiz_id || Date.now();
   const title = mode?.title || mode?.mode_name || "Untitled Mode";
   const kind = inferModeKind(mode, title);
+  const description = String(mode?.description || "");
+  const isLegacyMixedMode =
+    kind === "mixed" &&
+    (String(id) === "7291703" ||
+      /survival/i.test(title) ||
+      /three lives|lives|life/i.test(description));
+  const route = String(mode?.route || "");
 
   return {
     ...mode,
@@ -107,10 +122,17 @@ export function normalizeQuizMode(mode) {
     kind,
     mode_id: mode?.mode_id || id,
     quiz_id: mode?.quiz_id || id,
-    title,
-    mode_name: mode?.mode_name || title,
-    description: mode?.description || "",
-    route: mode?.route || "",
+    title: isLegacyMixedMode ? "Mixed Mode" : title,
+    mode_name: isLegacyMixedMode ? "Mixed Mode" : mode?.mode_name || title,
+    description:
+      isLegacyMixedMode || !description
+        ? "Practice with matching type, multiple choice, and Q&A all at once."
+        : description,
+    route:
+      kind === "mixed" &&
+      (!route || route.includes("survival") || route.includes("mixed-mode"))
+        ? "/random-modes-tutorial"
+        : route,
     image: normalizeImagePath(mode?.image, title),
   };
 }

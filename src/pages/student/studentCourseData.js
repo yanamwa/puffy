@@ -121,7 +121,7 @@ async function readJsonResponse(response, fallbackMessage) {
   return data;
 }
 
-async function fetchEnrolledCoursesRequest() {
+async function fetchEnrolledCoursesRequest(params = {}) {
   const token = getStoredToken();
   const userId = getStoredUserId();
 
@@ -129,12 +129,26 @@ async function fetchEnrolledCoursesRequest() {
     return [];
   }
 
-  const query = userId ? `?userId=${encodeURIComponent(userId)}` : '';
-  const response = await fetch(`${API_BASE}/courses/enrolled${query}`, {
-    method: 'GET',
-    credentials: 'include',
-    headers: getAuthHeaders(),
+  const query = new URLSearchParams();
+
+  if (userId) {
+    query.set('userId', userId);
+  }
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') {
+      query.set(key, value);
+    }
   });
+
+  const response = await fetch(
+    `${API_BASE}/courses/enrolled${query.toString() ? `?${query}` : ''}`,
+    {
+      method: 'GET',
+      credentials: 'include',
+      headers: getAuthHeaders(),
+    }
+  );
   const data = await readJsonResponse(response, 'Could not load enrolled courses.');
 
   return Array.isArray(data.courses) ? data.courses : [];
@@ -177,6 +191,17 @@ function getProfessorCourseDepartment(course) {
     course.professor_department ||
     course.database_professor_department ||
     course.department ||
+    ''
+  );
+}
+
+function getProfessorCourseProfileImage(course) {
+  return (
+    course.professorProfileImage ||
+    course.professor_profile_image ||
+    course.database_professor_profile_image ||
+    course.professorAvatar ||
+    course.professor_avatar ||
     ''
   );
 }
@@ -408,6 +433,8 @@ export function normalizeStudentCourse(course) {
     instructor: getProfessorCourseOwner(course),
     professorDepartment,
     professor_department: professorDepartment,
+    professorProfileImage: getProfessorCourseProfileImage(course),
+    professor_profile_image: getProfessorCourseProfileImage(course),
     modulesList: getStudentCourseModules(course),
   };
 }
@@ -507,6 +534,15 @@ export function getStudentEnrolledCourses() {
     .map(normalizeStudentCourse);
 }
 
+export function getStudentArchivedCourses() {
+  const enrolledKeys = new Set(readStudentEnrollmentKeys());
+
+  return readProfessorCourses()
+    .filter((course) => courseMatchesEnrollment(course, enrolledKeys))
+    .filter((course) => course.archived)
+    .map(normalizeStudentCourse);
+}
+
 export async function loadStudentEnrolledCourses() {
   try {
     const enrolledCourses = await fetchEnrolledCoursesRequest();
@@ -531,6 +567,28 @@ export async function loadStudentEnrolledCourses() {
 
   return courses
     .filter((course) => courseMatchesEnrollment(course, enrolledKeys))
+    .map(normalizeStudentCourse);
+}
+
+export async function loadStudentArchivedCourses() {
+  try {
+    const archivedCourses = await fetchEnrolledCoursesRequest({ archived: '1' });
+
+    if (getStoredToken() || getStoredUserId()) {
+      return archivedCourses.map(normalizeStudentCourse);
+    }
+  } catch (error) {
+    if (error.status && error.status !== 401) {
+      console.warn('Archived courses API fallback:', error.message);
+    }
+  }
+
+  const enrolledKeys = new Set(readStudentEnrollmentKeys());
+  const courses = await loadProfessorCourses({ includeArchived: true });
+
+  return courses
+    .filter((course) => courseMatchesEnrollment(course, enrolledKeys))
+    .filter((course) => course.archived)
     .map(normalizeStudentCourse);
 }
 
