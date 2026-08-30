@@ -81,6 +81,20 @@ function getStoredToken() {
   );
 }
 
+function getUserRole(user) {
+  return user?.role || user?.userRole || user?.user_role || '';
+}
+
+function isStudentUser(user) {
+  return getUserRole(user) === 'student';
+}
+
+function getStoredStudentField(key) {
+  return localStorage.getItem('user_role') === 'student'
+    ? localStorage.getItem(key) || ''
+    : '';
+}
+
 function getSavedUser() {
   try {
     const storedUser =
@@ -90,8 +104,13 @@ function getSavedUser() {
       sessionStorage.getItem('user') ||
       sessionStorage.getItem('currentUser');
 
-    return storedUser
-      ? JSON.parse(storedUser)
+    if (!storedUser) {
+      return null;
+    }
+
+    const savedUser = JSON.parse(storedUser);
+    return isStudentUser(savedUser)
+      ? savedUser
       : null;
   } catch (error) {
     console.error(
@@ -104,7 +123,7 @@ function getSavedUser() {
 }
 
 function saveUpdatedUser(updatedUser) {
-  if (!updatedUser) return;
+  if (!isStudentUser(updatedUser)) return;
 
   const serializedUser =
     JSON.stringify(updatedUser);
@@ -122,6 +141,11 @@ function saveUpdatedUser(updatedUser) {
   localStorage.setItem(
     'puffy-user',
     serializedUser,
+  );
+
+  localStorage.setItem(
+    'user_role',
+    updatedUser.role || 'student',
   );
 
   if (sessionStorage.getItem('user')) {
@@ -152,7 +176,7 @@ function saveUpdatedUser(updatedUser) {
 
 function getStudentAccount(user) {
   const savedUser =
-    user || getSavedUser() || {};
+    isStudentUser(user) ? user : getSavedUser() || {};
 
   return {
     fullName:
@@ -162,12 +186,12 @@ function getStudentAccount(user) {
       savedUser.fullName ||
       savedUser.full_name ||
       savedUser.username ||
-      localStorage.getItem('username') ||
+      getStoredStudentField('username') ||
       '',
 
     email:
       savedUser.email ||
-      localStorage.getItem('user_email') ||
+      getStoredStudentField('user_email') ||
       '',
 
     profileImage:
@@ -188,6 +212,10 @@ function clearStudentSession() {
   localStorage.removeItem('year_level');
   localStorage.removeItem('section_name');
   localStorage.removeItem('school_name');
+  localStorage.removeItem('admin');
+  localStorage.removeItem('admin_id');
+  localStorage.removeItem('admin_email');
+  localStorage.removeItem('admin_username');
 
   localStorage.removeItem('token');
   localStorage.removeItem('authToken');
@@ -325,6 +353,10 @@ export default function StudentSettings() {
           data.data ||
           data;
 
+        if (!isStudentUser(currentUser)) {
+          return;
+        }
+
         if (!active) return;
 
         const account =
@@ -360,6 +392,10 @@ export default function StudentSettings() {
         event.detail ||
         getSavedUser() ||
         {};
+
+      if (!isStudentUser(updatedUser)) {
+        return;
+      }
 
       const updatedAccount =
         getStudentAccount(updatedUser);

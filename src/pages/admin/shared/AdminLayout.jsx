@@ -9,6 +9,7 @@ import {
 } from 'react-router-dom';
 
 import { useAuth } from '../../../context/AuthContext';
+import { API_BASE } from '../../../config.js';
 
 import {
   FiGrid,
@@ -35,9 +36,7 @@ import './AdminLayout.css';
    API CONFIG
 ===================================================== */
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL ||
-  'http://localhost:5000/api';
+const API_BASE_URL = API_BASE;
 
 const SERVER_ORIGIN =
   API_BASE_URL.replace(/\/api\/?$/, '');
@@ -99,7 +98,8 @@ function getStoredToken() {
     localStorage.getItem('authToken') ||
     localStorage.getItem('puffy-token') ||
     sessionStorage.getItem('token') ||
-    sessionStorage.getItem('authToken')
+    sessionStorage.getItem('authToken') ||
+    sessionStorage.getItem('puffy-token')
   );
 }
 
@@ -403,9 +403,30 @@ export default function AdminLayout({
         }
       };
 
+    const handleProfileImageUpdated = (event) => {
+      const image =
+        event.detail?.profileImage ||
+        event.detail?.profile_image;
+
+      if (!image) {
+        return;
+      }
+
+      setHeaderUser((currentUser) => ({
+        ...currentUser,
+        profileImage: image,
+        profile_image: image,
+      }));
+    };
+
     window.addEventListener(
       'puffy-user-updated',
       handleUserUpdated,
+    );
+
+    window.addEventListener(
+      'profile-image-updated',
+      handleProfileImageUpdated,
     );
 
     window.addEventListener(
@@ -417,6 +438,11 @@ export default function AdminLayout({
       window.removeEventListener(
         'puffy-user-updated',
         handleUserUpdated,
+      );
+
+      window.removeEventListener(
+        'profile-image-updated',
+        handleProfileImageUpdated,
       );
 
       window.removeEventListener(

@@ -29,6 +29,9 @@ import {
 
 import './EnrolledCourses.css';
 
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
 const notificationItems = [
   {
     id: 1,
@@ -58,6 +61,26 @@ const notificationItems = [
     icon: 'announcement',
   },
 ];
+
+function resolveProfileImage(imagePath) {
+  if (!imagePath) return undefined;
+
+  if (
+    imagePath.startsWith('http://') ||
+    imagePath.startsWith('https://') ||
+    imagePath.startsWith('blob:') ||
+    imagePath.startsWith('data:')
+  ) {
+    return imagePath;
+  }
+
+  const serverOrigin = API_BASE_URL.replace(/\/api\/?$/, '');
+  return `${serverOrigin}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
+}
+
+function getProfessorDepartment(course) {
+  return course.professorDepartment || course.professor_department || 'Department not set';
+}
 
 function normalizeModule(module, index) {
   const lessonPages = Array.isArray(module?.lessonPages)
@@ -966,13 +989,31 @@ export default function StudentCourseDetail() {
 
               <div className="student-course-bottom-row">
                 <div className="student-course-creator">
-                  <Avatar />
-
-                  <span>
-                    {course.instructor ||
+                  <Avatar
+                    src={resolveProfileImage(
+                      course.professorProfileImage ||
+                        course.professor_profile_image,
+                    )}
+                    alt={`${
+                      course.instructor ||
                       course.professorName ||
-                      'Name of the prof'}
-                  </span>
+                      'Professor'
+                    }'s profile`}
+                  />
+
+                  <div className="enrolled-course-meta">
+                    <span>
+                      {course.instructor ||
+                        course.professorName ||
+                        'Professor'}
+                    </span>
+
+                    <small>
+                      {getProfessorDepartment(
+                        course,
+                      )}
+                    </small>
+                  </div>
                 </div>
 
                 <div className="student-course-actions">

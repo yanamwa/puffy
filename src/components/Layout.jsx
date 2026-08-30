@@ -35,13 +35,37 @@ export default function Layout() {
     location.pathname.startsWith(path)
   );
 
+  const isQuizArea = [
+    "/flashcards-tutorial",
+    "/QandA-tutorial",
+    "/qna-tutorial",
+    "/multipleChoice-tutorial",
+    "/multiple-choice-tutorial",
+    "/Matching-tutorial",
+    "/matching-tutorial",
+    "/timedquiz-tutorial",
+    "/random-modes-tutorial",
+    "/mixed-mode-tutorial",
+    "/flashcard",
+    "/qna",
+    "/multiple-choice",
+    "/matching-type",
+    "/timedquiz",
+    "/mixed-mode",
+    "/random-modes",
+    "/survival",
+  ].some((path) =>
+    location.pathname.startsWith(path)
+  );
+
   if (
     isAuthPage ||
     isStudentDashboard ||
     isSuperAdminArea ||
     isAdminArea ||
     isProfessorArea ||
-    isCourseArea
+    isCourseArea ||
+    isQuizArea
   ) {
     return <Outlet />;
   }

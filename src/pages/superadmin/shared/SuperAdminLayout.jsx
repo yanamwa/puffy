@@ -7,6 +7,7 @@ import {
   useNavigate,
 } from 'react-router-dom';
 
+import { API_BASE } from '../../../config.js';
 import { useAuth } from '../../../context/AuthContext';
 
 import {
@@ -31,6 +32,38 @@ import HeaderProfileChip
 
 import '../../admin/shared/AdminLayout.css';
 import './SuperAdminLayout.css';
+
+const DEFAULT_PROFILE_IMAGE = '/images/temporaryimg.png';
+
+function resolveProfileImage(imagePath) {
+  if (!imagePath) return DEFAULT_PROFILE_IMAGE;
+
+  if (
+    imagePath.startsWith('http://') ||
+    imagePath.startsWith('https://') ||
+    imagePath.startsWith('blob:') ||
+    imagePath.startsWith('data:') ||
+    imagePath.startsWith('/images/')
+  ) {
+    return imagePath;
+  }
+
+  let fixedPath = imagePath;
+
+  if (fixedPath.startsWith('/api/uploads/profile-images/')) {
+    fixedPath = fixedPath.replace(
+      '/api/uploads/profile-images/',
+      '/uploads/profile-images/',
+    );
+  }
+
+  if (!fixedPath.startsWith('/')) {
+    fixedPath = `/${fixedPath}`;
+  }
+
+  const serverOrigin = API_BASE.replace(/\/api\/?$/, '');
+  return `${serverOrigin}${fixedPath}`;
+}
 
 
 export default function SuperAdminLayout({ children }) {
@@ -62,10 +95,12 @@ export default function SuperAdminLayout({ children }) {
      USER
   ===================================================== */
 
-  const avatarSrc =
+  const avatarSrc = resolveProfileImage(
     user?.profileImage ||
     user?.profile_image ||
-    '/images/temporaryimg.png';
+    user?.avatar ||
+    '',
+  );
 
 
   const displayUsername =

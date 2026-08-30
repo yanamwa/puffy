@@ -52,6 +52,24 @@
   padding: 42px 48px 60px;
 }
 
+.admin-profile-state {
+  width: min(720px, 100%);
+
+  margin: 42px auto 0;
+  padding: 22px 26px;
+
+  border: 1px solid #dfe4e1;
+  border-radius: 13px;
+
+  background: #ffffff;
+  color: #59656a;
+
+  font-family: system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 650;
+  text-align: center;
+}
+
 .admin-profile-layout {
   width: min(1180px, 100%);
 
@@ -242,6 +260,13 @@
 .admin-photo-change-button svg {
   width: 18px;
   height: 18px;
+}
+
+.admin-photo-uploading {
+  font-family: system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
 }
 
 .admin-photo-input {

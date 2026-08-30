@@ -127,6 +127,22 @@ function normalizeLocalCourse(course) {
       course.archived === 1 ||
       course.archived === "1" ||
       course.archived === "true",
+    professorDepartment:
+      course.professorDepartment || course.professor_department || course.department || "",
+    professor_department:
+      course.professor_department || course.professorDepartment || course.department || "",
+    professorProfileImage:
+      course.professorProfileImage ||
+      course.professor_profile_image ||
+      course.professorAvatar ||
+      course.professor_avatar ||
+      "",
+    professor_profile_image:
+      course.professor_profile_image ||
+      course.professorProfileImage ||
+      course.professorAvatar ||
+      course.professor_avatar ||
+      "",
     updatedAt: course.updatedAt || new Date().toISOString().slice(0, 10),
   };
 }
@@ -188,6 +204,33 @@ function deleteLocalCourse(id) {
   return {
     success: true,
     message: "Course deleted locally.",
+  };
+}
+
+function archiveLocalCourse(id, archived = true) {
+  const courses = readProfessorCourses().map(normalizeLocalCourse);
+  const normalizedId = String(id || "");
+  let updatedCourse = null;
+
+  const nextCourses = courses.map((course) => {
+    if (String(course.id) !== normalizedId && String(course.course_id) !== normalizedId) {
+      return course;
+    }
+
+    updatedCourse = normalizeLocalCourse({
+      ...course,
+      archived,
+      updatedAt: new Date().toISOString().slice(0, 10),
+    });
+    return updatedCourse;
+  });
+
+  saveProfessorCourses(nextCourses);
+
+  return {
+    success: true,
+    message: archived ? "Course archived locally." : "Course restored locally.",
+    course: updatedCourse,
   };
 }
 
@@ -312,5 +355,23 @@ export async function deleteCourseById(id) {
 
     console.warn("Deleting course locally:", error.message);
     return deleteLocalCourse(id);
+  }
+}
+
+export async function archiveCourseById(id, archived = true) {
+  try {
+    return await requestCourse(`${API_BASE}/courses/${encodeURIComponent(id)}/archive`, {
+      method: "PATCH",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ archived }),
+    });
+  } catch (error) {
+    if (!canUseLocalWriteFallback(error)) throw error;
+
+    console.warn("Archiving course locally:", error.message);
+    return archiveLocalCourse(id, archived);
   }
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Link,
   useNavigate,
@@ -9,6 +9,7 @@ import {
   SortToggle,
 } from './EnrolledCourses';
 import JoinCourseModal from './JoinCourseModal';
+import { loadStudentArchivedCourses } from './studentCourseData';
 import './EnrolledCourses.css';
 import { FiLogOut } from 'react-icons/fi';
 
@@ -49,25 +50,6 @@ const notificationItems = [
   },
 ];
 
-const archivedCourses = Array.from(
-  { length: 6 },
-  (_, index) => ({
-    id: index + 1,
-
-    code:
-      index % 2 === 0
-        ? 'ITEC 106'
-        : 'ITEC 80',
-
-    title:
-      index % 2 === 0
-        ? 'Web Systems and Technologies 2'
-        : 'Introduction to Computing',
-
-    instructor: 'Name of the prof',
-  }),
-);
-
 function resolveProfileImage(imagePath) {
   if (!imagePath) {
     return DEFAULT_PROFILE_IMAGE;
@@ -100,6 +82,20 @@ function getStoredToken() {
   );
 }
 
+function getUserRole(user) {
+  return user?.role || user?.userRole || user?.user_role || '';
+}
+
+function isStudentUser(user) {
+  return getUserRole(user) === 'student';
+}
+
+function getStoredStudentField(key) {
+  return localStorage.getItem('user_role') === 'student'
+    ? localStorage.getItem(key) || ''
+    : '';
+}
+
 function getSavedUser() {
   try {
     const storedUser =
@@ -111,8 +107,13 @@ function getSavedUser() {
         'currentUser',
       );
 
-    return storedUser
-      ? JSON.parse(storedUser)
+    if (!storedUser) {
+      return null;
+    }
+
+    const savedUser = JSON.parse(storedUser);
+    return isStudentUser(savedUser)
+      ? savedUser
       : null;
   } catch (error) {
     console.error(
@@ -125,7 +126,7 @@ function getSavedUser() {
 }
 
 function saveUpdatedUser(updatedUser) {
-  if (!updatedUser) return;
+  if (!isStudentUser(updatedUser)) return;
 
   const serializedUser =
     JSON.stringify(updatedUser);
@@ -143,6 +144,11 @@ function saveUpdatedUser(updatedUser) {
   localStorage.setItem(
     'currentUser',
     serializedUser,
+  );
+
+  localStorage.setItem(
+    'user_role',
+    updatedUser.role || 'student',
   );
 
   if (
@@ -177,7 +183,7 @@ function saveUpdatedUser(updatedUser) {
 
 function getStudentAccount(user) {
   const savedUser =
-    user || getSavedUser() || {};
+    isStudentUser(user) ? user : getSavedUser() || {};
 
   return {
     fullName:
@@ -187,16 +193,12 @@ function getStudentAccount(user) {
       savedUser.fullName ||
       savedUser.full_name ||
       savedUser.username ||
-      localStorage.getItem(
-        'username',
-      ) ||
+      getStoredStudentField('username') ||
       '',
 
     email:
       savedUser.email ||
-      localStorage.getItem(
-        'user_email',
-      ) ||
+      getStoredStudentField('user_email') ||
       '',
 
     profileImage:
@@ -241,6 +243,11 @@ function clearStudentSession() {
     'school_name',
   );
 
+  localStorage.removeItem('admin');
+  localStorage.removeItem('admin_id');
+  localStorage.removeItem('admin_email');
+  localStorage.removeItem('admin_username');
+
   localStorage.removeItem('token');
 
   localStorage.removeItem(
@@ -268,6 +275,56 @@ function clearStudentSession() {
   sessionStorage.removeItem(
     'currentUser',
   );
+}
+
+function normalizeArchivedCourse(course) {
+  const title =
+    course.title ||
+    course.courseName ||
+    course.course_name ||
+    course.subject ||
+    'Untitled course';
+  const code =
+    course.code ||
+    course.courseCode ||
+    course.course_code ||
+    'COURSE';
+
+  return {
+    ...course,
+    id: course.id || course.course_id || code,
+    code,
+    title,
+    instructor:
+      course.professorName ||
+      course.professor_name ||
+      course.instructor ||
+      course.instructorName ||
+      'Professor',
+    professorDepartment:
+      course.professorDepartment ||
+      course.professor_department ||
+      course.database_professor_department ||
+      course.department ||
+      '',
+    professorProfileImage:
+      course.professorProfileImage ||
+      course.professor_profile_image ||
+      course.database_professor_profile_image ||
+      course.professorAvatar ||
+      course.professor_avatar ||
+      '',
+  };
+}
+
+function getArchivedCourseTitle(course) {
+  return course.code && course.code !== 'COURSE'
+    ? `${course.code} - ${course.title}`
+    : course.title;
+}
+
+function getProfessorDepartment(course) {
+  return course.professorDepartment || course.professor_department || 'Department not set';
 }
 
 export default function ArchivedCourses() {
@@ -316,6 +373,26 @@ export default function ArchivedCourses() {
   ] = useState('');
 
   const [
+    archivedCourses,
+    setArchivedCourses,
+  ] = useState([]);
+
+  const [
+    loadingCourses,
+    setLoadingCourses,
+  ] = useState(true);
+
+  const [
+    coursesErrorMessage,
+    setCoursesErrorMessage,
+  ] = useState('');
+
+  const [
+    searchQuery,
+    setSearchQuery,
+  ] = useState('');
+
+  const [
     studentAccount,
     setStudentAccount,
   ] = useState(
@@ -340,6 +417,70 @@ export default function ArchivedCourses() {
     studentAccount.email
       ? 'Student account'
       : 'Account information unavailable';
+
+  const filteredArchivedCourses = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+
+    if (!query) return archivedCourses;
+
+    return archivedCourses.filter((course) =>
+      [
+        course.code,
+        course.title,
+        course.instructor,
+        course.professorDepartment,
+        course.professor_department,
+      ]
+        .join(' ')
+        .toLowerCase()
+        .includes(query),
+    );
+  }, [archivedCourses, searchQuery]);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadArchivedCourses() {
+      try {
+        setLoadingCourses(true);
+        setCoursesErrorMessage('');
+
+        const loadedCourses =
+          await loadStudentArchivedCourses();
+
+        if (!active) return;
+
+        setArchivedCourses(
+          loadedCourses.map(
+            normalizeArchivedCourse,
+          ),
+        );
+      } catch (error) {
+        console.error(
+          'Archived courses loading error:',
+          error,
+        );
+
+        if (active) {
+          setArchivedCourses([]);
+          setCoursesErrorMessage(
+            error.message ||
+              'Could not load archived classes.',
+          );
+        }
+      } finally {
+        if (active) {
+          setLoadingCourses(false);
+        }
+      }
+    }
+
+    loadArchivedCourses();
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -380,6 +521,10 @@ export default function ArchivedCourses() {
           data.data?.user ||
           data.data ||
           data;
+
+        if (!isStudentUser(currentUser)) {
+          return;
+        }
 
         if (!active) return;
 
@@ -422,6 +567,10 @@ export default function ArchivedCourses() {
         event.detail ||
         getSavedUser() ||
         {};
+
+      if (!isStudentUser(updatedUser)) {
+        return;
+      }
 
       const updatedAccount =
         getStudentAccount(
@@ -766,6 +915,12 @@ export default function ArchivedCourses() {
           <label className="search-input">
             <input
               type="search"
+              value={searchQuery}
+              onChange={(event) =>
+                setSearchQuery(
+                  event.target.value,
+                )
+              }
               placeholder="Search your course"
             />
 
@@ -1269,40 +1424,75 @@ export default function ArchivedCourses() {
           className="public-courses-grid archived-courses-grid"
           aria-label="Archived courses"
         >
-          {archivedCourses.map(
-            (course) => (
-              <article
-                key={course.id}
-                className="course-folder archived-course-folder"
-              >
-                <span className="archived-course-badge">
-                  Archived
-                </span>
-
-                <div className="course-card-body">
-                  <h2>
-                    {course.code} -{' '}
-                    {course.title}
-                  </h2>
-                </div>
-
-                <div className="course-card-footer">
-                  <Avatar />
-
-                  <span>
-                    {course.instructor}
+          {loadingCourses ? (
+            <div className="student-empty-state">
+              Loading archived classes...
+            </div>
+          ) : coursesErrorMessage ? (
+            <div className="student-empty-state">
+              {coursesErrorMessage}
+            </div>
+          ) : filteredArchivedCourses.length ===
+            0 ? (
+            <div className="student-empty-state">
+              {searchQuery.trim()
+                ? 'No archived classes match your search.'
+                : 'No archived classes yet.'}
+            </div>
+          ) : (
+            filteredArchivedCourses.map(
+              (course) => (
+                <article
+                  key={course.id || course.code}
+                  className="course-folder archived-course-folder"
+                >
+                  <span className="archived-course-badge">
+                    Archived
                   </span>
 
-                  <button
-                    type="button"
-                    className="archived-view-button"
-                    disabled
-                  >
-                    View only
-                  </button>
-                </div>
-              </article>
-            ),
+                  <div className="course-card-body">
+                    <h2>
+                      {getArchivedCourseTitle(
+                        course,
+                      )}
+                    </h2>
+                  </div>
+
+                  <div className="course-card-footer">
+                    <Avatar
+                      src={
+                        course.professorProfileImage
+                          ? resolveProfileImage(
+                              course.professorProfileImage,
+                            )
+                          : undefined
+                      }
+                      alt={`${course.instructor}'s profile`}
+                    />
+
+                    <div className="archived-course-meta">
+                      <span>
+                        {course.instructor}
+                      </span>
+
+                      <small>
+                        {getProfessorDepartment(
+                          course,
+                        )}
+                      </small>
+                    </div>
+
+                    <button
+                      type="button"
+                      className="archived-view-button"
+                      disabled
+                    >
+                      View only
+                    </button>
+                  </div>
+                </article>
+              ),
+            )
           )}
         </section>
       </main>

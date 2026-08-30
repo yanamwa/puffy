@@ -1626,6 +1626,13 @@ export default function AddModule() {
         currentProfessor.department ||
         '';
 
+      const professorProfileImage =
+        currentProfessor.profileImage ||
+        currentProfessor.profile_image ||
+        currentProfessor.avatar ||
+        currentProfessor.image ||
+        '';
+
       const professorId =
         currentProfessor.id ||
         currentProfessor.userId ||
@@ -1792,6 +1799,10 @@ export default function AddModule() {
         professorDepartment,
         professor_department:
           professorDepartment,
+
+        professorProfileImage,
+        professor_profile_image:
+          professorProfileImage,
       };
 
       try {

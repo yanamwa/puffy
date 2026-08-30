@@ -1,13 +1,9 @@
 .wrapper{
   min-height:100vh;
-  background: repeating-linear-gradient(
-      0deg,
-      rgba(0,0,0,0.05) 0px,
-      rgba(0,0,0,0.05) 1px,
-      transparent 1px,
-      transparent 30px
-  );
-
+  background-image:url("/images/background_notebook.png");
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
   display:flex;
   flex-direction:column;
   align-items:center;
@@ -56,7 +52,7 @@
 .progressBar{
   height:100%;
   width:0%;
-  background:#c9a2ff;
+  background:#07832a;
   border-radius:10px;
   transition:width 0.6s ease;
 }
@@ -194,16 +190,16 @@
 .settingsModal {
   width: 430px;
   background: #ffffff;
-  border: 2px solid #c9a2ff;
+  border: 2px solid #07832a;
   border-radius: 24px;
   overflow: hidden;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
 }
 
 .settingsHeader {
-  background: #f3eaff;
+  background: #e7f5eb;
   padding: 20px 24px;
-  border-bottom: 2px solid #decaff;
+  border-bottom: 2px solid #c3dfcb;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -223,7 +219,7 @@
   border: none;
   border-radius: 50%;
   background: #ffffff;
-  color: #5c4a7d;
+  color: #044a17;
   font-size: 24px;
   cursor: pointer;
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
@@ -236,7 +232,7 @@
 .settingRow,
 .speedBox {
   background: #fafafa;
-  border: 1.5px solid #e6e0f5;
+  border: 1.5px solid #c3dfcb;
   border-radius: 16px;
   padding: 15px 16px;
   margin-bottom: 14px;
@@ -258,8 +254,8 @@
   width: 38px;
   height: 38px;
   border-radius: 12px;
-  background: #f1e7ff;
-  color: #7c3cff;
+  background: #e7f5eb;
+  color: #07832a;
   display: grid;
   place-items: center;
   font-size: 20px;
@@ -298,10 +294,10 @@
 }
 
 .switchOn {
-  background: #6b4baa;
+  background: #07832a;
   color: #ffffff;
-  border-color: #5c4a7d;
-  box-shadow: 0 4px 0 #4d347e;
+  border-color: #044a17;
+  box-shadow: 0 4px 0 #044a17;
 }
 
 .speedHeader {
@@ -324,7 +320,7 @@
 
 .speedBox input {
   width: 100%;
-  accent-color: #7c3cff;
+  accent-color: #07832a;
   cursor: pointer;
 }
 
@@ -409,7 +405,7 @@
   padding: 12px 24px;
   border: none;
   border-radius: 12px;
-  background: #d7a7ff;
+  background: #07832a;
   color: white;
   cursor: pointer;
   font-weight: 600;
@@ -662,7 +658,7 @@
 
 .checkpointProgressFill {
   height: 100%;
-  background: #dba8ff;
+  background: #07832a;
   border-radius: 10px;
   transition: width 0.4s ease;
 }
@@ -693,7 +689,7 @@
 .checkpointCard span {
   display: block;
   margin-bottom: 8px;
-  color: #7c3cff;
+  color: #07832a;
   font-size: 16px;
 }
 
@@ -717,9 +713,9 @@
   min-width: 130px;
   padding: 10px 18px;
   border-radius: 18px;
-  border: 1px solid #8f7cc9;
-  background: #a997dd;
-  box-shadow: 0 4px 0 #8f7cc9;
+  border: 1px solid #044a17;
+  background: #07832a;
+  box-shadow: 0 4px 0 #044a17;
   color: #ffffff;
   cursor: pointer;
   font-family: "Jersey 15", sans-serif;

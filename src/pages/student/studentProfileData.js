@@ -13,6 +13,14 @@ function valueOrFallback(value, fallback) {
   return cleaned || fallback;
 }
 
+function getUserRole(user) {
+  return user?.role || user?.userRole || user?.user_role || '';
+}
+
+function isStudentUser(user) {
+  return getUserRole(user) === 'student';
+}
+
 export function normalizeStudentProfileImage(image) {
   const cleaned = cleanStudentProfileText(image);
 
@@ -68,10 +76,20 @@ export function getStoredStudentUser() {
     if (!rawUser) continue;
 
     try {
-      return JSON.parse(rawUser);
+      const storedUser = JSON.parse(rawUser);
+
+      if (isStudentUser(storedUser)) {
+        return storedUser;
+      }
     } catch (error) {
       console.error('Unable to read stored student profile:', error);
     }
+  }
+
+  const storedRole = localStorage.getItem('user_role') || '';
+
+  if (storedRole !== 'student') {
+    return {};
   }
 
   return {
@@ -141,6 +159,10 @@ export function getStudentAccountLabel(profile) {
 }
 
 export function storeStudentUserProfile(user = {}) {
+  if (!isStudentUser(user)) {
+    return;
+  }
+
   localStorage.setItem('puffy-user', JSON.stringify(user));
   localStorage.setItem('user', JSON.stringify(user));
   localStorage.setItem('currentUser', JSON.stringify(user));
@@ -186,7 +208,13 @@ export async function fetchCurrentStudentUser() {
     throw new Error(data.message || 'Could not load your profile.');
   }
 
-  return data.user || data.data || null;
+  const loadedUser = data.user || data.data || null;
+
+  if (!loadedUser || !isStudentUser(loadedUser)) {
+    return null;
+  }
+
+  return loadedUser;
 }
 
 export function useStudentProfile() {
@@ -236,6 +264,10 @@ export function clearStudentSession() {
     'year_level',
     'section_name',
     'school_name',
+    'admin',
+    'admin_id',
+    'admin_email',
+    'admin_username',
   ].forEach((key) => localStorage.removeItem(key));
 
   sessionStorage.clear();

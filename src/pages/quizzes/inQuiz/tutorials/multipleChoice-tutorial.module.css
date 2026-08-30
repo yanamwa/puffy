@@ -3,8 +3,8 @@
 ========================= */
 
 :root {
-  --color-primary: #EBD3FA;
-  --color-secondary: #b26adf;
+  --color-primary: #07832a;
+  --color-secondary: #07832a;
   --color-shadow: rgba(0,0,0,0.15);
 }
 
@@ -54,7 +54,7 @@
   width: 100%;
   height: 90px;
 
-  background: #e3c2ff;
+  background: #07832a;
 
   border-top-left-radius: 40px;
   border-top-right-radius: 40px;
@@ -76,7 +76,7 @@
   font-weight: normal;
   font-style: normal;
 
-  color: #111;
+  color: #ffffff;
 }
 
 .subtitles {
@@ -105,9 +105,9 @@
 }
 
 .startBtn {
-  background: #9f89c2;
-  border: 1px solid #533a7a;
-  box-shadow: 0 4px rgb(114, 90, 153);
+  background: #07832a;
+  border: 1px solid #044a17;
+  box-shadow: 0 4px #044a17;
   padding: 10px 35px;
   border-radius: 20px;
   cursor: pointer;
@@ -125,7 +125,7 @@
 
 .startBtn:active {
   transform: translateY(3px);
-  box-shadow: 0 1px rgb(162, 140, 197);
+  box-shadow: 0 1px #044a17;
 }
 
 /* =========================
@@ -183,7 +183,7 @@
 
   padding: 18px;
 
-  border: 2px solid #b26adf;
+  border: 2px solid #07832a;
 
   border-radius: 18px;
 
@@ -218,7 +218,7 @@
 
   border-radius: 18px;
 
-  border: 2px solid #b26adf;
+  border: 2px solid #07832a;
 
   background: #fff;
 
@@ -240,7 +240,7 @@
 
 .options button:hover {
   transform: translateY(-2px);
-  background: #f8f4ff;
+  background: #e7f5eb;
 }
 
 /* =========================
@@ -295,7 +295,7 @@
   height: 10px;
   width: 10px;
 
-  background: #d7c1f3;
+  background: #c3dfcb;
 
   border-radius: 50%;
 
@@ -307,7 +307,7 @@
 }
 
 .activeDot {
-  background: #b26adf;
+  background: #07832a;
 }
 
 /* =========================
@@ -355,7 +355,7 @@
   position: fixed;
   inset: 0;
   z-index: 99999;
-  background: #efd9ff;
+  background: #07832a;
   display: flex;
   align-items: center;
   justify-content: center;

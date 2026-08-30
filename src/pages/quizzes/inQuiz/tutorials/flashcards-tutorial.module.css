@@ -24,7 +24,7 @@
 }
 
 .headerTop {
-  background: #efd9ff;
+  background: #07832a;
   padding: 18px;
   border-radius: 25px 25px 0 0;
   text-align: center;
@@ -35,7 +35,7 @@
   font-style: normal;
   font-size: 45px;
   margin: 0;
-  color: var(--font-color);
+  color: #ffffff;
 }
 
 .headerBody {
@@ -66,9 +66,9 @@
 }
 
 .startBtn {
-  background: #9f89c2;
-  border: 1px solid #533a7a;
-  box-shadow: 0 4px rgb(114, 90, 153);
+  background: #07832a;
+  border: 1px solid #044a17;
+  box-shadow: 0 4px #044a17;
   padding: 10px 35px;
   border-radius: 20px;
   cursor: pointer;
@@ -86,13 +86,13 @@
 
 .startBtn:active {
   transform: translateY(3px);
-  box-shadow: 0 1px rgb(162, 140, 197);
+  box-shadow: 0 1px #044a17;
 }
 
 .startBtn {
-  background: #9f89c2;
-  border: 1px solid #533a7a;
-  box-shadow: 0 4px rgb(114, 90, 153);
+  background: #07832a;
+  border: 1px solid #044a17;
+  box-shadow: 0 4px #044a17;
   padding: 10px 35px;
   border-radius: 20px;
   cursor: pointer;
@@ -110,7 +110,7 @@
 
 .startBtn:active {
   transform: translateY(3px);
-  box-shadow: 0 1px rgb(162, 140, 197);
+  box-shadow: 0 1px #044a17;
 }
 
 /* =========================
@@ -151,7 +151,7 @@
   border-radius: 12px 12px 0 0;
   text-align: center;
   font-size: 16px;
-  border-bottom: 4px solid #e7a6ff;
+  border-bottom: 4px solid #07832a;
   cursor: pointer;
   color: #111;
   box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.06);
@@ -184,7 +184,7 @@
   background-repeat: repeat-y;
   background-position: top left;
 
-  border: 1.8px solid #eba7ff;
+  border: 1.8px solid #07832a;
   overflow: hidden;
 }
 
@@ -223,7 +223,7 @@
   display: flex;
   justify-content: center;
   gap: 30px;
-  background: #efd9ff;
+  background: #e7f5eb;
   border-radius: 0 0 26px 26px;
   box-sizing: border-box;
   z-index: 4;
@@ -243,9 +243,9 @@
 }
 
 .easy {
-  background: #a997dd;
-  border: 1px solid #8f7cc9;
-  box-shadow: 0 4px 0 #8f7cc9;
+  background: #07832a;
+  border: 1px solid #044a17;
+  box-shadow: 0 4px 0 #044a17;
 }
 
 .good {
@@ -277,7 +277,7 @@
   inset: 0;
   z-index: 999;
 
-  background: #efd9ff;
+  background: #07832a;
 
   display: flex;
   align-items: center;
