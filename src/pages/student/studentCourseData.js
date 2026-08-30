@@ -571,25 +571,42 @@ export async function loadStudentEnrolledCourses() {
 }
 
 export async function loadStudentArchivedCourses() {
-  try {
-    const archivedCourses = await fetchEnrolledCoursesRequest({ archived: '1' });
+  const token = getStoredToken();
 
-    if (getStoredToken() || getStoredUserId()) {
-      return archivedCourses.map(normalizeStudentCourse);
-    }
-  } catch (error) {
-    if (error.status && error.status !== 401) {
-      console.warn('Archived courses API fallback:', error.message);
-    }
+  if (!token) {
+    return [];
   }
 
-  const enrolledKeys = new Set(readStudentEnrollmentKeys());
-  const courses = await loadProfessorCourses({ includeArchived: true });
+  try {
+    const response = await fetch(
+      `${API_BASE}/courses/archived`,
+      {
+        method: 'GET',
+        credentials: 'include',
+        headers: getAuthHeaders(),
+      }
+    );
 
-  return courses
-    .filter((course) => courseMatchesEnrollment(course, enrolledKeys))
-    .filter((course) => course.archived)
-    .map(normalizeStudentCourse);
+    const data = await readJsonResponse(
+      response,
+      'Could not load archived classes.'
+    );
+
+    const archivedCourses = Array.isArray(data.courses)
+      ? data.courses
+      : [];
+
+    return archivedCourses.map(
+      normalizeStudentCourse
+    );
+  } catch (error) {
+    console.error(
+      'Archived courses loading error:',
+      error
+    );
+
+    return [];
+  }
 }
 
 export function getPublicStudentCourses() {

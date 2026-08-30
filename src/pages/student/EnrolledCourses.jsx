@@ -7,6 +7,7 @@ import {
 } from './studentCourseData';
 import './EnrolledCourses.css';
 import { FiLogOut } from 'react-icons/fi';
+import Swal from 'sweetalert2';
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -489,6 +490,9 @@ export default function EnrolledCourses() {
   const [errorMessage, setErrorMessage] =
     useState('');
 
+  const [openCourseMenu, setOpenCourseMenu] = useState(null);
+const [unenrollingCourseId, setUnenrollingCourseId] = useState(null);
+
   const [sidebarCollapsed, setSidebarCollapsed] =
     useState(() => {
       return (
@@ -858,49 +862,76 @@ export default function EnrolledCourses() {
   };
 
   const joinByCourseCode = async () => {
-    try {
-      const course =
-        await findJoinableCourseByCodeAsync(
-          courseCode
-        );
+  try {
+    const trimmedCode = courseCode.trim();
 
-      if (!course) {
-        window.alert(
-          'Course code not found. Please check the code from your professor.'
-        );
+    if (!trimmedCode) {
+      await Swal.fire({
+        icon: "warning",
+        title: "Enter Course Code",
+        text: "Please enter the course code provided by your professor.",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#198754",
+      });
 
-        return;
-      }
+      return;
+    }
 
-     await enrollStudentInCourseAsync(course);
+    const course =
+      await findJoinableCourseByCodeAsync(trimmedCode);
 
-      closeJoinModal();
+    if (!course) {
+      await Swal.fire({
+        icon: "error",
+        title: "Course Not Found",
+        text: "Course code not found. Please check the code from your professor.",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#198754",
+      });
 
-      await loadEnrolledCourses();
+      return;
+    }
 
-      const courseId =
+    await enrollStudentInCourseAsync(course);
+
+    closeJoinModal();
+
+    await Swal.fire({
+      icon: "success",
+      title: "Course Joined!",
+      text: `You have successfully joined ${
+        course.title ||
+        course.courseName ||
+        course.course_name ||
+        course.name ||
+        "the course"
+      }.`,
+      confirmButtonText: "Continue",
+      confirmButtonColor: "#198754",
+    });
+
+    navigate(
+      `/student/enrolled-courses/${
         course.id ||
         course.courseId ||
         course.course_id ||
-        course.code ||
-        course.courseCode ||
-        course.course_code;
+        course.code
+      }`
+    );
+  } catch (error) {
+    console.error("Join course error:", error);
 
-      navigate(
-        `/student/enrolled-courses/${courseId}`
-      );
-    } catch (error) {
-      console.error(
-        'Join course error:',
-        error
-      );
-
-      window.alert(
-        error.message ||
-          'Unable to join the course.'
-      );
-    }
-  };
+    await Swal.fire({
+      icon: "error",
+      title: "Unable to Join Course",
+      text:
+        error?.message ||
+        "Unable to join the course.",
+      confirmButtonText: "OK",
+      confirmButtonColor: "#198754",
+    });
+  }
+};
 
   const unreadNotificationCount =
     notifications.filter(
@@ -935,7 +966,118 @@ export default function EnrolledCourses() {
         )
     );
   };
+const handleUnenrollCourse = async (course) => {
+  const courseId = course.id || course.code;
+  const courseTitle = getCourseTitle(course);
 
+  const result = await Swal.fire({
+    title: 'Unenroll from this course?',
+    text: `${courseTitle} will be moved to Archived Classes.`,
+    icon: 'warning',
+
+    showCancelButton: true,
+    confirmButtonText: 'Yes, unenroll',
+    cancelButtonText: 'Cancel',
+
+    confirmButtonColor: '#d93025',
+    cancelButtonColor: '#858d9b',
+
+    reverseButtons: true,
+
+    customClass: {
+      popup: 'unenroll-swal-popup',
+      title: 'unenroll-swal-title',
+      htmlContainer: 'unenroll-swal-text',
+      confirmButton: 'unenroll-swal-confirm',
+      cancelButton: 'unenroll-swal-cancel',
+    },
+  });
+
+  if (!result.isConfirmed) {
+    setOpenCourseMenu(null);
+    return;
+  }
+
+  try {
+    setUnenrollingCourseId(courseId);
+    setOpenCourseMenu(null);
+
+    const token = getStoredToken();
+
+    if (!token) {
+      throw new Error(
+        'Your login session was not found. Please log in again.'
+      );
+    }
+
+    const response = await fetch(
+      `${API_BASE_URL}/courses/${courseId}/unenroll`,
+      {
+        method: 'PUT',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const data = await response
+      .json()
+      .catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(
+        data.message ||
+          'Unable to unenroll from this course.'
+      );
+    }
+
+    // Remove course from Enrolled Courses
+    setCourses((currentCourses) =>
+      currentCourses.filter(
+        (currentCourse) =>
+          (currentCourse.id || currentCourse.code) !== courseId
+      )
+    );
+
+    await Swal.fire({
+      title: 'Course archived',
+      text: `${courseTitle} has been moved to Archived Classes.`,
+      icon: 'success',
+      confirmButtonText: 'Okay',
+      confirmButtonColor: '#198754',
+
+      customClass: {
+        popup: 'unenroll-swal-popup',
+        title: 'unenroll-swal-title',
+        htmlContainer: 'unenroll-swal-text',
+        confirmButton: 'unenroll-swal-ok',
+      },
+    });
+  } catch (error) {
+    console.error('Unenroll course error:', error);
+
+    await Swal.fire({
+      title: 'Unable to unenroll',
+      text:
+        error.message ||
+        'Unable to unenroll from this course.',
+      icon: 'error',
+      confirmButtonText: 'Okay',
+      confirmButtonColor: '#198754',
+
+      customClass: {
+        popup: 'unenroll-swal-popup',
+        title: 'unenroll-swal-title',
+        htmlContainer: 'unenroll-swal-text',
+        confirmButton: 'unenroll-swal-ok',
+      },
+    });
+  } finally {
+    setUnenrollingCourseId(null);
+  }
+};
 
 
   return (
@@ -1501,135 +1643,213 @@ export default function EnrolledCourses() {
 
                       <path d="M19 13.5v-3l-2-.6a7 7 0 0 0-.7-1.6l1-1.8-2.1-2.1-1.8 1a7 7 0 0 0-1.6-.7L11.5 3h-3l-.6 2a7 7 0 0 0-1.6.7l-1.8-1-2.1 2.1 1 1.8a7 7 0 0 0-.7 1.6L1 10.5v3l2 .6a7 7 0 0 0 .7 1.6l-1 1.8 2.1 2.1 1.8-1a7 7 0 0 0 1.6.7l.6 2h3l.6-2a7 7 0 0 0 1.6-.7l1.8 1 2.1-2.1-1-1.8a7 7 0 0 0 .7-1.6Z" />
                     </svg>
+                      <span>Settings</span>
+                    </button>
 
-                    <span>Settings</span>
-                  </button>
+                    <div className="profile-dropdown-divider" />
 
-                  <div className="profile-dropdown-divider" />
-
-                  <button
-                    type="button"
-                    className="profile-logout-option"
-                    onClick={handleLogout}
-                  >
-                    <svg
-                      viewBox="0 0 24 24"
-                      aria-hidden="true"
+                    <button
+                      type="button"
+                      className="profile-logout-option"
+                      onClick={handleLogout}
                     >
-                      <path d="M10 5H5v14h5" />
-                      <path d="m14 8 4 4-4 4" />
-                      <path d="M18 12H9" />
-                    </svg>
+                      <svg
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                      >
+                        <path d="M10 5H5v14h5" />
+                        <path d="m14 8 4 4-4 4" />
+                        <path d="M18 12H9" />
+                      </svg>
 
-                    <span>Log out</span>
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </header>
-
-        <section className="public-heading">
-          <h1>Enrolled Courses</h1>
-
-          <div className="filter-actions">
-            <span className="sort-by-label">
-              Sort by
-            </span>
-
-            <SortToggle
-              options={[
-                'Recent',
-                'Oldest',
-              ]}
-            />
-
-            <SortToggle
-              options={[
-                'A to Z',
-                'Z to A',
-              ]}
-            />
-          </div>
-        </section>
-
-        <section
-          className="courses-grid"
-          aria-label="Enrolled courses"
-        >
-          {loading ? (
-            <div className="student-empty-state">
-              Loading enrolled courses...
-            </div>
-          ) : errorMessage ? (
-            <div className="student-empty-state">
-              {errorMessage}
-            </div>
-          ) : courses.length === 0 ? (
-            <div className="student-empty-state">
-              No enrolled courses yet. Join
-              by code or start a public
-              course.
-            </div>
-          ) : (
-            courses.map((course) => (
-              <Link
-                key={
-                  course.id || course.code
-                }
-                to={`/student/enrolled-courses/${
-                  course.id || course.code
-                }`}
-                className="course-folder enrolled-course-folder"
-                aria-label={`Open ${getCourseTitle(course)}`}
-              >
-                <span
-                  className="menu-button"
-                  aria-hidden="true"
-                >
-                  <span />
-                  <span />
-                  <span />
-                </span>
-
-                <div className="course-card-body">
-                  <h2 title={getCourseTitle(course)}>
-                    {getCourseTitle(course)}
-                  </h2>
-                </div>
-
-                <div className="course-card-footer">
-                  <Avatar
-                    src={
-                      course.professorProfileImage
-                        ? resolveProfileImage(
-                            course.professorProfileImage,
-                          )
-                        : undefined
-                    }
-                    alt={`${course.instructor}'s profile`}
-                  />
-
-                  <div className="enrolled-course-meta">
-                    <span>{course.instructor}</span>
-                    <small>{getProfessorDepartment(course)}</small>
+                      <span>Log out</span>
+                    </button>
                   </div>
-                </div>
-              </Link>
-            ))
-          )}
-        </section>
-      </main>
+                )}
+              </div>
+            </div>
+          </header>
 
-      <JoinCourseModal
-        open={joinModalOpen}
-        courseCode={courseCode}
-        onCourseCodeChange={
-          setCourseCode
-        }
-        onCancel={closeJoinModal}
-        onJoin={joinByCourseCode}
-      />
-    </div>
-  );
+          <section className="public-heading">
+            <h1>Enrolled Courses</h1>
+
+            <div className="filter-actions">
+              <span className="sort-by-label">
+                Sort by
+              </span>
+
+              <SortToggle
+                options={[
+                  'Recent',
+                  'Oldest',
+                ]}
+              />
+
+              <SortToggle
+                options={[
+                  'A to Z',
+                  'Z to A',
+                ]}
+              />
+            </div>
+          </section>
+
+          <section
+            className="courses-grid"
+            aria-label="Enrolled courses"
+          >
+            {loading ? (
+              <div className="student-empty-state">
+                Loading enrolled courses...
+              </div>
+            ) : errorMessage ? (
+              <div className="student-empty-state">
+                {errorMessage}
+              </div>
+            ) : courses.length === 0 ? (
+              <div className="student-empty-state">
+                No enrolled courses yet. Join by code or
+                start a public course.
+              </div>
+            ) : (
+              courses.map((course) => {
+                const courseId =
+                  course.id || course.code;
+
+                const menuOpen =
+                  openCourseMenu === courseId;
+
+                const isUnenrolling =
+                  unenrollingCourseId === courseId;
+
+                return (
+                  <div
+                    key={courseId}
+                    className="course-card-wrapper"
+                  >
+                    <Link
+                      to={`/student/enrolled-courses/${courseId}`}
+                      className="course-folder enrolled-course-folder"
+                      aria-label={`Open ${getCourseTitle(
+                        course
+                      )}`}
+                    >
+                      <div className="course-card-body">
+                        <h2
+                          title={getCourseTitle(course)}
+                        >
+                          {getCourseTitle(course)}
+                        </h2>
+                      </div>
+
+                      <div className="course-card-footer">
+                        <Avatar
+                          src={
+                            course.professorProfileImage
+                              ? resolveProfileImage(
+                                  course.professorProfileImage
+                                )
+                              : undefined
+                          }
+                          alt={`${course.instructor}'s profile`}
+                        />
+
+                        <div className="enrolled-course-meta">
+                          <span>
+                            {course.instructor}
+                          </span>
+
+                          <small>
+                            {getProfessorDepartment(
+                              course
+                            )}
+                          </small>
+                        </div>
+                      </div>
+                    </Link>
+
+                    <div className="course-options-wrapper">
+                      <button
+                        type="button"
+                        className={`course-menu-button ${
+                          menuOpen ? 'active' : ''
+                        }`}
+                        aria-label={`Options for ${getCourseTitle(
+                          course
+                        )}`}
+                        aria-expanded={menuOpen}
+                        aria-haspopup="menu"
+                        onClick={(event) => {
+                          event.preventDefault();
+                          event.stopPropagation();
+
+                          setOpenCourseMenu(
+                            (current) =>
+                              current === courseId
+                                ? null
+                                : courseId
+                          );
+                        }}
+                      >
+                        <span />
+                        <span />
+                        <span />
+                      </button>
+
+                      {menuOpen && (
+                        <div
+                          className="course-options-menu"
+                          role="menu"
+                          onClick={(event) =>
+                            event.stopPropagation()
+                          }
+                        >
+                          <button
+                            type="button"
+                            className="course-unenroll-button"
+                            role="menuitem"
+                            disabled={isUnenrolling}
+                            onClick={(event) => {
+                              event.preventDefault();
+                              event.stopPropagation();
+
+                              handleUnenrollCourse(
+                                course
+                              );
+                            }}
+                          >
+                            <svg
+                              viewBox="0 0 24 24"
+                              aria-hidden="true"
+                            >
+                              <path d="M10 5H5v14h5" />
+                              <path d="m14 8 4 4-4 4" />
+                              <path d="M18 12H9" />
+                            </svg>
+
+                            <span>
+                              {isUnenrolling
+                                ? 'Unenrolling...'
+                                : 'Unenroll'}
+                            </span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </section>
+        </main>
+
+        <JoinCourseModal
+          open={joinModalOpen}
+          courseCode={courseCode}
+          onCourseCodeChange={setCourseCode}
+          onCancel={closeJoinModal}
+          onJoin={joinByCourseCode}
+        />
+      </div>
+    );
 }

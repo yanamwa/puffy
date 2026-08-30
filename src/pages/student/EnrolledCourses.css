@@ -5350,3 +5350,135 @@ a.course-folder:focus-visible {
   border-color: #7dac8c;
   background: #f7fbf8;
 }
+
+.course-card-wrapper {
+  position: relative;
+  min-width: 0;
+}
+
+/* Three dot container */
+.course-options-wrapper {
+  position: absolute;
+  top: 55px;
+  right: 18px;
+  z-index: 20;
+}
+
+/* Three dots */
+.course-menu-button {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+
+  border: none;
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.95);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 3px;
+
+  cursor: pointer;
+
+  opacity: 0;
+  visibility: hidden;
+
+  transition:
+    opacity 0.18s ease,
+    background-color 0.18s ease,
+    transform 0.18s ease;
+}
+
+.course-card-wrapper:hover
+  .course-menu-button,
+.course-menu-button.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.course-menu-button:hover,
+.course-menu-button.active {
+  background: #f0f4f1;
+}
+
+.course-menu-button:active {
+  transform: scale(0.94);
+}
+
+.course-menu-button span {
+  display: block;
+
+  width: 4px;
+  height: 4px;
+
+  border-radius: 50%;
+
+  background: #405047;
+}
+
+/* Dropdown */
+.course-options-menu {
+  position: absolute;
+
+  top: 40px;
+  right: 0;
+
+  min-width: 145px;
+
+  padding: 6px;
+
+  background: #ffffff;
+
+  border: 1px solid #e3e8e4;
+  border-radius: 10px;
+
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.12);
+
+  z-index: 100;
+}
+
+/* Unenroll */
+.course-unenroll-button {
+  width: 100%;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  padding: 5px 10px;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  color: #d93025;
+  cursor: pointer;
+  text-align: left;
+
+  font-family: system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.course-unenroll-button:hover {
+  background: #fce8e6;
+}
+
+.course-unenroll-button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.course-unenroll-button svg {
+  width: 17px;
+  height: 17px;
+
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}

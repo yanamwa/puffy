@@ -526,21 +526,76 @@ const confirmEnrollment = async (course) => {
   };
 
   const joinByCourseCode = async () => {
-    const course = await findJoinableCourseByCodeAsync(courseCode);
+  try {
+    const trimmedCode = courseCode.trim();
 
-    if (!course) {
-      window.alert(
-        'Course code not found. Please check the code from your professor.',
-      );
+    if (!trimmedCode) {
+      await Swal.fire({
+        icon: "warning",
+        title: "Enter Course Code",
+        text: "Please enter the course code provided by your professor.",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#198754",
+      });
+
       return;
     }
 
-    const enrolled = await confirmEnrollment(course);
+    const course =
+      await findJoinableCourseByCodeAsync(trimmedCode);
 
-    if (enrolled) {
-      closeJoinModal();
+    if (!course) {
+      await Swal.fire({
+        icon: "error",
+        title: "Course Not Found",
+        text: "Course code not found. Please check the code from your professor.",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#198754",
+      });
+
+      return;
     }
-  };
+
+    await enrollStudentInCourseAsync(course);
+
+    closeJoinModal();
+
+    await Swal.fire({
+      icon: "success",
+      title: "Course Joined!",
+      text: `You have successfully joined ${
+        course.title ||
+        course.courseName ||
+        course.course_name ||
+        course.name ||
+        "the course"
+      }.`,
+      confirmButtonText: "Continue",
+      confirmButtonColor: "#198754",
+    });
+
+    navigate(
+      `/student/enrolled-courses/${
+        course.id ||
+        course.courseId ||
+        course.course_id ||
+        course.code
+      }`
+    );
+  } catch (error) {
+    console.error("Join course error:", error);
+
+    await Swal.fire({
+      icon: "error",
+      title: "Unable to Join Course",
+      text:
+        error?.message ||
+        "Unable to join the course.",
+      confirmButtonText: "OK",
+      confirmButtonColor: "#198754",
+    });
+  }
+};
 
   const unreadNotificationCount = notifications.filter(
     (notification) => notification.unread,

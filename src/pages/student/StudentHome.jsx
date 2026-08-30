@@ -10,6 +10,7 @@ import {
 import { API_BASE } from "../../config.js";
 import "./EnrolledCourses.css";
 import { FiLogOut } from 'react-icons/fi';
+import Swal from "sweetalert2";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || "http://localhost:5000/api";
@@ -611,38 +612,76 @@ useEffect(() => {
   };
 
   const joinByCourseCode = async () => {
-    try {
-      const course =
-        await findJoinableCourseByCodeAsync(courseCode);
+  try {
+    const trimmedCode = courseCode.trim();
 
-      if (!course) {
-        window.alert(
-          "Course code not found. Please check the code from your professor."
-        );
+    if (!trimmedCode) {
+      await Swal.fire({
+        icon: "warning",
+        title: "Enter Course Code",
+        text: "Please enter the course code provided by your professor.",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#198754",
+      });
 
-        return;
-      }
-
-      await enrollStudentInCourseAsync(course);
-
-      closeJoinModal();
-
-      navigate(
-        `/student/enrolled-courses/${
-          course.id ||
-          course.courseId ||
-          course.course_id ||
-          course.code
-        }`
-      );
-    } catch (error) {
-      console.error("Join course error:", error);
-
-      window.alert(
-        error.message || "Unable to join the course."
-      );
+      return;
     }
-  };
+
+    const course =
+      await findJoinableCourseByCodeAsync(trimmedCode);
+
+    if (!course) {
+      await Swal.fire({
+        icon: "error",
+        title: "Course Not Found",
+        text: "Course code not found. Please check the code from your professor.",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#198754",
+      });
+
+      return;
+    }
+
+    await enrollStudentInCourseAsync(course);
+
+    closeJoinModal();
+
+    await Swal.fire({
+      icon: "success",
+      title: "Course Joined!",
+      text: `You have successfully joined ${
+        course.title ||
+        course.courseName ||
+        course.course_name ||
+        course.name ||
+        "the course"
+      }.`,
+      confirmButtonText: "Continue",
+      confirmButtonColor: "#198754",
+    });
+
+    navigate(
+      `/student/enrolled-courses/${
+        course.id ||
+        course.courseId ||
+        course.course_id ||
+        course.code
+      }`
+    );
+  } catch (error) {
+    console.error("Join course error:", error);
+
+    await Swal.fire({
+      icon: "error",
+      title: "Unable to Join Course",
+      text:
+        error?.message ||
+        "Unable to join the course.",
+      confirmButtonText: "OK",
+      confirmButtonColor: "#198754",
+    });
+  }
+};
 
   const unreadNotificationCount =
     notifications.filter(
