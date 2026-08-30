@@ -1,5 +1,15 @@
-import { NavLink, useNavigate } from 'react-router-dom';
+import {
+  useEffect,
+  useState,
+} from 'react';
+
+import {
+  NavLink,
+  useNavigate,
+} from 'react-router-dom';
+
 import { useAuth } from '../../../context/AuthContext';
+
 import {
   FiGrid,
   FiUsers,
@@ -9,101 +19,676 @@ import {
   FiSettings,
   FiUser,
   FiSearch,
-  FiSidebar,
   FiLogOut,
 } from 'react-icons/fi';
-import RoleNotificationMenu from '../../../components/RoleNotificationMenu';
-import HeaderProfileChip from '../../../components/HeaderProfileChip';
+
+import RoleNotificationMenu
+  from '../../../components/RoleNotificationMenu';
+
+import HeaderProfileChip
+  from '../../../components/HeaderProfileChip';
+
 import './AdminLayout.css';
 
-export default function AdminLayout({ children }) {
-  const { user, logout } = useAuth();
+
+/* =====================================================
+   API CONFIG
+===================================================== */
+
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL ||
+  'http://localhost:5000/api';
+
+const SERVER_ORIGIN =
+  API_BASE_URL.replace(/\/api\/?$/, '');
+
+const DEFAULT_PROFILE_IMAGE =
+  '/images/temporaryimg.png';
+
+
+/* =====================================================
+   MENU
+===================================================== */
+
+const mainMenuItems = [
+  {
+    label: 'Dashboard',
+    path: '/admin/dashboard',
+    icon: FiGrid,
+  },
+  {
+    label: 'User Management',
+    path: '/admin/users',
+    icon: FiUsers,
+  },
+  {
+    label: 'Course Management',
+    path: '/admin/courses',
+    icon: FiBook,
+  },
+  {
+    label: 'Reports',
+    path: '/admin/reports',
+    icon: FiActivity,
+  },
+  {
+    label: 'Announcements & Notifications',
+    path: '/admin/notification',
+    icon: FiBell,
+  },
+  {
+    label: 'Profile',
+    path: '/admin/profile',
+    icon: FiUser,
+  },
+  {
+    label: 'Settings',
+    path: '/admin/settings',
+    icon: FiSettings,
+  },
+];
+
+
+/* =====================================================
+   GET TOKEN
+===================================================== */
+
+function getStoredToken() {
+  return (
+    localStorage.getItem('token') ||
+    localStorage.getItem('authToken') ||
+    localStorage.getItem('puffy-token') ||
+    sessionStorage.getItem('token') ||
+    sessionStorage.getItem('authToken')
+  );
+}
+
+
+/* =====================================================
+   GET STORED USER
+===================================================== */
+
+function getStoredUser() {
+  try {
+    const storedUser =
+      localStorage.getItem('puffy-user') ||
+      localStorage.getItem('user') ||
+      localStorage.getItem('currentUser');
+
+    return storedUser
+      ? JSON.parse(storedUser)
+      : null;
+  } catch (error) {
+    console.error(
+      'Unable to read stored admin:',
+      error,
+    );
+
+    return null;
+  }
+}
+
+
+/* =====================================================
+   PROFILE IMAGE
+===================================================== */
+
+function resolveProfileImage(imagePath) {
+  if (!imagePath) {
+    return DEFAULT_PROFILE_IMAGE;
+  }
+
+  if (
+    imagePath.startsWith('http://') ||
+    imagePath.startsWith('https://') ||
+    imagePath.startsWith('blob:') ||
+    imagePath.startsWith('data:')
+  ) {
+    return imagePath;
+  }
+
+  let fixedPath =
+    String(imagePath).replace(/\\/g, '/');
+
+  /*
+   * Fix old profile image paths such as:
+   * /api/uploads/profile-images/...
+   */
+  if (
+    fixedPath.startsWith(
+      '/api/uploads/profile-images/',
+    )
+  ) {
+    fixedPath = fixedPath.replace(
+      '/api/uploads/profile-images/',
+      '/uploads/profile-images/',
+    );
+  }
+
+  if (!fixedPath.startsWith('/')) {
+    fixedPath = `/${fixedPath}`;
+  }
+
+  return `${SERVER_ORIGIN}${fixedPath}`;
+}
+
+
+/* =====================================================
+   DISPLAY NAME
+===================================================== */
+
+function getDisplayName(user) {
+  const name =
+    user?.displayName ||
+    user?.display_name ||
+    user?.fullName ||
+    user?.full_name ||
+    user?.name ||
+    user?.username ||
+    'Admin';
+
+  return String(name).replace(/^@+/, '');
+}
+
+
+/* =====================================================
+   COMPONENT
+===================================================== */
+
+export default function AdminLayout({
+  children,
+}) {
+  const {
+    user: authUser,
+    logout,
+  } = useAuth();
+
   const navigate = useNavigate();
+
+
+  /* ===================================================
+     HEADER USER
+  =================================================== */
+
+  const [
+    headerUser,
+    setHeaderUser,
+  ] = useState(() => {
+    return (
+      getStoredUser() ||
+      authUser ||
+      null
+    );
+  });
+
+
+  /* ===================================================
+     SIDEBAR
+  =================================================== */
+
+  const [
+    sidebarCollapsed,
+    setSidebarCollapsed,
+  ] = useState(() => {
+    return (
+      localStorage.getItem(
+        'adminSidebarCollapsed',
+      ) === 'true'
+    );
+  });
+
+
+  /* ===================================================
+     FETCH LOGGED-IN ADMIN
+  =================================================== */
+
+  useEffect(() => {
+    const fetchCurrentAdmin =
+      async () => {
+        try {
+          const token =
+            getStoredToken();
+
+          if (!token) {
+            return;
+          }
+
+          const response = await fetch(
+            `${API_BASE_URL}/users/me`,
+            {
+              method: 'GET',
+
+              headers: {
+                Accept:
+                  'application/json',
+
+                Authorization:
+                  `Bearer ${token}`,
+              },
+            },
+          );
+
+          const data =
+            await response
+              .json()
+              .catch(() => ({}));
+
+          if (!response.ok) {
+            console.error(
+              'Unable to load admin:',
+              data.message,
+            );
+
+            return;
+          }
+
+          const loggedInUser =
+            data.user ||
+            data.data?.user ||
+            data.data ||
+            data;
+
+          if (!loggedInUser) {
+            return;
+          }
+
+          /*
+           * Only accept an Admin account.
+           *
+           * If you also want super-admin to use
+           * this layout, add:
+           *
+           * loggedInUser.role !== 'super-admin'
+           */
+          if (
+            loggedInUser.role &&
+            loggedInUser.role !== 'admin'
+          ) {
+            return;
+          }
+
+          setHeaderUser(
+            loggedInUser,
+          );
+
+          const serializedUser =
+            JSON.stringify(
+              loggedInUser,
+            );
+
+          localStorage.setItem(
+            'puffy-user',
+            serializedUser,
+          );
+
+          localStorage.setItem(
+            'user',
+            serializedUser,
+          );
+
+          localStorage.setItem(
+            'currentUser',
+            serializedUser,
+          );
+        } catch (error) {
+          console.error(
+            'Admin header loading error:',
+            error,
+          );
+        }
+      };
+
+    fetchCurrentAdmin();
+  }, []);
+
+
+  /* ===================================================
+     SYNC AUTH USER
+  =================================================== */
+
+  useEffect(() => {
+    if (!authUser) {
+      return;
+    }
+
+    setHeaderUser(
+      (currentUser) => ({
+        ...currentUser,
+        ...authUser,
+      }),
+    );
+  }, [authUser]);
+
+
+  /* ===================================================
+     LISTEN FOR PROFILE CHANGES
+  =================================================== */
+
+  useEffect(() => {
+    const handleUserUpdated =
+      (event) => {
+        const updatedUser =
+          event.detail ||
+          getStoredUser();
+
+        if (!updatedUser) {
+          return;
+        }
+
+        setHeaderUser(
+          (currentUser) => ({
+            ...currentUser,
+            ...updatedUser,
+          }),
+        );
+      };
+
+    const handleStorageChange =
+      (event) => {
+        if (
+          event.key !== 'puffy-user' &&
+          event.key !== 'user' &&
+          event.key !== 'currentUser'
+        ) {
+          return;
+        }
+
+        const updatedUser =
+          getStoredUser();
+
+        if (updatedUser) {
+          setHeaderUser(
+            updatedUser,
+          );
+        }
+      };
+
+    window.addEventListener(
+      'puffy-user-updated',
+      handleUserUpdated,
+    );
+
+    window.addEventListener(
+      'storage',
+      handleStorageChange,
+    );
+
+    return () => {
+      window.removeEventListener(
+        'puffy-user-updated',
+        handleUserUpdated,
+      );
+
+      window.removeEventListener(
+        'storage',
+        handleStorageChange,
+      );
+    };
+  }, []);
+
+
+  /* ===================================================
+     HEADER VALUES
+  =================================================== */
+
+  const profileImagePath =
+    headerUser?.profileImage ||
+    headerUser?.profile_image ||
+    headerUser?.profileImageUrl ||
+    headerUser?.profile_image_url ||
+    headerUser?.avatar ||
+    headerUser?.image ||
+    '';
+
   const avatarSrc =
-    user?.profileImage ||
-    user?.profile_image ||
-    '/images/temporaryimg.png';
+    resolveProfileImage(
+      profileImagePath,
+    );
+
+  const displayName =
+    getDisplayName(
+      headerUser,
+    );
+
+
+  /* ===================================================
+     TOGGLE SIDEBAR
+  =================================================== */
+
+  const toggleSidebar = () => {
+    setSidebarCollapsed(
+      (currentValue) => {
+        const newValue =
+          !currentValue;
+
+        localStorage.setItem(
+          'adminSidebarCollapsed',
+          String(newValue),
+        );
+
+        return newValue;
+      },
+    );
+  };
+
+
+  /* ===================================================
+     LOGOUT
+  =================================================== */
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+
+    navigate(
+      '/login',
+      {
+        replace: true,
+      },
+    );
   };
 
-  const mainMenuItems = [
-    { label: 'Dashboard', path: '/admin/dashboard', icon: FiGrid },
-    { label: 'User Management', path: '/admin/users', icon: FiUsers },
-    { label: 'Course Management', path: '/admin/courses', icon: FiBook },
-    { label: 'Reports', path: '/admin/reports', icon: FiActivity },
-    { label: 'Announcements & Notifications', path: '/admin/notification', icon: FiBell },
-    { label: 'Profile', path: '/admin/profile', icon: FiUser },
-    { label: 'Settings', path: '/admin/settings', icon: FiSettings },
-  ];
+
+  /* ===================================================
+     PAGE
+  =================================================== */
 
   return (
-    <div className="admin-layout">
+    <div
+      className={`admin-layout ${
+        sidebarCollapsed
+          ? 'admin-sidebar-collapsed'
+          : ''
+      }`}
+    >
+
+      {/* ================================================
+          SIDEBAR
+      ================================================= */}
+
       <aside className="admin-sidebar">
-        <button className="sidebar-toggle" type="button" aria-label="Toggle sidebar">
-          <FiSidebar />
-        </button>
 
         <div className="sidebar-brand">
-          <img src="/images/logo_solo.png" alt="PuffyBrain" />
-          <h2>PuffyBrain</h2>
+
+          <button
+            type="button"
+            className="admin-logo-button"
+            onClick={toggleSidebar}
+            aria-label={
+              sidebarCollapsed
+                ? 'Expand admin sidebar'
+                : 'Collapse admin sidebar'
+            }
+            aria-expanded={
+              !sidebarCollapsed
+            }
+            title={
+              sidebarCollapsed
+                ? 'Expand sidebar'
+                : 'Collapse sidebar'
+            }
+          >
+
+            <img
+              src="/images/logo_solo.png"
+              alt="PuffyBrain logo"
+            />
+
+          </button>
+
+          <span className="admin-brand-name">
+            PuffyBrain
+          </span>
+
         </div>
 
-        <nav className="sidebar-menu">
-          <div className="menu-section">
-            <p className="menu-section-title">Menu</p>
-            {mainMenuItems.map((item) => {
-              const Icon = item.icon;
+
+        <nav
+          className="sidebar-menu"
+          aria-label="Admin navigation"
+        >
+
+          {mainMenuItems.map(
+            (item) => {
+              const Icon =
+                item.icon;
+
               return (
                 <NavLink
                   key={item.path}
                   to={item.path}
-                  className={({ isActive }) =>
-                    `sidebar-link ${isActive ? 'active' : ''}`
+                  className={({
+                    isActive,
+                  }) =>
+                    `sidebar-link ${
+                      isActive
+                        ? 'active'
+                        : ''
+                    }`
+                  }
+                  title={
+                    sidebarCollapsed
+                      ? item.label
+                      : undefined
                   }
                 >
-                  <Icon className="sidebar-icon" />
-                  <span>{item.label}</span>
+
+                  <Icon
+                    className="sidebar-icon"
+                    aria-hidden="true"
+                  />
+
+                  <span className="admin-nav-label">
+                    {item.label}
+                  </span>
+
                 </NavLink>
               );
-            })}
-          </div>
+            },
+          )}
 
         </nav>
 
-        <div className="sidebar-footer">
-          <button onClick={handleLogout} className="logout-btn">
-            <FiLogOut />
-            <span>Logout</span>
-          </button>
-        </div>
+
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="logout-btn"
+          title={
+            sidebarCollapsed
+              ? 'Logout'
+              : undefined
+          }
+        >
+
+          <FiLogOut
+            aria-hidden="true"
+          />
+
+          <span className="admin-logout-label">
+            Logout
+          </span>
+
+        </button>
+
       </aside>
 
+
+      {/* ================================================
+          MAIN AREA
+      ================================================= */}
+
       <main className="admin-main">
+
+
+        {/* ==============================================
+            HEADER
+        =============================================== */}
+
         <header className="admin-header">
-          <div className="admin-header-search">
-            <FiSearch className="search-icon" />
-            <input type="text" placeholder="Search..." />
-          </div>
+
+          <label className="admin-header-search">
+
+            <input
+              type="search"
+              placeholder="Search..."
+              aria-label="Search admin pages"
+            />
+
+            <span
+              className="search-icon"
+              aria-hidden="true"
+            >
+              <FiSearch />
+            </span>
+
+          </label>
+
+
           <div className="admin-header-actions">
-            <RoleNotificationMenu role="admin" />
+
+            <RoleNotificationMenu
+              role="admin"
+            />
+
             <HeaderProfileChip
-              username="admin"
+              username={displayName}
               accountLabel="Admin account"
               avatarSrc={avatarSrc}
               profilePath="/admin/profile"
               menuItems={[
-                { label: 'Profile', path: '/admin/profile', icon: 'user' },
-                { label: 'Settings', path: '/admin/settings', icon: 'settings' },
+                {
+                  label: 'Profile',
+                  path:
+                    '/admin/profile',
+                  icon: 'user',
+                },
+                {
+                  label: 'Settings',
+                  path:
+                    '/admin/settings',
+                  icon: 'settings',
+                },
               ]}
-              onLogout={handleLogout}
+              onLogout={
+                handleLogout
+              }
             />
+
           </div>
+
         </header>
-        <div className="admin-content">{children}</div>
+
+
+        {/* ==============================================
+            PAGE CONTENT
+        =============================================== */}
+
+        <div className="admin-content">
+          {children}
+        </div>
+
       </main>
+
     </div>
   );
 }

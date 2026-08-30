@@ -8,7 +8,9 @@ import {
   FiShield,
   FiX,
 } from 'react-icons/fi';
+
 import { useAuth } from '../../../context/AuthContext';
+import { API_BASE } from '../../../config.js';
 import './Settings.css';
 
 const initialPasswordForm = {
@@ -45,7 +47,7 @@ export default function SettingsPage() {
 
   const adminAccount = useMemo(
     () => getAdminAccount(user),
-    [user],
+    [user]
   );
 
   const [passwordForm, setPasswordForm] =
@@ -93,7 +95,7 @@ export default function SettingsPage() {
   };
 
   const passwordIsStrong = Object.values(
-    passwordChecks,
+    passwordChecks
   ).every(Boolean);
 
   const confirmPasswordHasValue =
@@ -185,27 +187,34 @@ export default function SettingsPage() {
         localStorage.getItem('puffy-token') ||
         localStorage.getItem('token');
 
-      const response = await fetch('/api/change-password', {
-        method: 'PUT',
+      console.log(
+        'Password request URL:',
+        `${API_BASE}/users/change-password`
+      );
 
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+          `${API_BASE}/users/change-password`,
+          {
+            method: 'PUT',
 
-          ...(token
-            ? {
-                Authorization: `Bearer ${token}`,
-              }
-            : {}),
-        },
+            headers: {
+              'Content-Type': 'application/json',
 
-        credentials: 'include',
+              ...(token
+                ? {
+                    Authorization: `Bearer ${token}`,
+                  }
+                : {}),
+            },
 
-        body: JSON.stringify({
-          currentPassword: passwordForm.currentPassword,
-          newPassword: passwordForm.newPassword,
-          role: 'admin',
-        }),
-      });
+            credentials: 'include',
+
+            body: JSON.stringify({
+              currentPassword: passwordForm.currentPassword,
+              newPassword: passwordForm.newPassword,
+            }),
+          }
+        );
 
       const data = await response
         .json()
@@ -214,7 +223,7 @@ export default function SettingsPage() {
       if (!response.ok) {
         throw new Error(
           data.message ||
-            'Unable to change your password.',
+            `Unable to change password. Server returned ${response.status}.`
         );
       }
 
@@ -233,6 +242,11 @@ export default function SettingsPage() {
           'Your administrator password was changed successfully.',
       });
     } catch (error) {
+      console.error(
+        'Change password error:',
+        error
+      );
+
       setPasswordNotice({
         type: 'error',
         message:
@@ -294,6 +308,7 @@ export default function SettingsPage() {
         aria-label="Administrator account settings"
       >
         <div className="admin-password-settings-card">
+
           <header className="admin-password-card-header">
             <span
               className="admin-password-card-icon"
@@ -325,12 +340,18 @@ export default function SettingsPage() {
             </span>
 
             <div>
-              <span>{adminAccount.role} account</span>
+              <span>
+                {adminAccount.role} account
+              </span>
 
-              <strong>{adminAccount.name}</strong>
+              <strong>
+                {adminAccount.name}
+              </strong>
 
               {adminAccount.email && (
-                <small>{adminAccount.email}</small>
+                <small>
+                  {adminAccount.email}
+                </small>
               )}
             </div>
           </div>
@@ -343,15 +364,19 @@ export default function SettingsPage() {
               id="admin-current-password"
               label="Current Password"
               placeholder="Enter your current password"
-              value={passwordForm.currentPassword}
-              visible={visiblePasswords.currentPassword}
+              value={
+                passwordForm.currentPassword
+              }
+              visible={
+                visiblePasswords.currentPassword
+              }
               autoComplete="current-password"
               onChange={updatePasswordField(
-                'currentPassword',
+                'currentPassword'
               )}
               onToggle={() =>
                 togglePasswordVisibility(
-                  'currentPassword',
+                  'currentPassword'
                 )
               }
             />
@@ -362,14 +387,20 @@ export default function SettingsPage() {
               id="admin-new-password"
               label="New Password"
               placeholder="Create a new password"
-              value={passwordForm.newPassword}
-              visible={visiblePasswords.newPassword}
+              value={
+                passwordForm.newPassword
+              }
+              visible={
+                visiblePasswords.newPassword
+              }
               autoComplete="new-password"
               onChange={updatePasswordField(
-                'newPassword',
+                'newPassword'
               )}
               onToggle={() =>
-                togglePasswordVisibility('newPassword')
+                togglePasswordVisibility(
+                  'newPassword'
+                )
               }
             />
 
@@ -380,32 +411,36 @@ export default function SettingsPage() {
               <div className="admin-password-requirements-heading">
                 <FiShield aria-hidden="true" />
 
-                <span>Password requirements</span>
+                <span>
+                  Password requirements
+                </span>
               </div>
 
               <div className="admin-password-requirements-grid">
-                {requirements.map((requirement) => (
-                  <div
-                    key={requirement.id}
-                    className={
-                      requirement.met
-                        ? 'admin-password-requirement met'
-                        : 'admin-password-requirement'
-                    }
-                  >
-                    <span aria-hidden="true">
-                      {requirement.met ? (
-                        <FiCheck />
-                      ) : (
-                        <FiX />
-                      )}
-                    </span>
+                {requirements.map(
+                  (requirement) => (
+                    <div
+                      key={requirement.id}
+                      className={
+                        requirement.met
+                          ? 'admin-password-requirement met'
+                          : 'admin-password-requirement'
+                      }
+                    >
+                      <span aria-hidden="true">
+                        {requirement.met ? (
+                          <FiCheck />
+                        ) : (
+                          <FiX />
+                        )}
+                      </span>
 
-                    <strong>
-                      {requirement.label}
-                    </strong>
-                  </div>
-                ))}
+                      <strong>
+                        {requirement.label}
+                      </strong>
+                    </div>
+                  )
+                )}
               </div>
             </div>
 
@@ -413,7 +448,9 @@ export default function SettingsPage() {
               id="admin-confirm-password"
               label="Confirm New Password"
               placeholder="Re-enter your new password"
-              value={passwordForm.confirmPassword}
+              value={
+                passwordForm.confirmPassword
+              }
               visible={
                 visiblePasswords.confirmPassword
               }
@@ -423,11 +460,11 @@ export default function SettingsPage() {
                 !passwordsMatch
               }
               onChange={updatePasswordField(
-                'confirmPassword',
+                'confirmPassword'
               )}
               onToggle={() =>
                 togglePasswordVisibility(
-                  'confirmPassword',
+                  'confirmPassword'
                 )
               }
             />
@@ -458,18 +495,22 @@ export default function SettingsPage() {
               <div
                 className={`admin-password-notice ${passwordNotice.type}`}
                 role={
-                  passwordNotice.type === 'error'
+                  passwordNotice.type ===
+                  'error'
                     ? 'alert'
                     : 'status'
                 }
               >
-                {passwordNotice.type === 'success' ? (
+                {passwordNotice.type ===
+                'success' ? (
                   <FiCheck aria-hidden="true" />
                 ) : (
                   <FiInfo aria-hidden="true" />
                 )}
 
-                <span>{passwordNotice.message}</span>
+                <span>
+                  {passwordNotice.message}
+                </span>
               </div>
             )}
 
@@ -478,7 +519,9 @@ export default function SettingsPage() {
                 type="button"
                 className="admin-password-clear-button"
                 onClick={clearPasswordForm}
-                disabled={isSubmittingPassword}
+                disabled={
+                  isSubmittingPassword
+                }
               >
                 Clear
               </button>
@@ -486,7 +529,9 @@ export default function SettingsPage() {
               <button
                 type="submit"
                 className="admin-password-save-button"
-                disabled={isSubmittingPassword}
+                disabled={
+                  isSubmittingPassword
+                }
               >
                 {isSubmittingPassword
                   ? 'Updating...'
@@ -505,12 +550,15 @@ export default function SettingsPage() {
           </span>
 
           <div>
-            <strong>Administrator security reminder</strong>
+            <strong>
+              Administrator security reminder
+            </strong>
 
             <p>
-              Never share your administrator credentials.
-              Sign out after managing the system on shared
-              or public devices.
+              Never share your administrator
+              credentials. Sign out after managing
+              the system on shared or public
+              devices.
             </p>
           </div>
         </aside>
@@ -532,7 +580,9 @@ function PasswordField({
 }) {
   return (
     <div className="admin-password-field-group">
-      <label htmlFor={id}>{label}</label>
+      <label htmlFor={id}>
+        {label}
+      </label>
 
       <div
         className={`admin-password-input-wrapper ${
@@ -541,7 +591,11 @@ function PasswordField({
       >
         <input
           id={id}
-          type={visible ? 'text' : 'password'}
+          type={
+            visible
+              ? 'text'
+              : 'password'
+          }
           value={value}
           onChange={onChange}
           autoComplete={autoComplete}
@@ -558,7 +612,9 @@ function PasswordField({
               : `Show ${label.toLowerCase()}`
           }
           title={
-            visible ? 'Hide password' : 'Show password'
+            visible
+              ? 'Hide password'
+              : 'Show password'
           }
         >
           {visible ? (
@@ -567,7 +623,9 @@ function PasswordField({
             <FiEye aria-hidden="true" />
           )}
 
-          <span>{visible ? 'Hide' : 'Show'}</span>
+          <span>
+            {visible ? 'Hide' : 'Show'}
+          </span>
         </button>
       </div>
     </div>
