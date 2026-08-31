@@ -5482,3 +5482,390 @@ a.course-folder:focus-visible {
   stroke-linecap: round;
   stroke-linejoin: round;
 }
+
+/* =========================================
+   ENROLLED COURSES SIDEBAR DROPDOWN
+========================================= */
+
+.sidebar-course-group {
+  width: 100%;
+}
+
+.sidebar-course-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.enrolled-course-main-link {
+  flex: 1;
+  min-width: 0;
+  padding-right: 42px !important;
+}
+
+.sidebar-course-dropdown-button {
+  position: absolute;
+  right: 10px;
+
+  width: 30px;
+  height: 30px;
+
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+
+  background: transparent;
+  color: currentColor;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.sidebar-course-dropdown-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.sidebar-course-dropdown-button svg {
+  width: 18px;
+  height: 18px;
+
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+
+  transition: transform 0.25s ease;
+}
+
+.sidebar-course-dropdown-button.open svg {
+  transform: rotate(180deg);
+}
+
+
+/* Dropdown container */
+
+.sidebar-course-dropdown {
+  display: flex;
+  flex-direction: column;
+
+  margin-top: 5px;
+  margin-bottom: 8px;
+  margin-left: 20px;
+
+  padding-left: 15px;
+
+  border-left: 1px solid #d9e5dc;
+
+  animation: sidebarDropdownOpen 0.2s ease;
+}
+
+
+/* Individual enrolled course */
+
+.sidebar-course-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  width: 100%;
+
+  padding: 8px 10px;
+
+  border-radius: 9px;
+
+  color: #52645a;
+  text-decoration: none;
+
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.sidebar-course-item:hover {
+  background: #edf7f0;
+  color: #198754;
+}
+
+
+/* Small green circle */
+
+.sidebar-course-dot {
+  width: 6px;
+  height: 6px;
+
+  flex: 0 0 6px;
+
+  border-radius: 50%;
+  background: #198754;
+}
+
+
+/* Course information */
+
+.sidebar-course-info {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  line-height: 1.2;
+}
+
+.sidebar-course-info strong {
+  font-size: 12px;
+  font-weight: 700;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-course-info small {
+  margin-top: 2px;
+
+  font-size: 10px;
+  font-weight: 500;
+
+  opacity: 0.7;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+/* Loading / empty state */
+
+.sidebar-course-message {
+  padding: 9px 10px;
+
+  font-size: 11px;
+  color: #89958e;
+}
+
+
+/* Opening animation */
+
+@keyframes sidebarDropdownOpen {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* Hide dropdown when sidebar is collapsed */
+
+.sidebar-collapsed .sidebar-course-dropdown,
+.sidebar-collapsed .sidebar-course-dropdown-button {
+  display: none;
+}
+/* =====================================================
+   ENROLLED COURSES SIDEBAR DROPDOWN
+===================================================== */
+
+.sidebar-course-group {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+
+/* Main Enrolled Courses button */
+
+.sidebar-enrolled-toggle {
+  width: 100%;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+}
+
+
+/* Dropdown arrow */
+
+.sidebar-dropdown-arrow {
+  width: 17px !important;
+  height: 17px !important;
+
+  margin-left: auto;
+
+  flex-shrink: 0;
+
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+
+  transition: transform 0.2s ease;
+}
+
+
+.sidebar-dropdown-arrow.open {
+  transform: rotate(180deg);
+}
+
+
+/* Container holding enrolled subjects */
+.sidebar-enrolled-list {
+  width: calc(100% + 18px);
+  margin-left: 18px;
+  margin-right: -18px;
+
+  display: flex;
+  flex-direction: column;
+
+  padding: 5px 0;
+  box-sizing: border-box;
+}
+
+.sidebar-enrolled-course {
+  position: relative;
+
+  width: 100%;
+  min-height: 38px;
+
+  display: flex;
+  align-items: center;
+
+  padding: 5px 12px 5px 18px;
+
+  border: 1px solid transparent;
+  border-right: none;
+  border-radius: 999px 0 0 999px;
+
+  background: transparent;
+  color: #ffffff;
+  text-decoration: none;
+
+  box-sizing: border-box;
+}
+
+
+/* HOVER */
+.sidebar-enrolled-course:hover {
+  background: #ffffff;
+  color: #606772;
+
+  border-color: #aeb5bf;
+  border-right: none;
+
+  border-radius: 999px 0 0 999px;
+}
+
+
+/* Make sure white reaches the RIGHT EDGE */
+.sidebar-enrolled-course:hover::after {
+  content: "";
+
+  position: absolute;
+  top: 0;
+  bottom: 0;
+
+  right: -20px;
+  width: 21px;
+
+  background: #ffffff;
+}
+
+
+/* Course text */
+.sidebar-enrolled-course-text {
+  position: relative;
+  z-index: 1;
+
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
+  font-size: 13px;
+}
+
+
+
+/* Course text */
+
+.sidebar-enrolled-course-text {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+}
+
+
+.sidebar-enrolled-course-text strong {
+  display: block;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+.sidebar-enrolled-course-text small {
+  display: block;
+
+  margin-top: 2px;
+
+  font-size: 10px;
+  font-weight: 500;
+
+  opacity: 0.7;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+/* Loading / empty message */
+
+.sidebar-enrolled-message {
+  padding: 8px;
+
+  font-size: 11px;
+  color: whitesmoke;
+}
+
+
+/* Opening animation */
+
+@keyframes enrolledSidebarOpen {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* Collapsed sidebar */
+
+.sidebar-collapsed .sidebar-enrolled-list,
+.sidebar-collapsed .sidebar-dropdown-arrow {
+  display: none;
+}

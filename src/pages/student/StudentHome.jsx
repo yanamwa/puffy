@@ -5,7 +5,6 @@ import JoinCourseModal from "./JoinCourseModal";
 import {
   enrollStudentInCourseAsync,
   findJoinableCourseByCodeAsync,
-  loadStudentEnrolledCourses,
 } from "./studentCourseData";
 import { API_BASE } from "../../config.js";
 import "./EnrolledCourses.css";
@@ -299,6 +298,10 @@ useEffect(() => {
     return localStorage.getItem("sidebarCollapsed") === "true";
   });
 
+  const [
+  enrolledCoursesOpen,
+  setEnrolledCoursesOpen,] = useState(false);
+
   const [currentUser, setCurrentUser] = useState(() =>
     getStoredUser()
   );
@@ -380,38 +383,87 @@ useEffect(() => {
   );
 
   useEffect(() => {
-    let active = true;
+  let active = true;
 
-    async function loadDashboardData() {
+  async function loadDashboardData() {
+    try {
+      setDashboardLoading(true);
+      setDashboardError("");
+
+      const token = getStoredToken();
+
+      if (!token) {
+        throw new Error(
+          "Your login session was not found. Please log in again."
+        );
+      }
+
+      /* =========================
+         LOAD ENROLLED COURSES
+      ========================= */
+
       try {
-        setDashboardLoading(true);
-        setDashboardError("");
+        const coursesResponse = await fetch(
+          `${API_BASE_URL}/courses/enrolled`,
+          {
+            method: "GET",
+            headers: {
+              Accept: "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
-        const token = getStoredToken();
+        const coursesData = await coursesResponse
+          .json()
+          .catch(() => ({}));
 
-        if (!token) {
+        if (!coursesResponse.ok) {
           throw new Error(
-            "Your login session was not found. Please log in again."
+            coursesData.message ||
+              "Could not load enrolled courses."
           );
         }
 
-        const requestOptions = {
-          method: "GET",
-          headers: {
-            Accept: "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        };
+        const loadedCourses = Array.isArray(
+          coursesData.courses
+        )
+          ? coursesData.courses
+          : Array.isArray(coursesData.data)
+            ? coursesData.data
+            : [];
 
-        const [userResponse, loadedCourses] =
-          await Promise.all([
-            fetch(
-              `${API_BASE}/users/me`,
-              requestOptions
-            ),
+        if (active) {
+          setEnrolledCourses(
+            loadedCourses.map(normalizeCourse)
+          );
+        }
+      } catch (courseError) {
+        console.error(
+          "Enrolled courses loading error:",
+          courseError
+        );
 
-            loadStudentEnrolledCourses(),
-          ]);
+        if (active) {
+          setEnrolledCourses([]);
+        }
+      }
+
+      /* =========================
+         LOAD CURRENT USER
+      ========================= */
+
+      try {
+        const userResponse = await fetch(
+          `${API_BASE_URL}/users/me`,
+          {
+            method: "GET",
+            headers: {
+              Accept: "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         const userData = await userResponse
           .json()
@@ -424,44 +476,47 @@ useEffect(() => {
           );
         }
 
-        if (!active) return;
-
         const loadedUser =
-          userData.user || userData.data || null;
+          userData.user ||
+          userData.data?.user ||
+          userData.data ||
+          userData;
 
-        setEnrolledCourses(
-          loadedCourses.map(normalizeCourse)
-        );
-
-        if (loadedUser) {
+        if (active && loadedUser) {
           setCurrentUser(loadedUser);
           saveUpdatedUser(loadedUser);
         }
-      } catch (error) {
+      } catch (userError) {
         console.error(
-          "Student dashboard loading error:",
-          error
+          "Student account loading error:",
+          userError
         );
+      }
+    } catch (error) {
+      console.error(
+        "Student dashboard loading error:",
+        error
+      );
 
-        if (active) {
-          setDashboardError(
-            error.message ||
-              "Could not load your dashboard."
-          );
-        }
-      } finally {
-        if (active) {
-          setDashboardLoading(false);
-        }
+      if (active) {
+        setDashboardError(
+          error.message ||
+            "Could not load your dashboard."
+        );
+      }
+    } finally {
+      if (active) {
+        setDashboardLoading(false);
       }
     }
+  }
 
-    loadDashboardData();
+  loadDashboardData();
 
-    return () => {
-      active = false;
-    };
-  }, []);
+  return () => {
+    active = false;
+  };
+}, []);
 
   useEffect(() => {
     const handleUserUpdated = (event) => {
@@ -826,25 +881,107 @@ useEffect(() => {
             </span>
           </Link>
 
-          <Link
-            to="/student/enrolled-courses"
-            className="side-nav-item"
-            title={
-              sidebarCollapsed
-                ? "Enrolled Courses"
-                : undefined
-            }
-          >
-            <Icon name="courses" />
+          <div className="sidebar-course-group">
 
-            <span className="nav-label">
-              Enrolled Courses
-            </span>
+              <button
+                type="button"
+                className="side-nav-item sidebar-enrolled-toggle"
+                onClick={() => {
+                  navigate("/student/enrolled-courses");
+                }}
+                title={
+                  sidebarCollapsed
+                    ? "Enrolled Courses"
+                    : undefined
+                }
+              >
+                <Icon name="courses" />
 
-            <span className="dropdown-mark">
-              v
-            </span>
-          </Link>
+                <span className="nav-label">
+                  Enrolled Courses
+                </span>
+
+                {!sidebarCollapsed && (
+                  <svg
+                    className={`sidebar-dropdown-arrow ${
+                      enrolledCoursesOpen ? "open" : ""
+                    }`}
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                    onClick={(event) => {
+                      event.stopPropagation();
+
+                      setEnrolledCoursesOpen(
+                        (previous) => !previous
+                      );
+                    }}
+                  >
+                    <path d="m7 9 5 5 5-5" />
+                  </svg>
+                )}
+              </button>
+
+              {!sidebarCollapsed &&
+                enrolledCoursesOpen && (
+                  <div className="sidebar-enrolled-list">
+
+                    {dashboardLoading ? (
+                      <div className="sidebar-enrolled-message">
+                        Loading courses...
+                      </div>
+                    ) : enrolledCourses.length === 0 ? (
+                      <div className="sidebar-enrolled-message">
+                        No enrolled courses
+                      </div>
+                    ) : (
+                      enrolledCourses.map((course) => {
+                        const courseId =
+                          course.id ||
+                          course.courseId ||
+                          course.course_id ||
+                          course.code ||
+                          course.courseCode ||
+                          course.course_code;
+
+                        const courseCode =
+                          course.code ||
+                          course.courseCode ||
+                          course.course_code ||
+                          "COURSE";
+
+                        const courseTitle =
+                          course.title ||
+                          course.courseName ||
+                          course.course_name ||
+                          course.name ||
+                          "Untitled course";
+
+                        return (
+                          <Link
+                            key={courseId}
+                            to={`/student/enrolled-courses/${courseId}`}
+                            className="sidebar-enrolled-course"
+                          >
+                            <span className="sidebar-course-indicator" />
+
+                            <span className="sidebar-enrolled-course-text">
+                              <strong>
+                                {courseCode}
+                              </strong>
+
+                              <small>
+                                {courseTitle}
+                              </small>
+                            </span>
+                          </Link>
+                        );
+                      })
+                    )}
+
+                  </div>
+                )}
+
+            </div>
 
           <Link
             to="/student/public-courses"

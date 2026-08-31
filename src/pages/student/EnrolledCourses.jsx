@@ -490,6 +490,8 @@ export default function EnrolledCourses() {
   const [errorMessage, setErrorMessage] =
     useState('');
 
+  const [enrolledCoursesOpen, setEnrolledCoursesOpen] = useState(false);
+
   const [openCourseMenu, setOpenCourseMenu] = useState(null);
 const [unenrollingCourseId, setUnenrollingCourseId] = useState(null);
 
@@ -1136,25 +1138,94 @@ const handleUnenrollCourse = async (course) => {
             </span>
           </Link>
 
-          <Link
-            to="/student/enrolled-courses"
-            className="side-nav-item active"
-            title={
-              sidebarCollapsed
-                ? 'Enrolled Courses'
-                : undefined
-            }
-          >
-            <Icon name="courses" />
+          <div className="sidebar-course-group">
 
-            <span className="nav-label">
-              Enrolled Courses
-            </span>
+            <button
+              type="button"
+              className="side-nav-item active sidebar-enrolled-toggle"
+              onClick={() => {
+                setEnrolledCoursesOpen((previous) => !previous);
+              }}
+              title={
+                sidebarCollapsed
+                  ? 'Enrolled Courses'
+                  : undefined
+              }
+            >
+              <Icon name="courses" />
 
-            <span className="dropdown-mark">
-              v
-            </span>
-          </Link>
+              <span className="nav-label">
+                Enrolled Courses
+              </span>
+
+              {!sidebarCollapsed && (
+                <svg
+                  className={`sidebar-dropdown-arrow ${
+                    enrolledCoursesOpen ? 'open' : ''
+                  }`}
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path d="m7 9 5 5 5-5" />
+                </svg>
+              )}
+            </button>
+
+            {!sidebarCollapsed && enrolledCoursesOpen && (
+              <div className="sidebar-enrolled-list">
+
+                {loading ? (
+                  <div className="sidebar-enrolled-message">
+                    Loading courses...
+                  </div>
+                ) : courses.length === 0 ? (
+                  <div className="sidebar-enrolled-message">
+                    No enrolled courses
+                  </div>
+                ) : (
+                  courses.map((course) => {
+                    const courseId =
+                      course.id ||
+                      course.courseId ||
+                      course.course_id ||
+                      course.code ||
+                      course.courseCode ||
+                      course.course_code;
+
+                    const courseCode =
+                      course.code ||
+                      course.courseCode ||
+                      course.course_code ||
+                      'COURSE';
+
+                    const courseTitle =
+                      course.title ||
+                      course.courseName ||
+                      course.course_name ||
+                      course.name ||
+                      'Untitled course';
+
+                    return (
+                      <Link
+                        key={courseId}
+                        to={`/student/enrolled-courses/${courseId}`}
+                        className="sidebar-enrolled-course"
+                      >
+                        <span className="sidebar-course-indicator" />
+
+                        <span className="sidebar-enrolled-course-text">
+                          <strong>{courseCode}</strong>
+                          <small>{courseTitle}</small>
+                        </span>
+                      </Link>
+                    );
+                  })
+                )}
+
+              </div>
+            )}
+
+          </div>
 
           <Link
             to="/student/public-courses"

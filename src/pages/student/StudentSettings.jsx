@@ -3,6 +3,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Icon } from './EnrolledCourses';
 import Swal from 'sweetalert2';
 import JoinCourseModal from './JoinCourseModal';
+
+import {
+  enrollStudentInCourseAsync,
+  findJoinableCourseByCodeAsync,
+} from './studentCourseData';
+
 import './EnrolledCourses.css';
 import { FiLogOut } from 'react-icons/fi';
 
@@ -230,6 +236,30 @@ function clearStudentSession() {
   );
 }
 
+function normalizeCourse(course) {
+  return {
+    id:
+      course.id ||
+      course.courseId ||
+      course.course_id ||
+      course.courseCode ||
+      course.course_code,
+
+    code:
+      course.code ||
+      course.courseCode ||
+      course.course_code ||
+      'COURSE',
+
+    title:
+      course.title ||
+      course.courseName ||
+      course.course_name ||
+      course.name ||
+      'Untitled course',
+  };
+}
+
 export default function StudentSettings() {
   const navigate = useNavigate();
 
@@ -298,6 +328,21 @@ export default function StudentSettings() {
       ) === 'true'
     );
   });
+
+  const [
+    enrolledCoursesOpen,
+    setEnrolledCoursesOpen,
+  ] = useState(false);
+
+  const [
+    enrolledCourses,
+    setEnrolledCourses,
+  ] = useState([]);
+
+  const [
+    enrolledCoursesLoading,
+    setEnrolledCoursesLoading,
+  ] = useState(true);
 
   const [
     profileMenuOpen,
@@ -509,10 +554,104 @@ export default function StudentSettings() {
     };
   }, []);
 
+  const toggleSidebar = () => {
+    setSidebarCollapsed(
+      (currentValue) => {
+        const nextValue =
+          !currentValue;
+
+        localStorage.setItem(
+          'sidebarCollapsed',
+          String(nextValue),
+        );
+
+        return nextValue;
+      },
+    );
+  };
+
   const closeJoinModal = () => {
     setJoinModalOpen(false);
     setCourseCode('');
   };
+
+  const joinByCourseCode = async () => {
+  const trimmedCode = courseCode.trim();
+
+  if (!trimmedCode) {
+    await Swal.fire({
+      icon: 'warning',
+      title: 'Enter Course Code',
+      text: 'Please enter the course code provided by your professor.',
+      confirmButtonText: 'OK',
+      confirmButtonColor: '#198754',
+    });
+
+    return;
+  }
+
+  try {
+    const course =
+      await findJoinableCourseByCodeAsync(trimmedCode);
+
+    if (!course) {
+      await Swal.fire({
+        icon: 'error',
+        title: 'Course Not Found',
+        text: 'Course code not found. Please check the code from your professor.',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#198754',
+      });
+
+      return;
+    }
+
+    await enrollStudentInCourseAsync(course);
+
+    closeJoinModal();
+
+    await Swal.fire({
+      icon: 'success',
+      title: 'Course Joined!',
+      text: `You have successfully joined ${
+        course.title ||
+        course.courseName ||
+        course.course_name ||
+        course.name ||
+        'the course'
+      }.`,
+      confirmButtonText: 'Continue',
+      confirmButtonColor: '#198754',
+    });
+
+    const joinedCourseId =
+      course.id ||
+      course.courseId ||
+      course.course_id ||
+      course.code ||
+      course.courseCode ||
+      course.course_code;
+
+    navigate(
+      `/student/enrolled-courses/${joinedCourseId}`
+    );
+  } catch (error) {
+    console.error(
+      'Join course error:',
+      error
+    );
+
+    await Swal.fire({
+      icon: 'error',
+      title: 'Unable to Join Course',
+      text:
+        error?.message ||
+        'Something went wrong while joining the course.',
+      confirmButtonText: 'OK',
+      confirmButtonColor: '#198754',
+    });
+  }
+};
 
   const updatePasswordField =
     (fieldName) => (event) => {
@@ -786,6 +925,81 @@ export default function StudentSettings() {
     );
   };
 
+  useEffect(() => {
+    let active = true;
+
+    async function loadEnrolledCoursesForSidebar() {
+      try {
+        setEnrolledCoursesLoading(true);
+
+        const token = getStoredToken();
+
+        if (!token) {
+          if (active) {
+            setEnrolledCourses([]);
+            setEnrolledCoursesLoading(false);
+          }
+          return;
+        }
+
+        const response = await fetch(
+          `${API_BASE_URL}/courses/enrolled`,
+          {
+            method: 'GET',
+            headers: {
+              Accept: 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+
+        const data = await response
+          .json()
+          .catch(() => ({}));
+
+        if (!response.ok) {
+          throw new Error(
+            data.message ||
+              'Could not load enrolled courses.',
+          );
+        }
+
+        const loadedCourses = Array.isArray(
+          data.courses,
+        )
+          ? data.courses
+          : Array.isArray(data.data)
+            ? data.data
+            : [];
+
+        if (!active) return;
+
+        setEnrolledCourses(
+          loadedCourses.map(normalizeCourse),
+        );
+      } catch (error) {
+        console.error(
+          'Enrolled courses loading error:',
+          error,
+        );
+
+        if (active) {
+          setEnrolledCourses([]);
+        }
+      } finally {
+        if (active) {
+          setEnrolledCoursesLoading(false);
+        }
+      }
+    }
+
+    loadEnrolledCoursesForSidebar();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const displayUsername =
     studentAccount.fullName
       ?.replace(/^@/, '')
@@ -810,26 +1024,12 @@ export default function StudentSettings() {
             src="/images/logo_solo.png"
             alt="PuffyBrain logo"
             className="sidebar-logo"
+            onClick={toggleSidebar}
             title={
               sidebarCollapsed
                 ? 'Expand sidebar'
                 : 'Collapse sidebar'
             }
-            onClick={() => {
-              setSidebarCollapsed(
-                (currentValue) => {
-                  const nextValue =
-                    !currentValue;
-
-                  localStorage.setItem(
-                    'sidebarCollapsed',
-                    String(nextValue),
-                  );
-
-                  return nextValue;
-                },
-              );
-            }}
           />
 
           <span className="brand-name">
@@ -857,25 +1057,98 @@ export default function StudentSettings() {
             </span>
           </Link>
 
-          <Link
-            to="/student/enrolled-courses"
-            className="side-nav-item"
-            title={
-              sidebarCollapsed
-                ? 'Enrolled Courses'
-                : undefined
-            }
-          >
-            <Icon name="courses" />
+          <div className="sidebar-course-group">
+            <button
+              type="button"
+              className="side-nav-item sidebar-enrolled-toggle"
+              onClick={() => {
+                setEnrolledCoursesOpen(
+                  (previous) => !previous,
+                );
+              }}
+              title={
+                sidebarCollapsed
+                  ? 'Enrolled Courses'
+                  : undefined
+              }
+            >
+              <Icon name="courses" />
 
-            <span className="nav-label">
-              Enrolled Courses
-            </span>
+              <span className="nav-label">
+                Enrolled Courses
+              </span>
 
-            <span className="dropdown-mark">
-              v
-            </span>
-          </Link>
+              {!sidebarCollapsed && (
+                <svg
+                  className={`sidebar-dropdown-arrow ${
+                    enrolledCoursesOpen ? 'open' : ''
+                  }`}
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path d="m7 9 5 5 5-5" />
+                </svg>
+              )}
+            </button>
+
+            {!sidebarCollapsed &&
+              enrolledCoursesOpen && (
+                <div className="sidebar-enrolled-list">
+                  {enrolledCoursesLoading ? (
+                    <div className="sidebar-enrolled-message">
+                      Loading courses...
+                    </div>
+                  ) : enrolledCourses.length === 0 ? (
+                    <div className="sidebar-enrolled-message">
+                      No enrolled courses
+                    </div>
+                  ) : (
+                    enrolledCourses.map((course) => {
+                      const courseId =
+                        course.id ||
+                        course.courseId ||
+                        course.course_id ||
+                        course.code ||
+                        course.courseCode ||
+                        course.course_code;
+
+                      const courseCode =
+                        course.code ||
+                        course.courseCode ||
+                        course.course_code ||
+                        'COURSE';
+
+                      const courseTitle =
+                        course.title ||
+                        course.courseName ||
+                        course.course_name ||
+                        course.name ||
+                        'Untitled course';
+
+                      return (
+                        <Link
+                          key={courseId}
+                          to={`/student/enrolled-courses/${courseId}`}
+                          className="sidebar-enrolled-course"
+                        >
+                          <span className="sidebar-course-indicator" />
+
+                          <span className="sidebar-enrolled-course-text">
+                            <strong>
+                              {courseCode}
+                            </strong>
+
+                            <small>
+                              {courseTitle}
+                            </small>
+                          </span>
+                        </Link>
+                      );
+                    })
+                  )}
+                </div>
+              )}
+          </div>
 
           <Link
             to="/student/public-courses"
@@ -927,24 +1200,24 @@ export default function StudentSettings() {
         </nav>
 
         <button
-            type="button"
-            className="logout-button"
-            title={
-              sidebarCollapsed
-                ? 'Logout'
-                : undefined
-            }
-            onClick={handleLogout}
-          >
-            <FiLogOut
-              className="logout-icon"
-              aria-hidden="true"
-            />
+          type="button"
+          className="logout-button"
+          title={
+            sidebarCollapsed
+              ? 'Logout'
+              : undefined
+          }
+          onClick={handleLogout}
+        >
+          <FiLogOut
+            className="logout-icon"
+            aria-hidden="true"
+          />
 
-            <span className="logout-label">
-              Logout
-            </span>
-          </button>
+          <span className="logout-label">
+            Logout
+          </span>
+        </button>
       </aside>
 
       <main className="enrolled-main settings-main">
@@ -1769,7 +2042,7 @@ export default function StudentSettings() {
           setCourseCode
         }
         onCancel={closeJoinModal}
-        onJoin={closeJoinModal}
+        onJoin={joinByCourseCode}
       />
     </div>
   );

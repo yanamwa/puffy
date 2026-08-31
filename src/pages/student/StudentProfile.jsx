@@ -238,6 +238,30 @@ const notificationItems = [
   },
 ];
 
+function normalizeCourse(course) {
+  return {
+    id:
+      course.id ||
+      course.courseId ||
+      course.course_id ||
+      course.courseCode ||
+      course.course_code,
+
+    code:
+      course.code ||
+      course.courseCode ||
+      course.course_code ||
+      'COURSE',
+
+    title:
+      course.title ||
+      course.courseName ||
+      course.course_name ||
+      course.name ||
+      'Untitled course',
+  };
+}
+
 export default function StudentProfile() {
   const navigate = useNavigate();
 
@@ -261,6 +285,21 @@ export default function StudentProfile() {
         ) === 'true'
       );
     });
+
+  const [
+    enrolledCoursesOpen,
+    setEnrolledCoursesOpen,
+  ] = useState(false);
+
+  const [
+    enrolledCourses,
+    setEnrolledCourses,
+  ] = useState([]);
+
+  const [
+    enrolledCoursesLoading,
+    setEnrolledCoursesLoading,
+  ] = useState(true);
 
   const [joinModalOpen, setJoinModalOpen] =
     useState(false);
@@ -408,6 +447,78 @@ export default function StudentProfile() {
   }, []);
 
   useEffect(() => {
+    let active = true;
+
+    async function loadEnrolledCoursesForSidebar() {
+      try {
+        setEnrolledCoursesLoading(true);
+
+        const token = getStoredToken();
+
+        if (!token) {
+          if (active) {
+            setEnrolledCourses([]);
+          }
+          return;
+        }
+
+        const response = await fetch(
+          `${API_BASE_URL}/courses/enrolled`,
+          {
+            method: 'GET',
+            headers: {
+              Accept: 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+
+        const data = await response
+          .json()
+          .catch(() => ({}));
+
+        if (!response.ok) {
+          throw new Error(
+            data.message ||
+              'Could not load enrolled courses.',
+          );
+        }
+
+        const loadedCourses = Array.isArray(data.courses)
+          ? data.courses
+          : Array.isArray(data.data)
+            ? data.data
+            : [];
+
+        if (active) {
+          setEnrolledCourses(
+            loadedCourses.map(normalizeCourse),
+          );
+        }
+      } catch (error) {
+        console.error(
+          'Enrolled courses loading error:',
+          error,
+        );
+
+        if (active) {
+          setEnrolledCourses([]);
+        }
+      } finally {
+        if (active) {
+          setEnrolledCoursesLoading(false);
+        }
+      }
+    }
+
+    loadEnrolledCoursesForSidebar();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
     const closeOpenMenus = (event) => {
       if (
         !event.target.closest(
@@ -488,47 +599,84 @@ export default function StudentProfile() {
   };
 
   const joinByCourseCode = async () => {
-    try {
-      const course =
-        await findJoinableCourseByCodeAsync(
-          courseCode,
-        );
+  const trimmedCode = courseCode.trim();
 
-      if (!course) {
-        window.alert(
-          'Course code not found. Please check the code from your professor.',
-        );
+  if (!trimmedCode) {
+    await Swal.fire({
+      icon: 'warning',
+      title: 'Enter Course Code',
+      text: 'Please enter the course code provided by your professor.',
+      confirmButtonText: 'OK',
+      confirmButtonColor: '#198754',
+    });
 
-        return;
-      }
+    return;
+  }
 
-      await enrollStudentInCourseAsync(course);
-
-      closeJoinModal();
-
-      const courseId =
-        course.id ||
-        course.courseId ||
-        course.course_id ||
-        course.code ||
-        course.courseCode ||
-        course.course_code;
-
-      navigate(
-        `/student/enrolled-courses/${courseId}`,
-      );
-    } catch (error) {
-      console.error(
-        'Join course error:',
-        error,
+  try {
+    const course =
+      await findJoinableCourseByCodeAsync(
+        trimmedCode,
       );
 
-      window.alert(
-        error.message ||
-          'Unable to join the course.',
-      );
+    if (!course) {
+      await Swal.fire({
+        icon: 'error',
+        title: 'Course Not Found',
+        text: 'Course code not found. Please check the code from your professor.',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#198754',
+      });
+
+      return;
     }
-  };
+
+    await enrollStudentInCourseAsync(course);
+
+    closeJoinModal();
+
+    await Swal.fire({
+      icon: 'success',
+      title: 'Course Joined!',
+      text: `You have successfully joined ${
+        course.title ||
+        course.courseName ||
+        course.course_name ||
+        course.name ||
+        'the course'
+      }.`,
+      confirmButtonText: 'Continue',
+      confirmButtonColor: '#198754',
+    });
+
+    const courseId =
+      course.id ||
+      course.courseId ||
+      course.course_id ||
+      course.code ||
+      course.courseCode ||
+      course.course_code;
+
+    navigate(
+      `/student/enrolled-courses/${courseId}`,
+    );
+  } catch (error) {
+    console.error(
+      'Join course error:',
+      error,
+    );
+
+    await Swal.fire({
+      icon: 'error',
+      title: 'Unable to Join Course',
+      text:
+        error?.message ||
+        'Unable to join the course.',
+      confirmButtonText: 'OK',
+      confirmButtonColor: '#198754',
+    });
+  }
+};
 
   const markAllNotificationsAsRead = () => {
     setNotifications(
@@ -768,25 +916,93 @@ export default function StudentProfile() {
             </span>
           </Link>
 
-          <Link
-            to="/student/enrolled-courses"
-            className="side-nav-item"
-            title={
-              sidebarCollapsed
-                ? 'Enrolled Courses'
-                : undefined
-            }
-          >
-            <Icon name="courses" />
+          <div className="sidebar-course-group">
+            <button
+              type="button"
+              className="side-nav-item sidebar-enrolled-toggle"
+              onClick={() => {
+                setEnrolledCoursesOpen(
+                  (previous) => !previous,
+                );
+              }}
+              title={
+                sidebarCollapsed
+                  ? 'Enrolled Courses'
+                  : undefined
+              }
+            >
+              <Icon name="courses" />
 
-            <span className="nav-label">
-              Enrolled Courses
-            </span>
+              <span className="nav-label">
+                Enrolled Courses
+              </span>
 
-            <span className="dropdown-mark">
-              v
-            </span>
-          </Link>
+              {!sidebarCollapsed && (
+                <svg
+                  className={`sidebar-dropdown-arrow ${
+                    enrolledCoursesOpen ? 'open' : ''
+                  }`}
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path d="m7 9 5 5 5-5" />
+                </svg>
+              )}
+            </button>
+
+            {!sidebarCollapsed &&
+              enrolledCoursesOpen && (
+                <div className="sidebar-enrolled-list">
+                  {enrolledCoursesLoading ? (
+                    <div className="sidebar-enrolled-message">
+                      Loading courses...
+                    </div>
+                  ) : enrolledCourses.length === 0 ? (
+                    <div className="sidebar-enrolled-message">
+                      No enrolled courses
+                    </div>
+                  ) : (
+                    enrolledCourses.map((course) => {
+                      const courseId =
+                        course.id ||
+                        course.courseId ||
+                        course.course_id ||
+                        course.code ||
+                        course.courseCode ||
+                        course.course_code;
+
+                      const courseCode =
+                        course.code ||
+                        course.courseCode ||
+                        course.course_code ||
+                        'COURSE';
+
+                      const courseTitle =
+                        course.title ||
+                        course.courseName ||
+                        course.course_name ||
+                        course.name ||
+                        'Untitled course';
+
+                      return (
+                        <Link
+                          key={courseId}
+                          to={`/student/enrolled-courses/${courseId}`}
+                          className="sidebar-enrolled-course"
+                        >
+                          <span className="sidebar-course-indicator" />
+
+                          <span className="sidebar-enrolled-course-text">
+                            <strong>{courseCode}</strong>
+                            <small>{courseTitle}</small>
+                          </span>
+                        </Link>
+                      );
+                    })
+                  )}
+                </div>
+              )}
+          </div>
 
           <Link
             to="/student/public-courses"

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import { FiLogOut } from 'react-icons/fi';
 
 import QuizModesModal from '../../components/QuizModesModal';
 import {
@@ -78,6 +79,16 @@ function resolveProfileImage(imagePath) {
   return `${serverOrigin}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
 }
 
+function getStoredToken() {
+  return (
+    localStorage.getItem('token') ||
+    localStorage.getItem('authToken') ||
+    localStorage.getItem('puffy-token') ||
+    sessionStorage.getItem('token') ||
+    sessionStorage.getItem('authToken')
+  );
+}
+
 function getProfessorDepartment(course) {
   return course.professorDepartment || course.professor_department || 'Department not set';
 }
@@ -150,7 +161,73 @@ export default function StudentCourseDetail() {
   const [notifications, setNotifications] =
     useState(notificationItems);
 
+  const [enrolledCoursesOpen, setEnrolledCoursesOpen] =
+    useState(false);
+
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    return localStorage.getItem('sidebarCollapsed') === 'true';
+  });
+
+  const [courses, setCourses] = useState([]);
+  const [coursesLoading, setCoursesLoading] = useState(true);
+
   const [, setProgressVersion] = useState(0);
+
+  const loadEnrolledCourses = async () => {
+    try {
+      setCoursesLoading(true);
+
+      const token = getStoredToken();
+
+      if (!token) {
+        setCourses([]);
+        return;
+      }
+
+      const response = await fetch(
+        `${API_BASE_URL}/courses/enrolled`,
+        {
+          method: 'GET',
+          headers: {
+            Accept: 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response
+        .json()
+        .catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(
+          data.message ||
+            'Could not load enrolled courses.'
+        );
+      }
+
+      const loadedCourses = Array.isArray(data.courses)
+        ? data.courses
+        : Array.isArray(data.data)
+          ? data.data
+          : [];
+
+      setCourses(loadedCourses);
+    } catch (error) {
+      console.error(
+        'Sidebar enrolled courses loading error:',
+        error
+      );
+
+      setCourses([]);
+    } finally {
+      setCoursesLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadEnrolledCourses();
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -509,6 +586,19 @@ export default function StudentCourseDetail() {
     setQuizModesOpen(true);
   };
 
+  const toggleSidebar = () => {
+    setSidebarCollapsed((currentValue) => {
+      const nextValue = !currentValue;
+
+      localStorage.setItem(
+        'sidebarCollapsed',
+        String(nextValue)
+      );
+
+      return nextValue;
+    });
+  };
+
   const closeJoinModal = () => {
     setJoinModalOpen(false);
     setJoinCourseCode('');
@@ -516,7 +606,7 @@ export default function StudentCourseDetail() {
 
  const joinByCourseCode = async () => {
   try {
-    const trimmedCode = courseCode.trim();
+    const trimmedCode = joinCourseCode.trim();
 
     if (!trimmedCode) {
       await Swal.fire({
@@ -669,58 +759,210 @@ export default function StudentCourseDetail() {
   }
 
   return (
-    <div className="enrolled-dashboard striped-dashboard">
+    <div
+      className={`enrolled-dashboard striped-dashboard ${
+        sidebarCollapsed ? 'sidebar-collapsed' : ''
+      }`}
+    >
       <aside className="enrolled-sidebar">
         <div className="brand-lockup">
-          <img src="/images/logo_solo.png" alt="" />
-          <span>PuffyBrain</span>
+          <img
+            src="/images/logo_solo.png"
+            alt="PuffyBrain logo"
+            className="sidebar-logo"
+            onClick={toggleSidebar}
+            title={
+              sidebarCollapsed
+                ? 'Expand sidebar'
+                : 'Collapse sidebar'
+            }
+          />
+
+          <span className="brand-name">
+            PuffyBrain
+          </span>
         </div>
 
-        <nav className="side-nav" aria-label="Student navigation">
-          <Link to="/student" className="side-nav-item">
+        <nav
+          className="side-nav"
+          aria-label="Student navigation"
+        >
+          <Link
+            to="/student"
+            className="side-nav-item"
+            title={
+              sidebarCollapsed
+                ? 'Home'
+                : undefined
+            }
+          >
             <Icon name="home" />
-            <span>Home</span>
+
+            <span className="nav-label">
+              Home
+            </span>
           </Link>
 
-          <Link
-            to="/student/enrolled-courses"
-            className="side-nav-item active"
-          >
-            <Icon name="courses" />
-            <span>Enrolled Courses</span>
-            <span className="dropdown-mark">v</span>
-          </Link>
+          <div className="sidebar-course-group">
+            <button
+              type="button"
+              className="side-nav-item active sidebar-enrolled-toggle"
+              onClick={() => {
+                setEnrolledCoursesOpen(
+                  (previous) => !previous
+                );
+              }}
+              title={
+                sidebarCollapsed
+                  ? 'Enrolled Courses'
+                  : undefined
+              }
+            >
+              <Icon name="courses" />
+
+              <span className="nav-label">
+                Enrolled Courses
+              </span>
+
+              {!sidebarCollapsed && (
+                <svg
+                  className={`sidebar-dropdown-arrow ${
+                    enrolledCoursesOpen ? 'open' : ''
+                  }`}
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path d="m7 9 5 5 5-5" />
+                </svg>
+              )}
+            </button>
+
+            {!sidebarCollapsed &&
+              enrolledCoursesOpen && (
+                <div className="sidebar-enrolled-list">
+                  {coursesLoading ? (
+                    <div className="sidebar-enrolled-message">
+                      Loading courses...
+                    </div>
+                  ) : courses.length === 0 ? (
+                    <div className="sidebar-enrolled-message">
+                      No enrolled courses
+                    </div>
+                  ) : (
+                    courses.map((course) => {
+                      const sidebarCourseId =
+                        course.id ||
+                        course.courseId ||
+                        course.course_id ||
+                        course.code ||
+                        course.courseCode ||
+                        course.course_code;
+
+                      const sidebarCourseCode =
+                        course.code ||
+                        course.courseCode ||
+                        course.course_code ||
+                        'COURSE';
+
+                      const sidebarCourseTitle =
+                        course.title ||
+                        course.courseName ||
+                        course.course_name ||
+                        course.name ||
+                        'Untitled course';
+
+                      return (
+                        <Link
+                          key={sidebarCourseId}
+                          to={`/student/enrolled-courses/${sidebarCourseId}`}
+                          className="sidebar-enrolled-course"
+                        >
+                          <span className="sidebar-course-indicator" />
+
+                          <span className="sidebar-enrolled-course-text">
+                            <strong>
+                              {sidebarCourseCode}
+                            </strong>
+
+                            <small>
+                              {sidebarCourseTitle}
+                            </small>
+                          </span>
+                        </Link>
+                      );
+                    })
+                  )}
+                </div>
+              )}
+          </div>
 
           <Link
             to="/student/public-courses"
             className="side-nav-item plain-nav-item"
+            title={
+              sidebarCollapsed
+                ? 'Public Courses'
+                : undefined
+            }
           >
             <Icon name="public" />
-            <span>Public Courses</span>
+
+            <span className="nav-label">
+              Public Courses
+            </span>
           </Link>
 
           <Link
             to="/student/archived-courses"
             className="side-nav-item plain-nav-item"
+            title={
+              sidebarCollapsed
+                ? 'Archived Classes'
+                : undefined
+            }
           >
             <Icon name="archive" />
-            <span>Archived classes</span>
+
+            <span className="nav-label">
+              Archived classes
+            </span>
           </Link>
 
           <Link
             to="/student/settings"
             className="side-nav-item plain-nav-item"
+            title={
+              sidebarCollapsed
+                ? 'Settings'
+                : undefined
+            }
           >
             <Icon name="settings" />
-            <span>Settings</span>
+
+            <span className="nav-label">
+              Settings
+            </span>
           </Link>
         </nav>
 
-        <button className="logout-button" onClick={handleLogout}>
-          <span className="logout-icon" aria-hidden="true">
-            &lt;
+        <button
+          type="button"
+          className="logout-button"
+          title={
+            sidebarCollapsed
+              ? 'Logout'
+              : undefined
+          }
+          onClick={handleLogout}
+        >
+          <FiLogOut
+            className="logout-icon"
+            aria-hidden="true"
+          />
+
+          <span className="logout-label">
+            Logout
           </span>
-          <span>Log-out</span>
         </button>
       </aside>
 
