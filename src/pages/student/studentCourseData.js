@@ -37,11 +37,15 @@ function filterCourses(courses, params = {}) {
     .filter((course) => !publishedOnly || course.status === 'published');
 }
 
-async function loadProfessorCourses(params = {}) {
+async function loadProfessorCourses(params = {}, options = {}) {
   try {
-    const courses = await fetchCourses(params);
+    const courses = await fetchCourses(params, options);
     return filterCourses(courses, params);
   } catch (error) {
+    if (options.fallback === false) {
+      throw error;
+    }
+
     console.error('Student course API error:', error);
     return filterCourses(readProfessorCourses(), params);
   }
@@ -135,7 +139,7 @@ async function fetchEnrolledCoursesRequest(params = {}) {
     query.set('userId', userId);
   }
 
-  Object.entries(params).forEach(([key, value]) => {
+  Object.entries({ summaryOnly: true, ...params }).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== '') {
       query.set(key, value);
     }
@@ -162,7 +166,7 @@ async function enrollCourseRequest(course) {
     return null;
   }
 
-  const response = await fetch(`${API_BASE}/courses/enroll`, {
+  const response = await fetch(`${API_BASE}/courses/enroll?summaryOnly=true`, {
     method: 'POST',
     credentials: 'include',
     headers: getAuthHeaders(),
@@ -170,6 +174,7 @@ async function enrollCourseRequest(course) {
       userId,
       courseId: course?.id || course?.course_id || null,
       courseCode: course?.courseCode || course?.course_code || course?.code || '',
+      summaryOnly: true,
     }),
   });
   const data = await readJsonResponse(response, 'Could not enroll in course.');
@@ -462,13 +467,27 @@ export async function findCourseByIdOrCodeAsync(value) {
     }
   }
 
-  const courses = await loadProfessorCourses({ includeArchived: true });
-
-  return courses.find((course) => {
+  const courses = await loadProfessorCourses({ includeArchived: true, summaryOnly: true });
+  const matchedCourse = courses.find((course) => {
     const id = String(course.id || course.course_id || '').trim().toLowerCase();
     const code = String(course.code || '').trim().toLowerCase();
     return id === normalizedValue || code === normalizedValue;
-  }) || null;
+  });
+
+  if (!matchedCourse) return null;
+
+  const detailId =
+    matchedCourse.id ||
+    matchedCourse.course_id ||
+    matchedCourse.code ||
+    matchedCourse.courseCode ||
+    value;
+
+  try {
+    return await fetchCourse(detailId);
+  } catch {
+    return matchedCourse;
+  }
 }
 
 export function findJoinableCourseByCode(code) {
@@ -488,7 +507,7 @@ export async function findJoinableCourseByCodeAsync(code) {
 
   if (!normalizedCode) return null;
 
-  const courses = await loadProfessorCourses({ published: true });
+  const courses = await loadProfessorCourses({ published: true, summaryOnly: true });
 
   return courses.find((course) => (
     !course.archived &&
@@ -579,7 +598,7 @@ export async function loadStudentArchivedCourses() {
 
   try {
     const response = await fetch(
-      `${API_BASE}/courses/archived`,
+      `${API_BASE}/courses/archived?summaryOnly=true`,
       {
         method: 'GET',
         credentials: 'include',
@@ -618,6 +637,9 @@ export function getPublicStudentCourses() {
 }
 
 export async function loadPublicStudentCourses() {
-  const courses = await loadProfessorCourses({ public: true, published: true });
+  const courses = await loadProfessorCourses(
+    { public: true, published: true, summaryOnly: true },
+    { fallback: false }
+  );
   return courses.map(normalizeStudentCourse);
 }

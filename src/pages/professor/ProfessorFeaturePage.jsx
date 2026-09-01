@@ -8,7 +8,6 @@ import {
   FiUsers,
 } from 'react-icons/fi';
 import {
-  professorCoursesSeed,
   readProfessorCourses,
 } from './professorData';
 import { fetchCourses } from '../../services/courseApi.js';
@@ -197,6 +196,14 @@ const courseMonitoringSeed = {
       },
     ],
   },
+};
+
+const emptyMonitoring = {
+  section: 'No course selected',
+  schedule: '',
+  topics: [],
+  assessments: [],
+  students: [],
 };
 
 const statusLabels = {
@@ -432,6 +439,10 @@ function getMonitoringFallback(course) {
 }
 
 function getMonitoringForCourse(course) {
+  if (!course) {
+    return emptyMonitoring;
+  }
+
   return courseMonitoringSeed[course.code] || getMonitoringFallback(course);
 }
 
@@ -450,7 +461,7 @@ function StudentMonitoringDashboard() {
     const storedCourses = readProfessorCourses();
     const activeCourses = storedCourses.filter((course) => !course.archived);
 
-    return activeCourses.length ? activeCourses : professorCoursesSeed;
+    return activeCourses;
   }, []);
 
   const [courses, setCourses] = useState(fallbackCourses);
@@ -475,8 +486,6 @@ function StudentMonitoringDashboard() {
 
         const activeCourses = loadedCourses.filter((course) => !course.archived);
 
-        if (activeCourses.length === 0) return;
-
         setCourses(activeCourses);
         setSelectedCourseId((currentId) =>
           activeCourses.some(
@@ -499,8 +508,8 @@ function StudentMonitoringDashboard() {
     () =>
       courses.find((course) => getCourseSelectId(course) === String(selectedCourseId)) ||
       courses[0] ||
-      fallbackCourses[0],
-    [courses, fallbackCourses, selectedCourseId]
+      null,
+    [courses, selectedCourseId]
   );
 
   useEffect(() => {
@@ -642,6 +651,10 @@ function StudentMonitoringDashboard() {
   };
 
   const handleExport = () => {
+    if (!selectedCourse) {
+      return;
+    }
+
     const csv = createMonitoringCsv(
       { ...selectedCourse, code: selectedCourseCode, title: selectedCourseTitle },
       monitoring,
@@ -660,6 +673,26 @@ function StudentMonitoringDashboard() {
     window.setTimeout(() => URL.revokeObjectURL(url), 0);
     setExportMessage(`CSV exported for ${selectedCourseCode}.`);
   };
+
+  if (courses.length === 0) {
+    return (
+      <section className="professor-page monitor-page">
+        <div className="monitor-header">
+          <div>
+            <h1>Student Monitoring</h1>
+            <p>
+              Select a course, then review class progress and each student's
+              performance inside that course.
+            </p>
+          </div>
+        </div>
+
+        <div className="monitor-empty-state">
+          No courses yet. Create a course first to start monitoring students.
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="professor-page monitor-page">

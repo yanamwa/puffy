@@ -27,6 +27,12 @@ import {
   getStudentProfileHandle,
   useStudentProfile,
 } from './studentProfileData';
+import {
+  markManagedNotificationAsReadForRole,
+  markManagedNotificationsAsReadForRole,
+  mergeManagedNotificationsForRole,
+  subscribeToManagedNotifications,
+} from '../../utils/notifications';
 
 import './EnrolledCourses.css';
 
@@ -159,7 +165,9 @@ export default function StudentCourseDetail() {
   const [profileMenuOpen, setProfileMenuOpen] =
     useState(false);
   const [notifications, setNotifications] =
-    useState(notificationItems);
+    useState(() =>
+      mergeManagedNotificationsForRole('student', notificationItems)
+    );
 
   const [enrolledCoursesOpen, setEnrolledCoursesOpen] =
     useState(false);
@@ -173,6 +181,16 @@ export default function StudentCourseDetail() {
 
   const [, setProgressVersion] = useState(0);
 
+  useEffect(() => {
+    const refreshNotifications = () => {
+      setNotifications((currentNotifications) =>
+        mergeManagedNotificationsForRole('student', currentNotifications)
+      );
+    };
+
+    return subscribeToManagedNotifications(refreshNotifications);
+  }, []);
+
   const loadEnrolledCourses = async () => {
     try {
       setCoursesLoading(true);
@@ -185,7 +203,7 @@ export default function StudentCourseDetail() {
       }
 
       const response = await fetch(
-        `${API_BASE_URL}/courses/enrolled`,
+        `${API_BASE_URL}/courses/enrolled?summaryOnly=true`,
         {
           method: 'GET',
           headers: {
@@ -688,6 +706,8 @@ export default function StudentCourseDetail() {
   ).length;
 
   const markAllNotificationsAsRead = () => {
+    markManagedNotificationsAsReadForRole('student');
+
     setNotifications((currentNotifications) =>
       currentNotifications.map((notification) => ({
         ...notification,
@@ -697,6 +717,8 @@ export default function StudentCourseDetail() {
   };
 
   const openNotification = (notificationId) => {
+    markManagedNotificationAsReadForRole('student', notificationId);
+
     setNotifications((currentNotifications) =>
       currentNotifications.map((notification) =>
         notification.id === notificationId

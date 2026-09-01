@@ -1,12 +1,35 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import {
+  APP_ROLES,
+  getHomePathForRole,
+  getUserRole,
+} from '../utils/roles.js';
 
-function getHomePath(role) {
-  if (role === 'super_admin') return '/super-admin';
-  if (role === 'admin') return '/admin';
-  if (role === 'professor') return '/professor';
-  return '/student';
-}
+const studentOnlyPrefixes = [
+  '/learning',
+  '/introduction',
+  '/lesson',
+  '/review',
+  '/flashcards-tutorial',
+  '/QandA-tutorial',
+  '/qna-tutorial',
+  '/multipleChoice-tutorial',
+  '/multiple-choice-tutorial',
+  '/Matching-tutorial',
+  '/matching-tutorial',
+  '/timedquiz-tutorial',
+  '/random-modes-tutorial',
+  '/mixed-mode-tutorial',
+  '/flashcard',
+  '/qna',
+  '/multiple-choice',
+  '/matching-type',
+  '/timedquiz',
+  '/mixed-mode',
+  '/random-modes',
+  '/survival',
+];
 
 function getStoredUser() {
   try {
@@ -90,7 +113,7 @@ export default function ProtectedRoute() {
   const storedUser = getStoredUser();
   const currentUser = user || storedUser || tokenUser;
   const location = useLocation();
-  const role = tokenUser?.role || currentUser?.role;
+  const role = getUserRole(tokenUser) || getUserRole(currentUser);
   const pathname = location.pathname;
 
   if (!token || !currentUser) {
@@ -107,20 +130,32 @@ export default function ProtectedRoute() {
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
 
-  if (pathname.startsWith('/super-admin') && role !== 'super_admin') {
-    return <Navigate to={getHomePath(role)} replace />;
+  if (!role) {
+    clearStoredAuth();
+    return <Navigate to="/login" replace state={{ from: location }} />;
   }
 
-  if (pathname.startsWith('/admin') && role !== 'admin') {
-    return <Navigate to={getHomePath(role)} replace />;
+  if (pathname.startsWith('/super-admin') && role !== APP_ROLES.SUPER_ADMIN) {
+    return <Navigate to={getHomePathForRole(role)} replace />;
   }
 
-  if (pathname.startsWith('/professor') && role !== 'professor') {
-    return <Navigate to={getHomePath(role)} replace />;
+  if (pathname.startsWith('/admin') && role !== APP_ROLES.ADMIN) {
+    return <Navigate to={getHomePathForRole(role)} replace />;
   }
 
-  if (pathname.startsWith('/student') && role !== 'student') {
-    return <Navigate to={getHomePath(role)} replace />;
+  if (pathname.startsWith('/professor') && role !== APP_ROLES.PROFESSOR) {
+    return <Navigate to={getHomePathForRole(role)} replace />;
+  }
+
+  if (pathname.startsWith('/student') && role !== APP_ROLES.STUDENT) {
+    return <Navigate to={getHomePathForRole(role)} replace />;
+  }
+
+  if (
+    studentOnlyPrefixes.some((prefix) => pathname.startsWith(prefix)) &&
+    role !== APP_ROLES.STUDENT
+  ) {
+    return <Navigate to={getHomePathForRole(role)} replace />;
   }
 
   return <Outlet />;

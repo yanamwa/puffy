@@ -1,6 +1,8 @@
 export const PROFESSOR_COURSES_KEY = 'professor-courses';
 export const PROFESSOR_COURSES_EVENT = 'professor-courses-updated';
 
+const USER_STORAGE_KEYS = ['puffy-user', 'user', 'currentUser'];
+
 export const professorCoursesSeed = [
   {
     id: 1,
@@ -56,7 +58,149 @@ export const recentProfessorActivities = [
   'Updated learning objectives for Web Development',
 ];
 
-export function readProfessorCourses() {
+function cleanText(value) {
+  return String(value || '').trim();
+}
+
+function normalizeKey(value) {
+  return cleanText(value).toLowerCase();
+}
+
+function normalizeRole(role) {
+  const value = normalizeKey(role).replace(/[\s-]+/g, '_');
+
+  if (value === 'instructor') {
+    return 'professor';
+  }
+
+  return value;
+}
+
+function readStoredUser() {
+  for (const storage of [localStorage, sessionStorage]) {
+    for (const key of USER_STORAGE_KEYS) {
+      try {
+        const value = storage.getItem(key);
+
+        if (!value) {
+          continue;
+        }
+
+        const parsed = JSON.parse(value);
+
+        if (parsed && typeof parsed === 'object') {
+          return parsed;
+        }
+      } catch {
+        storage.removeItem(key);
+      }
+    }
+  }
+
+  return null;
+}
+
+function getAccountId(user) {
+  return cleanText(user?.userId || user?.id || user?.user_id);
+}
+
+export function getCurrentProfessorIdentity(user = readStoredUser()) {
+  const role = normalizeRole(user?.role || localStorage.getItem('user_role'));
+
+  if (role !== 'professor') {
+    return null;
+  }
+
+  return {
+    id: getAccountId(user),
+    email: normalizeKey(
+      user?.email ||
+        localStorage.getItem('user_email') ||
+        localStorage.getItem('email')
+    ),
+    name: cleanText(
+      user?.displayName ||
+        user?.display_name ||
+        user?.name ||
+        localStorage.getItem('username') ||
+        'Professor'
+    ),
+    department: cleanText(
+      user?.professorDepartment ||
+        user?.professor_department ||
+        user?.department
+    ),
+    profileImage: cleanText(
+      user?.profileImage ||
+        user?.profile_image ||
+        user?.avatar ||
+        user?.image
+    ),
+  };
+}
+
+function getCourseProfessorId(course) {
+  return cleanText(course?.professorId || course?.professor_id);
+}
+
+function getCourseProfessorEmail(course) {
+  return normalizeKey(course?.professorEmail || course?.professor_email);
+}
+
+export function courseBelongsToProfessor(
+  course,
+  professor = getCurrentProfessorIdentity()
+) {
+  if (!professor) {
+    return true;
+  }
+
+  const courseProfessorId = getCourseProfessorId(course);
+  const courseProfessorEmail = getCourseProfessorEmail(course);
+
+  if (
+    courseProfessorId &&
+    professor.id &&
+    courseProfessorId === professor.id
+  ) {
+    return true;
+  }
+
+  if (
+    courseProfessorEmail &&
+    professor.email &&
+    courseProfessorEmail === professor.email
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
+export function stampCourseForProfessor(
+  course,
+  professor = getCurrentProfessorIdentity()
+) {
+  if (!professor) {
+    return course;
+  }
+
+  return {
+    ...course,
+    professorId: professor.id || null,
+    professor_id: professor.id || null,
+    professorName: professor.name || 'Professor',
+    professor_name: professor.name || 'Professor',
+    professorEmail: professor.email || '',
+    professor_email: professor.email || '',
+    professorDepartment: professor.department || '',
+    professor_department: professor.department || '',
+    professorProfileImage: professor.profileImage || '',
+    professor_profile_image: professor.profileImage || '',
+  };
+}
+
+function readAllProfessorCourses() {
   try {
     const saved = localStorage.getItem(PROFESSOR_COURSES_KEY);
     return saved ? JSON.parse(saved) : professorCoursesSeed;
@@ -65,12 +209,45 @@ export function readProfessorCourses() {
   }
 }
 
-export function saveProfessorCourses(courses) {
-  localStorage.setItem(PROFESSOR_COURSES_KEY, JSON.stringify(courses));
+export function readProfessorCourses(options = {}) {
+  const courses = readAllProfessorCourses();
+
+  if (options.includeAll) {
+    return courses;
+  }
+
+  const professor = options.professor || getCurrentProfessorIdentity();
+
+  if (!professor) {
+    return courses;
+  }
+
+  return courses.filter((course) => courseBelongsToProfessor(course, professor));
+}
+
+export function saveProfessorCourses(courses, options = {}) {
+  const incomingCourses = Array.isArray(courses) ? courses : [];
+  const professor = options.professor || getCurrentProfessorIdentity();
+  let coursesToStore = incomingCourses;
+  let visibleCourses = incomingCourses;
+
+  if (professor && !options.includeAll) {
+    const stampedCourses = incomingCourses.map((course) =>
+      stampCourseForProfessor(course, professor)
+    );
+    const preservedCourses = readAllProfessorCourses().filter(
+      (course) => !courseBelongsToProfessor(course, professor)
+    );
+
+    coursesToStore = [...stampedCourses, ...preservedCourses];
+    visibleCourses = stampedCourses;
+  }
+
+  localStorage.setItem(PROFESSOR_COURSES_KEY, JSON.stringify(coursesToStore));
 
   window.dispatchEvent(
     new CustomEvent(PROFESSOR_COURSES_EVENT, {
-      detail: { courses },
+      detail: { courses: visibleCourses, allCourses: coursesToStore },
     })
   );
 }

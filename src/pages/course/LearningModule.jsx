@@ -17,6 +17,11 @@ import {
   enrollStudentInCourseAsync,
   loadStudentEnrolledCourses,
 } from "../student/studentCourseData.js";
+import {
+  markManagedNotificationsAsReadForRole,
+  mergeManagedNotificationsForRole,
+  subscribeToManagedNotifications,
+} from "../../utils/notifications.js";
 
 const toast = {
   success: (message) => console.info(message),
@@ -38,7 +43,9 @@ function LearningModule() {
 
   const [myDecks, setMyDecks] = useState([]);
   const [courses, setCourses] = useState([]);
-  const [notifications, setNotifications] = useState([]);
+  const [notifications, setNotifications] = useState(() =>
+    mergeManagedNotificationsForRole("student", [])
+  );
 
   const [user, setUser] = useState({
     id: null,
@@ -55,7 +62,7 @@ function LearningModule() {
   });
 
   const notificationCount = notifications.filter(
-    (notif) => notif.status === "unread"
+    (notif) => notif.status === "unread" || notif.unread
   ).length;
 
   const currentCourse = useMemo(() => {
@@ -144,14 +151,28 @@ function LearningModule() {
       });
 
       const data = await res.json();
-      setNotifications(data.success ? data.notifications || [] : []);
+      setNotifications(
+        mergeManagedNotificationsForRole(
+          "student",
+          data.success ? data.notifications || [] : []
+        )
+      );
     } catch (err) {
       console.error("Notification fetch error:", err);
-      setNotifications([]);
+      setNotifications(mergeManagedNotificationsForRole("student", []));
     }
   };
 
   const markNotificationsAsRead = async () => {
+    markManagedNotificationsAsReadForRole("student");
+    setNotifications((prev) =>
+      prev.map((notif) => ({
+        ...notif,
+        unread: false,
+        status: "read",
+      }))
+    );
+
     try {
       const res = await fetch(`${API_BASE}/markNotificationsAsRead.php`, {
         method: "POST",
@@ -164,6 +185,7 @@ function LearningModule() {
         setNotifications((prev) =>
           prev.map((notif) => ({
             ...notif,
+            unread: false,
             status: "read",
           }))
         );
@@ -178,6 +200,16 @@ function LearningModule() {
     fetchUserDecks();
     fetchCourses();
     fetchNotifications();
+  }, []);
+
+  useEffect(() => {
+    const refreshNotifications = () => {
+      setNotifications((currentNotifications) =>
+        mergeManagedNotificationsForRole("student", currentNotifications)
+      );
+    };
+
+    return subscribeToManagedNotifications(refreshNotifications);
   }, []);
 
   const getTotalSlides = (lessonData) => {

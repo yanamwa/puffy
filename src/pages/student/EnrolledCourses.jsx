@@ -5,6 +5,12 @@ import {
   enrollStudentInCourseAsync,
   findJoinableCourseByCodeAsync,
 } from './studentCourseData';
+import {
+  markManagedNotificationAsReadForRole,
+  markManagedNotificationsAsReadForRole,
+  mergeManagedNotificationsForRole,
+  subscribeToManagedNotifications,
+} from '../../utils/notifications';
 import './EnrolledCourses.css';
 import { FiLogOut } from 'react-icons/fi';
 import Swal from 'sweetalert2';
@@ -414,8 +420,11 @@ export function Icon({ name }) {
   return null;
 }
 
-export function SortToggle({ options }) {
-  const [selectedIndex, setSelectedIndex] = useState(0);
+export function SortToggle({ options, value, onChange }) {
+  const controlledIndex = options.indexOf(value);
+  const [uncontrolledIndex, setUncontrolledIndex] = useState(0);
+  const selectedIndex =
+    controlledIndex >= 0 ? controlledIndex : uncontrolledIndex;
 
   const selected = options[selectedIndex];
 
@@ -425,7 +434,13 @@ export function SortToggle({ options }) {
       : selectedIndex + 1;
 
   const toggleSort = () => {
-    setSelectedIndex(nextIndex);
+    if (controlledIndex < 0) {
+      setUncontrolledIndex(nextIndex);
+    }
+
+    if (onChange) {
+      onChange(options[nextIndex]);
+    }
   };
 
   return (
@@ -513,7 +528,9 @@ const [unenrollingCourseId, setUnenrollingCourseId] = useState(null);
   ] = useState(false);
 
   const [notifications, setNotifications] =
-    useState(notificationItems);
+    useState(() =>
+      mergeManagedNotificationsForRole('student', notificationItems)
+    );
 
   const savedUser = getSavedUser() || {};
 
@@ -536,6 +553,16 @@ const [unenrollingCourseId, setUnenrollingCourseId] = useState(null);
     ? 'Student account'
     : 'Account information unavailable';
 
+  useEffect(() => {
+    const refreshNotifications = () => {
+      setNotifications((currentNotifications) =>
+        mergeManagedNotificationsForRole('student', currentNotifications)
+      );
+    };
+
+    return subscribeToManagedNotifications(refreshNotifications);
+  }, []);
+
   const loadEnrolledCourses = async () => {
     try {
       setLoading(true);
@@ -550,7 +577,7 @@ const [unenrollingCourseId, setUnenrollingCourseId] = useState(null);
       }
 
       const response = await fetch(
-        `${API_BASE_URL}/courses/enrolled`,
+        `${API_BASE_URL}/courses/enrolled?summaryOnly=true`,
         {
           method: 'GET',
           headers: {
@@ -616,7 +643,7 @@ const [unenrollingCourseId, setUnenrollingCourseId] = useState(null);
         }
 
         const response = await fetch(
-         `${API_BASE_URL}/courses/enrolled`,
+         `${API_BASE_URL}/courses/enrolled?summaryOnly=true`,
           {
             method: 'GET',
             headers: {
@@ -941,6 +968,8 @@ const [unenrollingCourseId, setUnenrollingCourseId] = useState(null);
     ).length;
 
   const markAllNotificationsAsRead = () => {
+    markManagedNotificationsAsReadForRole('student');
+
     setNotifications(
       (currentNotifications) =>
         currentNotifications.map(
@@ -955,6 +984,8 @@ const [unenrollingCourseId, setUnenrollingCourseId] = useState(null);
   const openNotification = (
     notificationId
   ) => {
+    markManagedNotificationAsReadForRole('student', notificationId);
+
     setNotifications(
       (currentNotifications) =>
         currentNotifications.map(

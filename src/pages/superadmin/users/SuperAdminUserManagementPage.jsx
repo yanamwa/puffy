@@ -15,6 +15,7 @@ import {
   FiTrash2,
   FiUpload,
   FiUser,
+  FiUserPlus,
   FiUsers,
   FiX,
 } from 'react-icons/fi';
@@ -66,13 +67,13 @@ const initialProfessorForm = {
   email: '',
   facultyId: '',
   department: '',
-  position: '',
-  specialization: '',
-  employmentProof: '',
+  employmentProof: null,
 };
 
 const STUDENT_IMPORT_ACCEPT =
   '.csv,.xlsx';
+const PROFESSOR_PROOF_ACCEPT =
+  '.jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp';
 
 const initialStudentImportStatus = {
   state: 'idle',
@@ -235,13 +236,28 @@ function getInitials(name) {
     .join('');
 }
 
+function getAuthToken() {
+  return (
+    localStorage.getItem('puffy-token') ||
+    localStorage.getItem('token') ||
+    localStorage.getItem('authToken') ||
+    ''
+  );
+}
+
 function getAuthHeaders() {
-  const token = localStorage.getItem('puffy-token');
+  const token = getAuthToken();
 
   return {
     'Content-Type': 'application/json',
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
+}
+
+function getMultipartAuthHeaders() {
+  const token = getAuthToken();
+
+  return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
 function getTemporaryPayload(form) {
@@ -298,6 +314,22 @@ function formatFileSize(bytes) {
   return `${(size / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+function validateProfessorProofFile(file) {
+  if (!file) return 'Please upload a clear photo of the faculty or employee ID.';
+
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+
+  if (!allowedTypes.includes(file.type)) {
+    return 'Please upload a JPG, PNG, or WEBP image.';
+  }
+
+  if (file.size > 5 * 1024 * 1024) {
+    return 'The uploaded ID photo must not exceed 5 MB.';
+  }
+
+  return '';
+}
+
 function UserAvatar({ user, large = false }) {
   const initials = getInitials(user.name) || '?';
   return <span className={large ? 'users-modal-avatar' : 'users-avatar'}>{initials}</span>;
@@ -319,6 +351,8 @@ export default function SuperAdminUserManagementPage() {
   const [adminForm, setAdminForm] = useState(initialAdminForm);
   const [professorModalOpen, setProfessorModalOpen] = useState(false);
   const [professorForm, setProfessorForm] = useState(initialProfessorForm);
+  const [professorProofPreview, setProfessorProofPreview] = useState('');
+  const [creatingProfessor, setCreatingProfessor] = useState(false);
   const [studentModalOpen, setStudentModalOpen] = useState(false);
   const [studentForm, setStudentForm] = useState(initialStudentForm);
   const [studentImportStatus, setStudentImportStatus] = useState(initialStudentImportStatus);
@@ -358,6 +392,14 @@ export default function SuperAdminUserManagementPage() {
       setStudentImportStatus(initialStudentImportStatus);
     }
   }, [studentModalOpen]);
+
+  useEffect(() => {
+    return () => {
+      if (professorProofPreview) {
+        URL.revokeObjectURL(professorProofPreview);
+      }
+    };
+  }, [professorProofPreview]);
 
   useEffect(() => {
     if (studentImportStatus.state !== 'success' && studentImportStatus.state !== 'partial') {
@@ -486,6 +528,65 @@ export default function SuperAdminUserManagementPage() {
       currentUsers.filter((user) => Number(user.id) !== Number(userId))
     );
     setSelectedUser(null);
+  };
+
+  const resetProfessorForm = () => {
+    setProfessorForm(initialProfessorForm);
+    setProfessorProofPreview('');
+  };
+
+  const closeProfessorModal = () => {
+    if (creatingProfessor) return;
+    setProfessorModalOpen(false);
+    resetProfessorForm();
+  };
+
+  const handleProfessorFieldChange = (fieldName) => (event) => {
+    setProfessorForm((currentForm) => ({
+      ...currentForm,
+      [fieldName]: event.target.value,
+    }));
+  };
+
+  const handleProfessorProofUpload = (event) => {
+    const file = event.target.files?.[0] || null;
+
+    if (!file) {
+      setProfessorForm((currentForm) => ({
+        ...currentForm,
+        employmentProof: null,
+      }));
+      setProfessorProofPreview('');
+      return;
+    }
+
+    const fileError = validateProfessorProofFile(file);
+
+    if (fileError) {
+      event.target.value = '';
+      setProfessorForm((currentForm) => ({
+        ...currentForm,
+        employmentProof: null,
+      }));
+      setProfessorProofPreview('');
+      setNotice(fileError);
+      return;
+    }
+
+    setProfessorForm((currentForm) => ({
+      ...currentForm,
+      employmentProof: file,
+    }));
+    setProfessorProofPreview(URL.createObjectURL(file));
+    setNotice('');
+  };
+
+  const removeProfessorProofImage = () => {
+    setProfessorForm((currentForm) => ({
+      ...currentForm,
+      employmentProof: null,
+    }));
+    setProfessorProofPreview('');
   };
 
   const renderAccountTypeFields = (form, setForm) => (
@@ -706,11 +807,59 @@ export default function SuperAdminUserManagementPage() {
   const handleCreateProfessor = async (event) => {
     event.preventDefault();
 
+    if (creatingProfessor) return;
+
+    const cleanName = professorForm.name.trim();
+    const cleanEmail = professorForm.email.trim().toLowerCase();
+    const cleanFacultyId = professorForm.facultyId.trim();
+    const cleanDepartment = professorForm.department.trim();
+    const proofError = validateProfessorProofFile(professorForm.employmentProof);
+
+    if (!cleanName) {
+      setNotice('Professor full name is required.');
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+      setNotice('Please enter a valid professor email address.');
+      return;
+    }
+
+    if (!cleanFacultyId) {
+      setNotice('Employee or faculty ID is required.');
+      return;
+    }
+
+    if (cleanFacultyId.length > 100) {
+      setNotice('Employee or faculty ID must be 100 characters or fewer.');
+      return;
+    }
+
+    if (!cleanDepartment) {
+      setNotice('Department is required.');
+      return;
+    }
+
+    if (proofError) {
+      setNotice(proofError);
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('name', cleanName);
+    formData.append('email', cleanEmail);
+    formData.append('facultyId', cleanFacultyId);
+    formData.append('department', cleanDepartment);
+    formData.append('employmentProof', professorForm.employmentProof);
+
     try {
+      setCreatingProfessor(true);
+      setNotice('');
+
       const response = await fetch(`${API_BASE}/users/professor`, {
         method: 'POST',
-        headers: getAuthHeaders(),
-        body: JSON.stringify(withTemporaryAccountFields(professorForm)),
+        headers: getMultipartAuthHeaders(),
+        body: formData,
       });
       const data = await response.json();
 
@@ -727,11 +876,13 @@ export default function SuperAdminUserManagementPage() {
           temporaryExpiresAt: data.user.temporaryExpiresAt,
         },
       ]);
-      setProfessorForm(initialProfessorForm);
+      resetProfessorForm();
       setProfessorModalOpen(false);
-      setNotice(data.user.isTemporary ? 'Temporary professor account created.' : 'Professor account created.');
+      setNotice('Professor account created.');
     } catch (error) {
       setNotice(error.message || 'Could not create professor account.');
+    } finally {
+      setCreatingProfessor(false);
     }
   };
 
@@ -1363,6 +1514,10 @@ export default function SuperAdminUserManagementPage() {
             <FiShield />
             Add Admin
           </button>
+          <button className="users-create-btn" type="button" onClick={() => setProfessorModalOpen(true)}>
+            <FiUserPlus />
+            Add Professor
+          </button>
           <button className="users-create-btn" type="button" onClick={() => setStudentModalOpen(true)}>
             <FiPlus />
             Add Student
@@ -1491,69 +1646,153 @@ export default function SuperAdminUserManagementPage() {
       )}
 
       {professorModalOpen && (
-        <div className="users-modal-backdrop" onClick={() => setProfessorModalOpen(false)}>
+        <div className="users-modal-backdrop" onClick={closeProfessorModal}>
           <section className="users-modal" onClick={(event) => event.stopPropagation()}>
-            <button className="users-modal-close" type="button" onClick={() => setProfessorModalOpen(false)} aria-label="Close professor form">
+            <button
+              className="users-modal-close"
+              type="button"
+              onClick={closeProfessorModal}
+              disabled={creatingProfessor}
+              aria-label="Close professor form"
+            >
               x
             </button>
             <div className="users-modal-profile">
               <span className="users-modal-avatar"><FiFileText /></span>
               <div>
                 <h2>Add Professor</h2>
-                <p>Create a permanent approved professor account with generated credentials.</p>
+                <p>Fill in the same professor registration details and upload their school ID.</p>
               </div>
             </div>
-            <form className="users-student-form" onSubmit={handleCreateProfessor}>
+            <form
+              className="users-student-form professor-registration-form"
+              onSubmit={handleCreateProfessor}
+            >
               <label>
-                Professor Name
-                <input type="text" value={professorForm.name} onChange={(event) => setProfessorForm((form) => ({ ...form, name: event.target.value }))} required />
+                Full Name
+                <input
+                  type="text"
+                  value={professorForm.name}
+                  onChange={handleProfessorFieldChange('name')}
+                  placeholder="Enter professor full name"
+                  disabled={creatingProfessor}
+                  autoComplete="name"
+                  required
+                />
               </label>
+
               <label>
-                Professor Email
-                <input type="email" value={professorForm.email} onChange={(event) => setProfessorForm((form) => ({ ...form, email: event.target.value }))} required />
+                Email Address
+                <input
+                  type="email"
+                  value={professorForm.email}
+                  onChange={handleProfessorFieldChange('email')}
+                  placeholder="Enter professor email"
+                  disabled={creatingProfessor}
+                  autoComplete="email"
+                  required
+                />
               </label>
+
               <label>
-                Faculty ID
-                <input type="text" value={professorForm.facultyId} onChange={(event) => setProfessorForm((form) => ({ ...form, facultyId: event.target.value }))} />
+                Employee or Faculty ID
+                <input
+                  type="text"
+                  value={professorForm.facultyId}
+                  onChange={handleProfessorFieldChange('facultyId')}
+                  placeholder="Enter employee or faculty ID"
+                  disabled={creatingProfessor}
+                  maxLength={100}
+                  required
+                />
               </label>
+
               <label>
                 Department
-                <input type="text" value={professorForm.department} onChange={(event) => setProfessorForm((form) => ({ ...form, department: event.target.value }))} />
+                <select
+                  value={professorForm.department}
+                  onChange={handleProfessorFieldChange('department')}
+                  disabled={creatingProfessor}
+                  required
+                >
+                  <option value="">Select professor department</option>
+                  <option value="Computer Science Department">
+                    Computer Science Department
+                  </option>
+                  <option value="Information Technology Department">
+                    Information Technology Department
+                  </option>
+                </select>
               </label>
-              <label>
-                  Position
-                  <input
-                    type="text"
-                    value={professorForm.position}
-                    onChange={(event) =>
-                      setProfessorForm((form) => ({
-                        ...form,
-                        position: event.target.value,
-                      }))
-                    }
-                    placeholder="Example: Associate Professor"
-                  />
+
+              <div className="users-form-field professor-proof-field">
+                <label
+                  className="users-form-label"
+                  htmlFor="superadmin-professor-proof"
+                >
+                  Upload Faculty or Employee ID
                 </label>
 
-                <label>
-                  Specialization
+                <p className="professor-proof-description">
+                  Upload a clear photo of the front of their valid school faculty
+                  or employee ID. Accepted formats are JPG, PNG, and WEBP, up to 5 MB.
+                </p>
+
+                <div className="professor-proof-upload-area">
                   <input
-                    type="text"
-                    value={professorForm.specialization}
-                    onChange={(event) =>
-                      setProfessorForm((form) => ({
-                        ...form,
-                        specialization: event.target.value,
-                      }))
-                    }
-                    placeholder="Example: Database Systems"
+                    id="superadmin-professor-proof"
+                    type="file"
+                    accept={PROFESSOR_PROOF_ACCEPT}
+                    className="professor-proof-file-input"
+                    disabled={creatingProfessor}
+                    onChange={handleProfessorProofUpload}
                   />
-                </label>
-              <label>
-                Employment Proof
-                <input type="text" value={professorForm.employmentProof} onChange={(event) => setProfessorForm((form) => ({ ...form, employmentProof: event.target.value }))} placeholder="URL or note" />
-              </label>
-              <button className="users-submit-btn" type="submit">Create Professor Account</button>
+
+                  <label
+                    className="users-secondary-btn professor-proof-upload-btn"
+                    htmlFor="superadmin-professor-proof"
+                  >
+                    <FiUpload />
+                    {professorForm.employmentProof
+                      ? 'Change ID Photo'
+                      : 'Choose ID Photo'}
+                  </label>
+
+                  {professorForm.employmentProof && (
+                    <span className="professor-proof-file-name">
+                      {professorForm.employmentProof.name}
+                    </span>
+                  )}
+                </div>
+
+                {professorProofPreview && (
+                  <div className="professor-proof-preview">
+                    <img
+                      src={professorProofPreview}
+                      alt="Uploaded faculty or employee ID preview"
+                    />
+
+                    <button
+                      type="button"
+                      disabled={creatingProfessor}
+                      onClick={removeProfessorProofImage}
+                    >
+                      <FiX />
+                      Remove Photo
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <button
+                className="users-submit-btn"
+                type="submit"
+                disabled={creatingProfessor}
+              >
+                {creatingProfessor
+                  ? 'Creating Professor...'
+                  : 'Create Professor Account'}
+              </button>
             </form>
           </section>
         </div>

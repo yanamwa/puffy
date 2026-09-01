@@ -7,6 +7,12 @@ import {
   findJoinableCourseByCodeAsync,
 } from "./studentCourseData";
 import { API_BASE } from "../../config.js";
+import {
+  markManagedNotificationAsReadForRole,
+  markManagedNotificationsAsReadForRole,
+  mergeManagedNotificationsForRole,
+  subscribeToManagedNotifications,
+} from "../../utils/notifications";
 import "./EnrolledCourses.css";
 import { FiLogOut } from 'react-icons/fi';
 import Swal from "sweetalert2";
@@ -292,7 +298,9 @@ useEffect(() => {
     useState(false);
 
   const [notifications, setNotifications] =
-    useState(notificationItems);
+    useState(() =>
+      mergeManagedNotificationsForRole("student", notificationItems)
+    );
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     return localStorage.getItem("sidebarCollapsed") === "true";
@@ -312,6 +320,16 @@ useEffect(() => {
   const [dashboardLoading, setDashboardLoading] = useState(true);
 
   const [dashboardError, setDashboardError] = useState("");
+
+  useEffect(() => {
+    const refreshNotifications = () => {
+      setNotifications((currentNotifications) =>
+        mergeManagedNotificationsForRole("student", currentNotifications)
+      );
+    };
+
+    return subscribeToManagedNotifications(refreshNotifications);
+  }, []);
 
   const calendarDays = useMemo(() => {
     const year = shownMonth.getFullYear();
@@ -404,7 +422,7 @@ useEffect(() => {
 
       try {
         const coursesResponse = await fetch(
-          `${API_BASE_URL}/courses/enrolled`,
+          `${API_BASE_URL}/courses/enrolled?summaryOnly=true`,
           {
             method: "GET",
             headers: {
@@ -744,6 +762,8 @@ useEffect(() => {
     ).length;
 
   const markAllNotificationsAsRead = () => {
+    markManagedNotificationsAsReadForRole("student");
+
     setNotifications((currentNotifications) =>
       currentNotifications.map((notification) => ({
         ...notification,
@@ -753,6 +773,8 @@ useEffect(() => {
   };
 
   const openNotification = (notificationId) => {
+    markManagedNotificationAsReadForRole("student", notificationId);
+
     setNotifications((currentNotifications) =>
       currentNotifications.map((notification) =>
         notification.id === notificationId

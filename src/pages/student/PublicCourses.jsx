@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { Avatar, Icon, SortToggle } from './EnrolledCourses';
@@ -6,10 +6,15 @@ import JoinCourseModal from './JoinCourseModal';
 import { PROFESSOR_COURSES_EVENT } from '../professor/professorData';
 import {
   enrollStudentInCourseAsync,
-  getPublicStudentCourses,
   findJoinableCourseByCodeAsync,
   loadPublicStudentCourses,
 } from './studentCourseData';
+import {
+  markManagedNotificationAsReadForRole,
+  markManagedNotificationsAsReadForRole,
+  mergeManagedNotificationsForRole,
+  subscribeToManagedNotifications,
+} from '../../utils/notifications';
 import './EnrolledCourses.css';
 import { FiLogOut } from 'react-icons/fi';
 
@@ -197,6 +202,30 @@ function getCourseTitle(course) {
   return course.title || course.courseName || course.course_name || 'Untitled course';
 }
 
+function getCourseKey(course) {
+  return String(
+    course?.id ||
+      course?.courseId ||
+      course?.course_id ||
+      course?.code ||
+      course?.courseCode ||
+      course?.course_code ||
+      ''
+  ).trim();
+}
+
+function getCourseTimestamp(course) {
+  const rawDate =
+    course?.updatedAt ||
+    course?.updated_at ||
+    course?.createdAt ||
+    course?.created_at ||
+    '';
+  const timestamp = Date.parse(rawDate);
+
+  return Number.isFinite(timestamp) ? timestamp : 0;
+}
+
 function getProfessorDepartment(course) {
   return course.professorDepartment || course.professor_department || 'Department not set';
 }
@@ -241,9 +270,11 @@ export default function PublicCourses() {
 
   const [joinModalOpen, setJoinModalOpen] = useState(false);
   const [courseCode, setCourseCode] = useState('');
-  const [publicCourses, setPublicCourses] = useState(() =>
-    getPublicStudentCourses(),
-  );
+  const [publicCourses, setPublicCourses] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [dateSort, setDateSort] = useState('Recent');
+  const [titleSort, setTitleSort] = useState('A to Z');
+  const [activeSort, setActiveSort] = useState('date');
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -268,7 +299,9 @@ export default function PublicCourses() {
 
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
-  const [notifications, setNotifications] = useState(notificationItems);
+  const [notifications, setNotifications] = useState(() =>
+    mergeManagedNotificationsForRole('student', notificationItems),
+  );
   const savedUser = getSavedUser() || {};
   const savedStudentAccount = getStudentAccount(savedUser);
 
@@ -287,6 +320,76 @@ export default function PublicCourses() {
   const accountLabel = studentAccount.email
     ? 'Student account'
     : 'Account information unavailable';
+
+  const enrolledCourseKeys = useMemo(
+    () => new Set(enrolledCourses.map(getCourseKey).filter(Boolean)),
+    [enrolledCourses],
+  );
+
+  const visiblePublicCourses = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+
+    return publicCourses
+      .filter((course) => {
+        if (!query) {
+          return true;
+        }
+
+        return [
+          getCourseTitle(course),
+          course.code,
+          course.courseCode,
+          course.course_code,
+          course.instructor,
+          getProfessorDepartment(course),
+        ]
+          .join(' ')
+          .toLowerCase()
+          .includes(query);
+      })
+      .sort((firstCourse, secondCourse) => {
+        if (activeSort === 'title') {
+          const direction = titleSort === 'A to Z' ? 1 : -1;
+
+          return (
+            getCourseTitle(firstCourse).localeCompare(
+              getCourseTitle(secondCourse),
+            ) * direction
+          );
+        }
+
+        const direction = dateSort === 'Recent' ? -1 : 1;
+        const timestampDifference =
+          getCourseTimestamp(firstCourse) - getCourseTimestamp(secondCourse);
+
+        if (timestampDifference !== 0) {
+          return timestampDifference * direction;
+        }
+
+        return getCourseTitle(firstCourse).localeCompare(
+          getCourseTitle(secondCourse),
+        );
+      });
+  }, [
+    activeSort,
+    dateSort,
+    publicCourses,
+    searchQuery,
+    titleSort,
+  ]);
+
+  useEffect(() => {
+    const refreshNotifications = () => {
+      setNotifications((currentNotifications) =>
+        mergeManagedNotificationsForRole(
+          'student',
+          currentNotifications,
+        ),
+      );
+    };
+
+    return subscribeToManagedNotifications(refreshNotifications);
+  }, []);
 
   const handleLogout = () => {
     setProfileMenuOpen(false);
@@ -461,6 +564,7 @@ export default function PublicCourses() {
         }
       } catch (error) {
         if (active) {
+          setPublicCourses([]);
           setErrorMessage(
             error.message || 'Could not load public courses.',
           );
@@ -511,7 +615,7 @@ export default function PublicCourses() {
         }
 
         const response = await fetch(
-          `${API_BASE_URL}/courses/enrolled`,
+          `${API_BASE_URL}/courses/enrolled?summaryOnly=true`,
           {
             method: 'GET',
             headers: {
@@ -540,9 +644,7 @@ export default function PublicCourses() {
 
         if (!active) return;
 
-        setEnrolledCourses(
-          loadedCourses.map(normalizeCourse),
-        );
+        setEnrolledCourses(loadedCourses.map(normalizeCourse));
       } catch (error) {
         console.error(
           'Enrolled courses loading error:',
@@ -616,6 +718,19 @@ const confirmEnrollment = async (course) => {
       const enrolledCourse = await enrollStudentInCourseAsync(course);
       const nextCourse = enrolledCourse || course;
       const courseId = getCourseNavigationId(nextCourse);
+      const normalizedCourse = normalizeCourse(nextCourse);
+      const enrolledKey = getCourseKey(normalizedCourse);
+
+      setEnrolledCourses((currentCourses) => {
+        if (
+          enrolledKey &&
+          currentCourses.some((currentCourse) => getCourseKey(currentCourse) === enrolledKey)
+        ) {
+          return currentCourses;
+        }
+
+        return [normalizedCourse, ...currentCourses];
+      });
 
       await Swal.fire({
         title: 'Enrolled!',
@@ -685,6 +800,20 @@ const confirmEnrollment = async (course) => {
     }
 
     await enrollStudentInCourseAsync(course);
+    const enrolledKey = getCourseKey(course);
+
+    setEnrolledCourses((currentCourses) => {
+      const normalizedCourse = normalizeCourse(course);
+
+      if (
+        enrolledKey &&
+        currentCourses.some((currentCourse) => getCourseKey(currentCourse) === enrolledKey)
+      ) {
+        return currentCourses;
+      }
+
+      return [normalizedCourse, ...currentCourses];
+    });
 
     closeJoinModal();
 
@@ -730,6 +859,8 @@ const confirmEnrollment = async (course) => {
   ).length;
 
   const markAllNotificationsAsRead = () => {
+    markManagedNotificationsAsReadForRole('student');
+
     setNotifications((currentNotifications) =>
       currentNotifications.map((notification) => ({
         ...notification,
@@ -739,6 +870,8 @@ const confirmEnrollment = async (course) => {
   };
 
   const openNotification = (notificationId) => {
+    markManagedNotificationAsReadForRole('student', notificationId);
+
     setNotifications((currentNotifications) =>
       currentNotifications.map((notification) =>
         notification.id === notificationId
@@ -969,6 +1102,8 @@ const confirmEnrollment = async (course) => {
             <input
               type="search"
               placeholder="Search your course"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
             />
 
             <span
@@ -1387,10 +1522,20 @@ const confirmEnrollment = async (course) => {
 
             <SortToggle
               options={['Recent', 'Oldest']}
+              value={dateSort}
+              onChange={(value) => {
+                setDateSort(value);
+                setActiveSort('date');
+              }}
             />
 
             <SortToggle
               options={['A to Z', 'Z to A']}
+              value={titleSort}
+              onChange={(value) => {
+                setTitleSort(value);
+                setActiveSort('title');
+              }}
             />
           </div>
         </section>
@@ -1407,81 +1552,99 @@ const confirmEnrollment = async (course) => {
             <div className="student-empty-state">
               {errorMessage}
             </div>
-          ) : publicCourses.length === 0 ? (
+          ) : visiblePublicCourses.length === 0 ? (
             <div className="student-empty-state">
-              No public courses available yet.
+              {publicCourses.length === 0
+                ? 'No public courses available yet.'
+                : 'No public courses match your search.'}
             </div>
           ) : (
-            publicCourses.map((course) => (
-              <article
-                key={
-                  course.id ||
-                  course.course_id ||
-                  course.code
-                }
-                className="course-folder public-course-folder"
-              >
-                <button
-                  type="button"
-                  className="add-course-button"
-                  aria-label={`Add ${
-                    getCourseTitle(course)
-                  }`}
-                  onClick={() =>
-                    confirmEnrollment(course)
+            visiblePublicCourses.map((course) => {
+              const courseEnrolled = enrolledCourseKeys.has(getCourseKey(course));
+
+              return (
+                <article
+                  key={
+                    course.id ||
+                    course.course_id ||
+                    course.code
                   }
+                  className="course-folder public-course-folder"
                 >
-                  +
-                </button>
-
-                <div className="course-card-body">
-                  <h2>
-                    {getCourseTitle(course)}
-                  </h2>
-                </div>
-
-                <div className="course-card-footer">
-                  <Avatar
-                    src={
-                      course.professorProfileImage ||
-                      course.professor_profile_image
-                        ? resolveProfileImage(
-                            course.professorProfileImage ||
-                              course.professor_profile_image,
-                          )
-                        : undefined
-                    }
-                    alt={`${
-                      course.instructor ||
-                      'Professor'
-                    }'s profile`}
-                  />
-
-                  <div className="public-course-meta">
-                    <span>
-                      {course.instructor ||
-                        'Professor'}
-                    </span>
-
-                    <small>
-                      {getProfessorDepartment(
-                        course,
-                      )}
-                    </small>
-                  </div>
-
                   <button
                     type="button"
-                    className="start-learning-button"
-                    onClick={() =>
-                      confirmEnrollment(course)
+                    className={`add-course-button ${
+                      courseEnrolled ? 'enrolled-course-status' : ''
+                    }`}
+                    aria-label={
+                      courseEnrolled
+                        ? `Already enrolled in ${getCourseTitle(course)}`
+                        : `Add ${getCourseTitle(course)}`
                     }
+                    disabled={courseEnrolled}
+                    onClick={() => {
+                      if (!courseEnrolled) {
+                        confirmEnrollment(course);
+                      }
+                    }}
                   >
-                    Enroll
+                    {courseEnrolled ? 'Enrolled' : '+'}
                   </button>
-                </div>
-              </article>
-            ))
+
+                  <div className="course-card-body">
+                    <h2>
+                      {getCourseTitle(course)}
+                    </h2>
+                  </div>
+
+                  <div className="course-card-footer">
+                    <Avatar
+                      src={
+                        course.professorProfileImage ||
+                        course.professor_profile_image
+                          ? resolveProfileImage(
+                              course.professorProfileImage ||
+                                course.professor_profile_image,
+                            )
+                          : undefined
+                      }
+                      alt={`${
+                        course.instructor ||
+                        'Professor'
+                      }'s profile`}
+                    />
+
+                    <div className="public-course-meta">
+                      <span>
+                        {course.instructor ||
+                          'Professor'}
+                      </span>
+
+                      <small>
+                        {getProfessorDepartment(
+                          course,
+                        )}
+                      </small>
+                    </div>
+
+                    <button
+                      type="button"
+                      className={`start-learning-button ${
+                        courseEnrolled ? 'enrolled-course-status' : ''
+                      }`}
+                      disabled={courseEnrolled}
+                      onClick={() => {
+                        if (!courseEnrolled) {
+                          confirmEnrollment(course);
+                        }
+                      }}
+                    >
+                      {courseEnrolled ? 'Enrolled' : 'Enroll'}
+                    </button>
+                  </div>
+                </article>
+              );
+            })
           )}
         </section>
       </main>

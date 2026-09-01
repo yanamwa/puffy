@@ -487,6 +487,17 @@
   background: #fbfaff;
 }
 
+.monitor-empty-state {
+  padding: 28px;
+  border: 1px solid #e5deeb;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #756681;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+}
+
 .monitor-kpi-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -2231,6 +2242,25 @@
 #root .dashboard-course-table tbody tr:last-child td,
 #root .dashboard-attention-table tbody tr:last-child td {
   border-bottom: 0;
+}
+
+#root .dashboard-empty-row td,
+#root .dashboard-empty-state {
+  padding: 22px 18px;
+  color: var(--professor-muted);
+  font-size: 13px !important;
+  font-weight: 700;
+  text-align: center;
+}
+
+#root .dashboard-empty-state {
+  border-top: 1px solid var(--professor-soft-line);
+  background: #fbfbfc;
+}
+
+#root .dashboard-empty-state.compact {
+  border-top: 0;
+  background: transparent;
 }
 
 #root .dashboard-course-table td:first-child strong,

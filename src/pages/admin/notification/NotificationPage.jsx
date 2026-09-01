@@ -1,9 +1,20 @@
 import { useEffect, useMemo, useState } from 'react';
 import { FiChevronDown, FiTrash2 } from 'react-icons/fi';
+import { useAuth } from '../../../context/AuthContext';
+import {
+  createManagedNotification,
+  deleteManagedNotificationFromServer,
+  fetchManagedNotificationsFromServer,
+  formatNotificationCreator,
+  formatNotificationRoleLabel,
+  formatNotificationTarget,
+  managedNotificationTargetOptions,
+  readManagedNotifications,
+  saveManagedNotificationToServer,
+  subscribeToManagedNotifications,
+  writeManagedNotifications,
+} from '../../../utils/notifications';
 import '../Features/AdminFeaturePages.css';
-
-const STORAGE_KEY = 'puffy-notifications-announcements';
-const LEGACY_STORAGE_KEY = 'admin-notifications';
 
 const defaultCopy = {
   pageTitle: 'Notifications & Announcements',
@@ -26,41 +37,6 @@ const announcementCopy = {
   postLabel: 'Post Announcement',
 };
 
-const seedNotifications = [
-  {
-    id: 1,
-    title: 'Admin Notice',
-    message: 'Administrative updates can be posted here.',
-    target: 'admin',
-    createdAt: '2026-06-08T08:33:00',
-  },
-  {
-    id: 2,
-    title: 'User Announcement',
-    message: 'General user announcements can be sent from this page.',
-    target: 'user',
-    createdAt: '2026-06-08T08:33:00',
-  },
-  {
-    id: 3,
-    title: 'Welcome',
-    message: 'Welcome to PuffyBrain.',
-    target: 'all',
-    createdAt: '2026-06-08T08:33:00',
-  },
-];
-
-function readNotifications() {
-  try {
-    const saved =
-      localStorage.getItem(STORAGE_KEY) ||
-      localStorage.getItem(LEGACY_STORAGE_KEY);
-    return saved ? JSON.parse(saved) : seedNotifications;
-  } catch {
-    return seedNotifications;
-  }
-}
-
 function formatDate(value) {
   const date = new Date(value);
 
@@ -76,29 +52,121 @@ function formatDate(value) {
   });
 }
 
-function formatTarget(value) {
-  const labels = {
-    all: 'All',
-    user: 'Users',
-    student: 'Students',
-    professor: 'Professors',
-    admin: 'Admins',
-  };
+function readStoredSessionUser() {
+  const storageSources = [
+    typeof localStorage === 'undefined' ? null : localStorage,
+    typeof sessionStorage === 'undefined' ? null : sessionStorage,
+  ];
 
-  return labels[value] || value;
+  for (const storage of storageSources) {
+    if (!storage) continue;
+
+    const candidates = [
+      storage.getItem('puffy-user'),
+      storage.getItem('user'),
+      storage.getItem('currentUser'),
+    ];
+
+    for (const candidate of candidates) {
+      if (!candidate) continue;
+
+      try {
+        return JSON.parse(candidate);
+      } catch {
+        continue;
+      }
+    }
+  }
+
+  return null;
+}
+
+function getUserDisplayName(user = {}) {
+  return String(
+    user.displayName ||
+      user.display_name ||
+      user.fullName ||
+      user.full_name ||
+      user.name ||
+      user.username ||
+      '',
+  ).replace(/^@+/, '');
+}
+
+function getAnnouncementCreator(authUser, variant) {
+  const user = authUser || readStoredSessionUser() || {};
+  const role = variant === 'announcement' ? 'superAdmin' : 'admin';
+  const name = getUserDisplayName(user) || formatNotificationRoleLabel(role);
+
+  return {
+    name,
+    role,
+  };
 }
 
 export default function NotificationPage({ variant = 'notification' }) {
+  const { user: authUser } = useAuth() || {};
   const copy = variant === 'announcement' ? announcementCopy : defaultCopy;
-  const [notifications, setNotifications] = useState(() => readNotifications());
+  const creator = useMemo(
+    () => getAnnouncementCreator(authUser, variant),
+    [authUser, variant],
+  );
+  const [notifications, setNotifications] = useState(() => readManagedNotifications());
   const [title, setTitle] = useState('');
   const [message, setMessage] = useState('');
   const [target, setTarget] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
+  const [isPosting, setIsPosting] = useState(false);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(notifications));
+    writeManagedNotifications(notifications);
   }, [notifications]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function syncNotificationsFromServer() {
+      try {
+        const nextNotifications = await fetchManagedNotificationsFromServer();
+
+        if (!isMounted) return;
+
+        setNotifications((currentNotifications) => {
+          const currentValue = JSON.stringify(currentNotifications);
+          const nextValue = JSON.stringify(nextNotifications);
+
+          return currentValue === nextValue
+            ? currentNotifications
+            : nextNotifications;
+        });
+      } catch (error) {
+        console.warn('Unable to sync notifications from the server.', error);
+      }
+    }
+
+    syncNotificationsFromServer();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const refreshNotifications = () => {
+      const nextNotifications = readManagedNotifications();
+
+      setNotifications((currentNotifications) => {
+        const currentValue = JSON.stringify(currentNotifications);
+        const nextValue = JSON.stringify(nextNotifications);
+
+        return currentValue === nextValue
+          ? currentNotifications
+          : nextNotifications;
+      });
+    };
+
+    return subscribeToManagedNotifications(refreshNotifications);
+  }, []);
 
   const sortedNotifications = useMemo(() => {
     return [...notifications].sort((a, b) => {
@@ -109,7 +177,7 @@ export default function NotificationPage({ variant = 'notification' }) {
     });
   }, [notifications, sortBy]);
 
-  const addNotification = (event) => {
+  const addNotification = async (event) => {
     event.preventDefault();
 
     if (!title.trim() || !message.trim()) {
@@ -117,27 +185,48 @@ export default function NotificationPage({ variant = 'notification' }) {
       return;
     }
 
-    setNotifications((current) => [
-      {
-        id: Date.now(),
-        title: title.trim(),
-        message: message.trim(),
-        target,
-        createdAt: new Date().toISOString(),
-      },
-      ...current,
-    ]);
+    const nextNotification = createManagedNotification({
+      title: title.trim(),
+      message: message.trim(),
+      target,
+      createdByName: creator.name,
+      createdByRole: creator.role,
+    });
 
-    setTitle('');
-    setMessage('');
-    setTarget('all');
+    setIsPosting(true);
+
+    try {
+      const nextNotifications = await saveManagedNotificationToServer(
+        nextNotification,
+      );
+
+      setNotifications(nextNotifications);
+      setTitle('');
+      setMessage('');
+      setTarget('all');
+    } catch (error) {
+      console.warn('Unable to save notification to the server.', error);
+      setNotifications([nextNotification]);
+      setTitle('');
+      setMessage('');
+      setTarget('all');
+    } finally {
+      setIsPosting(false);
+    }
   };
 
-  const deleteNotification = (id) => {
+  const deleteNotification = async (id) => {
     const ok = window.confirm(copy.deleteConfirm);
     if (!ok) return;
 
-    setNotifications((current) => current.filter((item) => item.id !== id));
+    try {
+      const nextNotifications = await deleteManagedNotificationFromServer(id);
+
+      setNotifications(nextNotifications);
+    } catch (error) {
+      console.warn('Unable to delete notification from the server.', error);
+      setNotifications((current) => current.filter((item) => item.id !== id));
+    }
   };
 
   return (
@@ -172,15 +261,20 @@ export default function NotificationPage({ variant = 'notification' }) {
             <label className="feature-field">
               <span>Send To</span>
               <select value={target} onChange={(event) => setTarget(event.target.value)}>
-                <option value="all">All</option>
-                <option value="student">Students</option>
-                <option value="professor">Professors</option>
-                <option value="admin">Admins</option>
+                {managedNotificationTargetOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
               </select>
             </label>
 
-            <button className="primary-feature-btn" type="submit">
-              {copy.postLabel}
+            <button
+              className="primary-feature-btn"
+              type="submit"
+              disabled={isPosting}
+            >
+              {isPosting ? 'Posting...' : copy.postLabel}
             </button>
           </div>
         </form>
@@ -210,10 +304,15 @@ export default function NotificationPage({ variant = 'notification' }) {
                   <article className="notification-item" key={item.id}>
                     <div className="notification-item-top">
                       <h3>{item.title}</h3>
-                      <span>{formatTarget(item.target)}</span>
+                      <span>{formatNotificationTarget(item.target)}</span>
                     </div>
                     <p>{item.message}</p>
-                    <small>{formatDate(item.createdAt)}</small>
+                    <div className="notification-item-meta">
+                      <small className="notification-creator-meta">
+                        {formatNotificationCreator(item)}
+                      </small>
+                      <small>{formatDate(item.createdAt)}</small>
+                    </div>
                     <button
                       className="danger-feature-btn"
                       type="button"

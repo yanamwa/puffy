@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
 import { useAuth } from '../../context/AuthContext';
@@ -79,6 +79,14 @@ const emptyCourse = {
   contentModules: [],
   students: 0,
 };
+
+function createEmptyCourseDraft() {
+  return {
+    ...emptyCourse,
+    code: createCourseCode(),
+    contentModules: [],
+  };
+}
 
 function limit(value, max) {
   return String(value || '').slice(0, max);
@@ -460,6 +468,7 @@ function getStoredUser() {
 
 export default function AddModule() {
   const { id } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -469,10 +478,7 @@ export default function AddModule() {
     useState(() =>
       isEditing
         ? emptyCourse
-        : {
-            ...emptyCourse,
-            code: createCourseCode(),
-          }
+        : createEmptyCourseDraft()
     );
 
   const [loading, setLoading] =
@@ -505,6 +511,18 @@ export default function AddModule() {
     activePageIndexes,
     setActivePageIndexes,
   ] = useState({});
+
+  useEffect(() => {
+    if (isEditing) {
+      return;
+    }
+
+    setForm(createEmptyCourseDraft());
+    setExpandedModuleId(null);
+    setModuleFiles({});
+    setActivePageIndexes({});
+    setLoading(false);
+  }, [id, isEditing, location.key]);
 
   useEffect(() => {
     if (!isEditing) {
@@ -1595,9 +1613,22 @@ export default function AddModule() {
       }
 
       const normalizedCode =
-        (form.code || createCourseCode())
+        (form.code.trim() || createCourseCode())
           .trim()
           .toUpperCase();
+      const courseTitle =
+        form.title.trim();
+      const courseSummary =
+        form.summary.trim();
+      const courseSubject =
+        form.subject.trim();
+      const learningObjectives =
+        form.contentModules
+          .map((module) =>
+            module.learningObjectives.trim()
+          )
+          .filter(Boolean)
+          .join('\n\n');
 
       const storedUser =
         getStoredUser();
@@ -1639,118 +1670,32 @@ export default function AddModule() {
         currentProfessor.user_id ||
         null;
 
-      const flattenedLessonPages =
-        form.contentModules.flatMap(
-          (module, moduleIndex) =>
-            module.lessonPages.map(
-              (page, pageIndex) => ({
-                ...page,
-
-                moduleId:
-                  module.id,
-
-                module_id:
-                  module.id,
-
-                moduleTitle:
-                  module.title,
-
-                module_title:
-                  module.title,
-
-                moduleDescription:
-                  module.description,
-
-                module_description:
-                  module.description,
-
-                moduleLearningObjectives:
-                  module.learningObjectives,
-
-                module_learning_objectives:
-                  module.learningObjectives,
-
-                moduleIndex,
-
-                module_index:
-                  moduleIndex,
-
-                pageIndex,
-
-                page_index:
-                  pageIndex,
-              })
-            )
-        );
-
-      const flattenedQuizItems =
-        form.contentModules.flatMap(
-          (module, moduleIndex) =>
-            module.quizItems.map(
-              (item) => ({
-                ...item,
-
-                moduleId:
-                  module.id,
-
-                module_id:
-                  module.id,
-
-                moduleTitle:
-                  module.title,
-
-                module_title:
-                  module.title,
-
-                moduleDescription:
-                  module.description,
-
-                module_description:
-                  module.description,
-
-                moduleLearningObjectives:
-                  module.learningObjectives,
-
-                module_learning_objectives:
-                  module.learningObjectives,
-
-                moduleIndex,
-
-                module_index:
-                  moduleIndex,
-              })
-            )
-        );
-
       const payload = {
-        ...form,
-
-        title:
-          form.title.trim(),
+        title: courseTitle,
+        courseName: courseTitle,
+        course_name: courseTitle,
 
         code: normalizedCode,
+        courseCode: normalizedCode,
+        course_code: normalizedCode,
 
-        summary:
-          form.summary.trim(),
+        summary: courseSummary,
+        description: courseSummary,
 
-        subject:
-          form.subject.trim(),
+        subject: courseSubject,
 
-        learningObjectives:
-          form.contentModules
-            .map((module) =>
-              module.learningObjectives.trim()
-            )
-            .filter(Boolean)
-            .join('\n\n'),
+        status:
+          form.status === 'published'
+            ? 'published'
+            : 'draft',
+
+        contentModules:
+          form.contentModules,
+
+        learningObjectives,
 
         learning_objectives:
-          form.contentModules
-            .map((module) =>
-              module.learningObjectives.trim()
-            )
-            .filter(Boolean)
-            .join('\n\n'),
+          learningObjectives,
 
         visibility:
           form.visibility ===
@@ -1770,12 +1715,6 @@ export default function AddModule() {
 
         quizzes:
           totalQuizItems,
-
-        lessonPages:
-          flattenedLessonPages,
-
-        quizItems:
-          flattenedQuizItems,
 
         updatedAt:
           new Date()
@@ -1933,7 +1872,7 @@ export default function AddModule() {
                   styles.required
                 }
               >
-                Auto-generated
+                *Required
               </span>
             </label>
 

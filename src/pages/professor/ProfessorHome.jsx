@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   FiArrowRight,
@@ -13,9 +13,10 @@ import {
 } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
 import {
-  professorCoursesSeed,
+  PROFESSOR_COURSES_EVENT,
   readProfessorCourses,
 } from './professorData';
+import { fetchCourses } from '../../services/courseApi.js';
 import './ProfessorLayout.css';
 
 const coursePerformanceSeed = {
@@ -193,6 +194,10 @@ function normalizeDashboardCourse(course, index) {
 }
 
 function buildActivityItems(courses) {
+  if (courses.length === 0) {
+    return [];
+  }
+
   const firstCourse = courses[0];
   const secondCourse = courses[1] || firstCourse;
   const thirdCourse = courses[2] || firstCourse;
@@ -257,14 +262,45 @@ function MasteryBar({ mastery }) {
 export default function ProfessorHome() {
   const { user } = useAuth();
   const [selectedCourseId, setSelectedCourseId] = useState('');
+  const [storedCourses, setStoredCourses] = useState(() =>
+    readProfessorCourses().filter((course) => !course.archived)
+  );
+
+  useEffect(() => {
+    let active = true;
+
+    const loadCourses = async () => {
+      try {
+        const courses = await fetchCourses();
+
+        if (active) {
+          setStoredCourses(courses.filter((course) => !course.archived));
+        }
+      } catch (error) {
+        console.error('Professor dashboard course load error:', error);
+      }
+    };
+
+    const handleCoursesUpdated = (event) => {
+      const nextCourses = Array.isArray(event.detail?.courses)
+        ? event.detail.courses
+        : readProfessorCourses();
+
+      setStoredCourses(nextCourses.filter((course) => !course.archived));
+    };
+
+    loadCourses();
+    window.addEventListener(PROFESSOR_COURSES_EVENT, handleCoursesUpdated);
+
+    return () => {
+      active = false;
+      window.removeEventListener(PROFESSOR_COURSES_EVENT, handleCoursesUpdated);
+    };
+  }, []);
 
   const dashboardCourses = useMemo(() => {
-    const courses = readProfessorCourses();
-    const activeCourses = courses.filter((course) => !course.archived);
-    const visibleCourses = activeCourses.length ? activeCourses : professorCoursesSeed;
-
-    return visibleCourses.map(normalizeDashboardCourse);
-  }, []);
+    return storedCourses.map(normalizeDashboardCourse);
+  }, [storedCourses]);
 
   const selectedCourse =
     dashboardCourses.find((course) => course.id === selectedCourseId) ||
@@ -370,28 +406,34 @@ export default function ProfessorHome() {
               </tr>
             </thead>
             <tbody>
-              {overviewCourses.map((course) => (
-                <tr key={course.id}>
-                  <td>
-                    <strong>{course.code}</strong>
-                    <span>{course.title}</span>
-                  </td>
-                  <td>{course.section}</td>
-                  <td>{course.students}</td>
-                  <td>{course.modules}</td>
-                  <td>{course.publishedQuizzes}</td>
-                  <td>
-                    <span className="dashboard-mastery-pill">
-                      {course.averageMastery}%
-                    </span>
-                  </td>
-                  <td>
-                    <Link className="dashboard-table-action" to={course.managePath}>
-                      Manage Course
-                    </Link>
-                  </td>
+              {overviewCourses.length === 0 ? (
+                <tr className="dashboard-empty-row">
+                  <td colSpan="7">No courses yet. Add a course to start.</td>
                 </tr>
-              ))}
+              ) : (
+                overviewCourses.map((course) => (
+                  <tr key={course.id}>
+                    <td>
+                      <strong>{course.code}</strong>
+                      <span>{course.title}</span>
+                    </td>
+                    <td>{course.section}</td>
+                    <td>{course.students}</td>
+                    <td>{course.modules}</td>
+                    <td>{course.publishedQuizzes}</td>
+                    <td>
+                      <span className="dashboard-mastery-pill">
+                        {course.averageMastery}%
+                      </span>
+                    </td>
+                    <td>
+                      <Link className="dashboard-table-action" to={course.managePath}>
+                        Manage Course
+                      </Link>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -403,62 +445,70 @@ export default function ProfessorHome() {
             <h2>Class Performance</h2>
             <p>Quiz scores, completion rates, and mastery levels by course.</p>
           </div>
-          <label className="dashboard-course-select">
-            <span>Course</span>
-            <select
-              value={selectedCourse?.id || ''}
-              onChange={(event) => setSelectedCourseId(event.target.value)}
-            >
-              {dashboardCourses.map((course) => (
-                <option key={course.id} value={course.id}>
-                  {course.code}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-
-        <div className="dashboard-chart-grid">
-          <div className="dashboard-bars" aria-label="Average quiz scores and completion">
-            {dashboardCourses.map((course) => (
-              <div className="dashboard-bar-row" key={course.id}>
-                <span>{course.code}</span>
-                <div>
-                  <i
-                    className="score"
-                    style={{ width: `${course.averageQuizScore}%` }}
-                  />
-                  <i
-                    className="completion"
-                    style={{ width: `${course.completionRate}%` }}
-                  />
-                </div>
-                <strong>{course.averageQuizScore}%</strong>
-              </div>
-            ))}
-            <div className="dashboard-chart-legend">
-              <span>
-                <i className="score" />
-                Average quiz score
-              </span>
-              <span>
-                <i className="completion" />
-                Completion rate
-              </span>
-            </div>
-          </div>
-
-          {selectedCourse && (
-            <div className="dashboard-selected-course">
-              <div>
-                <span>{selectedCourse.code}</span>
-                <strong>{selectedCourse.averageMastery}%</strong>
-                <p>Average class mastery</p>
-              </div>
-              <MasteryBar mastery={selectedCourse.mastery} />
-            </div>
+          {dashboardCourses.length > 0 && (
+            <label className="dashboard-course-select">
+              <span>Course</span>
+              <select
+                value={selectedCourse?.id || ''}
+                onChange={(event) => setSelectedCourseId(event.target.value)}
+              >
+                {dashboardCourses.map((course) => (
+                  <option key={course.id} value={course.id}>
+                    {course.code}
+                  </option>
+                ))}
+              </select>
+            </label>
           )}
         </div>
+
+        {dashboardCourses.length === 0 ? (
+          <div className="dashboard-empty-state">
+            No class performance yet. Create a course to start collecting data.
+          </div>
+        ) : (
+          <div className="dashboard-chart-grid">
+            <div className="dashboard-bars" aria-label="Average quiz scores and completion">
+              {dashboardCourses.map((course) => (
+                <div className="dashboard-bar-row" key={course.id}>
+                  <span>{course.code}</span>
+                  <div>
+                    <i
+                      className="score"
+                      style={{ width: `${course.averageQuizScore}%` }}
+                    />
+                    <i
+                      className="completion"
+                      style={{ width: `${course.completionRate}%` }}
+                    />
+                  </div>
+                  <strong>{course.averageQuizScore}%</strong>
+                </div>
+              ))}
+              <div className="dashboard-chart-legend">
+                <span>
+                  <i className="score" />
+                  Average quiz score
+                </span>
+                <span>
+                  <i className="completion" />
+                  Completion rate
+                </span>
+              </div>
+            </div>
+
+            {selectedCourse && (
+              <div className="dashboard-selected-course">
+                <div>
+                  <span>{selectedCourse.code}</span>
+                  <strong>{selectedCourse.averageMastery}%</strong>
+                  <p>Average class mastery</p>
+                </div>
+                <MasteryBar mastery={selectedCourse.mastery} />
+              </div>
+            )}
+          </div>
+        )}
       </section>
 
       <div className="dashboard-main-grid attention-grid">
@@ -486,19 +536,25 @@ export default function ProfessorHome() {
                 </tr>
               </thead>
               <tbody>
-                {studentsNeedingAttention.map((student) => (
-                  <tr key={`${student.course}-${student.name}`}>
-                    <td>{student.name}</td>
-                    <td>{student.course}</td>
-                    <td>{student.concern}</td>
-                    <td>{student.latestScore}%</td>
-                    <td>
-                      <Link className="dashboard-table-action" to="/professor/students">
-                        View Progress
-                      </Link>
-                    </td>
+                {studentsNeedingAttention.length === 0 ? (
+                  <tr className="dashboard-empty-row">
+                    <td colSpan="5">No student attention records yet.</td>
                   </tr>
-                ))}
+                ) : (
+                  studentsNeedingAttention.map((student) => (
+                    <tr key={`${student.course}-${student.name}`}>
+                      <td>{student.name}</td>
+                      <td>{student.course}</td>
+                      <td>{student.concern}</td>
+                      <td>{student.latestScore}%</td>
+                      <td>
+                        <Link className="dashboard-table-action" to="/professor/students">
+                          View Progress
+                        </Link>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
@@ -516,20 +572,26 @@ export default function ProfessorHome() {
             </Link>
           </div>
           <div className="dashboard-timeline">
-            {activityItems.map((activity) => {
-              const Icon = activity.icon;
-              return (
-                <div className="dashboard-timeline-item" key={`${activity.time}-${activity.text}`}>
-                  <span>
-                    <Icon />
-                  </span>
-                  <div>
-                    <p>{activity.text}</p>
-                    <time>{activity.time}</time>
+            {activityItems.length === 0 ? (
+              <div className="dashboard-empty-state compact">
+                No recent course activity yet.
+              </div>
+            ) : (
+              activityItems.map((activity) => {
+                const Icon = activity.icon;
+                return (
+                  <div className="dashboard-timeline-item" key={`${activity.time}-${activity.text}`}>
+                    <span>
+                      <Icon />
+                    </span>
+                    <div>
+                      <p>{activity.text}</p>
+                      <time>{activity.time}</time>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
         </aside>
       </div>

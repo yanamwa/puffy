@@ -2578,6 +2578,30 @@ a.course-folder:focus-visible {
   font-weight: 400;
 }
 
+.add-course-button.enrolled-course-status {
+  width: 82px;
+  border-radius: 999px;
+  background: #858d9b;
+  box-shadow: 2px 3px 0 #626873;
+  cursor: default;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.start-learning-button.enrolled-course-status {
+  background: #858d9b;
+  background-color: #858d9b;
+  box-shadow: 2px 3px 0 #626873;
+  cursor: default;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.add-course-button.enrolled-course-status:disabled,
+.start-learning-button.enrolled-course-status:disabled {
+  opacity: 1;
+}
+
 .enroll-confirm-btn {
   background-color: #198754;
   color: white;

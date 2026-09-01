@@ -1,5 +1,7 @@
+import { useEffect } from "react";
 import { FiBell, FiCheckCircle } from "react-icons/fi";
 import styles from "../pages/course/Learning_Module.module.css";
+import { fetchManagedNotificationsFromServer } from "../utils/notifications";
 
 export default function UserHeader({
   searchQuery,
@@ -15,6 +17,10 @@ export default function UserHeader({
   setProfileDropdownOpen,
   handleLogout,
 }) {
+  useEffect(() => {
+    fetchManagedNotificationsFromServer().catch(() => {});
+  }, []);
+
   return (
     <header className={styles.headerContainer}>
       <form className={styles.searchBar} onSubmit={handleSearchSubmit}>
@@ -94,7 +100,8 @@ export default function UserHeader({
                   </div>
                 ) : (
                   notifications.slice(0, 5).map((notification, index) => {
-                    const isUnread = notification.status === "unread";
+                    const isUnread =
+                      notification.status === "unread" || notification.unread;
 
                     return (
                       <article
@@ -114,7 +121,10 @@ export default function UserHeader({
                           <strong>{notification.title || "Notification"}</strong>
                           <span>{notification.message || notification.body || ""}</span>
                           <small>
-                            {notification.created_at || notification.date || ""}
+                            {notification.time ||
+                              notification.created_at ||
+                              notification.date ||
+                              ""}
                           </small>
                         </span>
 

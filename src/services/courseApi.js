@@ -1,7 +1,9 @@
 import { API_BASE } from "../config.js";
 import {
+  getCurrentProfessorIdentity,
   readProfessorCourses,
   saveProfessorCourses,
+  stampCourseForProfessor,
 } from "../pages/professor/professorData.js";
 
 const COURSE_REQUEST_TIMEOUT_MS = 5000;
@@ -29,6 +31,29 @@ function readList(...values) {
   }
 
   return [];
+}
+
+function getStoredToken() {
+  return (
+    localStorage.getItem("puffy-token") ||
+    localStorage.getItem("token") ||
+    localStorage.getItem("authToken") ||
+    sessionStorage.getItem("puffy-token") ||
+    sessionStorage.getItem("token") ||
+    sessionStorage.getItem("authToken") ||
+    ""
+  );
+}
+
+function getAuthHeaders(headers = {}) {
+  const token = getStoredToken();
+  const nextHeaders = { ...headers };
+
+  if (token) {
+    nextHeaders.Authorization = `Bearer ${token}`;
+  }
+
+  return nextHeaders;
 }
 
 function normalizeContentModule(module, index) {
@@ -178,8 +203,9 @@ function canUseLocalWriteFallback(error) {
 function saveLocalCourse(course) {
   const courses = readProfessorCourses().map(normalizeLocalCourse);
   const hasId = course.id !== undefined && course.id !== null && course.id !== "";
+  const professor = getCurrentProfessorIdentity();
   const normalizedCourse = normalizeLocalCourse({
-    ...course,
+    ...stampCourseForProfessor(course, professor),
     id: hasId ? course.id : `local-${Date.now()}`,
     updatedAt: course.updatedAt || new Date().toISOString().slice(0, 10),
   });
@@ -249,7 +275,7 @@ async function parseResponse(response) {
   return data;
 }
 
-async function requestCourse(url, options) {
+async function requestCourse(url, options = {}) {
   let response;
   const controller = new AbortController();
   const timeoutId = globalThis.setTimeout(
@@ -260,6 +286,7 @@ async function requestCourse(url, options) {
   try {
     response = await fetch(url, {
       ...options,
+      headers: getAuthHeaders(options.headers),
       signal: controller.signal,
     });
   } catch (fetchError) {
@@ -277,7 +304,7 @@ async function requestCourse(url, options) {
   return parseResponse(response);
 }
 
-export async function fetchCourses(params = {}) {
+export async function fetchCourses(params = {}, options = {}) {
   const query = new URLSearchParams();
 
   Object.entries(params).forEach(([key, value]) => {
@@ -296,6 +323,10 @@ export async function fetchCourses(params = {}) {
 
     return data.courses || data.modules || [];
   } catch (error) {
+    if (options.fallback === false) {
+      throw error;
+    }
+
     console.warn("Using local course data:", error.message);
     return filterLocalCourses(readProfessorCourses(), params);
   }

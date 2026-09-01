@@ -369,8 +369,6 @@ export default function AppRoutes() {
           element={<StudentProfile />} 
           />
 
-        </Route>
-
           {/* ==========================
               COURSE STUDY FLOW
           ========================== */}
@@ -433,6 +431,8 @@ export default function AppRoutes() {
           <Route path="/random-modes/deck/:deckId" element={<MixedModeQuiz />} />
           <Route path="/survival/lesson/:lessonId" element={<MixedModeQuiz />} />
           <Route path="/survival/deck/:deckId" element={<MixedModeQuiz />} />
+
+        </Route>
 
         {/* ==========================
             DEFAULT ROUTE

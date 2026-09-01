@@ -336,13 +336,28 @@ async function fetchModuleContent(contentId) {
 
 async function findCourseByIdOrCode(contentId) {
   const normalizedId = String(contentId || "").trim().toLowerCase();
-  const courses = await fetchCourses({ includeArchived: true });
+  const courses = await fetchCourses({ includeArchived: true, summaryOnly: true });
 
-  return courses.find((course) => {
+  const matchedCourse = courses.find((course) => {
     const id = String(course.id || course.course_id || "").trim().toLowerCase();
     const code = String(course.code || course.courseCode || "").trim().toLowerCase();
     return id === normalizedId || code === normalizedId;
   });
+
+  if (!matchedCourse) return null;
+
+  const detailId =
+    matchedCourse.id ||
+    matchedCourse.course_id ||
+    matchedCourse.code ||
+    matchedCourse.courseCode ||
+    contentId;
+
+  try {
+    return await fetchCourse(detailId);
+  } catch {
+    return matchedCourse;
+  }
 }
 
 export async function fetchCourseContent(contentId) {

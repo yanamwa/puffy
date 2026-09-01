@@ -8,6 +8,12 @@ import {
   enrollStudentInCourseAsync,
   findJoinableCourseByCodeAsync,
 } from './studentCourseData';
+import {
+  markManagedNotificationAsReadForRole,
+  markManagedNotificationsAsReadForRole,
+  mergeManagedNotificationsForRole,
+  subscribeToManagedNotifications,
+} from '../../utils/notifications';
 
 import './EnrolledCourses.css';
 import { FiLogOut } from 'react-icons/fi';
@@ -357,7 +363,19 @@ export default function StudentSettings() {
   const [
     notifications,
     setNotifications,
-  ] = useState(notificationItems);
+  ] = useState(() =>
+    mergeManagedNotificationsForRole('student', notificationItems)
+  );
+
+  useEffect(() => {
+    const refreshNotifications = () => {
+      setNotifications((currentNotifications) =>
+        mergeManagedNotificationsForRole('student', currentNotifications)
+      );
+    };
+
+    return subscribeToManagedNotifications(refreshNotifications);
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -896,6 +914,8 @@ export default function StudentSettings() {
 
   const markAllNotificationsAsRead =
     () => {
+      markManagedNotificationsAsReadForRole('student');
+
       setNotifications(
         (currentNotifications) =>
           currentNotifications.map(
@@ -910,6 +930,8 @@ export default function StudentSettings() {
   const openNotification = (
     notificationId,
   ) => {
+    markManagedNotificationAsReadForRole('student', notificationId);
+
     setNotifications(
       (currentNotifications) =>
         currentNotifications.map(
@@ -943,7 +965,7 @@ export default function StudentSettings() {
         }
 
         const response = await fetch(
-          `${API_BASE_URL}/courses/enrolled`,
+          `${API_BASE_URL}/courses/enrolled?summaryOnly=true`,
           {
             method: 'GET',
             headers: {

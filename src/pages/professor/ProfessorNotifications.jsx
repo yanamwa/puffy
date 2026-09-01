@@ -1,52 +1,19 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { FiBell, FiCheckCircle, FiMessageSquare } from 'react-icons/fi';
+import {
+  fetchManagedNotificationsFromServer,
+  markManagedNotificationsAsReadForRole,
+  mergeManagedNotificationsForRole,
+  subscribeToManagedNotifications,
+} from '../../utils/notifications';
 import './ProfessorLayout.css';
 
-const initialNotifications = [
-  {
-    id: 1,
-    type: 'student',
-    title: 'New quiz submission',
-    message: 'Ana Reyes submitted the Web Development Module 1 quiz.',
-    course: 'Introduction to Web Development',
-    time: '10 minutes ago',
-    unread: true,
-  },
-  {
-    id: 2,
-    type: 'announcement',
-    title: 'Announcement sent',
-    message: 'Your reminder about the database activity was sent to 35 students.',
-    course: 'Database Systems',
-    time: '1 hour ago',
-    unread: true,
-  },
-  {
-    id: 3,
-    type: 'system',
-    title: 'Module published',
-    message: 'Human Computer Interaction Module 3 is now visible to students.',
-    course: 'Human Computer Interaction',
-    time: 'Yesterday',
-    unread: false,
-  },
-  {
-    id: 4,
-    type: 'student',
-    title: 'Student needs review',
-    message: 'Three students scored below 60% on the latest database quiz.',
-    course: 'Database Systems',
-    time: 'Jul 5, 2026',
-    unread: false,
-  },
-];
+const initialNotifications = [];
 
 const tabs = [
   { label: 'All', value: 'all' },
   { label: 'Unread', value: 'unread' },
-  { label: 'Student', value: 'student' },
   { label: 'Announcements', value: 'announcement' },
-  { label: 'System', value: 'system' },
 ];
 
 function getIcon(type) {
@@ -57,7 +24,41 @@ function getIcon(type) {
 
 export default function ProfessorNotifications() {
   const [activeTab, setActiveTab] = useState('all');
-  const [notifications, setNotifications] = useState(initialNotifications);
+  const [notifications, setNotifications] = useState(() =>
+    mergeManagedNotificationsForRole('professor', initialNotifications),
+  );
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function syncNotificationsFromServer() {
+      try {
+        await fetchManagedNotificationsFromServer();
+      } catch (error) {
+        console.warn('Unable to sync notifications from the server.', error);
+      }
+
+      if (isMounted) {
+        setNotifications(mergeManagedNotificationsForRole('professor', []));
+      }
+    }
+
+    syncNotificationsFromServer();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const refreshNotifications = () => {
+      setNotifications((current) =>
+        mergeManagedNotificationsForRole('professor', current),
+      );
+    };
+
+    return subscribeToManagedNotifications(refreshNotifications);
+  }, []);
 
   const visibleNotifications = useMemo(() => {
     if (activeTab === 'all') return notifications;
@@ -70,6 +71,8 @@ export default function ProfessorNotifications() {
   const unreadCount = notifications.filter((notification) => notification.unread).length;
 
   const markAllRead = () => {
+    markManagedNotificationsAsReadForRole('professor');
+
     setNotifications((current) =>
       current.map((notification) => ({ ...notification, unread: false }))
     );
@@ -79,7 +82,7 @@ export default function ProfessorNotifications() {
     <section className="professor-page professor-notifications">
       <div>
         <h1>Notifications</h1>
-        <p>Review student activity, announcements, and course updates.</p>
+        <p>Review platform announcements.</p>
       </div>
 
       <div className="professor-notification-toolbar">

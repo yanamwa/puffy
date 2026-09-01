@@ -831,6 +831,104 @@
   text-transform: none;
 }
 
+.users-form-field {
+  display: grid;
+  gap: 8px;
+}
+
+.users-form-label {
+  color: #777777;
+  display: block;
+  font-size: 10px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.users-student-form .users-form-label {
+  display: block;
+}
+
+.professor-registration-form {
+  gap: 14px;
+}
+
+.professor-proof-description {
+  color: #666666;
+  font-size: 11px;
+  font-weight: 750;
+  line-height: 1.45;
+  margin: 0;
+  text-transform: none;
+}
+
+.professor-proof-upload-area {
+  align-items: center;
+  border: 1.5px dashed #111111;
+  border-radius: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  min-height: 58px;
+  padding: 10px;
+}
+
+.users-student-form .professor-proof-file-input {
+  display: none;
+}
+
+.users-student-form .professor-proof-upload-btn {
+  align-items: center;
+  color: #ffffff;
+  display: inline-flex;
+  justify-content: center;
+  text-transform: none;
+  width: auto;
+}
+
+.professor-proof-file-name {
+  color: #111111;
+  font-size: 11px;
+  font-weight: 900;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.professor-proof-preview {
+  align-items: flex-start;
+  display: grid;
+  gap: 10px;
+}
+
+.professor-proof-preview img {
+  width: min(280px, 100%);
+  aspect-ratio: 16 / 10;
+  border: 1.5px solid #111111;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+.professor-proof-preview button {
+  align-items: center;
+  border: 0;
+  border-radius: 12px;
+  background: #f1f1f1;
+  color: #111111;
+  cursor: pointer;
+  display: inline-flex;
+  gap: 7px;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0 12px;
+  width: fit-content;
+}
+
+.professor-proof-preview button:disabled,
+.users-student-form input:disabled,
+.users-student-form select:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
 .users-submit-btn {
   width: 100%;
   min-height: 44px;

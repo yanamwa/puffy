@@ -1,5 +1,5 @@
 import styles from "./login.module.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import {
   useNavigate,
@@ -9,10 +9,16 @@ import { FiEye, FiEyeOff } from "react-icons/fi";
 import { API_BASE } from "../../config.js";
 import LandingNavbar from "../../components/LandingNavbar";
 import { useAuth } from "../../context/AuthContext.jsx";
+import {
+  APP_ROLES,
+  getHomePathForRole,
+  getUserRole,
+  normalizeRole,
+} from "../../utils/roles.js";
 
 function Login() {
   const navigate = useNavigate();
-  const { saveSession } = useAuth();
+  const { user, saveSession } = useAuth();
 
   const [showPassword, setShowPassword] =
     useState(false);
@@ -34,6 +40,16 @@ function Login() {
 
   const [loginFeedback, setLoginFeedback] =
     useState(null);
+
+  useEffect(() => {
+    const role = getUserRole(user);
+
+    if (role && !isLoggingIn) {
+      navigate(getHomePathForRole(role), {
+        replace: true,
+      });
+    }
+  }, [isLoggingIn, navigate, user]);
 
   const setLoginError = (message) => {
     setLoginFeedback({
@@ -172,9 +188,10 @@ function Login() {
     loggedInUser
   ) => {
     const role =
-      loggedInUser?.role ||
-      data.user?.role ||
-      "student";
+      getUserRole(loggedInUser) ||
+      getUserRole(data.user) ||
+      normalizeRole(data.role) ||
+      APP_ROLES.STUDENT;
 
     const mustChangePassword =
       loggedInUser?.mustChangePassword ===
@@ -186,7 +203,7 @@ function Login() {
       ) === 1;
 
     if (
-      role === "student" &&
+      role === APP_ROLES.STUDENT &&
       mustChangePassword
     ) {
       await Swal.fire({
@@ -219,23 +236,9 @@ function Login() {
       showConfirmButton: false,
     });
 
-    if (role === "super_admin") {
-      navigate("/super-admin", {
-        replace: true,
-      });
-    } else if (role === "admin") {
-      navigate("/admin", {
-        replace: true,
-      });
-    } else if (role === "professor") {
-      navigate("/professor", {
-        replace: true,
-      });
-    } else {
-      navigate("/student", {
-        replace: true,
-      });
-    }
+    navigate(getHomePathForRole(role), {
+      replace: true,
+    });
   };
 
   const handleLogin = async (event) => {

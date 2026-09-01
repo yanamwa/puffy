@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   FiBell,
@@ -6,6 +6,14 @@ import {
   FiCheckCircle,
   FiMessageSquare,
 } from 'react-icons/fi';
+import {
+  fetchManagedNotificationsFromServer,
+  markManagedNotificationAsReadForRole,
+  markManagedNotificationsAsReadForRole,
+  mergeManagedNotificationsForRole,
+  normalizeNotificationRole,
+  subscribeToManagedNotifications,
+} from '../utils/notifications';
 import './RoleNotificationMenu.css';
 
 const notificationSets = {
@@ -107,16 +115,44 @@ function NotificationIcon({ type }) {
 export default function RoleNotificationMenu({ role = 'admin' }) {
   const navigate = useNavigate();
   const menuRef = useRef(null);
-  const config = notificationSets[role] || notificationSets.admin;
+  const normalizedRole = normalizeNotificationRole(role) || 'admin';
+  const config = notificationSets[normalizedRole] || notificationSets.admin;
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('all');
-  const [notifications, setNotifications] = useState(config.items);
+  const [notifications, setNotifications] = useState(() =>
+    mergeManagedNotificationsForRole(normalizedRole, config.items)
+  );
+
+  const syncNotificationsFromServer = useCallback(async () => {
+    try {
+      await fetchManagedNotificationsFromServer();
+    } catch (error) {
+      console.warn('Unable to sync notifications from the server.', error);
+    }
+
+    setNotifications(
+      mergeManagedNotificationsForRole(normalizedRole, config.items)
+    );
+  }, [config.items, normalizedRole]);
 
   useEffect(() => {
-    setNotifications(config.items);
+    setNotifications(
+      mergeManagedNotificationsForRole(normalizedRole, config.items)
+    );
     setActiveTab('all');
     setIsOpen(false);
-  }, [config]);
+    syncNotificationsFromServer();
+  }, [config, normalizedRole, syncNotificationsFromServer]);
+
+  useEffect(() => {
+    const refreshNotifications = () => {
+      setNotifications((current) =>
+        mergeManagedNotificationsForRole(normalizedRole, current)
+      );
+    };
+
+    return subscribeToManagedNotifications(refreshNotifications);
+  }, [normalizedRole]);
 
   useEffect(() => {
     const closeOnOutsideClick = (event) => {
@@ -142,12 +178,16 @@ export default function RoleNotificationMenu({ role = 'admin' }) {
   }, [activeTab, notifications]);
 
   const markAllRead = () => {
+    markManagedNotificationsAsReadForRole(normalizedRole);
+
     setNotifications((current) =>
       current.map((notification) => ({ ...notification, unread: false }))
     );
   };
 
   const openNotification = (id) => {
+    markManagedNotificationAsReadForRole(normalizedRole, id);
+
     setNotifications((current) =>
       current.map((notification) =>
         notification.id === id ? { ...notification, unread: false } : notification
@@ -163,7 +203,15 @@ export default function RoleNotificationMenu({ role = 'admin' }) {
         aria-label={`Notifications${unreadCount > 0 ? `, ${unreadCount} unread` : ''}`}
         aria-expanded={isOpen}
         aria-haspopup="dialog"
-        onClick={() => setIsOpen((current) => !current)}
+        onClick={() => {
+          const nextIsOpen = !isOpen;
+
+          setIsOpen(nextIsOpen);
+
+          if (nextIsOpen) {
+            syncNotificationsFromServer();
+          }
+        }}
       >
         <FiBell aria-hidden="true" />
 

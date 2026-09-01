@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { API_BASE } from '../config.js';
+import { getUserRole, withNormalizedRole } from '../utils/roles.js';
 
 const AuthContext = createContext(null);
 
@@ -26,7 +27,8 @@ const sessionStorageKeys = [
 
 function readStoredUser() {
   try {
-    return JSON.parse(localStorage.getItem('puffy-user') || 'null');
+    const storedUser = JSON.parse(localStorage.getItem('puffy-user') || 'null');
+    return storedUser ? withNormalizedRole(storedUser) : null;
   } catch {
     localStorage.removeItem('puffy-user');
     return null;
@@ -54,51 +56,61 @@ function clearStoredSession() {
 }
 
 function writeUserSession(sessionUser, token = readStoredToken()) {
+  const normalizedUser = withNormalizedRole(sessionUser);
+
   if (token) {
     localStorage.setItem('puffy-token', token);
     localStorage.setItem('token', token);
     localStorage.setItem('authToken', token);
   }
 
-  localStorage.setItem('puffy-user', JSON.stringify(sessionUser));
-  localStorage.setItem('user', JSON.stringify(sessionUser));
-  localStorage.setItem('currentUser', JSON.stringify(sessionUser));
+  localStorage.setItem('puffy-user', JSON.stringify(normalizedUser));
+  localStorage.setItem('user', JSON.stringify(normalizedUser));
+  localStorage.setItem('currentUser', JSON.stringify(normalizedUser));
   localStorage.setItem(
     'user_id',
-    String(sessionUser.userId || sessionUser.id || '')
+    String(normalizedUser.userId || normalizedUser.id || '')
   );
-  localStorage.setItem('user_email', sessionUser.email || '');
-  localStorage.setItem('email', sessionUser.email || '');
-  localStorage.setItem('user_role', sessionUser.role || '');
+  localStorage.setItem('user_email', normalizedUser.email || '');
+  localStorage.setItem('email', normalizedUser.email || '');
+  localStorage.setItem('user_role', getUserRole(normalizedUser));
   localStorage.setItem(
     'username',
-    sessionUser.displayName ||
-      sessionUser.display_name ||
-      sessionUser.name ||
+    normalizedUser.displayName ||
+      normalizedUser.display_name ||
+      normalizedUser.name ||
       ''
   );
   localStorage.setItem(
     'year_level',
-    sessionUser.yearLevel || sessionUser.year_level || ''
+    normalizedUser.yearLevel || normalizedUser.year_level || ''
   );
   localStorage.setItem(
     'section_name',
-    sessionUser.sectionName || sessionUser.section_name || ''
+    normalizedUser.sectionName || normalizedUser.section_name || ''
   );
+
+  return normalizedUser;
 }
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(readStoredUser);
 
   const saveSession = (data) => {
-    const sessionUser = data.user || {};
+    const sessionUser = withNormalizedRole(
+      data.user || {
+        email: data.email,
+        name: data.username,
+        role: data.role,
+      }
+    );
     const token = getSessionToken(data);
 
     clearStoredSession();
-    writeUserSession(sessionUser, token);
-    setUser(sessionUser);
+    const normalizedUser = writeUserSession(sessionUser, token);
+    setUser(normalizedUser);
 
-    return sessionUser;
+    return normalizedUser;
   };
 
   const updateUser = (nextUser) => {
@@ -107,12 +119,12 @@ export function AuthProvider({ children }) {
     }
 
     const storedUser = readStoredUser() || {};
-    const storedRole = storedUser.role || storedUser.userRole || storedUser.user_role;
-    const nextRole = nextUser.role || nextUser.userRole || nextUser.user_role;
+    const normalizedNextUser = withNormalizedRole(nextUser);
+    const storedRole = getUserRole(storedUser);
+    const nextRole = getUserRole(normalizedNextUser);
     const baseUser =
       storedRole && nextRole && storedRole !== nextRole ? {} : storedUser;
-    const updatedUser = { ...baseUser, ...nextUser };
-    writeUserSession(updatedUser);
+    const updatedUser = writeUserSession({ ...baseUser, ...normalizedNextUser });
     setUser(updatedUser);
 
     window.dispatchEvent(
@@ -157,8 +169,8 @@ export function AuthProvider({ children }) {
           return;
         }
 
-        writeUserSession(data.user, token);
-        setUser(data.user);
+        const normalizedUser = writeUserSession(data.user, token);
+        setUser(normalizedUser);
       } catch (error) {
         console.warn('Unable to refresh current user session.', error);
       }
@@ -174,7 +186,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const handleUserUpdated = (event) => {
       if (event.detail) {
-        setUser(event.detail);
+        setUser(withNormalizedRole(event.detail));
       }
     };
 

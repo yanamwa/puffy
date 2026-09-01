@@ -349,6 +349,35 @@
   white-space: nowrap;
 }
 
+.notification-list-card .notification-item-meta {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  min-width: 0;
+  margin-top: -2px;
+}
+
+.notification-list-card .notification-item .notification-item-meta small {
+  display: inline-flex;
+  grid-column: auto;
+  grid-row: auto;
+  justify-self: start;
+  min-width: 0;
+  color: #25714e;
+  font-size: 11px;
+  font-weight: 850;
+  line-height: 1.35;
+  text-align: left;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.notification-list-card .notification-item .notification-creator-meta {
+  color: #566071;
+}
+
 .notification-list-card .notification-item .danger-feature-btn {
   grid-column: 1 / -1;
   justify-self: start;

@@ -532,6 +532,7 @@ export default function SuperAdminHome() {
 
   const quickActions = [
     { label: 'Add Student', to: '/super-admin/users?tab=students&action=add-student', icon: FiPlus },
+    { label: 'Add Professor', to: '/super-admin/users?tab=professors&action=add-professor', icon: FiUserPlus },
     { label: 'Add Administrator', to: '/super-admin/users?tab=admins&action=add-admin', icon: FiShield },
     { label: 'Review Professor Requests', to: '/super-admin/users?tab=approvals', icon: FiUserCheck },
     { label: 'Create Announcement', to: '/super-admin/announcements', icon: FiBell },
