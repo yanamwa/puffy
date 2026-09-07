@@ -1,3 +1,5 @@
+import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   FiArrowRight,
   FiBookOpen,
@@ -15,44 +17,7 @@ import { fetchCourses } from '../../services/courseApi.js';
 import { fetchCourseMonitoring } from '../../services/monitoringApi.js';
 import './ProfessorLayout.css';
 
-const coursePerformanceSeed = {
-  WEB101: {
-    section: 'BSIT 1A',
-    averageQuizScore: 84,
-    completionRate: 88,
-    averageMastery: 82,
-    mastery: {
-      Advanced: 12,
-      Proficient: 18,
-      Developing: 9,
-      Beginning: 3,
-    },
-  },
-  DBS204: {
-    section: 'BSIT 2B',
-    averageQuizScore: 70,
-    completionRate: 76,
-    averageMastery: 69,
-    mastery: {
-      Advanced: 6,
-      Proficient: 14,
-      Developing: 10,
-      Beginning: 5,
-    },
-  },
-  HCI310: {
-    section: 'BSCS 3A',
-    averageQuizScore: 86,
-    completionRate: 91,
-    averageMastery: 85,
-    mastery: {
-      Advanced: 10,
-      Proficient: 12,
-      Developing: 5,
-      Beginning: 1,
-    },
-  },
-};
+const coursePerformanceSeed = {};
 const fallbackSections = ['BSIT 1A', 'BSIT 2B', 'BSCS 3A', 'BSIT 4A'];
 
 function getProfessorName(user) {
@@ -759,7 +724,7 @@ export default function ProfessorHome() {
             {selectedCourse && (
               <div className="dashboard-selected-course">
                 <div>
-                  <span>{selectedCourse.code}</span>
+                  <span>{selectedCourse.title}</span>
                   <strong>{selectedCourse.averageMastery}%</strong>
                   <p>Average class mastery</p>
                 </div>

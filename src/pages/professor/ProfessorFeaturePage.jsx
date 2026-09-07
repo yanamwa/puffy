@@ -14,189 +14,7 @@ import { fetchCourses } from '../../services/courseApi.js';
 import { fetchCourseMonitoring } from '../../services/monitoringApi.js';
 import './ProfessorLayout.css';
 
-const courseMonitoringSeed = {
-  WEB101: {
-    section: 'BSIT 1A',
-    schedule: 'Mon/Wed, 9:00 AM',
-    topics: [
-      { name: 'HTML semantics', average: 92 },
-      { name: 'CSS layout', average: 84 },
-      { name: 'JavaScript basics', average: 76 },
-      { name: 'Responsive design', average: 81 },
-    ],
-    assessments: [
-      { label: 'Quiz average', value: 82 },
-      { label: 'Activity completion', value: 88 },
-      { label: 'Project milestone', value: 79 },
-    ],
-    students: [
-      {
-        id: 'STU-1001',
-        name: 'Mika Santos',
-        completion: 96,
-        score: 91,
-        lastActive: 'Today',
-        status: 'onTrack',
-        weakestTopic: 'JavaScript basics',
-        topicScores: [94, 88, 86, 95],
-      },
-      {
-        id: 'STU-1002',
-        name: 'Jomari Cruz',
-        completion: 74,
-        score: 69,
-        lastActive: '2 days ago',
-        status: 'needsReview',
-        weakestTopic: 'Responsive design',
-        topicScores: [82, 71, 68, 55],
-      },
-      {
-        id: 'STU-1003',
-        name: 'Bea Reyes',
-        completion: 43,
-        score: 54,
-        lastActive: '6 days ago',
-        status: 'atRisk',
-        weakestTopic: 'JavaScript basics',
-        topicScores: [65, 58, 41, 52],
-      },
-      {
-        id: 'STU-1004',
-        name: 'Enzo Villanueva',
-        completion: 89,
-        score: 84,
-        lastActive: 'Yesterday',
-        status: 'onTrack',
-        weakestTopic: 'CSS layout',
-        topicScores: [91, 77, 82, 85],
-      },
-      {
-        id: 'STU-1005',
-        name: 'Aira Mendoza',
-        completion: 68,
-        score: 72,
-        lastActive: 'Today',
-        status: 'needsReview',
-        weakestTopic: 'JavaScript basics',
-        topicScores: [80, 76, 59, 71],
-      },
-    ],
-  },
-  DBS204: {
-    section: 'BSIT 2B',
-    schedule: 'Tue/Thu, 10:30 AM',
-    topics: [
-      { name: 'ER diagrams', average: 78 },
-      { name: 'Normalization', average: 66 },
-      { name: 'SQL joins', average: 73 },
-      { name: 'Transactions', average: 61 },
-    ],
-    assessments: [
-      { label: 'Quiz average', value: 70 },
-      { label: 'Lab completion', value: 76 },
-      { label: 'Case analysis', value: 68 },
-    ],
-    students: [
-      {
-        id: 'STU-2101',
-        name: 'Lia Aquino',
-        completion: 91,
-        score: 86,
-        lastActive: 'Today',
-        status: 'onTrack',
-        weakestTopic: 'Transactions',
-        topicScores: [92, 84, 88, 79],
-      },
-      {
-        id: 'STU-2102',
-        name: 'Marco Dela Cruz',
-        completion: 63,
-        score: 65,
-        lastActive: '3 days ago',
-        status: 'needsReview',
-        weakestTopic: 'Normalization',
-        topicScores: [73, 55, 69, 63],
-      },
-      {
-        id: 'STU-2103',
-        name: 'Nina Salcedo',
-        completion: 78,
-        score: 74,
-        lastActive: 'Yesterday',
-        status: 'needsReview',
-        weakestTopic: 'Transactions',
-        topicScores: [81, 77, 75, 62],
-      },
-      {
-        id: 'STU-2104',
-        name: 'Paolo Garcia',
-        completion: 39,
-        score: 48,
-        lastActive: '8 days ago',
-        status: 'atRisk',
-        weakestTopic: 'SQL joins',
-        topicScores: [58, 49, 36, 50],
-      },
-    ],
-  },
-  HCI310: {
-    section: 'BSCS 3A',
-    schedule: 'Friday, 1:00 PM',
-    topics: [
-      { name: 'User research', average: 86 },
-      { name: 'Wireframing', average: 91 },
-      { name: 'Accessibility', average: 72 },
-      { name: 'Usability testing', average: 83 },
-    ],
-    assessments: [
-      { label: 'Design critique', value: 87 },
-      { label: 'Prototype progress', value: 90 },
-      { label: 'Testing report', value: 76 },
-    ],
-    students: [
-      {
-        id: 'STU-3101',
-        name: 'Sam Ortega',
-        completion: 98,
-        score: 93,
-        lastActive: 'Today',
-        status: 'onTrack',
-        weakestTopic: 'Accessibility',
-        topicScores: [96, 94, 84, 97],
-      },
-      {
-        id: 'STU-3102',
-        name: 'Ivy Tan',
-        completion: 88,
-        score: 85,
-        lastActive: 'Today',
-        status: 'onTrack',
-        weakestTopic: 'Usability testing',
-        topicScores: [86, 91, 84, 79],
-      },
-      {
-        id: 'STU-3103',
-        name: 'Ken Ramos',
-        completion: 71,
-        score: 70,
-        lastActive: '4 days ago',
-        status: 'needsReview',
-        weakestTopic: 'Accessibility',
-        topicScores: [78, 82, 55, 66],
-      },
-      {
-        id: 'STU-3104',
-        name: 'Mara Torres',
-        completion: 52,
-        score: 57,
-        lastActive: '7 days ago',
-        status: 'atRisk',
-        weakestTopic: 'Accessibility',
-        topicScores: [62, 70, 39, 56],
-      },
-    ],
-  },
-};
+const courseMonitoringSeed = {};
 
 const emptyMonitoring = {
   section: 'No course selected',
@@ -212,48 +30,7 @@ const statusLabels = {
   atRisk: 'At risk',
 };
 
-const rosterNamePool = [
-  'Rafa Bautista',
-  'Celine Ong',
-  'Daryl Lim',
-  'Trisha Navarro',
-  'Luis Mercado',
-  'Alexa Rivera',
-  'Noel Santiago',
-  'Gia Flores',
-  'Miguel Sy',
-  'Andrea Lopez',
-  'Harvey Yu',
-  'Sofia Castillo',
-  'Renz Villamor',
-  'Patricia Uy',
-  'Carlo Reyes',
-  'Janelle Cruz',
-  'Theo Ramos',
-  'Bianca Tan',
-  'Gab Mateo',
-  'Elise Gomez',
-  'Ivan Chua',
-  'Faith Santos',
-  'Nico Mendoza',
-  'Kyla Dizon',
-  'Arman Lee',
-  'Elaine Roxas',
-  'Joshua Co',
-  'Mia Fernando',
-  'Cedric Villanueva',
-  'Yna Aquino',
-  'Bryan Cortez',
-  'Lea Garcia',
-  'Troy Valdez',
-  'Rica Salcedo',
-  'Paulo Enriquez',
-  'Dana Mariano',
-  'Vince Robles',
-  'Iris Domingo',
-  'Kurt Angeles',
-  'Shane Ignacio',
-];
+const rosterNamePool = [];
 
 function average(items, key) {
   if (!items.length) return 0;
@@ -287,49 +64,37 @@ function getWeakestTopic(topics, topicScores) {
   return topics[weakestIndex]?.name || 'Course topic';
 }
 
-function buildClassRoster(monitoring, enrolled, courseCode) {
-  const baseStudents = monitoring.students.map((student) => ({
-    ...student,
-    topicScores: monitoring.topics.map(
-      (_, index) => student.topicScores[index] ?? student.score
-    ),
-  }));
-
-  if (baseStudents.length >= enrolled) {
-    return baseStudents;
-  }
-
-  const generatedStudents = Array.from(
-    { length: enrolled - baseStudents.length },
-    (_, index) => {
-      const rosterIndex = baseStudents.length + index;
-      const topicScores = monitoring.topics.map((topic, topicIndex) =>
-        clampScore(topic.average + ((rosterIndex * (topicIndex + 3)) % 21) - 10)
-      );
-      const score = averageNumbers(topicScores);
-      const completion = clampScore(score + ((rosterIndex % 13) - 6));
-      const status = getStatus(completion, score);
-
-      return {
-        id: `${courseCode}-${String(rosterIndex + 1).padStart(3, '0')}`,
-        name:
-          rosterNamePool[index % rosterNamePool.length] ||
-          `Student ${String(rosterIndex + 1).padStart(2, '0')}`,
-        completion,
-        score,
-        lastActive: ['Today', 'Yesterday', '2 days ago', '4 days ago', '1 week ago'][
-          rosterIndex % 5
-        ],
-        status,
-        weakestTopic: getWeakestTopic(monitoring.topics, topicScores),
-        topicScores,
-      };
-    }
-  );
-
-  return [...baseStudents, ...generatedStudents];
+function getMonitoringStudents(monitoring) {
+  return Array.isArray(monitoring?.students) ? monitoring.students : [];
 }
 
+function getMonitoringTopics(monitoring) {
+  return Array.isArray(monitoring?.topics) ? monitoring.topics : [];
+}
+
+function getMonitoringAssessments(monitoring) {
+  return Array.isArray(monitoring?.assessments) ? monitoring.assessments : [];
+}
+
+function getStudentDisplayName(student) {
+  return student?.name || student?.fullName || student?.full_name || student?.username || student?.email || 'Unnamed student';
+}
+
+function getStudentInitials(student) {
+  return getStudentDisplayName(student)
+    .split(' ')
+    .map((part) => part[0])
+    .join('')
+    .slice(0, 2) || 'ST';
+}
+function buildClassRoster(monitoring) {
+  return getMonitoringStudents(monitoring).map((student) => ({
+    ...student,
+    topicScores: getMonitoringTopics(monitoring).map(
+      (_, index) => student.topicScores?.[index] ?? student.score ?? 0
+    ),
+  }));
+}
 function escapeCsv(value) {
   return `"${String(value ?? '').replaceAll('"', '""')}"`;
 }
@@ -348,23 +113,23 @@ function createMonitoringCsv(course, monitoring, students, stats) {
   ];
 
   const topicHeader = ['Topic', 'Class average'];
-  const topicRows = monitoring.topics.map((topic) => [topic.name, `${topic.average}%`]);
+  const topicRows = getMonitoringTopics(monitoring).map((topic) => [topic.name, `${topic.average}%`]);
   const studentHeader = [
     'Student ID',
     'Student',
     'Completion',
     'Average score',
-    ...monitoring.topics.map((topic) => topic.name),
+    ...getMonitoringTopics(monitoring).map((topic) => topic.name),
     'Weakest topic',
     'Last active',
     'Status',
   ];
   const studentRows = students.map((student) => [
     student.id,
-    student.name,
+    getStudentDisplayName(student),
     `${student.completion}%`,
     `${student.score}%`,
-    ...student.topicScores.map((score) => `${score}%`),
+    ...(Array.isArray(student.topicScores) ? student.topicScores : []).map((score) => `${score}%`),
     student.weakestTopic,
     student.lastActive,
     statusLabels[student.status],
@@ -376,68 +141,14 @@ function createMonitoringCsv(course, monitoring, students, stats) {
 }
 
 function getMonitoringFallback(course) {
-  const courseCode = course.code || 'COURSE';
-  const base = Number(course.id || 1) * 7;
-
   return {
-    section: 'Course section',
-    schedule: 'Schedule not set',
-    topics: [
-      { name: 'Module completion', average: 70 + (base % 18) },
-      { name: 'Quiz performance', average: 62 + (base % 21) },
-      { name: 'Activity submissions', average: 66 + (base % 20) },
-      { name: 'Final output', average: 58 + (base % 25) },
-    ],
-    assessments: [
-      { label: 'Quiz average', value: 65 + (base % 18) },
-      { label: 'Activity completion', value: 70 + (base % 16) },
-      { label: 'Project progress', value: 60 + (base % 20) },
-    ],
-    students: [
-      {
-        id: `${courseCode}-001`,
-        name: 'Mika Santos',
-        completion: 90,
-        score: 87,
-        lastActive: 'Today',
-        status: 'onTrack',
-        weakestTopic: 'Quiz performance',
-        topicScores: [90, 83, 88, 86],
-      },
-      {
-        id: `${courseCode}-002`,
-        name: 'Jomari Cruz',
-        completion: 72,
-        score: 68,
-        lastActive: '2 days ago',
-        status: 'needsReview',
-        weakestTopic: 'Final output',
-        topicScores: [76, 70, 73, 55],
-      },
-      {
-        id: `${courseCode}-003`,
-        name: 'Bea Reyes',
-        completion: 48,
-        score: 53,
-        lastActive: '6 days ago',
-        status: 'atRisk',
-        weakestTopic: 'Quiz performance',
-        topicScores: [58, 44, 61, 50],
-      },
-      {
-        id: `${courseCode}-004`,
-        name: 'Enzo Villanueva',
-        completion: 84,
-        score: 81,
-        lastActive: 'Yesterday',
-        status: 'onTrack',
-        weakestTopic: 'Activity submissions',
-        topicScores: [88, 80, 75, 82],
-      },
-    ],
+    section: course?.section || 'Course section',
+    schedule: course?.schedule || 'Schedule not set',
+    topics: [],
+    assessments: [],
+    students: [],
   };
 }
-
 function getMonitoringForCourse(course) {
   if (!course) {
     return emptyMonitoring;
@@ -552,7 +263,7 @@ function StudentMonitoringDashboard() {
   const monitoringNotice = monitoringLoading
     ? 'Loading database monitoring...'
     : monitoringError
-      ? `${monitoringError} Showing local preview data.`
+      ? `${monitoringError} No monitoring records loaded yet.`
       : monitoringFromDb
         ? 'Showing database monitoring data.'
         : '';
@@ -568,23 +279,19 @@ function StudentMonitoringDashboard() {
     monitoring.course?.title ||
     'Selected course';
   const selectedCourseStudentCount = Number(
-    selectedCourse?.students || monitoring.students.length
+    selectedCourse?.students || getMonitoringStudents(monitoring).length
   );
 
   const allStudents = useMemo(
     () =>
-      buildClassRoster(
-        monitoring,
-        selectedCourseStudentCount,
-        selectedCourseCode
-      ),
+      buildClassRoster(monitoring),
     [monitoring, selectedCourseCode, selectedCourseStudentCount]
   );
 
   const courseStats = useMemo(() => {
     const students = allStudents;
-    const lowestTopic = monitoring.topics.length
-      ? monitoring.topics.reduce((lowest, topic) =>
+    const lowestTopic = getMonitoringTopics(monitoring).length
+      ? getMonitoringTopics(monitoring).reduce((lowest, topic) =>
           topic.average < lowest.average ? topic : lowest
         )
       : { name: 'Course data', average: 0 };
@@ -615,7 +322,7 @@ function StudentMonitoringDashboard() {
   const topicBreakdown = useMemo(
     () => {
       if (allStudents.length === 0) {
-        return monitoring.topics.map((topic) => ({
+        return getMonitoringTopics(monitoring).map((topic) => ({
           ...topic,
           needsSupport: 0,
           highestScore: 0,
@@ -623,7 +330,7 @@ function StudentMonitoringDashboard() {
         }));
       }
 
-      return monitoring.topics.map((topic, topicIndex) => {
+      return getMonitoringTopics(monitoring).map((topic, topicIndex) => {
         const scores = allStudents.map((student) => student.topicScores[topicIndex]);
         const topStudent = allStudents.reduce((best, student) =>
           student.topicScores[topicIndex] > best.topicScores[topicIndex]
@@ -635,7 +342,7 @@ function StudentMonitoringDashboard() {
           ...topic,
           needsSupport: scores.filter((score) => score < 70).length,
           highestScore: topStudent.topicScores[topicIndex],
-          topStudent: topStudent.name,
+          topStudent: getStudentDisplayName(topStudent),
         };
       });
     },
@@ -671,7 +378,7 @@ function StudentMonitoringDashboard() {
     link.click();
     link.remove();
     window.setTimeout(() => URL.revokeObjectURL(url), 0);
-    setExportMessage(`CSV exported for ${selectedCourseCode}.`);
+    setExportMessage(`CSV exported for ${selectedCourseTitle}.`);
   };
 
   if (courses.length === 0) {
@@ -734,8 +441,7 @@ function StudentMonitoringDashboard() {
           >
             {courses.map((course) => (
               <option key={getCourseSelectId(course)} value={getCourseSelectId(course)}>
-                {course.code || course.course_code} -{' '}
-                {course.title || course.courseName || course.course_name}
+                {course.title || course.courseName || course.course_name || 'Untitled course'}
               </option>
             ))}
           </select>
@@ -798,7 +504,7 @@ function StudentMonitoringDashboard() {
               </div>
 
               <div className="monitor-topic-list">
-                {monitoring.topics.map((topic) => (
+                {getMonitoringTopics(monitoring).map((topic) => (
                   <div className="monitor-topic-row" key={topic.name}>
                     <span>{topic.name}</span>
                     <div className="monitor-progress-track">
@@ -863,7 +569,7 @@ function StudentMonitoringDashboard() {
               </div>
 
               <div className="monitor-assessment-list">
-                {monitoring.assessments.map((assessment) => (
+                {getMonitoringAssessments(monitoring).map((assessment) => (
                   <div className="monitor-assessment" key={assessment.label}>
                     <span>{assessment.label}</span>
                     <strong>{assessment.value}%</strong>
@@ -879,7 +585,7 @@ function StudentMonitoringDashboard() {
           <section className="monitor-panel monitor-students-panel">
             <div className="monitor-panel-heading">
               <div>
-                <h2>Students in {selectedCourseCode}</h2>
+                <h2>Students in {selectedCourseTitle}</h2>
                 <p>
                   Performance is scoped to {selectedCourseTitle}, so the
                   professor can compare students within the same course context.
@@ -925,14 +631,10 @@ function StudentMonitoringDashboard() {
                       <td>
                         <div className="monitor-student-cell">
                           <span className="monitor-avatar">
-                            {student.name
-                              .split(' ')
-                              .map((part) => part[0])
-                              .join('')
-                              .slice(0, 2)}
+                            {getStudentInitials(student)}
                           </span>
                           <div>
-                            <strong>{student.name}</strong>
+                            <strong>{getStudentDisplayName(student)}</strong>
                             <span>{student.id}</span>
                           </div>
                         </div>
@@ -941,13 +643,13 @@ function StudentMonitoringDashboard() {
                       <td>{student.score}%</td>
                       <td>
                         <div className="monitor-topic-dots">
-                          {student.topicScores.map((score, index) => (
+                          {(Array.isArray(student.topicScores) ? student.topicScores : []).map((score, index) => (
                             <span
                               key={`${student.id}-${index}`}
                               className={
                                 score < 60 ? 'low' : score < 78 ? 'mid' : 'high'
                               }
-                              title={`${monitoring.topics[index]?.name}: ${score}%`}
+                              title={`${getMonitoringTopics(monitoring)[index]?.name || 'Topic'}: ${score}%`}
                             >
                               {score}
                             </span>
@@ -982,7 +684,7 @@ function StudentMonitoringDashboard() {
                 <div>
                   <h3>{selectedStudent.name}</h3>
                   <p>
-                    {selectedStudent.id} in {selectedCourseCode} -{' '}
+                    {selectedStudent.id} in {selectedCourseTitle} -{' '}
                     {statusLabels[selectedStudent.status]}.
                   </p>
                 </div>
@@ -1001,7 +703,7 @@ function StudentMonitoringDashboard() {
                   </span>
                 </div>
                 <div className="monitor-detail-topics">
-                  {monitoring.topics.map((topic, index) => (
+                  {getMonitoringTopics(monitoring).map((topic, index) => (
                     <div key={topic.name}>
                       <span>{topic.name}</span>
                       <strong>{selectedStudent.topicScores[index]}%</strong>
@@ -1044,8 +746,8 @@ function StudentMonitoringDashboard() {
           <div className="monitor-report-grid">
             <article className="monitor-report-card">
               <span>Course</span>
-              <strong>{selectedCourseCode}</strong>
-              <p>{selectedCourseTitle}</p>
+              <strong>{selectedCourseTitle}</strong>
+              <p>{courseStats.enrolled} enrolled students</p>
             </article>
             <article className="monitor-report-card">
               <span>Completion</span>
@@ -1073,7 +775,7 @@ function StudentMonitoringDashboard() {
               <ul>
                 {studentsNeedingSupport.slice(0, 8).map((student) => (
                   <li key={student.id}>
-                    {student.name} - {student.weakestTopic} ({student.score}%)
+                    {getStudentDisplayName(student)} - {student.weakestTopic} ({student.score}%)
                   </li>
                 ))}
                 {studentsNeedingSupport.length === 0 && (
@@ -1095,7 +797,7 @@ function StudentMonitoringDashboard() {
               </div>
             </div>
             <div className="monitor-topic-list">
-              {[...monitoring.topics]
+              {[...getMonitoringTopics(monitoring)]
                 .sort((first, second) => first.average - second.average)
                 .map((topic) => (
                   <div className="monitor-topic-row" key={topic.name}>
@@ -1168,7 +870,7 @@ function StudentMonitoringDashboard() {
                   }}
                 >
                   <span>
-                    <strong>{student.name}</strong>
+                    <strong>{getStudentDisplayName(student)}</strong>
                     {student.weakestTopic}
                   </span>
                   <em>{student.score}%</em>
@@ -1307,3 +1009,6 @@ export default function ProfessorFeaturePage({ path }) {
     </section>
   );
 }
+
+
+
