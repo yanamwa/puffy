@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
 import {
   FiArrowRight,
   FiBookOpen,
-  FiCheckCircle,  FiFileText,
-  FiLayers,  FiUsers,
+  FiCheckCircle,
+  FiFileText,
+  FiLayers,
+  FiUsers,
 } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
 import {
@@ -857,4 +857,5 @@ export default function ProfessorHome() {
     </section>
   );
 }
+
 
