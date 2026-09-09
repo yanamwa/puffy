@@ -689,8 +689,9 @@ export default function PublicCourses() {
     setCourseCode('');
   };
 
-const confirmEnrollment = async (course) => {
+  const confirmEnrollment = async (course) => {
   const courseTitle = getCourseTitle(course);
+
   const result = await Swal.fire({
     title: 'Do you want to enroll in this course?',
     text: courseTitle,
@@ -698,9 +699,9 @@ const confirmEnrollment = async (course) => {
     imageWidth: 180,
     imageHeight: 180,
     showCancelButton: true,
-    confirmButtonText: 'Enroll',
+    confirmButtonText: 'Send Request',
     cancelButtonText: 'Cancel',
-    
+
     customClass: {
       popup: 'enroll-popup',
       confirmButton: 'enroll-confirm-btn',
@@ -710,63 +711,128 @@ const confirmEnrollment = async (course) => {
     buttonsStyling: false,
   });
 
-    if (!result.isConfirmed) {
-      return false;
-    }
+  if (!result.isConfirmed) {
+    return false;
+  }
 
-    try {
-      const enrolledCourse = await enrollStudentInCourseAsync(course);
-      const nextCourse = enrolledCourse || course;
-      const courseId = getCourseNavigationId(nextCourse);
-      const normalizedCourse = normalizeCourse(nextCourse);
-      const enrolledKey = getCourseKey(normalizedCourse);
+  try {
+    const courseKey = getCourseKey(course);
 
-      setEnrolledCourses((currentCourses) => {
-        if (
-          enrolledKey &&
-          currentCourses.some((currentCourse) => getCourseKey(currentCourse) === enrolledKey)
-        ) {
-          return currentCourses;
-        }
+    const storedRequests = JSON.parse(
+      localStorage.getItem('puffy-enrollment-requests') || '[]'
+    );
 
-        return [normalizedCourse, ...currentCourses];
-      });
+    const alreadyRequested = storedRequests.some(
+      (request) =>
+        String(request.courseId) === String(courseKey) &&
+        request.status === 'pending'
+    );
 
+    if (alreadyRequested) {
       await Swal.fire({
-        title: 'Enrolled!',
-        text: `You are now enrolled in ${getCourseTitle(nextCourse)}.`,
-        imageUrl: '/images/success.png',
-        imageWidth: 170,
-        imageHeight: 170,
-        confirmButtonText: 'Continue',
+        title: 'Request already sent',
+        text: `Your enrollment request for ${courseTitle} is still waiting for professor approval.`,
+        imageUrl: '/images/asking.png',
+        imageWidth: 160,
+        imageHeight: 160,
+        confirmButtonText: 'OK',
         confirmButtonColor: '#198754',
       });
 
-      navigate(
-        courseId
-          ? `/student/enrolled-courses/${courseId}`
-          : '/student/enrolled-courses',
-      );
-
-      return true;
-    } catch (error) {
-      console.error('Enroll course error:', error);
-
-      await Swal.fire({
-        title: 'Unable to enroll',
-        text:
-          error.message ||
-          'Could not enroll in this course. Please try again.',
-        imageUrl: '/images/error.png',
-        imageWidth: 170,
-        imageHeight: 170,
-        confirmButtonText: 'OK',
-        confirmButtonColor: '#858d9b',
-      });
-
       return false;
     }
-  };
+
+    const savedUser = getSavedUser() || {};
+
+    const enrollmentRequest = {
+      id: Date.now(),
+
+      courseId: courseKey,
+
+      courseCode:
+        course.code ||
+        course.courseCode ||
+        course.course_code ||
+        '',
+
+      courseTitle,
+
+      studentId:
+        savedUser.studentId ||
+        savedUser.student_id ||
+        savedUser.schoolId ||
+        '202310102',
+
+      studentUserId:
+        savedUser.id ||
+        savedUser.userId ||
+        savedUser.user_id ||
+        null,
+
+      studentName:
+        savedUser.name ||
+        savedUser.fullName ||
+        savedUser.full_name ||
+        savedUser.username ||
+        'Student',
+
+      studentCourse:
+        savedUser.course ||
+        savedUser.program ||
+        'Bachelor of Science Information Technology',
+
+      yearLevel:
+        savedUser.yearLevel ||
+        savedUser.year_level ||
+        '1st Year',
+
+      profileImage:
+        savedUser.profileImage ||
+        savedUser.profile_image ||
+        '',
+
+      status: 'pending',
+
+      requestedAt: new Date().toISOString(),
+    };
+
+    localStorage.setItem(
+      'puffy-enrollment-requests',
+      JSON.stringify([
+        enrollmentRequest,
+        ...storedRequests,
+      ])
+    );
+
+    await Swal.fire({
+      title: 'Enrollment request sent!',
+      text: `Your request to join ${courseTitle} is waiting for professor approval.`,
+      imageUrl: '/images/success.png',
+      imageWidth: 170,
+      imageHeight: 170,
+      confirmButtonText: 'OK',
+      confirmButtonColor: '#198754',
+    });
+
+    return true;
+  } catch (error) {
+    console.error('Enrollment request error:', error);
+
+    await Swal.fire({
+      title: 'Unable to send request',
+      text:
+        error.message ||
+        'Could not send your enrollment request. Please try again.',
+      imageUrl: '/images/error.png',
+      imageWidth: 170,
+      imageHeight: 170,
+      confirmButtonText: 'OK',
+      confirmButtonColor: '#858d9b',
+    });
+
+    return false;
+  }
+};
 
   const joinByCourseCode = async () => {
   try {
@@ -774,86 +840,47 @@ const confirmEnrollment = async (course) => {
 
     if (!trimmedCode) {
       await Swal.fire({
-        icon: "warning",
-        title: "Enter Course Code",
-        text: "Please enter the course code provided by your professor.",
-        confirmButtonText: "OK",
-        confirmButtonColor: "#198754",
+        icon: 'warning',
+        title: 'Enter Course Code',
+        text: 'Please enter the course code provided by your professor.',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#198754',
       });
 
       return;
     }
 
-    const course =
-      await findJoinableCourseByCodeAsync(trimmedCode);
+    const course = await findJoinableCourseByCodeAsync(trimmedCode);
 
     if (!course) {
       await Swal.fire({
-        icon: "error",
-        title: "Course Not Found",
-        text: "Course code not found. Please check the code from your professor.",
-        confirmButtonText: "OK",
-        confirmButtonColor: "#198754",
+        icon: 'error',
+        title: 'Course Not Found',
+        text: 'Course code not found. Please check the code from your professor.',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#198754',
       });
 
       return;
     }
 
-    await enrollStudentInCourseAsync(course);
-    const enrolledKey = getCourseKey(course);
-
-    setEnrolledCourses((currentCourses) => {
-      const normalizedCourse = normalizeCourse(course);
-
-      if (
-        enrolledKey &&
-        currentCourses.some((currentCourse) => getCourseKey(currentCourse) === enrolledKey)
-      ) {
-        return currentCourses;
-      }
-
-      return [normalizedCourse, ...currentCourses];
-    });
-
     closeJoinModal();
 
-    await Swal.fire({
-      icon: "success",
-      title: "Course Joined!",
-      text: `You have successfully joined ${
-        course.title ||
-        course.courseName ||
-        course.course_name ||
-        course.name ||
-        "the course"
-      }.`,
-      confirmButtonText: "Continue",
-      confirmButtonColor: "#198754",
-    });
-
-    navigate(
-      `/student/enrolled-courses/${
-        course.id ||
-        course.courseId ||
-        course.course_id ||
-        course.code
-      }`
-    );
+    await confirmEnrollment(course);
   } catch (error) {
-    console.error("Join course error:", error);
+    console.error('Join course error:', error);
 
     await Swal.fire({
-      icon: "error",
-      title: "Unable to Join Course",
+      icon: 'error',
+      title: 'Unable to Join Course',
       text:
         error?.message ||
-        "Unable to join the course.",
-      confirmButtonText: "OK",
-      confirmButtonColor: "#198754",
+        'Unable to find or request enrollment for this course.',
+      confirmButtonText: 'OK',
+      confirmButtonColor: '#198754',
     });
   }
 };
-
   const unreadNotificationCount = notifications.filter(
     (notification) => notification.unread,
   ).length;
