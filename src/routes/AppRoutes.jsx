@@ -34,6 +34,7 @@ import AddModule from '../pages/professor/AddModule';
 import ProfessorNotifications from '../pages/professor/ProfessorNotifications';
 import ProfessorProfile from '../pages/professor/ProfessorProfile';
 import ProfessorSetting from '../pages/professor/ProfessorSetting';
+import CourseView from '../pages/professor/courseview';
 
 import StudentHome from '../pages/student/StudentHome';
 import EnrolledCourses from '../pages/student/EnrolledCourses';
@@ -325,6 +326,7 @@ export default function AppRoutes() {
             <Route path="profile" element={<ProfessorProfile />}/>
             <Route path="change-password" element={<ProfessorFeaturePage path="/professor/change-password" />} />
             <Route path="settings" element={<ProfessorSetting />} />
+            <Route path="courses/view/:courseId" element={<CourseView />} />
           </Route>
 
           {/* ==========================
