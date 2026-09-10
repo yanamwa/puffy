@@ -2041,3 +2041,22 @@
   box-shadow: 0 1px 0 rgba(25, 27, 42, 0.24) !important;
   transform: translateY(1px);
 }
+.moduleBox {
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.moduleBox:hover {
+  transform: translateY(-2px);
+}
+
+.moduleBox:focus-visible {
+  outline: 2px solid #198754;
+  outline-offset: 3px;
+}
+
+.actions button {
+  cursor: pointer;
+}

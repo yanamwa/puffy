@@ -1,343 +1,1039 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
+g
+import {
+  useNavigate,
+  useParams,
+} from 'react-router-dom';
+
 import styles from './courseview.module.css';
+
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL ||
+  'http://localhost:5000/api';
+
+const SERVER_ORIGIN =
+  API_BASE_URL.replace(/\/api\/?$/, '');
+
+const DEFAULT_PROFILE_IMAGE =
+  '/images/temporaryimg.png';
+
+
+/* =====================================================
+   TOKEN
+===================================================== */
+
+function getStoredToken() {
+  return (
+    localStorage.getItem('token') ||
+    localStorage.getItem('authToken') ||
+    localStorage.getItem('puffy-token') ||
+    sessionStorage.getItem('token') ||
+    sessionStorage.getItem('authToken')
+  );
+}
+
+
+/* =====================================================
+   PROFILE IMAGE
+===================================================== */
+
+function resolveProfileImage(imagePath) {
+  if (!imagePath) {
+    return DEFAULT_PROFILE_IMAGE;
+  }
+
+  if (
+    imagePath.startsWith('http://') ||
+    imagePath.startsWith('https://') ||
+    imagePath.startsWith('blob:') ||
+    imagePath.startsWith('data:')
+  ) {
+    return imagePath;
+  }
+
+  let fixedPath = imagePath;
+
+  if (
+    fixedPath.startsWith(
+      '/api/uploads/profile-images/'
+    )
+  ) {
+    fixedPath = fixedPath.replace(
+      '/api/uploads/profile-images/',
+      '/uploads/profile-images/'
+    );
+  }
+
+  if (!fixedPath.startsWith('/')) {
+    fixedPath = `/${fixedPath}`;
+  }
+
+  return `${SERVER_ORIGIN}${fixedPath}`;
+}
+
+
+/* =====================================================
+   DATE
+===================================================== */
+
+function formatDate(value) {
+  if (!value) {
+    return 'N/A';
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return String(value);
+  }
+
+  return date.toLocaleDateString();
+}
+
+
+/* =====================================================
+   COMPONENT
+===================================================== */
 
 export default function CourseView() {
   const { courseId } = useParams();
+
   const navigate = useNavigate();
 
-  const [activeTab, setActiveTab] = useState('requests');
-  const [course, setCourse] = useState(null);
-  const [requests, setRequests] = useState([]);
-  const [enrolledStudents, setEnrolledStudents] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] =
+    useState('requests');
 
-    useEffect(() => {
-  async function loadCourse() {
-    try {
-      setLoading(true);
+  const [course, setCourse] =
+    useState(null);
 
-      const courseData = {
-        id: courseId,
-        code: 'AKDF-23AD-DKDK',
-        title: 'ITEC 106 - Web Systems and Technologies 2',
-        program: 'Bachelor of Science Information Technology',
-        yearLevel: '1st year',
-        students: 30,
-        modules: 5,
-        quizzes: 10,
-        dateCreated: '08-23-26',
-      };
+  const [requests, setRequests] =
+    useState([]);
 
-      const requestData = [
-        {
-          id: 1,
-          studentId: '202310102',
-          name: 'Raeliana Obelia Blake',
-          course: 'Bachelor of Science Information Technology',
-          yearLevel: '1st Year',
-          profileImage: '',
-        },
-        {
-          id: 2,
-          studentId: '202310103',
-          name: 'Lucas Virel',
-          course: 'Bachelor of Science Information Technology',
-          yearLevel: '1st Year',
-          profileImage: '',
-        },
-        {
-          id: 3,
-          studentId: '202310104',
-          name: 'Emma Valeria',
-          course: 'Bachelor of Science Information Technology',
-          yearLevel: '1st Year',
-          profileImage: '',
-        },
-        {
-          id: 4,
-          studentId: '202310105',
-          name: 'Noah Alaric',
-          course: 'Bachelor of Science Information Technology',
-          yearLevel: '1st Year',
-          profileImage: '',
-        },
-      ];
+  const [
+    enrolledStudents,
+    setEnrolledStudents,
+  ] = useState([]);
 
-      const enrolledData = [
-        {
-          id: 101,
-          studentId: '202210001',
-          name: 'Raeliana Obelia Blake',
-          course: 'Bachelor of Science Information Technology',
-          yearLevel: '1st Year',
-          profileImage: '',
-        },
-        {
-          id: 102,
-          studentId: '202210002',
-          name: 'Aurelia Vance',
-          course: 'Bachelor of Science Information Technology',
-          yearLevel: '1st Year',
-          profileImage: '',
-        },
-        {
-          id: 103,
-          studentId: '202210003',
-          name: 'Lucian Hart',
-          course: 'Bachelor of Science Information Technology',
-          yearLevel: '1st Year',
-          profileImage: '',
-        },
-        {
-          id: 104,
-          studentId: '202210004',
-          name: 'Evelyn Rose',
-          course: 'Bachelor of Science Information Technology',
-          yearLevel: '1st Year',
-          profileImage: '',
-        },
-        {
-          id: 105,
-          studentId: '202210005',
-          name: 'Theo Aldrin',
-          course: 'Bachelor of Science Information Technology',
-          yearLevel: '1st Year',
-          profileImage: '',
-        },
-      ];
+  const [loading, setLoading] =
+    useState(true);
 
-      setCourse(courseData);
-      setRequests(requestData);
-      setEnrolledStudents(enrolledData);
-    } catch (error) {
-      console.error('Failed to load course:', error);
-    } finally {
-      setLoading(false);
+  const [errorMessage, setErrorMessage] =
+    useState('');
+
+  const [
+    processingId,
+    setProcessingId,
+  ] = useState(null);
+
+
+  /* ===================================================
+     LOAD COURSE + ENROLLMENTS
+  =================================================== */
+
+  const loadCourseData =
+    useCallback(async () => {
+      const token = getStoredToken();
+
+      if (!token) {
+        throw new Error(
+          'Professor authentication is required.'
+        );
+      }
+
+      /*
+       * Fetch the exact course selected
+       * from Course Management.
+       */
+      const courseResponse = await fetch(
+        `${API_BASE_URL}/courses/${courseId}`,
+        {
+          method: 'GET',
+
+          headers: {
+            Accept: 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const courseResult =
+        await courseResponse
+          .json()
+          .catch(() => ({}));
+
+      if (!courseResponse.ok) {
+        throw new Error(
+          courseResult.message ||
+            'Could not load course.'
+        );
+      }
+
+      const loadedCourse =
+        courseResult.course ||
+        courseResult.data?.course ||
+        courseResult.data ||
+        null;
+
+      if (!loadedCourse) {
+        throw new Error(
+          'Course data was not returned.'
+        );
+      }
+
+      /*
+       * Fetch enrollment requests +
+       * approved students specifically
+       * for THIS course ID.
+       */
+      const enrollmentResponse =
+        await fetch(
+          `${API_BASE_URL}/courses/${courseId}/enrollments`,
+          {
+            method: 'GET',
+
+            headers: {
+              Accept:
+                'application/json',
+
+              Authorization:
+                `Bearer ${token}`,
+            },
+          }
+        );
+
+      const enrollmentResult =
+        await enrollmentResponse
+          .json()
+          .catch(() => ({}));
+
+      if (!enrollmentResponse.ok) {
+        throw new Error(
+          enrollmentResult.message ||
+            'Could not load course students.'
+        );
+      }
+
+      setCourse(loadedCourse);
+
+      setRequests(
+        Array.isArray(
+          enrollmentResult.pending
+        )
+          ? enrollmentResult.pending
+          : []
+      );
+
+      setEnrolledStudents(
+        Array.isArray(
+          enrollmentResult.enrolled
+        )
+          ? enrollmentResult.enrolled
+          : []
+      );
+    }, [courseId]);
+
+
+  /* ===================================================
+     INITIAL LOAD
+  =================================================== */
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadPage() {
+      try {
+        setLoading(true);
+        setErrorMessage('');
+
+        await loadCourseData();
+      } catch (error) {
+        console.error(
+          'Course View loading error:',
+          error
+        );
+
+        if (active) {
+          setCourse(null);
+
+          setRequests([]);
+
+          setEnrolledStudents([]);
+
+          setErrorMessage(
+            error.message ||
+              'Unable to load this course.'
+          );
+        }
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
     }
-  }
 
-  loadCourse();
-}, [courseId]);
+    loadPage();
 
-  const displayedStudents = useMemo(() => {
-    return activeTab === 'requests' ? requests : enrolledStudents;
-  }, [activeTab, requests, enrolledStudents]);
+    return () => {
+      active = false;
+    };
+  }, [
+    courseId,
+    loadCourseData,
+  ]);
 
-  const handleApprove = (student) => {
-    const approved = window.confirm(
-      `Approve enrollment request from ${student.name}?`
-    );
 
-    if (!approved) return;
+  /* ===================================================
+     DISPLAYED STUDENTS
+  =================================================== */
 
-    setRequests((current) =>
-      current.filter((item) => item.id !== student.id)
-    );
+  const displayedStudents = useMemo(
+    () =>
+      activeTab === 'requests'
+        ? requests
+        : enrolledStudents,
+    [
+      activeTab,
+      requests,
+      enrolledStudents,
+    ]
+  );
 
-    setEnrolledStudents((current) => [...current, student]);
-  };
 
-  const handleDecline = (student) => {
-    const declined = window.confirm(
-      `Decline enrollment request from ${student.name}?`
-    );
+  /* ===================================================
+     APPROVE
+  =================================================== */
 
-    if (!declined) return;
+  const handleApprove =
+    async (student) => {
+      const confirmed =
+        window.confirm(
+          `Approve enrollment request from ${student.name}?`
+        );
 
-    setRequests((current) =>
-      current.filter((item) => item.id !== student.id)
-    );
-  };
+      if (!confirmed) {
+        return;
+      }
 
-  const handleUnenroll = (student) => {
-    const confirmed = window.confirm(
-      `Remove ${student.name} from this course?`
-    );
+      try {
+        setProcessingId(
+          student.enrollmentId
+        );
 
-    if (!confirmed) return;
+        const token =
+          getStoredToken();
 
-    setEnrolledStudents((current) =>
-      current.filter((item) => item.id !== student.id)
-    );
-  };
+        const response = await fetch(
+          `${API_BASE_URL}/enrollments/${student.enrollmentId}/approve`,
+          {
+            method: 'PATCH',
+
+            headers: {
+              Accept:
+                'application/json',
+
+              Authorization:
+                `Bearer ${token}`,
+            },
+          }
+        );
+
+        const data =
+          await response
+            .json()
+            .catch(() => ({}));
+
+        if (!response.ok) {
+          throw new Error(
+            data.message ||
+              'Unable to approve student.'
+          );
+        }
+
+        /*
+         * Reload directly from database
+         * after approval.
+         */
+        await loadCourseData();
+      } catch (error) {
+        console.error(
+          'Approve enrollment error:',
+          error
+        );
+
+        window.alert(
+          error.message ||
+            'Unable to approve student.'
+        );
+      } finally {
+        setProcessingId(null);
+      }
+    };
+
+
+  /* ===================================================
+     DECLINE
+  =================================================== */
+
+  const handleDecline =
+    async (student) => {
+      const confirmed =
+        window.confirm(
+          `Decline enrollment request from ${student.name}?`
+        );
+
+      if (!confirmed) {
+        return;
+      }
+
+      try {
+        setProcessingId(
+          student.enrollmentId
+        );
+
+        const token =
+          getStoredToken();
+
+        const response = await fetch(
+          `${API_BASE_URL}/enrollments/${student.enrollmentId}/decline`,
+          {
+            method: 'PATCH',
+
+            headers: {
+              Accept:
+                'application/json',
+
+              Authorization:
+                `Bearer ${token}`,
+            },
+          }
+        );
+
+        const data =
+          await response
+            .json()
+            .catch(() => ({}));
+
+        if (!response.ok) {
+          throw new Error(
+            data.message ||
+              'Unable to decline request.'
+          );
+        }
+
+        await loadCourseData();
+      } catch (error) {
+        console.error(
+          'Decline enrollment error:',
+          error
+        );
+
+        window.alert(
+          error.message ||
+            'Unable to decline request.'
+        );
+      } finally {
+        setProcessingId(null);
+      }
+    };
+
+
+  /* ===================================================
+     UNENROLL
+  =================================================== */
+
+  const handleUnenroll =
+    async (student) => {
+      const confirmed =
+        window.confirm(
+          `Remove ${student.name} from this course?`
+        );
+
+      if (!confirmed) {
+        return;
+      }
+
+      /*
+       * Your existing /courses/:id/unenroll
+       * endpoint is designed for the logged
+       * in student themselves.
+       *
+       * Until a professor-specific endpoint
+       * is added, keep the button disabled
+       * rather than accidentally unenrolling
+       * the professor account.
+       */
+
+      window.alert(
+        'Professor unenrollment endpoint still needs to be connected.'
+      );
+    };
+
+
+  /* ===================================================
+     LOADING
+  =================================================== */
 
   if (loading) {
     return (
-      <section className={styles.courseViewPage}>
-        <div className={styles.loading}>Loading course...</div>
+      <section
+        className={
+          styles.courseViewPage
+        }
+      >
+        <div
+          className={styles.loading}
+        >
+          Loading course...
+        </div>
       </section>
     );
   }
 
-  if (!course) {
+
+  /* ===================================================
+     ERROR
+  =================================================== */
+
+  if (
+    errorMessage ||
+    !course
+  ) {
     return (
-      <section className={styles.courseViewPage}>
-        <div className={styles.loading}>Course not found.</div>
+      <section
+        className={
+          styles.courseViewPage
+        }
+      >
+        <div
+          className={styles.loading}
+        >
+          <p>
+            {errorMessage ||
+              'Course not found.'}
+          </p>
+
+          <button
+            type="button"
+            onClick={() =>
+              navigate(
+                '/professor/courses'
+              )
+            }
+          >
+            Back to Courses
+          </button>
+        </div>
       </section>
     );
   }
+
+
+  /* ===================================================
+     COURSE VALUES
+  =================================================== */
+
+  const courseCode =
+    course.code ||
+    course.courseCode ||
+    course.course_code ||
+    'COURSE';
+
+  const courseTitle =
+    course.title ||
+    course.courseName ||
+    course.course_name ||
+    'Untitled Course';
+
+  const courseDescription =
+    course.summary ||
+    course.description ||
+    '';
+
+  const moduleCount =
+    course.moduleCount ??
+    course.module_count ??
+    course.modules ??
+    0;
+
+  const quizCount =
+    course.quizzes ??
+    course.quizCount ??
+    course.quiz_count ??
+    0;
+
+  const studentCount =
+    enrolledStudents.length;
+
+  const createdDate =
+    course.createdAt ||
+    course.created_at ||
+    course.updatedAt ||
+    course.updated_at;
+
+
+  /* ===================================================
+     PAGE
+  =================================================== */
 
   return (
-    <section className={styles.courseViewPage}>
-      <div className={styles.pageHeader}>
+    <section
+      className={
+        styles.courseViewPage
+      }
+    >
+
+      {/* ===============================================
+          PAGE HEADER
+      ================================================ */}
+
+      <div
+        className={
+          styles.pageHeader
+        }
+      >
         <div>
-          <h1>Course View</h1>
+          <h1>
+            Course View
+          </h1>
+
           <p>
-            Build the course using modules. Each module can contain lesson
-            pages and its own quiz.
+            View enrollment requests
+            and students enrolled in
+            this course.
           </p>
         </div>
       </div>
 
-      <div className={styles.courseInfo}>
-        <div className={styles.courseInfoTop}>
-          <div className={styles.courseCode}>
-            <span>Course Code:</span>
-            <strong>{course.code}</strong>
+
+      {/* ===============================================
+          COURSE INFORMATION
+      ================================================ */}
+
+      <div
+        className={
+          styles.courseInfo
+        }
+      >
+
+        <div
+          className={
+            styles.courseInfoTop
+          }
+        >
+
+          <div
+            className={
+              styles.courseCode
+            }
+          >
+            <span>
+              Course Code:
+            </span>
+
+            <strong>
+              {courseCode}
+            </strong>
           </div>
 
-          <span className={styles.dateCreated}>
-            Date created: {course.dateCreated}
+
+          <span
+            className={
+              styles.dateCreated
+            }
+          >
+            Date created:{' '}
+            {formatDate(
+              createdDate
+            )}
+          </span>
+
+        </div>
+
+
+        <h2>
+          {courseTitle}
+        </h2>
+
+
+        {courseDescription && (
+          <p
+            className={
+              styles.courseProgram
+            }
+          >
+            {courseDescription}
+          </p>
+        )}
+
+
+        <div
+          className={
+            styles.courseStats
+          }
+        >
+          <span>
+            {studentCount}{' '}
+            students
+          </span>
+
+          <span>
+            {moduleCount}{' '}
+            Modules
+          </span>
+
+          <span>
+            {quizCount}{' '}
+            Quizzes
           </span>
         </div>
 
-        <h2>{course.title}</h2>
-
-        <p className={styles.courseProgram}>
-          {course.yearLevel} - {course.program}
-        </p>
-
-        <div className={styles.courseStats}>
-          <span>{course.students} students</span>
-          <span>{course.modules} Modules</span>
-          <span>{course.quizzes} Quizzes</span>
-        </div>
       </div>
 
-      <div className={styles.studentSection}>
-        <div className={styles.tabs}>
+
+      {/* ===============================================
+          STUDENTS SECTION
+      ================================================ */}
+
+      <div
+        className={
+          styles.studentSection
+        }
+      >
+
+        {/* =============================================
+            TABS
+        ============================================== */}
+
+        <div
+          className={
+            styles.tabs
+          }
+        >
+
           <button
             type="button"
-            className={`${styles.tabButton} ${
-              activeTab === 'requests' ? styles.activeTab : ''
+            className={`${
+              styles.tabButton
+            } ${
+              activeTab ===
+              'requests'
+                ? styles.activeTab
+                : ''
             }`}
-            onClick={() => setActiveTab('requests')}
+            onClick={() =>
+              setActiveTab(
+                'requests'
+              )
+            }
           >
             Enrollment Request
-            {requests.length > 0 && (
-              <span className={styles.requestCount}>{requests.length}</span>
+
+            {requests.length >
+              0 && (
+              <span
+                className={
+                  styles.requestCount
+                }
+              >
+                {requests.length}
+              </span>
             )}
           </button>
 
+
           <button
             type="button"
-            className={`${styles.tabButton} ${
-              activeTab === 'enrolled' ? styles.activeTab : ''
+            className={`${
+              styles.tabButton
+            } ${
+              activeTab ===
+              'enrolled'
+                ? styles.activeTab
+                : ''
             }`}
-            onClick={() => setActiveTab('enrolled')}
+            onClick={() =>
+              setActiveTab(
+                'enrolled'
+              )
+            }
           >
             Enrolled Students
+
+            {enrolledStudents.length >
+              0 && (
+              <span
+                className={
+                  styles.requestCount
+                }
+              >
+                {
+                  enrolledStudents.length
+                }
+              </span>
+            )}
           </button>
+
         </div>
 
-        <div className={styles.tableWrapper}>
-          <table className={styles.studentTable}>
+
+        {/* =============================================
+            TABLE
+        ============================================== */}
+
+        <div
+          className={
+            styles.tableWrapper
+          }
+        >
+          <table
+            className={
+              styles.studentTable
+            }
+          >
+
             <thead>
               <tr>
-                <th>Student ID</th>
-                <th>Name</th>
-                <th>Course</th>
-                <th>Year Level</th>
-                <th>Action</th>
+                <th>
+                  Student ID
+                </th>
+
+                <th>
+                  Name
+                </th>
+
+                <th>
+                  Email
+                </th>
+
+                <th>
+                  Year Level
+                </th>
+
+                <th>
+                  Section
+                </th>
+
+                <th>
+                  Action
+                </th>
               </tr>
             </thead>
 
+
             <tbody>
-              {displayedStudents.length === 0 ? (
+
+              {displayedStudents
+                .length === 0 ? (
                 <tr>
-                  <td colSpan="5" className={styles.emptyTable}>
-                    {activeTab === 'requests'
+                  <td
+                    colSpan="6"
+                    className={
+                      styles.emptyTable
+                    }
+                  >
+                    {activeTab ===
+                    'requests'
                       ? 'No enrollment requests.'
                       : 'No enrolled students yet.'}
                   </td>
                 </tr>
               ) : (
-                displayedStudents.map((student) => (
-                  <tr key={student.id}>
-                    <td>{student.studentId}</td>
+                displayedStudents.map(
+                  (student) => {
+                    const studentKey =
+                      student.enrollmentId ||
+                      student.userId ||
+                      student.studentId;
 
-                    <td>
-                      <div className={styles.studentName}>
-                        {student.profileImage ? (
-                          <img
-                            src={student.profileImage}
-                            alt={student.name}
-                            className={styles.avatar}
-                          />
-                        ) : (
-                          <div className={styles.avatarFallback}>
-                            {student.name.charAt(0)}
-                          </div>
-                        )}
+                    const name =
+                      student.displayName ||
+                      student.name ||
+                      'Student';
 
-                        <span>{student.name}</span>
-                      </div>
-                    </td>
+                    const image =
+                      resolveProfileImage(
+                        student.profileImage
+                      );
 
-                    <td>{student.course}</td>
-                    <td>{student.yearLevel}</td>
+                    const isProcessing =
+                      processingId ===
+                      student.enrollmentId;
 
-                    <td>
-                      {activeTab === 'requests' ? (
-                        <div className={styles.actionButtons}>
-                          <button
-                            type="button"
-                            className={styles.approveBtn}
-                            onClick={() => handleApprove(student)}
-                          >
-                            Approve
-                          </button>
+                    return (
+                      <tr
+                        key={
+                          studentKey
+                        }
+                      >
 
-                          <button
-                            type="button"
-                            className={styles.declineBtn}
-                            onClick={() => handleDecline(student)}
-                          >
-                            Decline
-                          </button>
-                        </div>
-                      ) : (
-                        <div className={styles.actionButtons}>
-                            <button
-                            type="button"
-                            className={styles.viewBtn}
-                            onClick={() =>
-                                navigate(
-                                `/professor/courses/view/${courseId}/student/${student.id}`
-                                )
+                        <td>
+                          {student.studentId ||
+                            'N/A'}
+                        </td>
+
+
+                        <td>
+                          <div
+                            className={
+                              styles.studentName
                             }
-                            >
-                            View
-                            </button>
+                          >
+                            <img
+                              src={
+                                image
+                              }
+                              alt={
+                                name
+                              }
+                              className={
+                                styles.avatar
+                              }
+                              onError={(
+                                event
+                              ) => {
+                                event.currentTarget.src =
+                                  DEFAULT_PROFILE_IMAGE;
+                              }}
+                            />
 
-                            <button
-                            type="button"
-                            className={styles.unenrollBtn}
-                            onClick={() => handleUnenroll(student)}
+                            <span>
+                              {name}
+                            </span>
+                          </div>
+                        </td>
+
+
+                        <td>
+                          {student.email ||
+                            'N/A'}
+                        </td>
+
+
+                        <td>
+                          {student.yearLevel ||
+                            'N/A'}
+                        </td>
+
+
+                        <td>
+                          {student.sectionName ||
+                            'N/A'}
+                        </td>
+
+
+                        <td>
+
+                          {activeTab ===
+                          'requests' ? (
+
+                            <div
+                              className={
+                                styles.actionButtons
+                              }
                             >
-                            Unenroll
-                            </button>
-                        </div>
-                        )}
-                    </td>
-                  </tr>
-                ))
+
+                              <button
+                                type="button"
+                                className={
+                                  styles.approveBtn
+                                }
+                                disabled={
+                                  isProcessing
+                                }
+                                onClick={() =>
+                                  handleApprove(
+                                    student
+                                  )
+                                }
+                              >
+                                {isProcessing
+                                  ? 'Processing...'
+                                  : 'Approve'}
+                              </button>
+
+
+                              <button
+                                type="button"
+                                className={
+                                  styles.declineBtn
+                                }
+                                disabled={
+                                  isProcessing
+                                }
+                                onClick={() =>
+                                  handleDecline(
+                                    student
+                                  )
+                                }
+                              >
+                                Decline
+                              </button>
+
+                            </div>
+
+                          ) : (
+
+                            <div
+                              className={
+                                styles.actionButtons
+                              }
+                            >
+
+                              <button
+                                type="button"
+                                className={
+                                  styles.viewBtn
+                                }
+                                onClick={() =>
+                                  navigate(
+                                    `/professor/courses/view/${courseId}/student/${student.userId}`
+                                  )
+                                }
+                              >
+                                View
+                              </button>
+
+
+                              <button
+                                type="button"
+                                className={
+                                  styles.unenrollBtn
+                                }
+                                onClick={() =>
+                                  handleUnenroll(
+                                    student
+                                  )
+                                }
+                              >
+                                Unenroll
+                              </button>
+
+                            </div>
+
+                          )}
+
+                        </td>
+
+                      </tr>
+                    );
+                  }
+                )
               )}
+
             </tbody>
+
           </table>
         </div>
+
       </div>
+
     </section>
   );
 }
+

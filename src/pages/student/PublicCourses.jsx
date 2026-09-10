@@ -698,7 +698,9 @@ export default function PublicCourses() {
     imageUrl: '/images/asking.png',
     imageWidth: 180,
     imageHeight: 180,
+
     showCancelButton: true,
+
     confirmButtonText: 'Send Request',
     cancelButtonText: 'Cancel',
 
@@ -716,22 +718,70 @@ export default function PublicCourses() {
   }
 
   try {
-    const courseKey = getCourseKey(course);
+    const token = getStoredToken();
 
-    const storedRequests = JSON.parse(
-      localStorage.getItem('puffy-enrollment-requests') || '[]'
+    if (!token) {
+      throw new Error(
+        'You must be logged in to send an enrollment request.'
+      );
+    }
+
+    const courseId =
+      course.id ||
+      course.courseId ||
+      course.course_id;
+
+    const courseCode =
+      course.code ||
+      course.courseCode ||
+      course.course_code ||
+      '';
+
+    if (!courseId && !courseCode) {
+      throw new Error(
+        'Unable to identify this course.'
+      );
+    }
+
+    /* =========================================
+       SEND REQUEST TO NODE BACKEND
+    ========================================= */
+
+    const response = await fetch(
+      `${API_BASE_URL}/courses/enroll`,
+      {
+        method: 'POST',
+
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+
+        body: JSON.stringify({
+          courseId,
+          courseCode,
+        }),
+      }
     );
 
-    const alreadyRequested = storedRequests.some(
-      (request) =>
-        String(request.courseId) === String(courseKey) &&
-        request.status === 'pending'
-    );
+    const data = await response
+      .json()
+      .catch(() => ({}));
 
-    if (alreadyRequested) {
+    /* =========================================
+       ALREADY PENDING
+    ========================================= */
+
+    if (
+      response.status === 409 &&
+      data.status === 'pending'
+    ) {
       await Swal.fire({
         title: 'Request already sent',
-        text: `Your enrollment request for ${courseTitle} is still waiting for professor approval.`,
+        text:
+          data.message ||
+          `Your enrollment request for ${courseTitle} is still waiting for professor approval.`,
         imageUrl: '/images/asking.png',
         imageWidth: 160,
         imageHeight: 160,
@@ -742,71 +792,49 @@ export default function PublicCourses() {
       return false;
     }
 
-    const savedUser = getSavedUser() || {};
+    /* =========================================
+       ALREADY ENROLLED
+    ========================================= */
 
-    const enrollmentRequest = {
-      id: Date.now(),
+    if (
+      response.status === 409 &&
+      data.status === 'approved'
+    ) {
+      await Swal.fire({
+        title: 'Already enrolled',
+        text:
+          data.message ||
+          `You are already enrolled in ${courseTitle}.`,
+        imageUrl: '/images/success.png',
+        imageWidth: 160,
+        imageHeight: 160,
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#198754',
+      });
 
-      courseId: courseKey,
+      return false;
+    }
 
-      courseCode:
-        course.code ||
-        course.courseCode ||
-        course.course_code ||
-        '',
+    /* =========================================
+       OTHER ERROR
+    ========================================= */
 
-      courseTitle,
+    if (!response.ok) {
+      throw new Error(
+        data.message ||
+        'Could not send enrollment request.'
+      );
+    }
 
-      studentId:
-        savedUser.studentId ||
-        savedUser.student_id ||
-        savedUser.schoolId ||
-        '202310102',
-
-      studentUserId:
-        savedUser.id ||
-        savedUser.userId ||
-        savedUser.user_id ||
-        null,
-
-      studentName:
-        savedUser.name ||
-        savedUser.fullName ||
-        savedUser.full_name ||
-        savedUser.username ||
-        'Student',
-
-      studentCourse:
-        savedUser.course ||
-        savedUser.program ||
-        'Bachelor of Science Information Technology',
-
-      yearLevel:
-        savedUser.yearLevel ||
-        savedUser.year_level ||
-        '1st Year',
-
-      profileImage:
-        savedUser.profileImage ||
-        savedUser.profile_image ||
-        '',
-
-      status: 'pending',
-
-      requestedAt: new Date().toISOString(),
-    };
-
-    localStorage.setItem(
-      'puffy-enrollment-requests',
-      JSON.stringify([
-        enrollmentRequest,
-        ...storedRequests,
-      ])
-    );
+    /* =========================================
+       SUCCESS
+    ========================================= */
 
     await Swal.fire({
       title: 'Enrollment request sent!',
-      text: `Your request to join ${courseTitle} is waiting for professor approval.`,
+      text:
+        data.message ||
+        `Your request to join ${courseTitle} is waiting for professor approval.`,
       imageUrl: '/images/success.png',
       imageWidth: 170,
       imageHeight: 170,
@@ -816,7 +844,10 @@ export default function PublicCourses() {
 
     return true;
   } catch (error) {
-    console.error('Enrollment request error:', error);
+    console.error(
+      'Enrollment request error:',
+      error
+    );
 
     await Swal.fire({
       title: 'Unable to send request',
