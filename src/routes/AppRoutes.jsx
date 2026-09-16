@@ -35,6 +35,8 @@ import ProfessorNotifications from '../pages/professor/ProfessorNotifications';
 import ProfessorProfile from '../pages/professor/ProfessorProfile';
 import ProfessorSetting from '../pages/professor/ProfessorSetting';
 import CourseView from '../pages/professor/courseview';
+import AssessmentAnalysis from '../pages/professor/AssessmentAnalysis';
+import AssessmentDetail from '../pages/professor/AssessmentDetail';
 
 import StudentHome from '../pages/student/StudentHome';
 import EnrolledCourses from '../pages/student/EnrolledCourses';
@@ -321,7 +323,8 @@ export default function AppRoutes() {
             <Route path="courses" element={<ModuleManagement />} />
             <Route path="courses/new" element={<AddModule />} />
             <Route path="courses/edit/:id" element={<AddModule />} />
-            <Route path="students" element={<ProfessorFeaturePage path="/professor/students" />} />
+            <Route path="students" element={<AssessmentAnalysis />} />
+            <Route path="assessment/:courseId" element={<AssessmentDetail />} />
             <Route path="notifications" element={<ProfessorNotifications />} />
             <Route path="profile" element={<ProfessorProfile />}/>
             <Route path="change-password" element={<ProfessorFeaturePage path="/professor/change-password" />} />
@@ -447,3 +450,4 @@ export default function AppRoutes() {
     </Routes>
   );
 }
+

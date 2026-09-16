@@ -21,7 +21,7 @@ import {
   FiSearch,
   FiSettings,
   FiUser,
-  FiUsers,
+  FiBarChart2,
 } from 'react-icons/fi';
 
 import RoleNotificationMenu
@@ -64,9 +64,9 @@ const menuItems = [
     icon: FiBookOpen,
   },
   {
-    label: 'Student Monitoring',
+    label: 'Assessment Analysis',
     path: '/professor/students',
-    icon: FiUsers,
+    icon: FiBarChart2,
   },
   {
     label: 'Notifications',
@@ -711,3 +711,4 @@ export default function ProfessorLayout() {
     </div>
   );
 }
+

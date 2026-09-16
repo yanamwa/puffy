@@ -1,0 +1,448 @@
+.page {
+  min-height: 100%;
+  margin: -34px -42px -48px;
+  background: #eeeeee;
+  color: #606060;
+}
+
+.header {
+  min-height: 62px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 10px 38px;
+  border-bottom: 1px solid #cccccc;
+  background: #eeeeee;
+}
+
+.header h1 {
+  margin: 0;
+  color: #606060;
+  font-size: 27px;
+  font-weight: 500;
+  line-height: 1.1;
+}
+
+.header p {
+  margin: 5px 0 0;
+  color: #686868;
+  font-size: 11px;
+}
+
+.searchPanel {
+  width: min(100% - 70px, 960px);
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  margin: 18px 35px 0;
+  padding: 8px 12px;
+  border: 1px solid #c7c7c7;
+  border-radius: 5px;
+  background: #ffffff;
+  box-shadow: 5px 4px 0 rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+}
+
+.searchBox {
+  width: min(330px, 100%);
+  height: 32px;
+  display: flex;
+  align-items: center;
+  padding: 0 15px;
+  border: 1px solid #c8c8c8;
+  border-radius: 999px;
+  background: #ededed;
+  box-sizing: border-box;
+}
+
+.searchBox input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #606060;
+  font: inherit;
+  font-size: 10px;
+}
+
+.searchBox input::placeholder {
+  color: #9a9a9a;
+}
+
+.courseArea {
+  margin: 34px 35px;
+}
+
+.courseGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 260px));
+  gap: 18px;
+  align-items: start;
+}
+
+.courseCard {
+  position: relative;
+  width: 260px;
+  min-height: 138px;
+  padding: 15px 17px 13px;
+  border: 1px solid #d2d2d2;
+  border-radius: 5px;
+  background: #ffffff;
+  box-shadow: 8px 0 0 #c4c7cc;
+  color: #646464;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.courseCard:hover {
+  transform: translateY(-1px);
+  box-shadow: 8px 0 0 #bcc0c6, 0 8px 18px rgba(0, 0, 0, 0.08);
+}
+
+.folderTab {
+  position: absolute;
+  top: -21px;
+  left: 0;
+  width: 94px;
+  height: 21px;
+  border-radius: 5px 16px 0 0;
+  border-top: 7px solid #c4c7cc;
+  border-left: 1px solid #d2d2d2;
+  background: #ffffff;
+  transform: skewX(28deg);
+  transform-origin: left bottom;
+}
+
+.dateText,
+.codeText,
+.description {
+  display: block;
+  margin: 0;
+  color: #666666;
+  font-size: 9px;
+  line-height: 1.35;
+}
+
+.codeText {
+  margin-top: 9px;
+}
+
+.codeText span {
+  margin-right: 8px;
+}
+
+.courseCard strong {
+  display: block;
+  margin: 5px 0;
+  color: #686868;
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+.description {
+  font-size: 7px;
+}
+
+.divider {
+  display: block;
+  height: 1px;
+  margin: 7px 0 9px;
+  background: #eeeeee;
+}
+
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.stats span {
+  min-height: 19px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 9px;
+  border-radius: 999px;
+  background: #eeeeee;
+  color: #666666;
+  font-size: 8px;
+  line-height: 1;
+}
+
+.message {
+  width: min(100% - 70px, 960px);
+  padding: 22px;
+  border: 1px solid #c7c7c7;
+  border-radius: 5px;
+  background: #ffffff;
+  color: #606060;
+}
+
+.backButton {
+  min-height: 34px;
+  padding: 0 14px;
+  border: 1px solid #c8c8c8;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #606060;
+  cursor: pointer;
+  font: inherit;
+}
+
+.detailPanel {
+  width: min(100% - 70px, 1100px);
+  margin: 18px 35px 0;
+  padding: 20px;
+  border: 1px solid #c7c7c7;
+  border-radius: 6px;
+  background: #ffffff;
+  box-shadow: 5px 4px 0 rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+}
+
+.detailTitle h2 {
+  margin: 0;
+  color: #606060;
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.detailTitle p {
+  margin: 5px 0 0;
+  color: #747474;
+  font-size: 12px;
+}
+
+.metricGrid {
+  width: min(100%, 760px);
+  display: grid;
+  grid-template-columns: repeat(4, minmax(120px, 1fr));
+  gap: 24px;
+  margin: 24px auto;
+}
+
+.metricGrid div {
+  min-height: 70px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #cccccc;
+  border-radius: 6px;
+  background: #ffffff;
+}
+
+.metricGrid span {
+  color: #333333;
+  font-size: 13px;
+}
+
+.metricGrid strong {
+  margin-top: 8px;
+  color: #222222;
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.analysisGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 190px;
+  gap: 32px;
+  align-items: start;
+}
+
+.questionBlock {
+  position: relative;
+  padding-top: 32px;
+}
+
+.sectionTab {
+  position: absolute;
+  top: 0;
+  left: 10px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  padding: 0 18px;
+  border: 1px solid #c7c7c7;
+  border-bottom: 0;
+  border-radius: 7px 7px 0 0;
+  background: #eeeeee;
+  color: #444444;
+  font-size: 13px;
+}
+
+.tableWrap {
+  overflow-x: auto;
+  border: 1px solid #c7c7c7;
+  border-radius: 6px;
+}
+
+.tableWrap table {
+  width: 100%;
+  min-width: 700px;
+  border-collapse: collapse;
+}
+
+.tableWrap th,
+.tableWrap td {
+  padding: 13px 12px;
+  border-bottom: 1px solid #dddddd;
+  color: #333333;
+  font-size: 12px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.tableWrap th:first-child,
+.tableWrap td:first-child {
+  text-align: left;
+}
+
+.tableWrap button {
+  min-width: 68px;
+  height: 26px;
+  border: 0;
+  border-radius: 6px;
+  background: #565656;
+  color: #ffffff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+}
+
+.scoreSummary {
+  margin-top: 32px;
+  padding: 15px 16px;
+  border: 1px solid #c7c7c7;
+  border-radius: 6px;
+  background: #ffffff;
+}
+
+.scoreSummary h3 {
+  margin: 0 0 18px;
+  color: #333333;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.scoreSummary div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+  color: #444444;
+  font-size: 12px;
+}
+
+.scoreSummary strong {
+  color: #777777;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.modal {
+  width: min(560px, 94vw);
+  overflow: hidden;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.modal header {
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 18px;
+  border-bottom: 1px solid #eeeeee;
+  background: #f6f6f6;
+}
+
+.modal header h2 {
+  margin: 0;
+  color: #333333;
+  font-size: 19px;
+  font-weight: 500;
+}
+
+.modal header button {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+}
+
+.modalBody {
+  padding: 18px;
+}
+
+.modalBody span {
+  display: block;
+  margin-top: 12px;
+  color: #666666;
+  font-size: 12px;
+}
+
+.modalBody p {
+  margin: 6px 0 0;
+  color: #222222;
+  font-size: 15px;
+}
+
+@media (max-width: 900px) {
+  .page {
+    margin: -22px -16px -32px;
+  }
+
+  .header {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 18px 16px;
+  }
+
+  .searchPanel,
+  .detailPanel,
+  .message {
+    width: calc(100% - 32px);
+    margin-right: 16px;
+    margin-left: 16px;
+  }
+
+  .courseArea {
+    margin-right: 16px;
+    margin-left: 16px;
+  }
+
+  .courseGrid,
+  .metricGrid,
+  .analysisGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .courseCard {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .scoreSummary {
+    margin-top: 0;
+  }
+}

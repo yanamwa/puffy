@@ -5,7 +5,6 @@ import {
   useMemo,
   useState,
 } from 'react';
-g
 import {
   useNavigate,
   useParams,
