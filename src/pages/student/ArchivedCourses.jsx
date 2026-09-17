@@ -1066,39 +1066,43 @@ const [
           </Link>
 
           <div className="sidebar-course-group">
+              <button
+                type="button"
+                className="side-nav-item sidebar-enrolled-toggle"
+                onClick={() => {
+                  navigate('/student/enrolled-courses');
+                }}
+                title={
+                  sidebarCollapsed
+                    ? 'Enrolled Courses'
+                    : undefined
+                }
+              >
+                <Icon name="courses" />
 
-  <button
-    type="button"
-    className="side-nav-item sidebar-enrolled-toggle"
-    onClick={() => {
-      setEnrolledCoursesOpen(
-        (previous) => !previous,
-      );
-    }}
-    title={
-      sidebarCollapsed
-        ? 'Enrolled Courses'
-        : undefined
-    }
-  >
-    <Icon name="courses" />
+                <span className="nav-label">
+                  Enrolled Courses
+                </span>
 
-    <span className="nav-label">
-      Enrolled Courses
-    </span>
+                {!sidebarCollapsed && (
+                  <svg
+                    className={`sidebar-dropdown-arrow ${
+                      enrolledCoursesOpen ? 'open' : ''
+                    }`}
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                    onClick={(event) => {
+                      event.stopPropagation();
 
-    {!sidebarCollapsed && (
-      <svg
-        className={`sidebar-dropdown-arrow ${
-          enrolledCoursesOpen ? 'open' : ''
-        }`}
-        viewBox="0 0 24 24"
-        aria-hidden="true"
-      >
-        <path d="m7 9 5 5 5-5" />
-      </svg>
-    )}
-  </button>
+                      setEnrolledCoursesOpen(
+                        (previous) => !previous
+                      );
+                    }}
+                  >
+                    <path d="m7 9 5 5 5-5" />
+                  </svg>
+                )}
+              </button>
 
   {!sidebarCollapsed &&
     enrolledCoursesOpen && (

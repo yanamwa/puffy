@@ -45,6 +45,10 @@
 
   overflow-y: auto;
   overflow-x: hidden;
+
+  font-family: Arial, Helvetica, sans-serif;
+
+  
 }
 
 /* ===========================
@@ -61,6 +65,15 @@
   gap: 8px;
 
   padding: 18px 24px 15px;
+
+
+}
+.brand-lockup .brand-name {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1;
+  color: #ffffff;
 }
 
 .brand-lockup::after {
@@ -117,12 +130,17 @@
   color: #ffffff;
   text-decoration: none;
 
-  font-size: 14px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: px;
   font-weight: 400;
 
   transition: color .2s ease;
 }
-
+.side-nav-item .nav-label {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+}
 .side-nav-item svg {
   width: 18px;
   height: 18px;
@@ -575,6 +593,9 @@
   padding: 0 44px;
   background: #fbfbfc;
   border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
 
 .transparent-topbar {
@@ -3949,13 +3970,14 @@ a.course-folder:focus-visible {
 }
 
 /* ==================================================
-   KEEP HEADER DROPDOWNS ABOVE ALL PAGE CONTENT
+   KEEP HEADER STICKY + DROPDOWNS ABOVE CONTENT
 ================================================== */
 
 .enrolled-topbar,
 .home-topbar,
 .enrolled-courses-topbar {
-  position: relative;
+  position: sticky;
+  top: 0;
   z-index: 1000;
   overflow: visible;
 }
@@ -4350,23 +4372,6 @@ a.course-folder:focus-visible {
   font-weight: 800;
 }
 
-.student-id-barcode {
-  width: 88px;
-  height: 29px;
-  flex: 0 0 88px;
-
-  background: repeating-linear-gradient(
-    to right,
-    #222722 0,
-    #222722 2px,
-    transparent 2px,
-    transparent 4px,
-    #222722 4px,
-    #222722 5px,
-    transparent 5px,
-    transparent 8px
-  );
-}
 
 /* ==================================================
    INFORMATION PANEL
