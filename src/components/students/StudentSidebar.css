@@ -1,0 +1,662 @@
+@import url("https://fonts.googleapis.com/css2?family=Jersey+15&display=swap");
+
+/* =====================================================
+   STUDENT SIDEBAR
+===================================================== */
+
+.enrolled-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+
+  width: 220px;
+  height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  background: #198754;
+  border-right: 1px solid #c4c8cf;
+
+  font-family: Arial, Helvetica, sans-serif;
+
+  box-sizing: border-box;
+
+  transition: width 220ms ease;
+}
+
+
+/* =====================================================
+   BRAND
+===================================================== */
+
+.brand-lockup {
+  position: relative;
+
+  height: 95px;
+  min-height: 95px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+
+  padding: 18px 24px 15px;
+
+  box-sizing: border-box;
+}
+
+.brand-lockup::after {
+  content: "";
+
+  position: absolute;
+
+  left: 22px;
+  right: 22px;
+  bottom: 0;
+
+  height: 1px;
+
+  background: #d3d7de;
+}
+
+.sidebar-logo {
+  width: 44px;
+
+  display: block;
+
+  object-fit: contain;
+
+  cursor: pointer;
+
+  transition: transform 0.2s ease;
+}
+
+.sidebar-logo:hover {
+  transform: scale(1.06);
+}
+
+.brand-name {
+  color: #ffffff;
+
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1;
+
+  white-space: nowrap;
+  overflow: hidden;
+
+  transition:
+    opacity 140ms ease,
+    width 220ms ease;
+}
+
+
+/* =====================================================
+   NAVIGATION
+===================================================== */
+
+.side-nav {
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 14px;
+
+  padding: 26px 0 0 56px;
+
+  box-sizing: border-box;
+}
+
+.side-nav-item {
+  position: relative;
+
+  width: 100%;
+  min-height: 40px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 0 12px 0 10px;
+
+  border: 1px solid transparent;
+  border-right: none;
+
+  border-radius: 999px 0 0 999px;
+
+  background: transparent;
+
+  color: #ffffff;
+
+  text-decoration: none;
+
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 400;
+
+  cursor: pointer;
+
+  box-sizing: border-box;
+
+  transition:
+    color 0.2s ease,
+    background 0.2s ease;
+}
+
+.side-nav-item .nav-label {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+
+  white-space: nowrap;
+  overflow: hidden;
+
+  transition:
+    opacity 140ms ease,
+    width 220ms ease;
+}
+
+.side-nav-item svg {
+  width: 18px;
+  height: 18px;
+
+  flex-shrink: 0;
+
+  fill: currentColor;
+}
+
+
+/* =====================================================
+   NAV HOVER
+===================================================== */
+
+.side-nav-item:hover {
+  background: transparent;
+  border-color: transparent;
+
+  color: #171927;
+}
+
+
+/* =====================================================
+   ACTIVE NAVIGATION
+===================================================== */
+
+.side-nav-item.active {
+  z-index: 2;
+
+  background: #ffffff;
+  color: #606772;
+
+  border: 1px solid #aeb5bf;
+  border-right: none;
+
+  border-radius: 999px 0 0 999px;
+}
+
+.side-nav-item.active::after {
+  content: "";
+
+  position: absolute;
+
+  top: 1px;
+  right: -2px;
+  bottom: 1px;
+
+  width: 3px;
+
+  background: #ffffff;
+}
+
+.side-nav-item.plain-nav-item {
+  padding-left: 10px;
+}
+
+
+/* =====================================================
+   ENROLLED COURSES
+===================================================== */
+
+.sidebar-course-group {
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-enrolled-toggle {
+  width: 100%;
+
+  border-right: none;
+
+  cursor: pointer;
+
+  font-family: inherit;
+  text-align: left;
+}
+
+
+/* =====================================================
+   ENROLLED DROPDOWN ARROW
+===================================================== */
+
+.sidebar-dropdown-arrow {
+  width: 17px !important;
+  height: 17px !important;
+
+  margin-left: auto;
+
+  flex-shrink: 0;
+
+  fill: none !important;
+  stroke: currentColor;
+
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+
+  transition: transform 0.2s ease;
+}
+
+.sidebar-dropdown-arrow.open {
+  transform: rotate(180deg);
+}
+
+
+/* =====================================================
+   ENROLLED COURSE LIST
+===================================================== */
+
+.sidebar-enrolled-list {
+  width: calc(100% + 18px);
+
+  margin-left: 18px;
+  margin-right: -18px;
+
+  display: flex;
+  flex-direction: column;
+
+  padding: 5px 0;
+
+  box-sizing: border-box;
+
+  animation: enrolledSidebarOpen 0.2s ease;
+}
+
+.sidebar-enrolled-course {
+  position: relative;
+
+  width: 100%;
+  min-height: 38px;
+
+  display: flex;
+  align-items: center;
+
+  padding: 5px 12px 5px 18px;
+
+  border: 1px solid transparent;
+  border-right: none;
+
+  border-radius: 999px 0 0 999px;
+
+  background: transparent;
+
+  color: #ffffff;
+
+  text-decoration: none;
+
+  box-sizing: border-box;
+}
+
+.sidebar-enrolled-course:hover {
+  background: #ffffff;
+  color: #606772;
+
+  border-color: #aeb5bf;
+  border-right: none;
+}
+
+.sidebar-enrolled-course:hover::after {
+  content: "";
+
+  position: absolute;
+
+  top: 0;
+  right: -20px;
+  bottom: 0;
+
+  width: 21px;
+
+  background: #ffffff;
+}
+
+.sidebar-course-indicator {
+  width: 6px;
+  height: 6px;
+
+  flex: 0 0 6px;
+
+  margin-right: 9px;
+
+  border-radius: 50%;
+
+  background: currentColor;
+}
+
+.sidebar-enrolled-course-text {
+  position: relative;
+  z-index: 1;
+
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+}
+
+.sidebar-enrolled-course-text strong {
+  display: block;
+
+  overflow: hidden;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar-enrolled-course-text small {
+  display: block;
+
+  margin-top: 2px;
+
+  overflow: hidden;
+
+  font-size: 10px;
+  font-weight: 500;
+
+  opacity: 0.7;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar-enrolled-message {
+  padding: 8px;
+
+  color: whitesmoke;
+
+  font-size: 11px;
+}
+
+@keyframes enrolledSidebarOpen {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* =====================================================
+   LOGOUT
+===================================================== */
+
+.logout-button {
+  width: 100%;
+  height: 56px;
+  min-height: 56px;
+
+  margin-top: auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 12px;
+
+  padding: 0;
+
+  border: none;
+  border-top: 1px solid #ececec;
+  border-radius: 0;
+
+  background: #f2f2f2;
+  color: #666666;
+
+  cursor: pointer;
+
+  font-family: "Jersey 15", system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+
+  box-sizing: border-box;
+
+  transition:
+    color 160ms ease,
+    background 160ms ease;
+}
+
+.logout-button:hover {
+  background: #f2f2f2;
+  color: #171927;
+}
+
+.logout-button .logout-icon {
+  width: 18px;
+  height: 18px;
+
+  flex: 0 0 18px;
+
+  margin: 0;
+
+  color: currentColor;
+
+  fill: none;
+  stroke: currentColor;
+
+  border: 0;
+  transform: none;
+}
+
+.logout-label {
+  white-space: nowrap;
+}
+
+
+/* =====================================================
+   COLLAPSED SIDEBAR
+===================================================== */
+
+.enrolled-sidebar.sidebar-collapsed {
+  width: 76px;
+}
+
+.enrolled-sidebar.sidebar-collapsed .brand-lockup {
+  justify-content: center;
+
+  padding: 18px 0 15px;
+}
+
+.enrolled-sidebar.sidebar-collapsed .brand-lockup::after {
+  left: 10px;
+  right: 10px;
+}
+
+.enrolled-sidebar.sidebar-collapsed .sidebar-logo {
+  width: 38px;
+
+  margin: 0 auto;
+
+  transform: none;
+}
+
+.enrolled-sidebar.sidebar-collapsed .brand-name {
+  width: 0;
+
+  opacity: 0;
+
+  pointer-events: none;
+}
+
+
+/* =====================================================
+   COLLAPSED NAVIGATION
+===================================================== */
+
+.enrolled-sidebar.sidebar-collapsed .side-nav {
+  width: 100%;
+
+  align-items: stretch;
+
+  gap: 14px;
+
+  padding: 26px 0 0 18px;
+}
+
+.enrolled-sidebar.sidebar-collapsed .side-nav-item,
+.enrolled-sidebar.sidebar-collapsed
+  .side-nav-item.plain-nav-item,
+.enrolled-sidebar.sidebar-collapsed
+  .side-nav-item.plain-nav-item.active {
+  position: relative;
+
+  width: 100%;
+  min-height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+
+  gap: 0;
+
+  padding: 0 0 0 18px;
+
+  border: 1px solid transparent;
+  border-right: 0;
+
+  border-radius: 999px 0 0 999px;
+
+  background: transparent;
+
+  box-sizing: border-box;
+}
+
+.enrolled-sidebar.sidebar-collapsed .nav-label,
+.enrolled-sidebar.sidebar-collapsed .dropdown-mark {
+  display: none;
+}
+
+.enrolled-sidebar.sidebar-collapsed .side-nav-item svg {
+  width: 20px;
+  height: 20px;
+
+  flex: 0 0 20px;
+
+  margin: 0;
+}
+
+.enrolled-sidebar.sidebar-collapsed .side-nav-item:hover {
+  background: transparent;
+
+  border-color: transparent;
+
+  color: #171927;
+}
+
+.enrolled-sidebar.sidebar-collapsed .side-nav-item.active {
+  z-index: 2;
+
+  background: #ffffff;
+  color: #606772;
+
+  border: 1px solid #aeb5bf;
+  border-right: 0;
+
+  border-radius: 999px 0 0 999px;
+}
+
+.enrolled-sidebar.sidebar-collapsed
+  .side-nav-item.active::after {
+  content: "";
+
+  position: absolute;
+
+  top: 1px;
+  right: -2px;
+  bottom: 1px;
+
+  width: 3px;
+
+  background: #ffffff;
+}
+
+
+/* Hide enrolled dropdown while collapsed */
+
+.enrolled-sidebar.sidebar-collapsed
+  .sidebar-enrolled-list,
+.enrolled-sidebar.sidebar-collapsed
+  .sidebar-dropdown-arrow {
+  display: none;
+}
+
+
+/* =====================================================
+   COLLAPSED LOGOUT
+===================================================== */
+
+.enrolled-sidebar.sidebar-collapsed .logout-button {
+  justify-content: center;
+
+  gap: 0;
+
+  padding: 0;
+}
+
+.enrolled-sidebar.sidebar-collapsed .logout-label {
+  display: none;
+}
+
+.enrolled-sidebar.sidebar-collapsed .logout-icon {
+  flex: 0 0 17px;
+
+  margin: 0;
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 820px) {
+  .enrolled-sidebar {
+    position: relative;
+
+    width: 100%;
+    height: auto;
+    min-height: auto;
+
+    border-right: 0;
+
+    overflow: visible;
+  }
+
+  .enrolled-sidebar.sidebar-collapsed {
+    width: 100%;
+  }
+}

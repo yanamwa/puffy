@@ -1,90 +1,51 @@
-import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import JoinCourseModal from './JoinCourseModal';
+import { useEffect, useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
+
+import StudentSidebar from "../../components/students/StudentSidebar";
+import StudentHeader from "../../components/students/StudentHeader";
+import JoinCourseModal from "./JoinCourseModal";
+
 import {
   enrollStudentInCourseAsync,
   findJoinableCourseByCodeAsync,
-} from './studentCourseData';
-import {
-  markManagedNotificationAsReadForRole,
-  markManagedNotificationsAsReadForRole,
-  mergeManagedNotificationsForRole,
-  subscribeToManagedNotifications,
-} from '../../utils/notifications';
-import './EnrolledCourses.css';
-import { FiLogOut } from 'react-icons/fi';
-import Swal from 'sweetalert2';
+} from "./studentCourseData";
+
+import "./EnrolledCoursespage.css";
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-
-const DEFAULT_PROFILE_IMAGE =
-  '/images/temporary profile.jpg';
-
-function resolveProfileImage(imagePath) {
-  if (!imagePath) return DEFAULT_PROFILE_IMAGE;
-
-  if (
-    imagePath.startsWith('http://') ||
-    imagePath.startsWith('https://') ||
-    imagePath.startsWith('blob:') ||
-    imagePath.startsWith('data:')
-  ) {
-    return imagePath;
-  }
-
-  const serverOrigin = API_BASE_URL.replace(/\/api\/?$/, '');
-  return `${serverOrigin}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
-}
+  import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 function getStoredToken() {
   return (
-    localStorage.getItem('token') ||
-    localStorage.getItem('authToken') ||
-    localStorage.getItem('puffy-token') ||
-    sessionStorage.getItem('token') ||
-    sessionStorage.getItem('authToken')
+    localStorage.getItem("token") ||
+    localStorage.getItem("authToken") ||
+    localStorage.getItem("puffy-token") ||
+    sessionStorage.getItem("token") ||
+    sessionStorage.getItem("authToken")
   );
 }
 
-function getUserRole(user) {
-  return user?.role || user?.userRole || user?.user_role || '';
-}
-
-function isStudentUser(user) {
-  return getUserRole(user) === 'student';
-}
-
-function getStoredStudentField(key) {
-  return localStorage.getItem('user_role') === 'student'
-    ? localStorage.getItem(key) || ''
-    : '';
-}
-
-function normalizeCourse(course) {
+function normalizeCourse(course = {}) {
   return {
+    ...course,
     id:
       course.id ||
       course.courseId ||
       course.course_id ||
       course.courseCode ||
       course.course_code,
-
     code:
       course.code ||
       course.courseCode ||
       course.course_code ||
-      'COURSE',
-
+      "COURSE",
     title:
       course.title ||
       course.courseName ||
       course.course_name ||
       course.name ||
-      'Untitled course',
-
-    description: course.description || '',
-
+      "Untitled course",
     instructor:
       course.professorName ||
       course.professor_name ||
@@ -92,198 +53,51 @@ function normalizeCourse(course) {
       course.instructorName ||
       course.createdBy ||
       course.created_by ||
-      'Professor',
-
+      "Professor",
     professorDepartment:
       course.professorDepartment ||
       course.professor_department ||
       course.database_professor_department ||
       course.department ||
-      '',
-
+      "Department not set",
     professorProfileImage:
       course.professorProfileImage ||
       course.professor_profile_image ||
       course.database_professor_profile_image ||
       course.professorAvatar ||
       course.professor_avatar ||
-      '',
+      "",
+    createdAt:
+      course.createdAt ||
+      course.created_at ||
+      course.enrolledAt ||
+      course.enrolled_at ||
+      "",
   };
 }
 
-function getSavedUser() {
-  try {
-    const storedUser =
-      localStorage.getItem('puffy-user') ||
-      localStorage.getItem('user') ||
-      localStorage.getItem('currentUser') ||
-      sessionStorage.getItem('user') ||
-      sessionStorage.getItem('currentUser');
+function resolveProfileImage(imagePath) {
+  if (!imagePath) return "/images/temporaryimg.png";
 
-    if (!storedUser) {
-      return null;
-    }
-
-    const savedUser = JSON.parse(storedUser);
-    return isStudentUser(savedUser) ? savedUser : null;
-  } catch (error) {
-    console.error('Unable to read saved user:', error);
-    return null;
-  }
-}
-
-function getUserProfileImage(user = {}) {
-  return (
-    user.profileImage ||
-    user.profile_image ||
-    user.avatar ||
-    user.image ||
-    ''
-  );
-}
-
-function mergeWithSavedProfileImage(user = {}) {
-  if (!isStudentUser(user)) {
-    return {};
+  if (
+    imagePath.startsWith("http://") ||
+    imagePath.startsWith("https://") ||
+    imagePath.startsWith("blob:") ||
+    imagePath.startsWith("data:")
+  ) {
+    return imagePath;
   }
 
-  const savedUser = getSavedUser() || {};
-  const profileImage =
-    getUserProfileImage(user) ||
-    getUserProfileImage(savedUser);
-
-  const mergedUser = {
-    ...savedUser,
-    ...user,
-  };
-
-  if (profileImage) {
-    mergedUser.profileImage = profileImage;
-    mergedUser.profile_image = profileImage;
-  }
-
-  return mergedUser;
+  const serverOrigin = API_BASE_URL.replace(/\/api\/?$/, "");
+  return `${serverOrigin}${imagePath.startsWith("/") ? "" : "/"}${imagePath}`;
 }
 
-function getStudentAccount(user) {
-  const savedUser =
-    isStudentUser(user) ? user : getSavedUser() || {};
-
-  return {
-    fullName:
-      savedUser.displayName ||
-      savedUser.display_name ||
-      savedUser.name ||
-      savedUser.fullName ||
-      savedUser.full_name ||
-      savedUser.username ||
-      getStoredStudentField('username') ||
-      '',
-
-    email:
-      savedUser.email ||
-      getStoredStudentField('user_email') ||
-      '',
-
-    profileImage:
-      savedUser.profileImage ||
-      savedUser.profile_image ||
-      savedUser.avatar ||
-      savedUser.image ||
-      '',
-  };
-}
-
-function saveUpdatedUser(updatedUser) {
-  if (!isStudentUser(updatedUser)) return;
-
-  const serializedUser = JSON.stringify(updatedUser);
-
-  localStorage.setItem('puffy-user', serializedUser);
-  localStorage.setItem('user', serializedUser);
-  localStorage.setItem('currentUser', serializedUser);
-  localStorage.setItem('user_role', updatedUser.role || 'student');
-
-  if (sessionStorage.getItem('user')) {
-    sessionStorage.setItem('user', serializedUser);
-  }
-
-  if (sessionStorage.getItem('currentUser')) {
-    sessionStorage.setItem('currentUser', serializedUser);
-  }
-
-  window.dispatchEvent(
-    new CustomEvent('puffy-user-updated', {
-      detail: updatedUser,
-    }),
-  );
-}
-
-function clearStudentSession() {
-  localStorage.removeItem('puffy-token');
-  localStorage.removeItem('puffy-user');
-  localStorage.removeItem('user_email');
-  localStorage.removeItem('user_role');
-  localStorage.removeItem('username');
-  localStorage.removeItem('year_level');
-  localStorage.removeItem('section_name');
-  localStorage.removeItem('school_name');
-  localStorage.removeItem('admin');
-  localStorage.removeItem('admin_id');
-  localStorage.removeItem('admin_email');
-  localStorage.removeItem('admin_username');
-
-  localStorage.removeItem('token');
-  localStorage.removeItem('authToken');
-  localStorage.removeItem('user');
-  localStorage.removeItem('currentUser');
-
-  sessionStorage.removeItem('token');
-  sessionStorage.removeItem('authToken');
-  sessionStorage.removeItem('user');
-  sessionStorage.removeItem('currentUser');
-}
-
-const notificationItems = [
-  {
-    id: 1,
-    title: 'Welcome to PuffyBrain!',
-    message:
-      'Your student account is ready. Start exploring your enrolled courses.',
-    time: 'Just now',
-    unread: true,
-    icon: 'sparkle',
-  },
-  {
-    id: 2,
-    title: 'New learning material',
-    message:
-      'A new module was added to ITEC 106 - Web Systems and Technologies 2.',
-    time: '12 minutes ago',
-    unread: true,
-    icon: 'course',
-  },
-  {
-    id: 3,
-    title: 'Course announcement',
-    message:
-      'Your professor posted an announcement for Introduction to Computing.',
-    time: 'Yesterday',
-    unread: false,
-    icon: 'announcement',
-  },
-];
-
-function getCourseTitle(course) {
-  return course.title || course.courseName || course.course_name || 'Untitled course';
-}
-
-function getProfessorDepartment(course) {
-  return course.professorDepartment || course.professor_department || 'Department not set';
-}
-
+/*
+  Keep these exports because some of your other student files may still
+  import them from EnrolledCourses.jsx.
+*/
 export function Icon({ name }) {
-  if (name === 'home') {
+  if (name === "home") {
     return (
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M4 11.3 12 5l8 6.3V20a1 1 0 0 1-1 1h-4.6v-5.4H9.6V21H5a1 1 0 0 1-1-1v-8.7Z" />
@@ -291,7 +105,7 @@ export function Icon({ name }) {
     );
   }
 
-  if (name === 'courses') {
+  if (name === "courses") {
     return (
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path
@@ -300,59 +114,17 @@ export function Icon({ name }) {
           stroke="currentColor"
           strokeWidth="1.4"
         />
-
         <path
           d="M6 10.3v5.2c0 1.2 2.7 3 6 3s6-1.8 6-3v-5.2"
           fill="none"
           stroke="currentColor"
           strokeWidth="1.4"
         />
-
-        <path
-          d="M20.8 8.3v6.2"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.4"
-        />
       </svg>
     );
   }
 
-  if (name === 'quiz') {
-    return (
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path
-          d="M5 19 6.2 14.8 15.8 5.2a2 2 0 0 1 2.8 2.8L9 17.6 5 19Z"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.4"
-        />
-
-        <path
-          d="m14.4 6.6 3 3"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.4"
-        />
-      </svg>
-    );
-  }
-
-  if (name === 'folder') {
-    return (
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path
-          d="M4 7.5h6l1.7 2H20v8.8H4V7.5Z"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.4"
-          strokeLinejoin="round"
-        />
-      </svg>
-    );
-  }
-
-  if (name === 'public') {
+  if (name === "public") {
     return (
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <circle
@@ -363,7 +135,6 @@ export function Icon({ name }) {
           stroke="currentColor"
           strokeWidth="1.5"
         />
-
         <path
           d="M4.5 12h15M12 4.5c2 2.2 3 4.7 3 7.5s-1 5.3-3 7.5c-2-2.2-3-4.7-3-7.5s1-5.3 3-7.5Z"
           fill="none"
@@ -374,7 +145,7 @@ export function Icon({ name }) {
     );
   }
 
-  if (name === 'archive') {
+  if (name === "archive") {
     return (
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path
@@ -382,36 +153,33 @@ export function Icon({ name }) {
           fill="none"
           stroke="currentColor"
           strokeWidth="1.5"
-          strokeLinejoin="round"
         />
-
         <path
           d="M4 5h16v3H4V5ZM9 12h6"
           fill="none"
           stroke="currentColor"
           strokeWidth="1.5"
-          strokeLinecap="round"
         />
       </svg>
     );
   }
 
-  if (name === 'settings') {
+  if (name === "settings") {
     return (
       <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path
-          d="M12 15.3a3.3 3.3 0 1 0 0-6.6 3.3 3.3 0 0 0 0 6.6Z"
+        <circle
+          cx="12"
+          cy="12"
+          r="3.3"
           fill="none"
           stroke="currentColor"
           strokeWidth="1.5"
         />
-
         <path
           d="m18.6 13.4 1.2 1.1-1.7 3-1.6-.5a7.4 7.4 0 0 1-1.6.9l-.3 1.6h-3.4l-.3-1.6a7.4 7.4 0 0 1-1.6-.9l-1.6.5-1.7-3 1.2-1.1a6.3 6.3 0 0 1 0-1.8l-1.2-1.1 1.7-3 1.6.5a7.4 7.4 0 0 1 1.6-.9l.3-1.6h3.4l.3 1.6a7.4 7.4 0 0 1 1.6.9l1.6-.5 1.7 3-1.2 1.1a6.3 6.3 0 0 1 0 1.8Z"
           fill="none"
           stroke="currentColor"
           strokeWidth="1.5"
-          strokeLinejoin="round"
         />
       </svg>
     );
@@ -421,43 +189,18 @@ export function Icon({ name }) {
 }
 
 export function SortToggle({ options, value, onChange }) {
-  const controlledIndex = options.indexOf(value);
-  const [uncontrolledIndex, setUncontrolledIndex] = useState(0);
-  const selectedIndex =
-    controlledIndex >= 0 ? controlledIndex : uncontrolledIndex;
-
-  const selected = options[selectedIndex];
-
-  const nextIndex =
-    selectedIndex === options.length - 1
-      ? 0
-      : selectedIndex + 1;
-
-  const toggleSort = () => {
-    if (controlledIndex < 0) {
-      setUncontrolledIndex(nextIndex);
-    }
-
-    if (onChange) {
-      onChange(options[nextIndex]);
-    }
-  };
+  const selectedIndex = Math.max(0, options.indexOf(value));
+  const nextIndex = selectedIndex === options.length - 1 ? 0 : selectedIndex + 1;
 
   return (
     <button
       type="button"
       className="sort-toggle"
-      onClick={toggleSort}
-      aria-label={`Current sort: ${selected}. Click to switch to ${options[nextIndex]}`}
+      onClick={() => onChange?.(options[nextIndex])}
       title={`Click to switch to ${options[nextIndex]}`}
     >
-      <span>{selected}</span>
-
-      <svg
-        className="sort-toggle-icon"
-        viewBox="0 0 24 24"
-        aria-hidden="true"
-      >
+      <span>{options[selectedIndex]}</span>
+      <svg className="sort-toggle-icon" viewBox="0 0 24 24" aria-hidden="true">
         <path d="M7 7h10" />
         <path d="m14 4 3 3-3 3" />
         <path d="M17 17H7" />
@@ -469,18 +212,16 @@ export function SortToggle({ options, value, onChange }) {
 
 export function Avatar({
   large = false,
-  src = '/images/temporaryimg.png',
-  alt = '',
+  src = "/images/temporaryimg.png",
+  alt = "",
 }) {
-  const imageSrc = src || '/images/temporaryimg.png';
-
   return (
-    <span className={`anime-avatar${large ? ' large' : ''}`}>
+    <span className={`anime-avatar${large ? " large" : ""}`}>
       <img
-        src={imageSrc}
+        src={src || "/images/temporaryimg.png"}
         alt={alt}
         onError={(event) => {
-          event.currentTarget.src = '/images/temporaryimg.png';
+          event.currentTarget.src = "/images/temporaryimg.png";
         }}
       />
     </span>
@@ -490,136 +231,62 @@ export function Avatar({
 export default function EnrolledCourses() {
   const navigate = useNavigate();
 
-  const [joinModalOpen, setJoinModalOpen] =
-    useState(false);
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const [courseCode, setCourseCode] =
-    useState('');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [dateSort, setDateSort] = useState("Recent");
+  const [alphabeticalSort, setAlphabeticalSort] = useState("A to Z");
 
-  const [courses, setCourses] =
-    useState([]);
-
-  const [loading, setLoading] =
-    useState(true);
-
-  const [errorMessage, setErrorMessage] =
-    useState('');
-
-  const [enrolledCoursesOpen, setEnrolledCoursesOpen] = useState(false);
+  const [joinModalOpen, setJoinModalOpen] = useState(false);
+  const [courseCode, setCourseCode] = useState("");
 
   const [openCourseMenu, setOpenCourseMenu] = useState(null);
-const [unenrollingCourseId, setUnenrollingCourseId] = useState(null);
-
-  const [sidebarCollapsed, setSidebarCollapsed] =
-    useState(() => {
-      return (
-        localStorage.getItem(
-          'sidebarCollapsed'
-        ) === 'true'
-      );
-    });
-
-  const [profileMenuOpen, setProfileMenuOpen] =
-    useState(false);
-
-  const [
-    notificationMenuOpen,
-    setNotificationMenuOpen,
-  ] = useState(false);
-
-  const [notifications, setNotifications] =
-    useState(() =>
-      mergeManagedNotificationsForRole('student', notificationItems)
-    );
-
-  const savedUser = getSavedUser() || {};
-
-  const [studentAccount, setStudentAccount] =
-    useState(() => getStudentAccount(savedUser));
-
-  const [profileImage, setProfileImage] =
-    useState(() =>
-      resolveProfileImage(
-        getStudentAccount(savedUser).profileImage,
-      ),
-    );
-
-  const displayUsername =
-    studentAccount.fullName
-      ? studentAccount.fullName.replace(/^@/, '')
-      : 'Student';
-
-  const accountLabel = studentAccount.email
-    ? 'Student account'
-    : 'Account information unavailable';
-
-  useEffect(() => {
-    const refreshNotifications = () => {
-      setNotifications((currentNotifications) =>
-        mergeManagedNotificationsForRole('student', currentNotifications)
-      );
-    };
-
-    return subscribeToManagedNotifications(refreshNotifications);
-  }, []);
+  const [unenrollingCourseId, setUnenrollingCourseId] = useState(null);
 
   const loadEnrolledCourses = async () => {
     try {
       setLoading(true);
-      setErrorMessage('');
+      setErrorMessage("");
 
       const token = getStoredToken();
 
       if (!token) {
         throw new Error(
-          'Your login session was not found. Please log in again.'
+          "Your login session was not found. Please log in again."
         );
       }
 
       const response = await fetch(
         `${API_BASE_URL}/courses/enrolled?summaryOnly=true`,
         {
-          method: 'GET',
+          method: "GET",
           headers: {
-            Accept: 'application/json',
+            Accept: "application/json",
             Authorization: `Bearer ${token}`,
           },
         }
       );
 
-      const data = await response
-        .json()
-        .catch(() => ({}));
+      const data = await response.json().catch(() => ({}));
 
       if (!response.ok) {
-        throw new Error(
-          data.message ||
-            'Could not load enrolled courses.'
-        );
+        throw new Error(data.message || "Could not load enrolled courses.");
       }
 
-      const loadedCourses = Array.isArray(
-        data.courses
-      )
+      const loadedCourses = Array.isArray(data.courses)
         ? data.courses
         : Array.isArray(data.data)
           ? data.data
           : [];
 
-      setCourses(
-        loadedCourses.map(normalizeCourse)
-      );
+      setCourses(loadedCourses.map(normalizeCourse));
     } catch (error) {
-      console.error(
-        'Enrolled courses loading error:',
-        error
-      );
-
+      console.error("Enrolled courses loading error:", error);
       setCourses([]);
-
       setErrorMessage(
-        error.message ||
-          'Could not load enrolled courses.'
+        error.message || "Could not load enrolled courses."
       );
     } finally {
       setLoading(false);
@@ -627,1171 +294,252 @@ const [unenrollingCourseId, setUnenrollingCourseId] = useState(null);
   };
 
   useEffect(() => {
-    let active = true;
-
-    async function loadCourses() {
-      try {
-        setLoading(true);
-        setErrorMessage('');
-
-        const token = getStoredToken();
-
-        if (!token) {
-          throw new Error(
-            'Your login session was not found. Please log in again.'
-          );
-        }
-
-        const response = await fetch(
-         `${API_BASE_URL}/courses/enrolled?summaryOnly=true`,
-          {
-            method: 'GET',
-            headers: {
-              Accept: 'application/json',
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        const data = await response
-          .json()
-          .catch(() => ({}));
-
-        if (!response.ok) {
-          throw new Error(
-            data.message ||
-              'Could not load enrolled courses.'
-          );
-        }
-
-        const loadedCourses = Array.isArray(
-          data.courses
-        )
-          ? data.courses
-          : Array.isArray(data.data)
-            ? data.data
-            : [];
-
-        if (!active) return;
-
-        setCourses(
-          loadedCourses.map(normalizeCourse)
-        );
-      } catch (error) {
-        console.error(
-          'Enrolled courses loading error:',
-          error
-        );
-
-        if (active) {
-          setCourses([]);
-
-          setErrorMessage(
-            error.message ||
-              'Could not load enrolled courses.'
-          );
-        }
-      } finally {
-        if (active) {
-          setLoading(false);
-        }
-      }
-    }
-
-    loadCourses();
-
-    return () => {
-      active = false;
-    };
+    loadEnrolledCourses();
   }, []);
 
   useEffect(() => {
-    let active = true;
-
-    async function loadCurrentUser() {
-      const token = getStoredToken();
-
-      if (!token) return;
-
-      try {
-        const response = await fetch(
-          `${API_BASE_URL}/users/me`,
-          {
-            method: 'GET',
-            headers: {
-              Accept: 'application/json',
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
-
-        const data = await response
-          .json()
-          .catch(() => ({}));
-
-        if (!response.ok) {
-          throw new Error(
-            data.message ||
-              'Unable to load your account.',
-          );
-        }
-
-        const currentUser =
-          data.user ||
-          data.data?.user ||
-          data.data ||
-          data;
-
-        if (!isStudentUser(currentUser)) {
-          return;
-        }
-
-        if (!active) return;
-
-        const mergedUser = mergeWithSavedProfileImage(currentUser);
-        const account = getStudentAccount(mergedUser);
-
-        setStudentAccount(account);
-        setProfileImage(
-          resolveProfileImage(account.profileImage),
-        );
-        saveUpdatedUser(mergedUser);
-      } catch (error) {
-        console.error(
-          'Unable to load the current user:',
-          error,
-        );
+    const closeCourseMenu = (event) => {
+      if (!event.target.closest(".course-options-wrapper")) {
+        setOpenCourseMenu(null);
       }
-    }
+    };
 
-    loadCurrentUser();
+    document.addEventListener("mousedown", closeCourseMenu);
 
     return () => {
-      active = false;
+      document.removeEventListener("mousedown", closeCourseMenu);
     };
   }, []);
-
-  useEffect(() => {
-    const updateProfileFromUser = (updatedUser) => {
-      const mergedUser = mergeWithSavedProfileImage(updatedUser);
-      const account = getStudentAccount(mergedUser);
-
-      setStudentAccount(account);
-      setProfileImage(
-        resolveProfileImage(account.profileImage),
-      );
-    };
-
-    const handleUserUpdated = (event) => {
-      const updatedUser =
-        event.detail || getSavedUser() || {};
-
-      if (!isStudentUser(updatedUser)) {
-        return;
-      }
-
-      updateProfileFromUser(
-        updatedUser,
-      );
-    };
-
-    const handleStorageUpdate = (event) => {
-      if (
-        !['puffy-user', 'user', 'currentUser'].includes(
-          event.key,
-        )
-      ) {
-        return;
-      }
-
-      updateProfileFromUser(getSavedUser() || {});
-    };
-
-    window.addEventListener(
-      'puffy-user-updated',
-      handleUserUpdated,
-    );
-    window.addEventListener('storage', handleStorageUpdate);
-
-    return () => {
-      window.removeEventListener(
-        'puffy-user-updated',
-        handleUserUpdated,
-      );
-      window.removeEventListener(
-        'storage',
-        handleStorageUpdate,
-      );
-    };
-  }, []);
-
-  useEffect(() => {
-    const closeOpenMenus = (event) => {
-      if (
-        !event.target.closest(
-          '.profile-menu-wrapper'
-        )
-      ) {
-        setProfileMenuOpen(false);
-      }
-
-      if (
-        !event.target.closest(
-          '.notification-menu-wrapper'
-        )
-      ) {
-        setNotificationMenuOpen(false);
-      }
-    };
-
-    const closeMenusWithEscape = (event) => {
-      if (event.key === 'Escape') {
-        setProfileMenuOpen(false);
-        setNotificationMenuOpen(false);
-      }
-    };
-
-    document.addEventListener(
-      'mousedown',
-      closeOpenMenus
-    );
-
-    document.addEventListener(
-      'keydown',
-      closeMenusWithEscape
-    );
-
-    return () => {
-      document.removeEventListener(
-        'mousedown',
-        closeOpenMenus
-      );
-
-      document.removeEventListener(
-        'keydown',
-        closeMenusWithEscape
-      );
-    };
-  }, []);
-
-  const handleLogout = () => {
-    setProfileMenuOpen(false);
-    setNotificationMenuOpen(false);
-
-    clearStudentSession();
-
-    navigate('/login', {
-      replace: true,
-    });
-  };
 
   const closeJoinModal = () => {
     setJoinModalOpen(false);
-    setCourseCode('');
+    setCourseCode("");
   };
 
   const joinByCourseCode = async () => {
-  try {
-    const trimmedCode = courseCode.trim();
+    try {
+      const trimmedCode = courseCode.trim();
 
-    if (!trimmedCode) {
+      if (!trimmedCode) {
+        await Swal.fire({
+          icon: "warning",
+          title: "Enter Course Code",
+          text: "Please enter the course code provided by your professor.",
+          confirmButtonText: "OK",
+          confirmButtonColor: "#198754",
+        });
+        return;
+      }
+
+      const course = await findJoinableCourseByCodeAsync(trimmedCode);
+
+      if (!course) {
+        await Swal.fire({
+          icon: "error",
+          title: "Course Not Found",
+          text: "Course code not found. Please check the code from your professor.",
+          confirmButtonText: "OK",
+          confirmButtonColor: "#198754",
+        });
+        return;
+      }
+
+      await enrollStudentInCourseAsync(course);
+      closeJoinModal();
+
       await Swal.fire({
-        icon: "warning",
-        title: "Enter Course Code",
-        text: "Please enter the course code provided by your professor.",
-        confirmButtonText: "OK",
+        icon: "success",
+        title: "Course Joined!",
+        text: `You have successfully joined ${
+          course.title ||
+          course.courseName ||
+          course.course_name ||
+          course.name ||
+          "the course"
+        }.`,
+        confirmButtonText: "Continue",
         confirmButtonColor: "#198754",
       });
 
-      return;
-    }
-
-    const course =
-      await findJoinableCourseByCodeAsync(trimmedCode);
-
-    if (!course) {
-      await Swal.fire({
-        icon: "error",
-        title: "Course Not Found",
-        text: "Course code not found. Please check the code from your professor.",
-        confirmButtonText: "OK",
-        confirmButtonColor: "#198754",
-      });
-
-      return;
-    }
-
-    await enrollStudentInCourseAsync(course);
-
-    closeJoinModal();
-
-    await Swal.fire({
-      icon: "success",
-      title: "Course Joined!",
-      text: `You have successfully joined ${
-        course.title ||
-        course.courseName ||
-        course.course_name ||
-        course.name ||
-        "the course"
-      }.`,
-      confirmButtonText: "Continue",
-      confirmButtonColor: "#198754",
-    });
-
-    navigate(
-      `/student/enrolled-courses/${
+      const joinedCourseId =
         course.id ||
         course.courseId ||
         course.course_id ||
-        course.code
-      }`
-    );
-  } catch (error) {
-    console.error("Join course error:", error);
+        course.code;
 
-    await Swal.fire({
-      icon: "error",
-      title: "Unable to Join Course",
-      text:
-        error?.message ||
-        "Unable to join the course.",
-      confirmButtonText: "OK",
-      confirmButtonColor: "#198754",
-    });
-  }
-};
-
-  const unreadNotificationCount =
-    notifications.filter(
-      (notification) => notification.unread
-    ).length;
-
-  const markAllNotificationsAsRead = () => {
-    markManagedNotificationsAsReadForRole('student');
-
-    setNotifications(
-      (currentNotifications) =>
-        currentNotifications.map(
-          (notification) => ({
-            ...notification,
-            unread: false,
-          })
-        )
-    );
-  };
-
-  const openNotification = (
-    notificationId
-  ) => {
-    markManagedNotificationAsReadForRole('student', notificationId);
-
-    setNotifications(
-      (currentNotifications) =>
-        currentNotifications.map(
-          (notification) =>
-            notification.id === notificationId
-              ? {
-                  ...notification,
-                  unread: false,
-                }
-              : notification
-        )
-    );
-  };
-const handleUnenrollCourse = async (course) => {
-  const courseId = course.id || course.code;
-  const courseTitle = getCourseTitle(course);
-
-  const result = await Swal.fire({
-    title: 'Unenroll from this course?',
-    text: `${courseTitle} will be moved to Archived Classes.`,
-    icon: 'warning',
-
-    showCancelButton: true,
-    confirmButtonText: 'Yes, unenroll',
-    cancelButtonText: 'Cancel',
-
-    confirmButtonColor: '#d93025',
-    cancelButtonColor: '#858d9b',
-
-    reverseButtons: true,
-
-    customClass: {
-      popup: 'unenroll-swal-popup',
-      title: 'unenroll-swal-title',
-      htmlContainer: 'unenroll-swal-text',
-      confirmButton: 'unenroll-swal-confirm',
-      cancelButton: 'unenroll-swal-cancel',
-    },
-  });
-
-  if (!result.isConfirmed) {
-    setOpenCourseMenu(null);
-    return;
-  }
-
-  try {
-    setUnenrollingCourseId(courseId);
-    setOpenCourseMenu(null);
-
-    const token = getStoredToken();
-
-    if (!token) {
-      throw new Error(
-        'Your login session was not found. Please log in again.'
-      );
-    }
-
-    const response = await fetch(
-      `${API_BASE_URL}/courses/${courseId}/unenroll`,
-      {
-        method: 'PUT',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
+      if (joinedCourseId) {
+        navigate(`/student/enrolled-courses/${joinedCourseId}`);
+      } else {
+        await loadEnrolledCourses();
       }
-    );
+    } catch (error) {
+      console.error("Join course error:", error);
 
-    const data = await response
-      .json()
-      .catch(() => ({}));
+      await Swal.fire({
+        icon: "error",
+        title: "Unable to Join Course",
+        text: error?.message || "Unable to join the course.",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#198754",
+      });
+    }
+  };
 
-    if (!response.ok) {
-      throw new Error(
-        data.message ||
-          'Unable to unenroll from this course.'
-      );
+  const handleUnenrollCourse = async (course) => {
+    const courseId = course.id || course.code;
+    const courseTitle = course.title || "this course";
+
+    const result = await Swal.fire({
+      title: "Unenroll from this course?",
+      text: `${courseTitle} will be moved to Archived Classes.`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, unenroll",
+      cancelButtonText: "Cancel",
+      confirmButtonColor: "#d93025",
+      cancelButtonColor: "#858d9b",
+      reverseButtons: true,
+      customClass: {
+        popup: "unenroll-swal-popup",
+        title: "unenroll-swal-title",
+        htmlContainer: "unenroll-swal-text",
+        confirmButton: "unenroll-swal-confirm",
+        cancelButton: "unenroll-swal-cancel",
+      },
+    });
+
+    if (!result.isConfirmed) {
+      setOpenCourseMenu(null);
+      return;
     }
 
-    // Remove course from Enrolled Courses
-    setCourses((currentCourses) =>
-      currentCourses.filter(
-        (currentCourse) =>
-          (currentCourse.id || currentCourse.code) !== courseId
-      )
-    );
+    try {
+      setUnenrollingCourseId(courseId);
+      setOpenCourseMenu(null);
 
-    await Swal.fire({
-      title: 'Course archived',
-      text: `${courseTitle} has been moved to Archived Classes.`,
-      icon: 'success',
-      confirmButtonText: 'Okay',
-      confirmButtonColor: '#198754',
+      const token = getStoredToken();
 
-      customClass: {
-        popup: 'unenroll-swal-popup',
-        title: 'unenroll-swal-title',
-        htmlContainer: 'unenroll-swal-text',
-        confirmButton: 'unenroll-swal-ok',
-      },
+      if (!token) {
+        throw new Error(
+          "Your login session was not found. Please log in again."
+        );
+      }
+
+      const response = await fetch(
+        `${API_BASE_URL}/courses/${courseId}/unenroll`,
+        {
+          method: "PUT",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || "Unable to unenroll from this course."
+        );
+      }
+
+      setCourses((currentCourses) =>
+        currentCourses.filter(
+          (currentCourse) =>
+            (currentCourse.id || currentCourse.code) !== courseId
+        )
+      );
+
+      await Swal.fire({
+        title: "Course archived",
+        text: `${courseTitle} has been moved to Archived Classes.`,
+        icon: "success",
+        confirmButtonText: "Okay",
+        confirmButtonColor: "#198754",
+      });
+    } catch (error) {
+      console.error("Unenroll course error:", error);
+
+      await Swal.fire({
+        title: "Unable to unenroll",
+        text:
+          error.message || "Unable to unenroll from this course.",
+        icon: "error",
+        confirmButtonText: "Okay",
+        confirmButtonColor: "#198754",
+      });
+    } finally {
+      setUnenrollingCourseId(null);
+    }
+  };
+
+  const visibleCourses = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+
+    let result = courses.filter((course) => {
+      if (!query) return true;
+
+      return [
+        course.title,
+        course.code,
+        course.instructor,
+        course.professorDepartment,
+      ]
+        .filter(Boolean)
+        .some((value) => String(value).toLowerCase().includes(query));
     });
-  } catch (error) {
-    console.error('Unenroll course error:', error);
 
-    await Swal.fire({
-      title: 'Unable to unenroll',
-      text:
-        error.message ||
-        'Unable to unenroll from this course.',
-      icon: 'error',
-      confirmButtonText: 'Okay',
-      confirmButtonColor: '#198754',
+    result = [...result].sort((a, b) => {
+      const titleCompare = a.title.localeCompare(b.title);
 
-      customClass: {
-        popup: 'unenroll-swal-popup',
-        title: 'unenroll-swal-title',
-        htmlContainer: 'unenroll-swal-text',
-        confirmButton: 'unenroll-swal-ok',
-      },
+      if (alphabeticalSort === "Z to A") {
+        return -titleCompare;
+      }
+
+      return titleCompare;
     });
-  } finally {
-    setUnenrollingCourseId(null);
-  }
-};
 
+    result = result.sort((a, b) => {
+      const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+
+      return dateSort === "Oldest" ? aTime - bTime : bTime - aTime;
+    });
+
+    return result;
+  }, [courses, searchQuery, dateSort, alphabeticalSort]);
 
   return (
-    <div
-      className={`enrolled-dashboard striped-dashboard ${
-        sidebarCollapsed
-          ? 'sidebar-collapsed'
-          : ''
-      }`}
-    >
-      <aside className="enrolled-sidebar">
-        <div className="brand-lockup">
-          <img
-            src="/images/logo_solo.png"
-            alt="PuffyBrain logo"
-            className="sidebar-logo"
-            onClick={() => {
-              setSidebarCollapsed(
-                (previousValue) => {
-                  const newValue =
-                    !previousValue;
-
-                  localStorage.setItem(
-                    'sidebarCollapsed',
-                    String(newValue)
-                  );
-
-                  return newValue;
-                }
-              );
-            }}
-          />
-
-          <span className="brand-name">
-            PuffyBrain
-          </span>
-        </div>
-
-        <nav
-          className="side-nav"
-          aria-label="Student navigation"
-        >
-          <Link
-            to="/student"
-            className="side-nav-item"
-            title={
-              sidebarCollapsed
-                ? 'Home'
-                : undefined
-            }
-          >
-            <Icon name="home" />
-
-            <span className="nav-label">
-              Home
-            </span>
-          </Link>
-
-          <div className="sidebar-course-group">
-
-            <button
-              type="button"
-              className="side-nav-item active sidebar-enrolled-toggle"
-              onClick={() => {
-                setEnrolledCoursesOpen((previous) => !previous);
-              }}
-              title={
-                sidebarCollapsed
-                  ? 'Enrolled Courses'
-                  : undefined
-              }
-            >
-              <Icon name="courses" />
-
-              <span className="nav-label">
-                Enrolled Courses
-              </span>
-
-              {!sidebarCollapsed && (
-                <svg
-                  className={`sidebar-dropdown-arrow ${
-                    enrolledCoursesOpen ? 'open' : ''
-                  }`}
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                >
-                  <path d="m7 9 5 5 5-5" />
-                </svg>
-              )}
-            </button>
-
-            {!sidebarCollapsed && enrolledCoursesOpen && (
-              <div className="sidebar-enrolled-list">
-
-                {loading ? (
-                  <div className="sidebar-enrolled-message">
-                    Loading courses...
-                  </div>
-                ) : courses.length === 0 ? (
-                  <div className="sidebar-enrolled-message">
-                    No enrolled courses
-                  </div>
-                ) : (
-                  courses.map((course) => {
-                    const courseId =
-                      course.id ||
-                      course.courseId ||
-                      course.course_id ||
-                      course.code ||
-                      course.courseCode ||
-                      course.course_code;
-
-                    const courseCode =
-                      course.code ||
-                      course.courseCode ||
-                      course.course_code ||
-                      'COURSE';
-
-                    const courseTitle =
-                      course.title ||
-                      course.courseName ||
-                      course.course_name ||
-                      course.name ||
-                      'Untitled course';
-
-                    return (
-                      <Link
-                        key={courseId}
-                        to={`/student/enrolled-courses/${courseId}`}
-                        className="sidebar-enrolled-course"
-                      >
-                        <span className="sidebar-course-indicator" />
-
-                        <span className="sidebar-enrolled-course-text">
-                          <strong>{courseCode}</strong>
-                          <small>{courseTitle}</small>
-                        </span>
-                      </Link>
-                    );
-                  })
-                )}
-
-              </div>
-            )}
-
-          </div>
-
-          <Link
-            to="/student/public-courses"
-            className="side-nav-item plain-nav-item"
-            title={
-              sidebarCollapsed
-                ? 'Public Courses'
-                : undefined
-            }
-          >
-            <Icon name="public" />
-
-            <span className="nav-label">
-              Public Courses
-            </span>
-          </Link>
-
-          <Link
-            to="/student/archived-courses"
-            className="side-nav-item plain-nav-item"
-            title={
-              sidebarCollapsed
-                ? 'Archived Classes'
-                : undefined
-            }
-          >
-            <Icon name="archive" />
-
-            <span className="nav-label">
-              Archived classes
-            </span>
-          </Link>
-
-          <Link
-            to="/student/settings"
-            className="side-nav-item plain-nav-item"
-            title={
-              sidebarCollapsed
-                ? 'Settings'
-                : undefined
-            }
-          >
-            <Icon name="settings" />
-
-            <span className="nav-label">
-              Settings
-            </span>
-          </Link>
-        </nav>
-
-        <button
-          type="button"
-          className="logout-button"
-          title={
-            sidebarCollapsed
-              ? 'Logout'
-              : undefined
-          }
-          onClick={handleLogout}
-        >
-          <FiLogOut
-            className="logout-icon"
-            aria-hidden="true"
-          />
-
-          <span className="logout-label">
-            Logout
-          </span>
-        </button>
-      </aside>
-
-      <main className="enrolled-main">
-        <header className="enrolled-topbar transparent-topbar enrolled-courses-topbar">
-          <label className="search-input">
-            <input
-              type="search"
-              placeholder="Search your course"
-            />
-
-            <span
-              className="student-search-icon"
-              aria-hidden="true"
-            >
-              <svg viewBox="0 0 24 24">
-                <circle
-                  cx="10.5"
-                  cy="10.5"
-                  r="5.5"
-                />
-
-                <path d="m15 15 4 4" />
-              </svg>
-            </span>
-          </label>
-
-          <div className="topbar-actions">
-            <div className="notification-menu-wrapper">
-              <button
-                type="button"
-                className={`notification-button ${
-                  notificationMenuOpen
-                    ? 'active'
-                    : ''
-                }`}
-                aria-label={`Notifications${
-                  unreadNotificationCount > 0
-                    ? `, ${unreadNotificationCount} unread`
-                    : ''
-                }`}
-                aria-expanded={
-                  notificationMenuOpen
-                }
-                aria-haspopup="dialog"
-                onClick={(event) => {
-                  event.stopPropagation();
-
-                  setProfileMenuOpen(false);
-
-                  setNotificationMenuOpen(
-                    (current) => !current
-                  );
-                }}
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                >
-                  <path d="M6.6 17.4h10.8l-.9-1.6v-4.5a4.5 4.5 0 0 0-9 0v4.5l-.9 1.6Z" />
-                  <path d="M10 19.2h4" />
-                </svg>
-
-                {unreadNotificationCount >
-                  0 && (
-                  <span className="notification-badge">
-                    {unreadNotificationCount >
-                    9
-                      ? '9+'
-                      : unreadNotificationCount}
-                  </span>
-                )}
-              </button>
-
-              {notificationMenuOpen && (
-                <section
-                  className="notification-dropdown-menu"
-                  role="dialog"
-                  aria-label="Notifications"
-                  onClick={(event) =>
-                    event.stopPropagation()
-                  }
-                >
-                  <div className="notification-dropdown-header">
-                    <div>
-                      <h2>Notifications</h2>
-
-                      <span>
-                        {unreadNotificationCount >
-                        0
-                          ? `${unreadNotificationCount} unread`
-                          : 'You are all caught up'}
-                      </span>
-                    </div>
-
-                    {unreadNotificationCount >
-                      0 && (
-                      <button
-                        type="button"
-                        className="mark-all-read-button"
-                        onClick={
-                          markAllNotificationsAsRead
-                        }
-                      >
-                        Mark all as read
-                      </button>
-                    )}
-                  </div>
-
-                  <div className="notification-dropdown-tabs">
-                    <button
-                      type="button"
-                      className="active"
-                    >
-                      All
-                    </button>
-
-                    <button type="button">
-                      Unread
-                    </button>
-                  </div>
-
-                  <div className="notification-list">
-                    {notifications.length ===
-                    0 ? (
-                      <div className="notification-empty-state">
-                        <span className="notification-empty-icon">
-                          <svg
-                            viewBox="0 0 24 24"
-                            aria-hidden="true"
-                          >
-                            <path d="M6.6 17.4h10.8l-.9-1.6v-4.5a4.5 4.5 0 0 0-9 0v4.5l-.9 1.6Z" />
-                            <path d="M10 19.2h4" />
-                          </svg>
-                        </span>
-
-                        <strong>
-                          No notifications yet
-                        </strong>
-
-                        <p>
-                          New updates will
-                          appear here.
-                        </p>
-                      </div>
-                    ) : (
-                      notifications.map(
-                        (notification) => (
-                          <button
-                            key={
-                              notification.id
-                            }
-                            type="button"
-                            className={`notification-item ${
-                              notification.unread
-                                ? 'unread'
-                                : ''
-                            }`}
-                            onClick={() =>
-                              openNotification(
-                                notification.id
-                              )
-                            }
-                          >
-                            <span
-                              className={`notification-item-icon ${notification.icon}`}
-                              aria-hidden="true"
-                            >
-                              {notification.icon ===
-                              'course' ? (
-                                <svg viewBox="0 0 24 24">
-                                  <path d="m3.5 8.2 8.5-4.7 8.5 4.7-8.5 4.7-8.5-4.7Z" />
-
-                                  <path d="M6.5 10.2v5c0 1.3 2.5 3 5.5 3s5.5-1.7 5.5-3v-5" />
-                                </svg>
-                              ) : notification.icon ===
-                                'announcement' ? (
-                                <svg viewBox="0 0 24 24">
-                                  <path d="M4 11v2h3l7 4V7l-7 4H4Z" />
-
-                                  <path d="m17 9 3-2M17 12h3M17 15l3 2" />
-                                </svg>
-                              ) : (
-                                <svg viewBox="0 0 24 24">
-                                  <path d="m12 3 1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5L12 3Z" />
-                                </svg>
-                              )}
-                            </span>
-
-                            <span className="notification-item-copy">
-                              <strong>
-                                {
-                                  notification.title
-                                }
-                              </strong>
-
-                              <span>
-                                {
-                                  notification.message
-                                }
-                              </span>
-
-                              <small>
-                                {
-                                  notification.time
-                                }
-                              </small>
-                            </span>
-
-                            {notification.unread && (
-                              <span
-                                className="notification-unread-dot"
-                                aria-label="Unread"
-                              />
-                            )}
-                          </button>
-                        )
-                      )
-                    )}
-                  </div>
-
-                  <button
-                    type="button"
-                    className="notification-view-all-button"
-                    onClick={() => {
-                      setNotificationMenuOpen(
-                        false
-                      );
-
-                      navigate(
-                        '/student/notifications'
-                      );
-                    }}
-                  >
-                    See all notifications
-                  </button>
-                </section>
-              )}
-            </div>
-
-            <button
-              type="button"
-              className="primary-button"
-              onClick={() =>
-                setJoinModalOpen(true)
-              }
-            >
-              + Join course
-            </button>
-
-            <div className="profile-menu-wrapper">
-              <div className="profile-chip">
-                <button
-                  type="button"
-                  className="profile-main-button"
-                  onClick={() =>
-                    navigate(
-                      '/student/profile'
-                    )
-                  }
-                  aria-label="Open your profile"
-                >
-                  <span className="profile-avatar">
-                    <img
-                      src={profileImage}
-                      alt={`${displayUsername}'s profile`}
-                      className="profile-header-image"
-                      onError={(event) => {
-                        event.currentTarget.src =
-                          DEFAULT_PROFILE_IMAGE;
-                      }}
-                    />
-
-                    <span className="profile-status-dot" />
-                  </span>
-
-                  <span className="profile-user-info">
-                    <strong>
-                      {displayUsername}
-                    </strong>
-
-                    <small>Student</small>
-                  </span>
-                </button>
-
-                <button
-                  type="button"
-                  className={`profile-dropdown-button ${
-                    profileMenuOpen
-                      ? 'open'
-                      : ''
-                  }`}
-                  aria-label={
-                    profileMenuOpen
-                      ? 'Close profile menu'
-                      : 'Open profile menu'
-                  }
-                  aria-expanded={
-                    profileMenuOpen
-                  }
-                  aria-haspopup="menu"
-                  onClick={(event) => {
-                    event.stopPropagation();
-
-                    setProfileMenuOpen(
-                      (current) => !current
-                    );
-                  }}
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                  >
-                    <circle
-                      cx="12"
-                      cy="5"
-                      r="1.6"
-                    />
-
-                    <circle
-                      cx="12"
-                      cy="12"
-                      r="1.6"
-                    />
-
-                    <circle
-                      cx="12"
-                      cy="19"
-                      r="1.6"
-                    />
-                  </svg>
-                </button>
-              </div>
-
-              {profileMenuOpen && (
-                <div
-                  className="profile-dropdown-menu"
-                  role="menu"
-                  onClick={(event) =>
-                    event.stopPropagation()
-                  }
-                >
-                  <div className="profile-dropdown-header">
-                    <img
-                      src={profileImage}
-                      alt={`${displayUsername}'s profile`}
-                      className="profile-dropdown-image"
-                      onError={(event) => {
-                        event.currentTarget.src =
-                          DEFAULT_PROFILE_IMAGE;
-                      }}
-                    />
-
-                    <div>
-                      <strong>
-                        {displayUsername}
-                      </strong>
-
-                      <span>
-                        {accountLabel}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="profile-dropdown-divider" />
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setProfileMenuOpen(
-                        false
-                      );
-
-                      navigate(
-                        '/student/profile'
-                      );
-                    }}
-                  >
-                    <svg
-                      viewBox="0 0 24 24"
-                      aria-hidden="true"
-                    >
-                      <circle
-                        cx="12"
-                        cy="8"
-                        r="4"
-                      />
-
-                      <path d="M5 20c.8-4 3.2-6 7-6s6.2 2 7 6" />
-                    </svg>
-
-                    <span>
-                      View profile
-                    </span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setProfileMenuOpen(
-                        false
-                      );
-
-                      navigate(
-                        '/student/settings'
-                      );
-                    }}
-                  >
-                    <svg
-                      viewBox="0 0 24 24"
-                      aria-hidden="true"
-                    >
-                      <circle
-                        cx="12"
-                        cy="12"
-                        r="3"
-                      />
-
-                      <path d="M19 13.5v-3l-2-.6a7 7 0 0 0-.7-1.6l1-1.8-2.1-2.1-1.8 1a7 7 0 0 0-1.6-.7L11.5 3h-3l-.6 2a7 7 0 0 0-1.6.7l-1.8-1-2.1 2.1 1 1.8a7 7 0 0 0-.7 1.6L1 10.5v3l2 .6a7 7 0 0 0 .7 1.6l-1 1.8 2.1 2.1 1.8-1a7 7 0 0 0 1.6.7l.6 2h3l.6-2a7 7 0 0 0 1.6-.7l1.8 1 2.1-2.1-1-1.8a7 7 0 0 0 .7-1.6Z" />
-                    </svg>
-                      <span>Settings</span>
-                    </button>
-
-                    <div className="profile-dropdown-divider" />
-
-                    <button
-                      type="button"
-                      className="profile-logout-option"
-                      onClick={handleLogout}
-                    >
-                      <svg
-                        viewBox="0 0 24 24"
-                        aria-hidden="true"
-                      >
-                        <path d="M10 5H5v14h5" />
-                        <path d="m14 8 4 4-4 4" />
-                        <path d="M18 12H9" />
-                      </svg>
-
-                      <span>Log out</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          </header>
-
+    <div className="enrolled-courses-page">
+      <StudentSidebar />
+
+      <div className="enrolled-courses-main-area">
+        <StudentHeader
+          searchValue={searchQuery}
+          onSearchChange={setSearchQuery}
+          searchPlaceholder="Search your course"
+          onJoinCourse={() => setJoinModalOpen(true)}
+        />
+
+        <main className="enrolled-courses-content">
           <section className="public-heading">
             <h1>Enrolled Courses</h1>
 
             <div className="filter-actions">
-              <span className="sort-by-label">
-                Sort by
-              </span>
+              <span className="sort-by-label">Sort by</span>
 
               <SortToggle
-                options={[
-                  'Recent',
-                  'Oldest',
-                ]}
+                options={["Recent", "Oldest"]}
+                value={dateSort}
+                onChange={setDateSort}
               />
 
               <SortToggle
-                options={[
-                  'A to Z',
-                  'Z to A',
-                ]}
+                options={["A to Z", "Z to A"]}
+                value={alphabeticalSort}
+                onChange={setAlphabeticalSort}
               />
             </div>
           </section>
@@ -1808,19 +556,16 @@ const handleUnenrollCourse = async (course) => {
               <div className="student-empty-state">
                 {errorMessage}
               </div>
-            ) : courses.length === 0 ? (
+            ) : visibleCourses.length === 0 ? (
               <div className="student-empty-state">
-                No enrolled courses yet. Join by code or
-                start a public course.
+                {searchQuery
+                  ? "No enrolled courses match your search."
+                  : "No enrolled courses yet. Join by code or start a public course."}
               </div>
             ) : (
-              courses.map((course) => {
-                const courseId =
-                  course.id || course.code;
-
-                const menuOpen =
-                  openCourseMenu === courseId;
-
+              visibleCourses.map((course) => {
+                const courseId = course.id || course.code;
+                const menuOpen = openCourseMenu === courseId;
                 const isUnenrolling =
                   unenrollingCourseId === courseId;
 
@@ -1832,15 +577,15 @@ const handleUnenrollCourse = async (course) => {
                     <Link
                       to={`/student/enrolled-courses/${courseId}`}
                       className="course-folder enrolled-course-folder"
-                      aria-label={`Open ${getCourseTitle(
-                        course
-                      )}`}
+                      aria-label={`Open ${course.title}`}
                     >
                       <div className="course-card-body">
-                        <h2
-                          title={getCourseTitle(course)}
-                        >
-                          {getCourseTitle(course)}
+                        <span className="course-code">
+                          {course.code}
+                        </span>
+
+                        <h2 title={course.title}>
+                          {course.title}
                         </h2>
                       </div>
 
@@ -1857,14 +602,9 @@ const handleUnenrollCourse = async (course) => {
                         />
 
                         <div className="enrolled-course-meta">
-                          <span>
-                            {course.instructor}
-                          </span>
-
+                          <span>{course.instructor}</span>
                           <small>
-                            {getProfessorDepartment(
-                              course
-                            )}
+                            {course.professorDepartment}
                           </small>
                         </div>
                       </div>
@@ -1874,22 +614,19 @@ const handleUnenrollCourse = async (course) => {
                       <button
                         type="button"
                         className={`course-menu-button ${
-                          menuOpen ? 'active' : ''
+                          menuOpen ? "active" : ""
                         }`}
-                        aria-label={`Options for ${getCourseTitle(
-                          course
-                        )}`}
+                        aria-label={`Options for ${course.title}`}
                         aria-expanded={menuOpen}
                         aria-haspopup="menu"
                         onClick={(event) => {
                           event.preventDefault();
                           event.stopPropagation();
 
-                          setOpenCourseMenu(
-                            (current) =>
-                              current === courseId
-                                ? null
-                                : courseId
+                          setOpenCourseMenu((current) =>
+                            current === courseId
+                              ? null
+                              : courseId
                           );
                         }}
                       >
@@ -1914,10 +651,7 @@ const handleUnenrollCourse = async (course) => {
                             onClick={(event) => {
                               event.preventDefault();
                               event.stopPropagation();
-
-                              handleUnenrollCourse(
-                                course
-                              );
+                              handleUnenrollCourse(course);
                             }}
                           >
                             <svg
@@ -1931,8 +665,8 @@ const handleUnenrollCourse = async (course) => {
 
                             <span>
                               {isUnenrolling
-                                ? 'Unenrolling...'
-                                : 'Unenroll'}
+                                ? "Unenrolling..."
+                                : "Unenroll"}
                             </span>
                           </button>
                         </div>
@@ -1944,14 +678,15 @@ const handleUnenrollCourse = async (course) => {
             )}
           </section>
         </main>
-
-        <JoinCourseModal
-          open={joinModalOpen}
-          courseCode={courseCode}
-          onCourseCodeChange={setCourseCode}
-          onCancel={closeJoinModal}
-          onJoin={joinByCourseCode}
-        />
       </div>
-    );
+
+      <JoinCourseModal
+        open={joinModalOpen}
+        courseCode={courseCode}
+        onCourseCodeChange={setCourseCode}
+        onCancel={closeJoinModal}
+        onJoin={joinByCourseCode}
+      />
+    </div>
+  );
 }

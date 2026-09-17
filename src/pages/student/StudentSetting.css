@@ -1,0 +1,43 @@
+/*
+  STUDENT SETTINGS
+  The existing settings card styles remain in EnrolledCourses.css.
+  These rules only provide the shared StudentSidebar + StudentHeader page layout.
+*/
+
+.student-settings-page {
+  width: 100%;
+  min-height: 100vh;
+  background: #f7f7f7;
+  color: #5f6064;
+}
+
+.student-settings-main-area {
+  width: calc(100% - 220px);
+  min-width: 0;
+  min-height: 100vh;
+  margin-left: 220px;
+  transition: width 220ms ease, margin-left 220ms ease;
+}
+
+.student-settings-page:has(.enrolled-sidebar.collapsed)
+  .student-settings-main-area,
+.student-settings-page:has(.enrolled-sidebar.sidebar-collapsed)
+  .student-settings-main-area {
+  width: calc(100% - 76px);
+  margin-left: 76px;
+}
+
+.student-settings-content {
+  min-height: calc(100vh - 74px);
+}
+
+@media (max-width: 820px) {
+  .student-settings-main-area,
+  .student-settings-page:has(.enrolled-sidebar.collapsed)
+    .student-settings-main-area,
+  .student-settings-page:has(.enrolled-sidebar.sidebar-collapsed)
+    .student-settings-main-area {
+    width: 100%;
+    margin-left: 0;
+  }
+}

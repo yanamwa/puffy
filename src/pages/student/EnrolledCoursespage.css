@@ -1,0 +1,443 @@
+@import url("https://fonts.googleapis.com/css2?family=Jersey+15&display=swap");
+
+* {
+  box-sizing: border-box;
+}
+
+.enrolled-courses-page {
+  --ink: #5f6064;
+  --muted: #858d9b;
+  --line: #c4c8cf;
+  --green: #198754;
+  --green-dark: #146c43;
+
+  width: 100%;
+  min-height: 100vh;
+  background: #f7f7f7;
+  color: var(--ink);
+  font-family: "Jersey 15", "Arial Rounded MT Bold", system-ui, sans-serif;
+}
+
+.enrolled-courses-main-area {
+  width: calc(100% - 220px);
+  min-height: 100vh;
+  margin-left: 220px;
+  transition: width 220ms ease, margin-left 220ms ease;
+}
+
+/* Works with the shared fixed sidebar when it is collapsed. */
+.enrolled-courses-page:has(.enrolled-sidebar.collapsed)
+  .enrolled-courses-main-area,
+.enrolled-courses-page:has(.enrolled-sidebar.sidebar-collapsed)
+  .enrolled-courses-main-area {
+  width: calc(100% - 76px);
+  margin-left: 76px;
+}
+
+.enrolled-courses-content {
+  min-height: calc(100vh - 74px);
+  padding: 10px 0px 10px;
+}
+
+.public-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 0px;
+}
+
+.public-heading h1 {
+  margin: 0;
+  color: #1f232c;
+  font-size: 38px;
+  line-height: 1;
+  font-weight: 400;
+}
+
+.filter-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sort-by-label {
+  margin-right: 2px;
+  color: #858d9b;
+  font-family: system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.sort-toggle {
+  min-width: 94px;
+  height: 36px;
+  padding: 0 13px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 9px;
+
+  border: 1px solid #cfd4db;
+  border-radius: 999px;
+
+  background: #fff;
+  color: #606878;
+
+  cursor: pointer;
+
+  font-family: system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+
+  transition:
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.sort-toggle:hover {
+  border-color: #198754;
+  color: #198754;
+  transform: translateY(-1px);
+}
+
+.sort-toggle-icon {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.courses-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 15px 18px;
+}
+
+.course-card-wrapper {
+  position: relative;
+  min-width: 0;
+}
+
+.course-folder {
+  position: relative;
+  z-index: 0;
+  isolation: isolate;
+
+  min-width: 0;
+  min-height: 220px;
+  padding: 69px 20px 18px;
+
+  display: flex;
+  flex-direction: column;
+
+  color: inherit;
+  text-decoration: none;
+
+  transition: transform 160ms ease;
+}
+
+.course-folder::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 387 234' preserveAspectRatio='none'%3E%3Cpath d='M12 7H128C133 7 136 9 140 12L176 43C180 46 184 48 189 48H373C381 48 386 54 386 62V221C386 228 380 233 373 233H12C5 233 1 228 1 221V19C1 12 5 7 12 7Z' fill='%23c4c9d1' stroke='%23aeb5bf' stroke-width='1.4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  pointer-events: none;
+}
+
+.course-folder::after {
+  content: "";
+  position: absolute;
+  inset: 6px 10px 1px 1px;
+  z-index: -1;
+
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 377 228' preserveAspectRatio='none'%3E%3Cpath d='M11 1H123C128 1 132 3 136 6L171 36C175 39 180 41 185 41H365C372 41 376 46 376 53V214C376 221 371 226 364 226H11C5 226 1 221 1 214V11C1 5 5 1 11 1Z' fill='white' stroke='%23b6bec9' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  pointer-events: none;
+}
+
+.course-folder:hover {
+  transform: translateY(-3px);
+}
+
+.course-folder:focus-visible {
+  outline: 3px solid rgba(25, 135, 84, 0.25);
+  outline-offset: 5px;
+}
+
+.course-card-body {
+  min-width: 0;
+}
+
+.course-code {
+  display: block;
+  margin: 0 0 7px;
+  color: #198754;
+  font-family: system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.course-card-body h2 {
+  min-height: 58px;
+  margin: 0 0 18px;
+
+  display: -webkit-box;
+  overflow: hidden;
+
+  color: #222630;
+  font-size: 23px;
+  line-height: 1.22;
+  font-weight: 400;
+
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.course-card-footer {
+  min-height: 40px;
+  margin-top: auto;
+
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.anime-avatar {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+
+  display: inline-block;
+  overflow: hidden;
+
+  border: 1px solid #c4c8cf;
+  border-radius: 50%;
+
+  background: #fafafa;
+}
+
+.anime-avatar.large {
+  width: 74px;
+  height: 74px;
+  flex-basis: 74px;
+}
+
+.anime-avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.enrolled-course-meta {
+  min-width: 0;
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.enrolled-course-meta span {
+  overflow: hidden;
+  color: #737b87;
+  font-family: system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.enrolled-course-meta small {
+  overflow: hidden;
+  color: #9aa2af;
+  font-family: system-ui, sans-serif;
+  font-size: 9px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.course-options-wrapper {
+  position: absolute;
+  top: 66px;
+  right: 22px;
+  z-index: 20;
+}
+
+.course-menu-button {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 3px;
+
+  border: 0;
+  border-radius: 50%;
+
+  background: transparent;
+  cursor: pointer;
+}
+
+.course-menu-button:hover,
+.course-menu-button.active {
+  background: rgba(25, 135, 84, 0.08);
+}
+
+.course-menu-button span {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #737b87;
+}
+
+.course-options-menu {
+  position: absolute;
+  top: 34px;
+  right: 0;
+  z-index: 40;
+
+  min-width: 132px;
+  padding: 6px;
+
+  border: 1px solid #d7dbe1;
+  border-radius: 10px;
+
+  background: #fff;
+  box-shadow: 0 10px 28px rgba(31, 35, 44, 0.14);
+}
+
+.course-unenroll-button {
+  width: 100%;
+  min-height: 36px;
+  padding: 0 10px;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  border: 0;
+  border-radius: 7px;
+
+  background: transparent;
+  color: #c53b32;
+
+  cursor: pointer;
+
+  font-family: system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: left;
+}
+
+.course-unenroll-button:hover {
+  background: #fff0ef;
+}
+
+.course-unenroll-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.course-unenroll-button svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.student-empty-state {
+  grid-column: 1 / -1;
+  min-height: 190px;
+
+  display: grid;
+  place-items: center;
+
+  padding: 28px;
+
+  border: 1px solid #d8dbe1;
+  border-radius: 16px;
+
+  background: #fff;
+  box-shadow: 0 4px 0 rgba(137, 146, 159, 0.1);
+
+  color: #69717f;
+
+  font-family: system-ui, sans-serif;
+  font-size: 14px;
+  text-align: center;
+}
+
+.unenroll-swal-popup {
+  border-radius: 18px !important;
+}
+
+.unenroll-swal-title {
+  font-family: "Jersey 15", system-ui, sans-serif !important;
+  font-size: 28px !important;
+  font-weight: 400 !important;
+}
+
+.unenroll-swal-text {
+  font-family: system-ui, sans-serif !important;
+  font-size: 14px !important;
+}
+
+@media (max-width: 1120px) {
+  .courses-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .enrolled-courses-content {
+    padding: 0px 0px 52px;
+  }
+}
+
+@media (max-width: 820px) {
+  .enrolled-courses-main-area,
+  .enrolled-courses-page:has(.enrolled-sidebar.collapsed)
+    .enrolled-courses-main-area,
+  .enrolled-courses-page:has(.enrolled-sidebar.sidebar-collapsed)
+    .enrolled-courses-main-area {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .enrolled-courses-content {
+    padding: 24px 18px 44px;
+  }
+
+  .public-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .filter-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .courses-grid {
+    grid-template-columns: 1fr;
+  }
+}

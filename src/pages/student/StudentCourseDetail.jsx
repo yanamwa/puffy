@@ -1,14 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import { FiLogOut } from 'react-icons/fi';
 
 import QuizModesModal from '../../components/QuizModesModal';
 import {
   getCourseContentModules,
   getCourseQuizItems,
 } from '../course/courseContent';
-import { Avatar, Icon } from './EnrolledCourses';
+import { Avatar } from './EnrolledCourses';
+import StudentSidebar from '../../components/students/StudentSidebar';
+import StudentHeader from '../../components/students/StudentHeader';
 import JoinCourseModal from './JoinCourseModal';
 
 import {
@@ -27,14 +28,8 @@ import {
   getStudentProfileHandle,
   useStudentProfile,
 } from './studentProfileData';
-import {
-  markManagedNotificationAsReadForRole,
-  markManagedNotificationsAsReadForRole,
-  mergeManagedNotificationsForRole,
-  subscribeToManagedNotifications,
-} from '../../utils/notifications';
 
-import './EnrolledCourses.css';
+import './StudentCourseDetail.css';
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -165,9 +160,7 @@ export default function StudentCourseDetail() {
   const [profileMenuOpen, setProfileMenuOpen] =
     useState(false);
   const [notifications, setNotifications] =
-    useState(() =>
-      mergeManagedNotificationsForRole('student', notificationItems)
-    );
+    useState(notificationItems);
 
   const [enrolledCoursesOpen, setEnrolledCoursesOpen] =
     useState(false);
@@ -181,16 +174,6 @@ export default function StudentCourseDetail() {
 
   const [, setProgressVersion] = useState(0);
 
-  useEffect(() => {
-    const refreshNotifications = () => {
-      setNotifications((currentNotifications) =>
-        mergeManagedNotificationsForRole('student', currentNotifications)
-      );
-    };
-
-    return subscribeToManagedNotifications(refreshNotifications);
-  }, []);
-
   const loadEnrolledCourses = async () => {
     try {
       setCoursesLoading(true);
@@ -203,7 +186,7 @@ export default function StudentCourseDetail() {
       }
 
       const response = await fetch(
-        `${API_BASE_URL}/courses/enrolled?summaryOnly=true`,
+        `${API_BASE_URL}/courses/enrolled`,
         {
           method: 'GET',
           headers: {
@@ -706,8 +689,6 @@ export default function StudentCourseDetail() {
   ).length;
 
   const markAllNotificationsAsRead = () => {
-    markManagedNotificationsAsReadForRole('student');
-
     setNotifications((currentNotifications) =>
       currentNotifications.map((notification) => ({
         ...notification,
@@ -717,8 +698,6 @@ export default function StudentCourseDetail() {
   };
 
   const openNotification = (notificationId) => {
-    markManagedNotificationAsReadForRole('student', notificationId);
-
     setNotifications((currentNotifications) =>
       currentNotifications.map((notification) =>
         notification.id === notificationId
@@ -740,774 +719,266 @@ export default function StudentCourseDetail() {
 
   if (loading) {
     return (
-      <div className="enrolled-dashboard striped-dashboard">
-        <aside className="enrolled-sidebar">
-          <div className="brand-lockup">
-            <img src="/images/logo_solo.png" alt="" />
-            <span>PuffyBrain</span>
-          </div>
-        </aside>
-
-        <main className="enrolled-main">
-          <section className="student-course-shell">
-            <div className="student-empty-state">
-              Loading course...
-            </div>
-          </section>
-        </main>
+      <div className="student-course-detail-page">
+        <StudentSidebar />
+        <div className="student-course-detail-main-area">
+          <StudentHeader searchPlaceholder="Search your course" onJoinCourse={() => setJoinModalOpen(true)} />
+          <main className="student-course-detail-content">
+            <section className="student-course-shell"><div className="student-empty-state">Loading course...</div></section>
+          </main>
+        </div>
       </div>
     );
   }
 
   if (!course) {
     return (
-      <div className="enrolled-dashboard striped-dashboard">
-        <aside className="enrolled-sidebar">
-          <div className="brand-lockup">
-            <img src="/images/logo_solo.png" alt="" />
-            <span>PuffyBrain</span>
-          </div>
-        </aside>
-
-        <main className="enrolled-main">
-          <section className="student-course-shell">
-            <div className="student-empty-state">
-              Course not found.
-            </div>
-          </section>
-        </main>
+      <div className="student-course-detail-page">
+        <StudentSidebar />
+        <div className="student-course-detail-main-area">
+          <StudentHeader searchPlaceholder="Search your course" onJoinCourse={() => setJoinModalOpen(true)} />
+          <main className="student-course-detail-content">
+            <section className="student-course-shell"><div className="student-empty-state">Course not found.</div></section>
+          </main>
+        </div>
       </div>
     );
   }
 
   return (
-    <div
-      className={`enrolled-dashboard striped-dashboard ${
-        sidebarCollapsed ? 'sidebar-collapsed' : ''
-      }`}
-    >
-      <aside className="enrolled-sidebar">
-        <div className="brand-lockup">
-          <img
-            src="/images/logo_solo.png"
-            alt="PuffyBrain logo"
-            className="sidebar-logo"
-            onClick={toggleSidebar}
-            title={
-              sidebarCollapsed
-                ? 'Expand sidebar'
-                : 'Collapse sidebar'
-            }
-          />
-
-          <span className="brand-name">
-            PuffyBrain
-          </span>
-        </div>
-
-        <nav
-          className="side-nav"
-          aria-label="Student navigation"
-        >
-          <Link
-            to="/student"
-            className="side-nav-item"
-            title={
-              sidebarCollapsed
-                ? 'Home'
-                : undefined
-            }
-          >
-            <Icon name="home" />
-
-            <span className="nav-label">
-              Home
-            </span>
-          </Link>
-
-          <div className="sidebar-course-group">
-            <button
-              type="button"
-              className="side-nav-item active sidebar-enrolled-toggle"
-              onClick={() => {
-                setEnrolledCoursesOpen(
-                  (previous) => !previous
-                );
-              }}
-              title={
-                sidebarCollapsed
-                  ? 'Enrolled Courses'
-                  : undefined
-              }
-            >
-              <Icon name="courses" />
-
-              <span className="nav-label">
-                Enrolled Courses
-              </span>
-
-              {!sidebarCollapsed && (
-                <svg
-                  className={`sidebar-dropdown-arrow ${
-                    enrolledCoursesOpen ? 'open' : ''
-                  }`}
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                >
-                  <path d="m7 9 5 5 5-5" />
-                </svg>
-              )}
-            </button>
-
-            {!sidebarCollapsed &&
-              enrolledCoursesOpen && (
-                <div className="sidebar-enrolled-list">
-                  {coursesLoading ? (
-                    <div className="sidebar-enrolled-message">
-                      Loading courses...
-                    </div>
-                  ) : courses.length === 0 ? (
-                    <div className="sidebar-enrolled-message">
-                      No enrolled courses
-                    </div>
-                  ) : (
-                    courses.map((course) => {
-                      const sidebarCourseId =
-                        course.id ||
-                        course.courseId ||
-                        course.course_id ||
-                        course.code ||
-                        course.courseCode ||
-                        course.course_code;
-
-                      const sidebarCourseCode =
-                        course.code ||
-                        course.courseCode ||
-                        course.course_code ||
-                        'COURSE';
-
-                      const sidebarCourseTitle =
-                        course.title ||
-                        course.courseName ||
-                        course.course_name ||
-                        course.name ||
-                        'Untitled course';
-
-                      return (
-                        <Link
-                          key={sidebarCourseId}
-                          to={`/student/enrolled-courses/${sidebarCourseId}`}
-                          className="sidebar-enrolled-course"
-                        >
-                          <span className="sidebar-course-indicator" />
-
-                          <span className="sidebar-enrolled-course-text">
-                            <strong>
-                              {sidebarCourseCode}
-                            </strong>
-
-                            <small>
-                              {sidebarCourseTitle}
-                            </small>
-                          </span>
-                        </Link>
-                      );
-                    })
-                  )}
-                </div>
-              )}
-          </div>
-
-          <Link
-            to="/student/public-courses"
-            className="side-nav-item plain-nav-item"
-            title={
-              sidebarCollapsed
-                ? 'Public Courses'
-                : undefined
-            }
-          >
-            <Icon name="public" />
-
-            <span className="nav-label">
-              Public Courses
-            </span>
-          </Link>
-
-          <Link
-            to="/student/archived-courses"
-            className="side-nav-item plain-nav-item"
-            title={
-              sidebarCollapsed
-                ? 'Archived Classes'
-                : undefined
-            }
-          >
-            <Icon name="archive" />
-
-            <span className="nav-label">
-              Archived classes
-            </span>
-          </Link>
-
-          <Link
-            to="/student/settings"
-            className="side-nav-item plain-nav-item"
-            title={
-              sidebarCollapsed
-                ? 'Settings'
-                : undefined
-            }
-          >
-            <Icon name="settings" />
-
-            <span className="nav-label">
-              Settings
-            </span>
-          </Link>
-        </nav>
-
-        <button
-          type="button"
-          className="logout-button"
-          title={
-            sidebarCollapsed
-              ? 'Logout'
-              : undefined
-          }
-          onClick={handleLogout}
-        >
-          <FiLogOut
-            className="logout-icon"
-            aria-hidden="true"
-          />
-
-          <span className="logout-label">
-            Logout
-          </span>
-        </button>
-      </aside>
-
-      <main className="enrolled-main">
-        <header className="enrolled-topbar transparent-topbar enrolled-courses-topbar">
-          <label className="search-input">
-            <input type="search" placeholder="Search your course" />
-
-            <span
-              className="student-search-icon"
-              aria-hidden="true"
-            >
-              <svg viewBox="0 0 24 24">
-                <circle cx="10.5" cy="10.5" r="5.5" />
-                <path d="m15 15 4 4" />
-              </svg>
-            </span>
-          </label>
-
-          <div className="topbar-actions">
-            <div className="notification-menu-wrapper">
-              <button
-                type="button"
-                className={`notification-button ${
-                  notificationMenuOpen ? 'active' : ''
-                }`}
-                aria-label={`Notifications${
-                  unreadNotificationCount > 0
-                    ? `, ${unreadNotificationCount} unread`
-                    : ''
-                }`}
-                aria-expanded={notificationMenuOpen}
-                aria-haspopup="dialog"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  setProfileMenuOpen(false);
-                  setNotificationMenuOpen((current) => !current);
-                }}
-              >
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M6.6 17.4h10.8l-.9-1.6v-4.5a4.5 4.5 0 0 0-9 0v4.5l-.9 1.6Z" />
-                  <path d="M10 19.2h4" />
-                </svg>
-
-                {unreadNotificationCount > 0 && (
-                  <span className="notification-badge">
-                    {unreadNotificationCount > 9
-                      ? '9+'
-                      : unreadNotificationCount}
-                  </span>
-                )}
-              </button>
-
-              {notificationMenuOpen && (
-                <section
-                  className="notification-dropdown-menu"
-                  role="dialog"
-                  aria-label="Notifications"
-                  onClick={(event) => event.stopPropagation()}
-                >
-                  <div className="notification-dropdown-header">
-                    <div>
-                      <h2>Notifications</h2>
-                      <span>
-                        {unreadNotificationCount > 0
-                          ? `${unreadNotificationCount} unread`
-                          : 'You are all caught up'}
-                      </span>
-                    </div>
-
-                    {unreadNotificationCount > 0 && (
-                      <button
-                        type="button"
-                        className="mark-all-read-button"
-                        onClick={markAllNotificationsAsRead}
-                      >
-                        Mark all as read
-                      </button>
-                    )}
-                  </div>
-
-                  <div className="notification-dropdown-tabs">
-                    <button type="button" className="active">
-                      All
-                    </button>
-                    <button type="button">Unread</button>
-                  </div>
-
-                  <div className="notification-list">
-                    {notifications.length === 0 ? (
-                      <div className="notification-empty-state">
-                        <span className="notification-empty-icon">
-                          <svg viewBox="0 0 24 24" aria-hidden="true">
-                            <path d="M6.6 17.4h10.8l-.9-1.6v-4.5a4.5 4.5 0 0 0-9 0v4.5l-.9 1.6Z" />
-                            <path d="M10 19.2h4" />
-                          </svg>
-                        </span>
-                        <strong>No notifications yet</strong>
-                        <p>New updates will appear here.</p>
-                      </div>
-                    ) : (
-                      notifications.map((notification) => (
-                        <button
-                          key={notification.id}
-                          type="button"
-                          className={`notification-item ${
-                            notification.unread ? 'unread' : ''
-                          }`}
-                          onClick={() =>
-                            openNotification(notification.id)
-                          }
-                        >
-                          <span
-                            className={`notification-item-icon ${notification.icon}`}
-                            aria-hidden="true"
-                          >
-                            {notification.icon === 'course' ? (
-                              <svg viewBox="0 0 24 24">
-                                <path d="m3.5 8.2 8.5-4.7 8.5 4.7-8.5 4.7-8.5-4.7Z" />
-                                <path d="M6.5 10.2v5c0 1.3 2.5 3 5.5 3s5.5-1.7 5.5-3v-5" />
-                              </svg>
-                            ) : notification.icon === 'announcement' ? (
-                              <svg viewBox="0 0 24 24">
-                                <path d="M4 11v2h3l7 4V7l-7 4H4Z" />
-                                <path d="m17 9 3-2M17 12h3M17 15l3 2" />
-                              </svg>
-                            ) : (
-                              <svg viewBox="0 0 24 24">
-                                <path d="m12 3 1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5L12 3Z" />
-                              </svg>
-                            )}
-                          </span>
-
-                          <span className="notification-item-copy">
-                            <strong>{notification.title}</strong>
-                            <span>{notification.message}</span>
-                            <small>{notification.time}</small>
-                          </span>
-
-                          {notification.unread && (
-                            <span
-                              className="notification-unread-dot"
-                              aria-label="Unread"
-                            />
-                          )}
-                        </button>
-                      ))
-                    )}
-                  </div>
-
-                  <button
-                    type="button"
-                    className="notification-view-all-button"
-                    onClick={() => {
-                      setNotificationMenuOpen(false);
-                      navigate('/student/notifications');
-                    }}
-                  >
-                    See all notifications
-                  </button>
-                </section>
-              )}
-            </div>
-
-            <button
-              type="button"
-              className="primary-button"
-              onClick={() => setJoinModalOpen(true)}
-            >
-              + Join course
-            </button>
-
-            <div className="profile-menu-wrapper">
-              <div className="profile-chip">
-                <button
-                  type="button"
-                  className="profile-main-button"
-                  onClick={() => navigate('/student/profile')}
-                  aria-label="Open your profile"
-                >
-                  <span className="profile-avatar">
-                    <Avatar src={studentProfile.profileImage} alt="" />
-                    <span className="profile-status-dot" />
-                  </span>
-
-                  <span className="profile-user-info">
-                    <strong>{profileHandle}</strong>
-                    <small>Student</small>
-                  </span>
-                </button>
-
-                <button
-                  type="button"
-                  className={`profile-dropdown-button ${
-                    profileMenuOpen ? 'open' : ''
-                  }`}
-                  aria-label={
-                    profileMenuOpen
-                      ? 'Close profile menu'
-                      : 'Open profile menu'
-                  }
-                  aria-expanded={profileMenuOpen}
-                  aria-haspopup="menu"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    setNotificationMenuOpen(false);
-                    setProfileMenuOpen((current) => !current);
-                  }}
-                >
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <circle cx="12" cy="5" r="1.6" />
-                    <circle cx="12" cy="12" r="1.6" />
-                    <circle cx="12" cy="19" r="1.6" />
-                  </svg>
-                </button>
-              </div>
-
-              {profileMenuOpen && (
-                <div
-                  className="profile-dropdown-menu"
-                  role="menu"
-                  onClick={(event) => event.stopPropagation()}
-                >
-                  <div className="profile-dropdown-header">
-                    <Avatar src={studentProfile.profileImage} alt="" />
-
-                    <div>
-                      <strong>{profileHandle}</strong>
-                      <span>{accountLabel}</span>
-                    </div>
-                  </div>
-
-                  <div className="profile-dropdown-divider" />
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setProfileMenuOpen(false);
-                      navigate('/student/profile');
-                    }}
-                  >
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                      <circle cx="12" cy="8" r="4" />
-                      <path d="M5 20c.8-4 3.2-6 7-6s6.2 2 7 6" />
-                    </svg>
-
-                    <span>View profile</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setProfileMenuOpen(false);
-                      navigate('/student/settings');
-                    }}
-                  >
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                      <circle cx="12" cy="12" r="3" />
-                      <path d="M19 13.5v-3l-2-.6a7 7 0 0 0-.7-1.6l1-1.8-2.1-2.1-1.8 1a7 7 0 0 0-1.6-.7L11.5 3h-3l-.6 2a7 7 0 0 0-1.6.7l-1.8-1-2.1 2.1 1 1.8a7 7 0 0 0-.7 1.6L1 10.5v3l2 .6a7 7 0 0 0 .7 1.6l-1 1.8 2.1 2.1 1.8-1a7 7 0 0 0 1.6.7l.6 2h3l.6-2a7 7 0 0 0 1.6-.7l1.8 1 2.1-2.1-1-1.8a7 7 0 0 0 .7-1.6Z" />
-                    </svg>
-
-                    <span>Settings</span>
-                  </button>
-
-                  <div className="profile-dropdown-divider" />
-
-                  <button
-                    type="button"
-                    className="profile-logout-option"
-                    onClick={handleLogout}
-                  >
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                      <path d="M10 5H5v14h5" />
-                      <path d="m14 8 4 4-4 4" />
-                      <path d="M18 12H9" />
-                    </svg>
-
-                    <span>Log out</span>
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </header>
-
-        <section className="student-course-shell">
-          <div className="student-course-hero">
-            <div className="student-course-copy">
-              <div className="student-course-meta-row">
-                <span>{course.code}</span>
-
-                <span>
-                  {course.visibility === 'private'
-                    ? 'Private course'
-                    : 'Public course'}
-                </span>
-              </div>
-
-              <h1>{course.title}</h1>
-
-              <p>
-                {course.summary ||
-                  'Continue learning and practicing this course.'}
-              </p>
-
-              <div
-                className="student-course-progress"
-                aria-label={`Course reading progress ${courseProgress}%`}
-              >
-                <span className="student-course-progress-track">
-                  <i style={{ width: `${courseProgress}%` }} />
-                </span>
-
-                <div>
-                  <span>Reading progress</span>
-                  <strong>{courseProgress}%</strong>
-                </div>
-              </div>
-
-              <div className="student-course-bottom-row">
-                <div className="student-course-creator">
-                  <Avatar
-                    src={resolveProfileImage(
-                      course.professorProfileImage ||
-                        course.professor_profile_image,
-                    )}
-                    alt={`${
-                      course.instructor ||
-                      course.professorName ||
-                      'Professor'
-                    }'s profile`}
-                  />
-
-                  <div className="enrolled-course-meta">
-                    <span>
-                      {course.instructor ||
-                        course.professorName ||
-                        'Professor'}
-                    </span>
-
-                    <small>
-                      {getProfessorDepartment(
-                        course,
-                      )}
-                    </small>
-                  </div>
-                </div>
-
-                <div className="student-course-actions">
-                  <button
-                    type="button"
-                    className="student-start-button"
-                    onClick={startCourseLearning}
-                    disabled={modules.length === 0}
-                  >
-                    Start Learning
-                  </button>
-
-                  <button
-                    type="button"
-                    className="student-practice-button"
-                    onClick={openCoursePractice}
-                    disabled={!areAllModulesCompleted}
-                    title={
-                      areAllModulesCompleted
-                        ? 'Practice the complete course'
-                        : 'Complete all modules before practicing the complete course.'
-                    }
-                  >
-                    Practice All
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <section
-            className="student-course-modules"
-            aria-labelledby="course-modules-title"
-          >
-            <div className="student-course-section-title">
-              <div>
-                <h2 id="course-modules-title">Modules</h2>
-                <p className="student-module-section-description">
-                  Complete each module to unlock the next one.
-                </p>
-              </div>
-
-              <span>{modules.length} module(s)</span>
-            </div>
-
-            {modules.length === 0 ? (
-              <div className="student-empty-state">
-                No modules have been added to this course yet.
-              </div>
-            ) : (
-              <div className="student-module-list">
-                {modules.map((module, index) => {
-                  const moduleProgress = getModuleProgress(index);
-                  const learnUnlocked =
-                    isModuleLearnUnlocked(index);
-                  const practiceUnlocked =
-                    isModulePracticeUnlocked(index);
-
-                  const moduleState = !learnUnlocked
-                    ? 'locked'
-                    : moduleProgress >= 100
-                      ? 'complete'
-                      : moduleProgress > 0
-                        ? 'current'
-                        : 'available';
-
-                  return (
-                    <article
-                      className={`student-module-row ${moduleState}`}
-                      key={module.id}
-                    >
-                      <span className="student-module-number">
-                        {learnUnlocked ? index + 1 : '🔒'}
-                      </span>
-
-                      <div className="student-module-main">
-                        <div className="student-module-title-row">
-                          <div>
-                            <span className="student-module-eyebrow">
-                              Module {index + 1}
-                            </span>
-
-                            <h3>{module.title}</h3>
-                          </div>
-
-                          <span
-                            className={`student-module-status ${moduleState}`}
-                          >
-                            {!learnUnlocked
-                              ? 'Locked'
-                              : moduleProgress >= 100
-                                ? 'Completed'
-                                : moduleProgress > 0
-                                  ? 'In progress'
-                                  : 'Available'}
-                          </span>
-                        </div>
-
-                        <p>
-                          {module.description ||
-                            `${module.lessonPages.length} lesson page(s)`}
-                        </p>
-
-                        {!learnUnlocked && (
-                          <small className="student-module-lock-message">
-                            Complete Module {index} to unlock this module.
-                          </small>
-                        )}
-
-                        <div
-                          className="student-module-progress"
-                          aria-label={`${module.title} reading progress ${moduleProgress}%`}
-                        >
+    <div className="student-course-detail-page">
+      <StudentSidebar />
+      <div className="student-course-detail-main-area">
+        <StudentHeader searchPlaceholder="Search your course" onJoinCourse={() => setJoinModalOpen(true)} />
+        <main className="student-course-detail-content">
+          <section className="student-course-shell">
+                    <div className="student-course-hero">
+                      <div className="student-course-copy">
+                        <div className="student-course-meta-row">
+                          <span>{course.code}</span>
+          
                           <span>
-                            <i style={{ width: `${moduleProgress}%` }} />
+                            {course.visibility === 'private'
+                              ? 'Private course'
+                              : 'Public course'}
                           </span>
-
-                          <strong>{moduleProgress}%</strong>
+                        </div>
+          
+                        <h1>{course.title}</h1>
+          
+                        <p>
+                          {course.summary ||
+                            'Continue learning and practicing this course.'}
+                        </p>
+          
+                        <div
+                          className="student-course-progress"
+                          aria-label={`Course reading progress ${courseProgress}%`}
+                        >
+                          <span className="student-course-progress-track">
+                            <i style={{ width: `${courseProgress}%` }} />
+                          </span>
+          
+                          <div>
+                            <span>Reading progress</span>
+                            <strong>{courseProgress}%</strong>
+                          </div>
+                        </div>
+          
+                        <div className="student-course-bottom-row">
+                          <div className="student-course-creator">
+                            <Avatar
+                              src={resolveProfileImage(
+                                course.professorProfileImage ||
+                                  course.professor_profile_image,
+                              )}
+                              alt={`${
+                                course.instructor ||
+                                course.professorName ||
+                                'Professor'
+                              }'s profile`}
+                            />
+          
+                            <div className="enrolled-course-meta">
+                              <span>
+                                {course.instructor ||
+                                  course.professorName ||
+                                  'Professor'}
+                              </span>
+          
+                              <small>
+                                {getProfessorDepartment(
+                                  course,
+                                )}
+                              </small>
+                            </div>
+                          </div>
+          
+                          <div className="student-course-actions">
+                            <button
+                              type="button"
+                              className="student-start-button"
+                              onClick={startCourseLearning}
+                              disabled={modules.length === 0}
+                            >
+                              Start Learning
+                            </button>
+          
+                            <button
+                              type="button"
+                              className="student-practice-button"
+                              onClick={openCoursePractice}
+                              disabled={!areAllModulesCompleted}
+                              title={
+                                areAllModulesCompleted
+                                  ? 'Practice the complete course'
+                                  : 'Complete all modules before practicing the complete course.'
+                              }
+                            >
+                              Practice All
+                            </button>
+                          </div>
                         </div>
                       </div>
-
-                      <div className="student-module-actions">
-                        <button
-                          type="button"
-                          className="student-module-learn-button"
-                          onClick={() =>
-                            startModuleLearning(module, index)
-                          }
-                          disabled={!learnUnlocked}
-                        >
-                          {moduleProgress > 0
-                            ? 'Continue'
-                            : 'Learn'}
-                        </button>
-
-                        <button
-                          type="button"
-                          className="student-module-practice-button"
-                          onClick={() =>
-                            openModulePractice(module, index)
-                          }
-                          disabled={!practiceUnlocked}
-                          title={
-                            practiceUnlocked
-                              ? `Practice ${module.title}`
-                              : 'Finish reading this module first.'
-                          }
-                        >
-                          Practice
-                        </button>
+                    </div>
+          
+                    <section
+                      className="student-course-modules"
+                      aria-labelledby="course-modules-title"
+                    >
+                      <div className="student-course-section-title">
+                        <div>
+                          <h2 id="course-modules-title">Modules</h2>
+                          <p className="student-module-section-description">
+                            Complete each module to unlock the next one.
+                          </p>
+                        </div>
+          
+                        <span>{modules.length} module(s)</span>
                       </div>
-                    </article>
-                  );
-                })}
-              </div>
-            )}
-          </section>
-        </section>
-      </main>
-
-      <JoinCourseModal
-        open={joinModalOpen}
-        courseCode={joinCourseCode}
-        onCourseCodeChange={setJoinCourseCode}
-        onCancel={closeJoinModal}
-        onJoin={joinByCourseCode}
-      />
-
+          
+                      {modules.length === 0 ? (
+                        <div className="student-empty-state">
+                          No modules have been added to this course yet.
+                        </div>
+                      ) : (
+                        <div className="student-module-list">
+                          {modules.map((module, index) => {
+                            const moduleProgress = getModuleProgress(index);
+                            const learnUnlocked =
+                              isModuleLearnUnlocked(index);
+                            const practiceUnlocked =
+                              isModulePracticeUnlocked(index);
+          
+                            const moduleState = !learnUnlocked
+                              ? 'locked'
+                              : moduleProgress >= 100
+                                ? 'complete'
+                                : moduleProgress > 0
+                                  ? 'current'
+                                  : 'available';
+          
+                            return (
+                              <article
+                                className={`student-module-row ${moduleState}`}
+                                key={module.id}
+                              >
+                                <span className="student-module-number">
+                                  {learnUnlocked ? index + 1 : '🔒'}
+                                </span>
+          
+                                <div className="student-module-main">
+                                  <div className="student-module-title-row">
+                                    <div>
+                                      <span className="student-module-eyebrow">
+                                        Module {index + 1}
+                                      </span>
+          
+                                      <h3>{module.title}</h3>
+                                    </div>
+          
+                                    <span
+                                      className={`student-module-status ${moduleState}`}
+                                    >
+                                      {!learnUnlocked
+                                        ? 'Locked'
+                                        : moduleProgress >= 100
+                                          ? 'Completed'
+                                          : moduleProgress > 0
+                                            ? 'In progress'
+                                            : 'Available'}
+                                    </span>
+                                  </div>
+          
+                                  <p>
+                                    {module.description ||
+                                      `${module.lessonPages.length} lesson page(s)`}
+                                  </p>
+          
+                                  {!learnUnlocked && (
+                                    <small className="student-module-lock-message">
+                                      Complete Module {index} to unlock this module.
+                                    </small>
+                                  )}
+          
+                                  <div
+                                    className="student-module-progress"
+                                    aria-label={`${module.title} reading progress ${moduleProgress}%`}
+                                  >
+                                    <span>
+                                      <i style={{ width: `${moduleProgress}%` }} />
+                                    </span>
+          
+                                    <strong>{moduleProgress}%</strong>
+                                  </div>
+                                </div>
+          
+                                <div className="student-module-actions">
+                                  <button
+                                    type="button"
+                                    className="student-module-learn-button"
+                                    onClick={() =>
+                                      startModuleLearning(module, index)
+                                    }
+                                    disabled={!learnUnlocked}
+                                  >
+                                    {moduleProgress > 0
+                                      ? 'Continue'
+                                      : 'Learn'}
+                                  </button>
+          
+                                  <button
+                                    type="button"
+                                    className="student-module-practice-button"
+                                    onClick={() =>
+                                      openModulePractice(module, index)
+                                    }
+                                    disabled={!practiceUnlocked}
+                                    title={
+                                      practiceUnlocked
+                                        ? `Practice ${module.title}`
+                                        : 'Finish reading this module first.'
+                                    }
+                                  >
+                                    Practice
+                                  </button>
+                                </div>
+                              </article>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </section>
+                  </section>
+        </main>
+      </div>
+      <JoinCourseModal open={joinModalOpen} courseCode={joinCourseCode} onCourseCodeChange={setJoinCourseCode} onCancel={closeJoinModal} onJoin={joinByCourseCode} />
       {quizModesOpen && selectedPracticeModule && (
         <QuizModesModal
           source={selectedPracticeModule.index === -1 ? 'course' : 'module'}
           lessonId={`${courseRouteId}-${selectedPracticeModule.id}`}
           quizzes={selectedPracticeModule.quizzes}
-          onClose={() => {
-            setQuizModesOpen(false);
-            setSelectedPracticeModule(null);
-          }}
+          onClose={() => { setQuizModesOpen(false); setSelectedPracticeModule(null); }}
         />
       )}
     </div>
