@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Swal from "sweetalert2";
-import { API_BASE } from "../../config.js";
+import { API_BASE } from "../../../config.js";
 import styles from "./modulemanage.module.css";
-import AdminLayout from "./AdminLayout";
+import AdminLayout from "./AdminLayout.js";
 
 function serializeQuizItems(items) {
   return JSON.stringify(

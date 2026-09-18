@@ -2,12 +2,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
-import { useAuth } from '../../context/AuthContext';
-import { API_BASE } from '../../config.js';
+import { useAuth } from '../../../context/AuthContext';
+import { API_BASE } from '../../../config.js';
 import {
   fetchCourse,
   saveCourse,
-} from '../../services/courseApi.js';
+} from '../../../services/courseApi.js';
 
 import styles from './Addmodule.module.css';
 

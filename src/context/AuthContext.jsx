@@ -1,6 +1,10 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { API_BASE } from '../config.js';
-import { getUserRole, withNormalizedRole } from '../utils/roles.js';
+import {
+  getUserRole,
+  isProfessorApprovalRestricted,
+  withNormalizedRole,
+} from '../utils/roles.js';
 
 const AuthContext = createContext(null);
 
@@ -102,9 +106,18 @@ export function AuthProvider({ children }) {
         email: data.email,
         name: data.username,
         role: data.role,
+        verificationStatus: data.verificationStatus || data.verification_status,
       }
     );
     const token = getSessionToken(data);
+
+    if (isProfessorApprovalRestricted(sessionUser)) {
+      clearStoredSession();
+      setUser(null);
+      throw new Error(
+        'Your professor registration is pending Super Admin approval.'
+      );
+    }
 
     clearStoredSession();
     const normalizedUser = writeUserSession(sessionUser, token);
@@ -164,6 +177,12 @@ export function AuthProvider({ children }) {
         }
 
         if (!response.ok || !data.success || !data.user) {
+          clearStoredSession();
+          setUser(null);
+          return;
+        }
+
+        if (isProfessorApprovalRestricted(data.user)) {
           clearStoredSession();
           setUser(null);
           return;

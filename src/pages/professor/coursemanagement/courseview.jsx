@@ -130,6 +130,21 @@ export default function CourseView() {
     setProcessingId,
   ] = useState(null);
 
+  const [
+    rejectTarget,
+    setRejectTarget,
+  ] = useState(null);
+
+  const [
+    rejectReason,
+    setRejectReason,
+  ] = useState('');
+
+  const [
+    rejectError,
+    setRejectError,
+  ] = useState('');
+
 
   /* ===================================================
      LOAD COURSE + ENROLLMENTS
@@ -379,14 +394,40 @@ export default function CourseView() {
      DECLINE
   =================================================== */
 
-  const handleDecline =
-    async (student) => {
-      const confirmed =
-        window.confirm(
-          `Decline enrollment request from ${student.name}?`
-        );
+  const openRejectDialog =
+    (student) => {
+      setRejectTarget(student);
+      setRejectReason('');
+      setRejectError('');
+    };
 
-      if (!confirmed) {
+  const closeRejectDialog =
+    () => {
+      if (processingId) {
+        return;
+      }
+
+      setRejectTarget(null);
+      setRejectReason('');
+      setRejectError('');
+    };
+
+  const handleDecline =
+    async (student, reason) => {
+      const cleanReason =
+        reason.trim();
+
+      if (!cleanReason) {
+        setRejectError(
+          'Please enter a reason before rejecting this request.'
+        );
+        return;
+      }
+
+      if (cleanReason.length > 500) {
+        setRejectError(
+          'Reason must be 500 characters or fewer.'
+        );
         return;
       }
 
@@ -394,6 +435,7 @@ export default function CourseView() {
         setProcessingId(
           student.enrollmentId
         );
+        setRejectError('');
 
         const token =
           getStoredToken();
@@ -407,9 +449,16 @@ export default function CourseView() {
               Accept:
                 'application/json',
 
+              'Content-Type':
+                'application/json',
+
               Authorization:
                 `Bearer ${token}`,
             },
+
+            body: JSON.stringify({
+              reason: cleanReason,
+            }),
           }
         );
 
@@ -426,6 +475,8 @@ export default function CourseView() {
         }
 
         await loadCourseData();
+        setRejectTarget(null);
+        setRejectReason('');
       } catch (error) {
         console.error(
           'Decline enrollment error:',
@@ -966,12 +1017,12 @@ export default function CourseView() {
                                   isProcessing
                                 }
                                 onClick={() =>
-                                  handleDecline(
+                                  openRejectDialog(
                                     student
                                   )
                                 }
                               >
-                                Decline
+                                Reject
                               </button>
 
                             </div>
@@ -1031,6 +1082,113 @@ export default function CourseView() {
         </div>
 
       </div>
+
+      {rejectTarget && (
+        <div
+          className={
+            styles.rejectOverlay
+          }
+          role="presentation"
+          onClick={
+            closeRejectDialog
+          }
+        >
+          <form
+            className={
+              styles.rejectDialog
+            }
+            onSubmit={(event) => {
+              event.preventDefault();
+              handleDecline(
+                rejectTarget,
+                rejectReason
+              );
+            }}
+            onClick={(event) =>
+              event.stopPropagation()
+            }
+          >
+            <h2>
+              Reject Enrollment
+            </h2>
+
+            <p>
+              {`Reason for rejecting ${
+                rejectTarget.displayName ||
+                rejectTarget.name ||
+                'this student'
+              }`}
+            </p>
+
+            <textarea
+              value={rejectReason}
+              maxLength={500}
+              placeholder="Enter rejection reason"
+              onChange={(event) => {
+                setRejectReason(
+                  event.target.value
+                );
+                setRejectError('');
+              }}
+              autoFocus
+            />
+
+            <div
+              className={
+                styles.reasonFooter
+              }
+            >
+              <span>
+                {rejectReason.length}/500
+              </span>
+
+              {rejectError && (
+                <strong>
+                  {rejectError}
+                </strong>
+              )}
+            </div>
+
+            <div
+              className={
+                styles.rejectActions
+              }
+            >
+              <button
+                type="button"
+                className={
+                  styles.cancelRejectBtn
+                }
+                disabled={
+                  processingId ===
+                  rejectTarget.enrollmentId
+                }
+                onClick={
+                  closeRejectDialog
+                }
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                className={
+                  styles.confirmRejectBtn
+                }
+                disabled={
+                  processingId ===
+                  rejectTarget.enrollmentId
+                }
+              >
+                {processingId ===
+                rejectTarget.enrollmentId
+                  ? 'Rejecting...'
+                  : 'Reject'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
 
     </section>
   );

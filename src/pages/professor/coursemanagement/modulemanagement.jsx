@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   archiveCourseById,
   fetchCourses,
-} from '../../services/courseApi.js';
+} from '../../../services/courseApi.js';
 import styles from './modulemanage.module.css';
 
 function formatCourseId(course) {

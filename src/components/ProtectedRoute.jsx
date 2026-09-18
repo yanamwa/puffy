@@ -4,6 +4,7 @@ import {
   APP_ROLES,
   getHomePathForRole,
   getUserRole,
+  isProfessorApprovalRestricted,
 } from '../utils/roles.js';
 
 const studentOnlyPrefixes = [
@@ -133,6 +134,27 @@ export default function ProtectedRoute() {
   if (!role) {
     clearStoredAuth();
     return <Navigate to="/login" replace state={{ from: location }} />;
+  }
+
+  if (role === APP_ROLES.PROFESSOR) {
+    const professorUser =
+      [user, storedUser, tokenUser].find(
+        (candidate) => getUserRole(candidate) === APP_ROLES.PROFESSOR,
+      ) || currentUser;
+
+    if (isProfessorApprovalRestricted(professorUser)) {
+      clearStoredAuth();
+      return (
+        <Navigate
+          to="/login"
+          replace
+          state={{
+            from: location,
+            professorApprovalRequired: true,
+          }}
+        />
+      );
+    }
   }
 
   if (pathname.startsWith('/super-admin') && role !== APP_ROLES.SUPER_ADMIN) {

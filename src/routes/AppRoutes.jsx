@@ -9,7 +9,6 @@ import ChangePasswordPage from '../pages/auth/Changepassword';
 import OtpPage from '../pages/auth/Otp';
 import RecoverAccountPage from '../pages/auth/RecoverAccount';
 
-import AdminHome from '../pages/admin/AdminHome';
 import AdminLayout from '../pages/admin/shared/AdminLayout';
 import DashboardPage from '../pages/admin/dashboard/DashboardPage';
 import UserManagementPage from '../pages/admin/users/UserManagementPage';
@@ -29,12 +28,12 @@ import SuperAdminBackupPage from '../pages/superadmin/backup/SuperAdminBackupPag
 import ProfessorHome from '../pages/professor/ProfessorHome';
 import ProfessorLayout from '../pages/professor/ProfessorLayout';
 import ProfessorFeaturePage from '../pages/professor/ProfessorFeaturePage';
-import ModuleManagement from '../pages/professor/modulemanagement';
-import AddModule from '../pages/professor/AddModule';
+import ModuleManagement from '../pages/professor/coursemanagement/modulemanagement';
+import AddModule from '../pages/professor/coursemanagement/AddModule';
 import ProfessorNotifications from '../pages/professor/ProfessorNotifications';
 import ProfessorProfile from '../pages/professor/ProfessorProfile';
 import ProfessorSetting from '../pages/professor/ProfessorSetting';
-import CourseView from '../pages/professor/courseview';
+import CourseView from '../pages/professor/coursemanagement/courseview';
 import AssessmentAnalysis from '../pages/professor/AssessmentAnalysis';
 import AssessmentDetail from '../pages/professor/AssessmentDetail';
 
@@ -215,11 +214,7 @@ export default function AppRoutes() {
           ========================== */}
           <Route
             path="/admin"
-            element={
-              <AdminLayout>
-                <AdminHome />
-              </AdminLayout>
-            }
+            element={<Navigate to="/admin/dashboard" replace />}
           />
 
           <Route

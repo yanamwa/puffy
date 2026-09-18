@@ -1,9 +1,82 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { API_BASE } from '../../config.js';
 import { fetchCourses } from '../../services/courseApi.js';
 import styles from './AssessmentAnalysis.module.css';
 
 const FALLBACK_RATIOS = [1, 0.83, 0.7, 0.5, 0.4];
+
+function getStoredToken() {
+  return (
+    localStorage.getItem('puffy-token') ||
+    localStorage.getItem('token') ||
+    localStorage.getItem('authToken') ||
+    sessionStorage.getItem('puffy-token') ||
+    sessionStorage.getItem('token') ||
+    sessionStorage.getItem('authToken') ||
+    ''
+  );
+}
+
+function normalizeGender(value) {
+  const normalized = String(value || '').trim().toLowerCase();
+
+  if (['male', 'm'].includes(normalized)) return 'male';
+  if (['female', 'f'].includes(normalized)) return 'female';
+
+  return '';
+}
+
+function getEnrollmentSummary(enrolledStudents = []) {
+  const enrolled = Array.isArray(enrolledStudents) ? enrolledStudents : [];
+
+  return enrolled.reduce(
+    (summary, student) => {
+      const gender = normalizeGender(student.gender || student.studentGender);
+
+      if (gender === 'male') {
+        summary.maleStudents += 1;
+      }
+
+      if (gender === 'female') {
+        summary.femaleStudents += 1;
+      }
+
+      return summary;
+    },
+    {
+      totalStudents: enrolled.length,
+      maleStudents: 0,
+      femaleStudents: 0,
+    }
+  );
+}
+
+async function fetchEnrollmentSummary(courseId) {
+  const token = getStoredToken();
+
+  if (!token || !courseId) {
+    return null;
+  }
+
+  const response = await fetch(
+    `${API_BASE}/courses/${encodeURIComponent(courseId)}/enrollments`,
+    {
+      headers: {
+        Accept: 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok || data.success === false) {
+    throw new Error(data.message || 'Could not load enrolled students.');
+  }
+
+  return getEnrollmentSummary(data.enrolled);
+}
 
 function readNumber(...values) {
   for (const value of values) {
@@ -33,7 +106,7 @@ function parseItems(raw, fallbackCount) {
     }
   }
 
-  return Array.from({ length: Math.max(fallbackCount, 1) }, (_, index) => ({
+  return Array.from({ length: Math.max(Number(fallbackCount) || 0, 0) }, (_, index) => ({
     label: `Q${index + 1}`,
     question: `Assessment item ${index + 1}`,
     answer: 'Answer not available',
@@ -49,10 +122,10 @@ function normalizeCourse(course, index) {
     code,
     title: course.title || course.courseName || course.course_name || 'Untitled Course',
     description: course.summary || course.description || course.subject || 'Course details not available',
-    students: readNumber(course.students, course.studentCount, course.student_count) ?? 30,
-    maleStudents: readNumber(course.maleStudents, course.male_students) ?? 15,
-    femaleStudents: readNumber(course.femaleStudents, course.female_students) ?? 15,
-    quizzes: readNumber(course.quizzes, course.quizCount, course.quiz_count, course.quizItems) ?? 5,
+    students: readNumber(course.students, course.studentCount, course.student_count) ?? 0,
+    maleStudents: readNumber(course.maleStudents, course.male_students) ?? 0,
+    femaleStudents: readNumber(course.femaleStudents, course.female_students) ?? 0,
+    quizzes: readNumber(course.quizzes, course.quizCount, course.quiz_count, course.quizItems) ?? 0,
     quizContents: course.quizContents || course.quiz_contents || course.quizModule || course.questions || '',
     averageScore: course.averageScore || course.average_score,
     highestScore: course.highestScore || course.highest_score,
@@ -124,6 +197,7 @@ export default function AssessmentDetail() {
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
   const [selectedQuestion, setSelectedQuestion] = useState(null);
+  const [enrollmentSummary, setEnrollmentSummary] = useState(null);
 
   useEffect(() => {
     let active = true;
@@ -134,10 +208,18 @@ export default function AssessmentDetail() {
         setErrorMessage('');
 
         const loadedCourses = await fetchCourses();
+        const loadedEnrollmentSummary = await fetchEnrollmentSummary(courseId).catch((error) => {
+          console.warn('Could not load enrolled students for assessment totals.', error);
+          return null;
+        });
         const normalized = Array.isArray(loadedCourses)
           ? loadedCourses.map((item, index) => normalizeCourse(item, index))
           : [];
         const found = normalized.find((item) => String(item.id) === String(courseId));
+
+        if (active) {
+          setEnrollmentSummary(loadedEnrollmentSummary);
+        }
 
         if (active && found) {
           setCourse(found);
@@ -169,12 +251,18 @@ export default function AssessmentDetail() {
   );
   const totals = useMemo(
     () => ({
-      totalStudents: Number(activeCourse?.students || 0),
-      maleStudents: Number(activeCourse?.maleStudents || 0),
-      femaleStudents: Number(activeCourse?.femaleStudents || 0),
+      totalStudents:
+        enrollmentSummary?.totalStudents ??
+        Number(activeCourse?.students || 0),
+      maleStudents:
+        enrollmentSummary?.maleStudents ??
+        Number(activeCourse?.maleStudents || 0),
+      femaleStudents:
+        enrollmentSummary?.femaleStudents ??
+        Number(activeCourse?.femaleStudents || 0),
       quizItems: quizItems.length,
     }),
-    [activeCourse, quizItems]
+    [activeCourse, quizItems, enrollmentSummary]
   );
   const rows = useMemo(() => buildRows(quizItems, totals), [quizItems, totals]);
   const average = readNumber(activeCourse?.averageScore) ??

@@ -4,6 +4,7 @@ import Swal from "sweetalert2";
 import {
   useNavigate,
   Link,
+  useLocation,
 } from "react-router-dom";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { API_BASE } from "../../config.js";
@@ -13,12 +14,14 @@ import {
   APP_ROLES,
   getHomePathForRole,
   getUserRole,
+  isProfessorApprovalRestricted,
   normalizeRole,
 } from "../../utils/roles.js";
 
 function Login() {
   const navigate = useNavigate();
-  const { user, saveSession } = useAuth();
+  const location = useLocation();
+  const { user, saveSession, logout } = useAuth();
 
   const [showPassword, setShowPassword] =
     useState(false);
@@ -45,11 +48,27 @@ function Login() {
     const role = getUserRole(user);
 
     if (role && !isLoggingIn) {
+      if (isProfessorApprovalRestricted(user)) {
+        logout();
+        setLoginError(
+          "Your professor registration is pending Super Admin approval."
+        );
+        return;
+      }
+
       navigate(getHomePathForRole(role), {
         replace: true,
       });
     }
-  }, [isLoggingIn, navigate, user]);
+  }, [isLoggingIn, logout, navigate, user]);
+
+  useEffect(() => {
+    if (location.state?.professorApprovalRequired) {
+      setLoginError(
+        "Your professor registration is pending Super Admin approval."
+      );
+    }
+  }, [location.state]);
 
   const setLoginError = (message) => {
     setLoginFeedback({
@@ -436,7 +455,8 @@ function Login() {
       const message =
         error.name === "AbortError"
           ? "Login took too long. Please check that the backend is running and try again."
-          : "Could not connect to the server. Please check that your backend is running.";
+          : error.message ||
+            "Could not connect to the server. Please check that your backend is running.";
 
       setLoginError(message);
 
@@ -444,7 +464,9 @@ function Login() {
         imageUrl: "/images/error.png",
         imageWidth: 170,
         imageHeight: 170,
-        title: "Server Error",
+        title: message.includes("professor registration")
+          ? "Approval Pending"
+          : "Server Error",
         text: message,
       });
     } finally {
