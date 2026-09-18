@@ -14,8 +14,8 @@ import {
 import Swal from "sweetalert2";
 import styles from "./editmodule.module.css";
 import "boxicons/css/boxicons.min.css";
-import { API_BASE } from "../../config.js";
-import LoadingState from "../../components/LoadingState.jsx";
+import { API_BASE } from "../../../config.js";
+import LoadingState from "../../../components/LoadingState.jsx";
 import AdminSidebar from "../../components/ASidebar";
 import AdminHeader from "../../components/AHeader";
 
