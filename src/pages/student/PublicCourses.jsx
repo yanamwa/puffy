@@ -68,6 +68,79 @@ function getCourseKey(course) {
   ).trim();
 }
 
+function normalizeEnrollmentStatus(value) {
+  const status = String(value || "").trim().toLowerCase();
+
+  if (["approved", "enrolled", "active"].includes(status)) {
+    return "enrolled";
+  }
+
+  if (
+    [
+      "pending",
+      "requested",
+      "request",
+      "request_pending",
+      "approval_pending",
+    ].includes(status)
+  ) {
+    return "requested";
+  }
+
+  return "";
+}
+
+function isTruthyFlag(value) {
+  return (
+    value === true ||
+    value === 1 ||
+    value === "1" ||
+    String(value).trim().toLowerCase() === "true"
+  );
+}
+
+function getCourseEnrollmentState(course, enrolledCourseKeys) {
+  if (enrolledCourseKeys.has(getCourseKey(course))) {
+    return "enrolled";
+  }
+
+  const status = normalizeEnrollmentStatus(
+    course.enrollmentStatus ||
+      course.enrollment_status ||
+      course.requestStatus ||
+      course.request_status ||
+      course.enrollmentRequestStatus ||
+      course.enrollment_request_status
+  );
+
+  if (status) {
+    return status;
+  }
+
+  if (
+    isTruthyFlag(course.enrollmentRequested) ||
+    isTruthyFlag(course.enrollment_requested) ||
+    isTruthyFlag(course.requestedEnrollment) ||
+    isTruthyFlag(course.requested_enrollment)
+  ) {
+    return "requested";
+  }
+
+  return "enroll";
+}
+
+function withRequestedEnrollment(course) {
+  return {
+    ...course,
+    enrollmentStatus: "pending",
+    enrollment_status: "pending",
+    enrollmentRequested: true,
+    enrollment_requested: true,
+    requestedEnrollment: true,
+    requested_enrollment: true,
+  };
+}
+
 function getCourseTimestamp(course) {
   const rawDate =
     course?.updatedAt ||
@@ -280,6 +353,22 @@ export default function PublicCourses() {
     setCourseCode("");
   };
 
+  const markCourseRequested = (course) => {
+    const courseKey = getCourseKey(course);
+
+    if (!courseKey) {
+      return;
+    }
+
+    setPublicCourses((courses) =>
+      courses.map((currentCourse) =>
+        getCourseKey(currentCourse) === courseKey
+          ? withRequestedEnrollment(currentCourse)
+          : currentCourse
+      )
+    );
+  };
+
   const confirmEnrollment = async (course) => {
     const courseTitle = getCourseTitle(course);
 
@@ -350,6 +439,8 @@ export default function PublicCourses() {
         response.status === 409 &&
         data.status === "pending"
       ) {
+        markCourseRequested(course);
+
         await Swal.fire({
           title: "Request already sent",
           text:
@@ -391,6 +482,8 @@ export default function PublicCourses() {
             "Could not send enrollment request."
         );
       }
+
+      markCourseRequested(course);
 
       await Swal.fire({
         title: "Enrollment request sent!",
@@ -531,8 +624,24 @@ export default function PublicCourses() {
               </div>
             ) : (
               visiblePublicCourses.map((course) => {
-                const courseEnrolled =
-                  enrolledCourseKeys.has(getCourseKey(course));
+                const enrollmentState = getCourseEnrollmentState(
+                  course,
+                  enrolledCourseKeys
+                );
+                const courseEnrolled = enrollmentState === "enrolled";
+                const courseRequested = enrollmentState === "requested";
+                const courseLocked = courseEnrolled || courseRequested;
+                const statusClass = courseEnrolled
+                  ? "enrolled-course-status"
+                  : courseRequested
+                    ? "requested-course-status"
+                    : "";
+                const actionLabel = courseEnrolled
+                  ? "Enrolled"
+                  : courseRequested
+                    ? "Requested"
+                    : "Enroll";
+                const topActionLabel = courseLocked ? actionLabel : "+";
 
                 return (
                   <article
@@ -545,24 +654,22 @@ export default function PublicCourses() {
                   >
                     <button
                       type="button"
-                      className={`add-course-button ${
-                        courseEnrolled
-                          ? "enrolled-course-status"
-                          : ""
-                      }`}
+                      className={`add-course-button ${statusClass}`}
                       aria-label={
                         courseEnrolled
                           ? `Already enrolled in ${getCourseTitle(course)}`
-                          : `Add ${getCourseTitle(course)}`
+                          : courseRequested
+                            ? `Enrollment requested for ${getCourseTitle(course)}`
+                            : `Add ${getCourseTitle(course)}`
                       }
-                      disabled={courseEnrolled}
+                      disabled={courseLocked}
                       onClick={() => {
-                        if (!courseEnrolled) {
+                        if (!courseLocked) {
                           confirmEnrollment(course);
                         }
                       }}
                     >
-                      {courseEnrolled ? "Enrolled" : "+"}
+                      {topActionLabel}
                     </button>
 
                     <div className="course-card-body">
@@ -597,19 +704,15 @@ export default function PublicCourses() {
 
                       <button
                         type="button"
-                        className={`start-learning-button ${
-                          courseEnrolled
-                            ? "enrolled-course-status"
-                            : ""
-                        }`}
-                        disabled={courseEnrolled}
+                        className={`start-learning-button ${statusClass}`}
+                        disabled={courseLocked}
                         onClick={() => {
-                          if (!courseEnrolled) {
+                          if (!courseLocked) {
                             confirmEnrollment(course);
                           }
                         }}
                       >
-                        {courseEnrolled ? "Enrolled" : "Enroll"}
+                        {actionLabel}
                       </button>
                     </div>
                   </article>

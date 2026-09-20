@@ -506,8 +506,17 @@ function Lesson() {
     currentItem.content.options.length > 0;
 
   return (
-    <div className={styles.wrapper}>
-      <div className={styles.content}>
+<div className={styles.wrapper}>
+
+  <button
+    type="button"
+    className={styles.backButton}
+    onClick={() => navigate(`/student/enrolled-courses/${lessonId}`)}
+  >
+    ← Back to homepage
+  </button>
+
+  <div className={styles.content}>
         <div className={styles.ribbon}></div>
 
         <div className={styles.tabs}>
@@ -519,23 +528,24 @@ function Lesson() {
             Lesson
           </button>
 
-          <button className={styles.aboutyou} type="button" disabled>
-            Review
-          </button>
+  <button className={styles.aboutyou} type="button" disabled>
+  Overview
+</button>
         </div>
+<div className={styles.greets}>
+  <p className={styles.slideCounter}>
+    Slide {totalSlides > 0 ? currentSlide + 1 : 0} of {totalSlides}
+  </p>
 
-        <div className={styles.greets}>
-          <p className={styles.moduleEyebrow}>
-            Module {moduleNumber} of {moduleCount}
-          </p>
+  <p className={styles.moduleEyebrow}>
+    Module {moduleNumber} of {moduleCount}
+  </p>
 
-          <h2>Module {moduleNumber}: {moduleTitle}</h2>
+  <h2>
+    Module {moduleNumber}: {moduleTitle}
+  </h2>
 
-          <h3>
-            Slide {totalSlides > 0 ? currentSlide + 1 : 0} of {totalSlides}
-          </h3>
-
-          <div className={styles.progressWrapper}>
+  <div className={styles.progressWrapper}>
             <div className={styles.progressBar}>
               <div
                 className={styles.progressFill}

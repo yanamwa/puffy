@@ -300,3 +300,75 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Final public card fixes: keep status chips, titles, and footers from overlapping. */
+.public-course-folder {
+  height: 258px;
+  min-height: 258px;
+  padding: 88px 18px 0;
+}
+
+.public-course-folder .course-card-body {
+  height: 106px;
+  padding-right: 100px;
+}
+
+.public-course-folder .course-card-body h2 {
+  margin: 0;
+  max-width: 100%;
+  display: -webkit-box;
+  overflow: hidden;
+  color: #55575c;
+  font-size: 25px;
+  line-height: 1.14;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.public-course-folder .course-card-footer {
+  left: 18px;
+  right: 18px;
+  bottom: 14px;
+  height: 52px;
+  gap: 10px;
+  padding-top: 9px;
+}
+
+.public-course-folder .start-learning-button {
+  width: 96px;
+  flex-basis: 96px;
+  white-space: nowrap;
+}
+
+.add-course-button {
+  top: 62px;
+  right: 20px;
+}
+
+.add-course-button.enrolled-course-status,
+.add-course-button.requested-course-status {
+  width: auto;
+  min-width: 84px;
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 999px;
+  box-shadow: none;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.add-course-button.requested-course-status,
+.start-learning-button.requested-course-status {
+  border: 1px solid #b8d8bf;
+  background: #eef6f0;
+  background-color: #eef6f0;
+  color: #198754;
+  box-shadow: none;
+  cursor: default;
+}
+
+.add-course-button.requested-course-status:disabled,
+.start-learning-button.requested-course-status:disabled {
+  opacity: 1;
+}

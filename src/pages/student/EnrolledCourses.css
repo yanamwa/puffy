@@ -5898,3 +5898,46 @@ a.course-folder:focus-visible {
 .sidebar-collapsed .sidebar-dropdown-arrow {
   display: none;
 }
+
+/* Final enrolled card fixes: reserve separate title and footer areas. */
+.enrolled-course-folder {
+  height: 258px;
+  padding: 86px 18px 0;
+}
+
+.enrolled-course-folder .course-card-body {
+  position: relative;
+  z-index: 2;
+  min-height: 108px;
+  padding-right: 16px;
+}
+
+.enrolled-course-folder .course-code {
+  display: block;
+  max-width: 326px;
+  margin: 0 0 6px;
+  overflow: hidden;
+  color: #198754;
+  font-family: system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.enrolled-course-folder .course-card-body h2 {
+  max-width: 326px;
+  margin: 0;
+  min-height: 0;
+  line-height: 1.14;
+  overflow-wrap: anywhere;
+  -webkit-line-clamp: 2;
+}
+
+.enrolled-course-folder .course-card-footer {
+  bottom: 14px;
+  height: 52px;
+  padding-top: 9px;
+}

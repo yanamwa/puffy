@@ -637,8 +637,14 @@ export function getPublicStudentCourses() {
 }
 
 export async function loadPublicStudentCourses() {
+  const userId = getStoredUserId();
   const courses = await loadProfessorCourses(
-    { public: true, published: true, summaryOnly: true },
+    {
+      public: true,
+      published: true,
+      summaryOnly: true,
+      ...(userId ? { userId } : {}),
+    },
     { fallback: false }
   );
   return courses.map(normalizeStudentCourse);
