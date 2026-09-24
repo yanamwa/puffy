@@ -10,6 +10,7 @@ import {
   useParams,
 } from 'react-router-dom';
 
+import Swal from 'sweetalert2';
 import styles from './courseview.module.css';
 
 const API_BASE_URL =
@@ -106,7 +107,7 @@ export default function CourseView() {
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] =
-    useState('requests');
+    useState('enrolled');
 
   const [course, setCourse] =
     useState(null);
@@ -144,6 +145,11 @@ export default function CourseView() {
     rejectError,
     setRejectError,
   ] = useState('');
+
+  const [
+    selectedStudent,
+    setSelectedStudent,
+  ] = useState(null);
 
 
   /* ===================================================
@@ -319,6 +325,31 @@ export default function CourseView() {
   );
 
 
+  const getStudentName =
+    (student) =>
+      student?.displayName ||
+      student?.name ||
+      'Student';
+
+  const getStudentKey =
+    (student) =>
+      student?.enrollmentId ||
+      student?.userId ||
+      student?.studentId ||
+      student?.email ||
+      student?.name ||
+      '';
+
+  const getStudentIdentifier =
+    (student) =>
+      student?.userId ||
+      student?.studentUserId ||
+      student?.accountId ||
+      student?.id ||
+      student?.studentId ||
+      '';
+
+
   /* ===================================================
      APPROVE
   =================================================== */
@@ -419,7 +450,7 @@ export default function CourseView() {
 
       if (!cleanReason) {
         setRejectError(
-          'Please enter a reason before rejecting this request.'
+          'Please enter a reason before declining this request.'
         );
         return;
       }
@@ -497,33 +528,145 @@ export default function CourseView() {
      UNENROLL
   =================================================== */
 
+  const getFriendlyUnenrollMessage =
+    (error) => {
+      const message =
+        error?.message ||
+        'Unable to unenroll student.';
+
+      if (/route not found/i.test(message)) {
+        return 'The professor unenroll route is not running yet. Please restart the backend server and try again.';
+      }
+
+      if (/not actively enrolled/i.test(message)) {
+        return 'This student is no longer actively enrolled in this course.';
+      }
+
+      return message;
+    };
+
+  const requestProfessorUnenroll =
+    async (student, token) => {
+      const enrollmentId =
+        student?.enrollmentId;
+
+      if (!enrollmentId) {
+        throw new Error(
+          'Enrollment record is missing for this student.'
+        );
+      }
+
+      const response = await fetch(
+        `${API_BASE_URL}/enrollments/${enrollmentId}/unenroll`,
+        {
+          method: 'PATCH',
+          headers: {
+            Accept: 'application/json',
+            Authorization:
+              `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data =
+        await response
+          .json()
+          .catch(() => ({}));
+
+      if (!response.ok) {
+        const message =
+          data.message ||
+          data.error ||
+          'Unable to unenroll student.';
+
+        if (/route not found/i.test(message)) {
+          throw new Error(
+            'The professor unenroll route is not running yet. Please restart the backend server and try again.'
+          );
+        }
+
+        throw new Error(message);
+      }
+
+      return data;
+    };
+
   const handleUnenroll =
     async (student) => {
-      const confirmed =
-        window.confirm(
-          `Remove ${student.name} from this course?`
-        );
+      const name =
+        getStudentName(student);
 
-      if (!confirmed) {
+      const result = await Swal.fire({
+        title: 'Unenroll student?',
+        text: `${name} will be removed from this course.`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, unenroll',
+        cancelButtonText: 'Cancel',
+        confirmButtonColor: '#d93025',
+        cancelButtonColor: '#858d9b',
+        reverseButtons: true,
+      });
+
+      if (!result.isConfirmed) {
         return;
       }
 
-      /*
-       * Your existing /courses/:id/unenroll
-       * endpoint is designed for the logged
-       * in student themselves.
-       *
-       * Until a professor-specific endpoint
-       * is added, keep the button disabled
-       * rather than accidentally unenrolling
-       * the professor account.
-       */
+      const studentKey =
+        getStudentKey(student);
 
-      window.alert(
-        'Professor unenrollment endpoint still needs to be connected.'
-      );
+      try {
+        setProcessingId(studentKey);
+
+        const token =
+          getStoredToken();
+
+        if (!token) {
+          throw new Error(
+            'Professor authentication is required.'
+          );
+        }
+
+        await requestProfessorUnenroll(
+          student,
+          token
+        );
+
+        setEnrolledStudents(
+          (previousStudents) =>
+            previousStudents.filter(
+              (item) =>
+                getStudentKey(item) !==
+                studentKey
+            )
+        );
+
+        await loadCourseData();
+
+        await Swal.fire({
+          icon: 'success',
+          title: 'Student unenrolled',
+          text: `${name} has been removed from this course.`,
+          confirmButtonText: 'Okay',
+          confirmButtonColor: '#198754',
+        });
+      } catch (error) {
+        console.error(
+          'Unenroll student error:',
+          error
+        );
+
+        await Swal.fire({
+          icon: 'error',
+          title: 'Unable to unenroll',
+          text: getFriendlyUnenrollMessage(error),
+          confirmButtonText: 'Okay',
+          confirmButtonColor: '#198754',
+        });
+      } finally {
+        setProcessingId(null);
+      }
     };
-
 
   /* ===================================================
      LOADING
@@ -897,14 +1040,10 @@ export default function CourseView() {
                 displayedStudents.map(
                   (student) => {
                     const studentKey =
-                      student.enrollmentId ||
-                      student.userId ||
-                      student.studentId;
+                      getStudentKey(student);
 
                     const name =
-                      student.displayName ||
-                      student.name ||
-                      'Student';
+                      getStudentName(student);
 
                     const image =
                       resolveProfileImage(
@@ -913,7 +1052,7 @@ export default function CourseView() {
 
                     const isProcessing =
                       processingId ===
-                      student.enrollmentId;
+                      studentKey;
 
                     return (
                       <tr
@@ -1022,7 +1161,7 @@ export default function CourseView() {
                                   )
                                 }
                               >
-                                Reject
+                                Decline
                               </button>
 
                             </div>
@@ -1040,9 +1179,9 @@ export default function CourseView() {
                                 className={
                                   styles.viewBtn
                                 }
-                                onClick={() =>
-                                  navigate(
-                                    `/professor/courses/view/${courseId}/student/${student.userId}`
+                                                                onClick={() =>
+                                  setSelectedStudent(
+                                    student
                                   )
                                 }
                               >
@@ -1055,13 +1194,18 @@ export default function CourseView() {
                                 className={
                                   styles.unenrollBtn
                                 }
+                                disabled={
+                                  isProcessing
+                                }
                                 onClick={() =>
                                   handleUnenroll(
                                     student
                                   )
                                 }
                               >
-                                Unenroll
+                                {isProcessing
+                                  ? 'Removing...'
+                                  : 'Unenroll'}
                               </button>
 
                             </div>
@@ -1083,6 +1227,140 @@ export default function CourseView() {
 
       </div>
 
+      {selectedStudent && (
+        <div
+          className={
+            styles.studentModalOverlay
+          }
+          role="presentation"
+          onClick={() =>
+            setSelectedStudent(null)
+          }
+        >
+          <div
+            className={
+              styles.studentModal
+            }
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="student-details-title"
+            onClick={(event) =>
+              event.stopPropagation()
+            }
+          >
+            <div
+              className={
+                styles.studentModalHeader
+              }
+            >
+              <div>
+                <p>
+                  Student Details
+                </p>
+
+                <h2 id="student-details-title">
+                  {getStudentName(
+                    selectedStudent
+                  )}
+                </h2>
+              </div>
+
+              <button
+                type="button"
+                aria-label="Close student details"
+                onClick={() =>
+                  setSelectedStudent(null)
+                }
+              >
+                x
+              </button>
+            </div>
+
+            <div
+              className={
+                styles.studentModalProfile
+              }
+            >
+              <img
+                src={resolveProfileImage(
+                  selectedStudent.profileImage
+                )}
+                alt={getStudentName(
+                  selectedStudent
+                )}
+                onError={(event) => {
+                  event.currentTarget.src =
+                    DEFAULT_PROFILE_IMAGE;
+                }}
+              />
+
+              <div>
+                <strong>
+                  {getStudentName(
+                    selectedStudent
+                  )}
+                </strong>
+
+                <span>
+                  {selectedStudent.email ||
+                    'N/A'}
+                </span>
+              </div>
+            </div>
+
+            <div
+              className={
+                styles.studentModalGrid
+              }
+            >
+              <div>
+                <span>
+                  Student ID
+                </span>
+
+                <strong>
+                  {selectedStudent.studentId ||
+                    selectedStudent.studentNumber ||
+                    'N/A'}
+                </strong>
+              </div>
+
+              <div>
+                <span>
+                  Year Level
+                </span>
+
+                <strong>
+                  {selectedStudent.yearLevel ||
+                    'N/A'}
+                </strong>
+              </div>
+
+              <div>
+                <span>
+                  Section
+                </span>
+
+                <strong>
+                  {selectedStudent.sectionName ||
+                    selectedStudent.section ||
+                    'N/A'}
+                </strong>
+              </div>
+
+              <div>
+                <span>
+                  Course
+                </span>
+
+                <strong>
+                  {courseTitle}
+                </strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       {rejectTarget && (
         <div
           className={
@@ -1109,11 +1387,11 @@ export default function CourseView() {
             }
           >
             <h2>
-              Reject Enrollment
+              Decline Enrollment
             </h2>
 
             <p>
-              {`Reason for rejecting ${
+              {`Reason for declining ${
                 rejectTarget.displayName ||
                 rejectTarget.name ||
                 'this student'
@@ -1123,7 +1401,7 @@ export default function CourseView() {
             <textarea
               value={rejectReason}
               maxLength={500}
-              placeholder="Enter rejection reason"
+              placeholder="Enter decline reason"
               onChange={(event) => {
                 setRejectReason(
                   event.target.value
@@ -1182,8 +1460,8 @@ export default function CourseView() {
               >
                 {processingId ===
                 rejectTarget.enrollmentId
-                  ? 'Rejecting...'
-                  : 'Reject'}
+                  ? 'Declining...'
+                  : 'Decline'}
               </button>
             </div>
           </form>

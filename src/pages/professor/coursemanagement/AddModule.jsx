@@ -87,6 +87,44 @@ function createEmptyCourseDraft() {
     contentModules: [],
   };
 }
+const COURSE_DRAFT_STORAGE_PREFIX = 'puffy-course-builder-draft';
+
+function getCourseDraftStorageKey(courseId) {
+  return `${COURSE_DRAFT_STORAGE_PREFIX}:${courseId || 'new'}`;
+}
+
+function readCourseBuilderDraft(courseId) {
+  try {
+    return JSON.parse(
+      sessionStorage.getItem(
+        getCourseDraftStorageKey(courseId)
+      ) || 'null'
+    );
+  } catch {
+    return null;
+  }
+}
+
+function writeCourseBuilderDraft(courseId, draft) {
+  try {
+    sessionStorage.setItem(
+      getCourseDraftStorageKey(courseId),
+      JSON.stringify(draft)
+    );
+  } catch {
+    // Navigation state still carries the draft if session storage is unavailable.
+  }
+}
+
+function clearCourseBuilderDraft(courseId) {
+  try {
+    sessionStorage.removeItem(
+      getCourseDraftStorageKey(courseId)
+    );
+  } catch {
+    // Nothing to clear.
+  }
+}
 
 function limit(value, max) {
   return String(value || '').slice(0, max);
@@ -475,11 +513,19 @@ export default function AddModule() {
   const isEditing = Boolean(id);
 
   const [form, setForm] =
-    useState(() =>
-      isEditing
+    useState(() => {
+      const draft =
+        location.state?.courseDraft ||
+        readCourseBuilderDraft(id);
+
+      if (draft) {
+        return normalizeCourse(draft);
+      }
+
+      return isEditing
         ? emptyCourse
-        : createEmptyCourseDraft()
-    );
+        : createEmptyCourseDraft();
+    });
 
   const [loading, setLoading] =
     useState(isEditing);
@@ -517,15 +563,39 @@ export default function AddModule() {
       return;
     }
 
-    setForm(createEmptyCourseDraft());
+    const draft =
+      location.state?.courseDraft ||
+      readCourseBuilderDraft(id);
+
+    setForm(
+      draft
+        ? normalizeCourse(draft)
+        : createEmptyCourseDraft()
+    );
     setExpandedModuleId(null);
     setModuleFiles({});
     setActivePageIndexes({});
     setLoading(false);
-  }, [id, isEditing, location.key]);
+  }, [id, isEditing, location.key, location.state]);
 
   useEffect(() => {
     if (!isEditing) {
+      return;
+    }
+
+    const draft =
+      location.state?.courseDraft ||
+      readCourseBuilderDraft(id);
+
+    if (draft) {
+      const normalized = normalizeCourse(draft);
+
+      setForm(normalized);
+      setExpandedModuleId(null);
+      setModuleFiles({});
+      setActivePageIndexes({});
+      setLoading(false);
+
       return;
     }
 
@@ -544,11 +614,7 @@ export default function AddModule() {
 
           setForm(normalized);
 
-          setExpandedModuleId(
-            normalized
-              .contentModules[0]
-              ?.id || null
-          );
+          setExpandedModuleId(null);
         }
       } catch (error) {
         await Swal.fire({
@@ -637,21 +703,45 @@ export default function AddModule() {
     );
   };
 
+  const getModuleEditorPath = (
+    moduleId
+  ) =>
+    isEditing
+      ? `/professor/courses/edit/${id}/modules/${encodeURIComponent(moduleId)}/edit`
+      : `/professor/courses/new/modules/${encodeURIComponent(moduleId)}/edit`;
+
+  const openModuleEditor = (
+    moduleId,
+    draft = form
+  ) => {
+    writeCourseBuilderDraft(id, draft);
+
+    navigate(
+      getModuleEditorPath(moduleId),
+      {
+        state: {
+          courseDraft: draft,
+        },
+      }
+    );
+  };
+
   const addContentModule = () => {
     const module =
       createEmptyContentModule(
         form.contentModules.length
       );
 
-    setForm((current) => ({
-      ...current,
+    const nextForm = {
+      ...form,
       contentModules: [
-        ...current.contentModules,
+        ...form.contentModules,
         module,
       ],
-    }));
+    };
 
-    setExpandedModuleId(module.id);
+    setForm(nextForm);
+    setExpandedModuleId(null);
 
     setActivePageIndexes(
       (current) => ({
@@ -659,8 +749,12 @@ export default function AddModule() {
         [module.id]: 0,
       })
     );
-  };
 
+    openModuleEditor(
+      module.id,
+      nextForm
+    );
+  };
   const updateContentModule = (
     moduleId,
     field,
@@ -1553,15 +1647,14 @@ export default function AddModule() {
 
       if (
         !form.title.trim() ||
-        !form.summary.trim() ||
-        !form.subject.trim()
+        !form.summary.trim()
       ) {
         await Swal.fire({
           icon: 'warning',
           title:
             'Required Fields Missing',
           text:
-            'Course title, description, and subject are required.',
+            'Course title and description are required.',
           confirmButtonText: 'OK',
         });
 
@@ -1605,7 +1698,7 @@ export default function AddModule() {
           confirmButtonText: 'OK',
         });
 
-        setExpandedModuleId(
+        openModuleEditor(
           incompleteModule.id
         );
 
@@ -1621,7 +1714,8 @@ export default function AddModule() {
       const courseSummary =
         form.summary.trim();
       const courseSubject =
-        form.subject.trim();
+        form.subject.trim() ||
+        courseTitle;
       const learningObjectives =
         form.contentModules
           .map((module) =>
@@ -1770,6 +1864,8 @@ export default function AddModule() {
           confirmButtonText:
             'Done',
         });
+
+        clearCourseBuilderDraft(id);
 
         navigate(
           '/professor/courses'
@@ -2145,12 +2241,7 @@ export default function AddModule() {
               </h2>
 
               <p>
-                {moduleCount} module(s),
-                {' '}
-                {totalLessonPages} lesson
-                page(s), and{' '}
-                {totalQuizItems} quiz
-                item(s)
+                Add your modules below:
               </p>
             </div>
 
@@ -2238,7 +2329,7 @@ export default function AddModule() {
                           }
                         >
                           <span>
-                            MODULE{' '}
+                            Module{' '}
                             {moduleIndex + 1}
                           </span>
 
@@ -2256,7 +2347,7 @@ export default function AddModule() {
                                 .length
                             }{' '}
                             lesson page(s)
-                            ·{' '}
+                            &middot;{' '}
                             {
                               module
                                 .quizItems
@@ -2277,16 +2368,12 @@ export default function AddModule() {
                               styles.moduleExpandBtn
                             }
                             onClick={() =>
-                              setExpandedModuleId(
-                                isExpanded
-                                  ? null
-                                  : module.id
+                              openModuleEditor(
+                                module.id
                               )
                             }
                           >
-                            {isExpanded
-                              ? 'Collapse'
-                              : 'Edit Module'}
+                            Edit Module
                           </button>
 
                           <button
@@ -2445,7 +2532,7 @@ export default function AddModule() {
                                 styles.popupLabel
                               }
                             >
-                              Upload Module File
+                              Generate Module from Material
                             </label>
 
                             <div
@@ -2458,7 +2545,7 @@ export default function AddModule() {
                                   styles.customFileBtn
                                 }
                               >
-                                Choose File
+                                Upload File Here
 
                                 <input
                                   type="file"
@@ -2515,8 +2602,8 @@ export default function AddModule() {
                                 }
                               >
                                 {isProcessing
-                                  ? 'Processing...'
-                                  : 'Upload and Auto Sort'}
+                                  ? 'Generating...'
+                                  : 'Generate Module'}
                               </button>
                             </div>
                           </div>
@@ -2739,7 +2826,7 @@ export default function AddModule() {
                                         0
                                       }
                                     >
-                                      ← Previous
+                                      Previous
                                     </button>
 
                                     <span
@@ -2791,7 +2878,7 @@ export default function AddModule() {
                                           1
                                       }
                                     >
-                                      Next →
+                                      Next
                                     </button>
                                   </div>
                                 </div>
@@ -3151,11 +3238,12 @@ export default function AddModule() {
               styles.popupCancelBtn
             }
             type="button"
-            onClick={() =>
+            onClick={() => {
+              clearCourseBuilderDraft(id);
               navigate(
                 '/professor/courses'
-              )
-            }
+              );
+            }}
             disabled={
               isSaving ||
               Boolean(
@@ -3193,3 +3281,7 @@ export default function AddModule() {
     </section>
   );
 }
+
+
+
+

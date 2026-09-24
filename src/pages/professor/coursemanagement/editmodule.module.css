@@ -1755,3 +1755,273 @@
   font-size: 24px !important;
   line-height: 1.15;
 }
+
+/* =========================================
+   REFERENCE EDIT MODULE SKIN
+========================================= */
+
+.gridContainer,
+.gridContainer * {
+  font-family: Arial, Helvetica, sans-serif !important;
+  letter-spacing: 0 !important;
+}
+
+.gridContainer {
+  display: block;
+  min-height: 100vh;
+  background: #f4f4f4;
+}
+
+.sidebar,
+.headerContainer {
+  display: none !important;
+}
+
+.main {
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0 0 52px;
+  background: #f4f4f4;
+  color: #555;
+}
+
+.pageHeader {
+  padding: 10px 32px 12px;
+  border-bottom: 1px solid #d0d0d0;
+  background: #f3f3f3;
+}
+
+.pageHeader h1 {
+  margin: 0;
+  color: #666;
+  font-size: 26px;
+  font-weight: 500 !important;
+  line-height: 1.05;
+}
+
+.pageHeaderText {
+  margin: 4px 0 0;
+  color: #666;
+  font-size: 10px;
+}
+
+.formCard {
+  margin: 0;
+  padding: 12px 32px 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.popupInfoGrid {
+  max-width: 590px;
+  display: grid;
+  grid-template-columns: minmax(250px, 280px) minmax(250px, 280px);
+  gap: 32px;
+}
+
+.popupInfoGrid .popupField:nth-child(2),
+.formCard > .popupSection:nth-of-type(3) {
+  display: none;
+}
+
+.popupLabel {
+  margin-bottom: 8px;
+  color: #202020;
+  font-size: 11px;
+  font-weight: 400 !important;
+}
+
+.required {
+  color: #a3a3a3;
+  font-size: 9px;
+}
+
+.wordCounter {
+  display: none;
+}
+
+.popupInput,
+.popupSelect {
+  height: 27px;
+  min-height: 27px;
+  padding: 4px 10px;
+  border: 1px solid #c9c9c9;
+  border-radius: 12px;
+  background: #f8f8f8;
+  color: #303030;
+  font-size: 11px;
+  box-shadow: none;
+}
+
+.popupTextarea {
+  padding: 10px 12px;
+  border: 1px solid #c9c9c9;
+  border-radius: 10px;
+  background: #f8f8f8;
+  color: #303030;
+  font-size: 11px;
+  line-height: 1.35;
+  box-shadow: none;
+}
+
+.popupSmallBox {
+  min-height: 92px;
+  height: 92px;
+}
+
+.formCard {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.formCard > .popupSection:nth-of-type(4) {
+  order: -3;
+  max-width: none;
+  margin: -12px -32px 0;
+  padding: 8px 32px 12px;
+  border-bottom: 1px solid #d0d0d0;
+  background: #eeeeee;
+}
+
+.formCard > .popupSection:nth-of-type(4) .popupLabel {
+  margin: 0 0 3px;
+  color: #666;
+  font-size: 18px;
+}
+
+.formCard > .popupSection:nth-of-type(4)::after {
+  content: "Upload your learning material and PuffyBrain will organize the content into lesson pages automatically.";
+  display: block;
+  margin-top: -2px;
+  color: #444;
+  font-size: 10px;
+}
+
+.uploadRow {
+  display: block;
+  margin-top: 7px;
+}
+
+.customFileBtn {
+  width: 376px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed #8fa7ff;
+  border-radius: 8px;
+  background: #eef3ff;
+  color: #172238;
+  font-size: 11px;
+  box-shadow: none;
+}
+
+.fileName {
+  display: block;
+  margin: 5px 0 0;
+  color: #777;
+  font-size: 10px;
+}
+
+.uploadRow .popupAddBtn {
+  width: 115px;
+  margin-top: 7px;
+}
+
+.popupAddBtn,
+.popupSaveBtn {
+  min-width: 105px;
+  height: 29px;
+  min-height: 29px;
+  padding: 0 16px;
+  border: 0 !important;
+  border-radius: 9px;
+  background: #8d8d8d !important;
+  color: #fff !important;
+  box-shadow: none !important;
+  font-size: 12px;
+  font-weight: 400 !important;
+}
+
+.popupCancelBtn {
+  min-width: 96px;
+  height: 30px;
+  border-radius: 8px;
+  box-shadow: none !important;
+  font-size: 12px;
+}
+
+.formCard > .popupSection:nth-of-type(5),
+.formCard > .popupSection:nth-of-type(6) {
+  margin: 4px -32px 0;
+  padding: 14px 32px 22px;
+  border-top: 1px solid #d0d0d0;
+  background: #eeeeee;
+}
+
+.popupSectionRow {
+  align-items: center;
+}
+
+.popupSectionRow .popupLabel {
+  color: #666;
+  font-size: 25px;
+  font-weight: 500 !important;
+}
+
+.popupQuizCard,
+.popupEmptyQuiz {
+  max-width: 493px;
+  border: 1px solid #c8c8c8;
+  border-radius: 8px;
+  background: #f8f8f8;
+  box-shadow: none;
+}
+
+.popupQuizCard {
+  padding: 12px;
+}
+
+.popupQuizCardTitle {
+  color: #333;
+  font-size: 12px !important;
+  font-weight: 400 !important;
+}
+
+.popupRemoveBtn {
+  min-width: 66px;
+  height: 24px;
+  border: 1px solid #ff4f5e;
+  border-radius: 8px;
+  background: transparent;
+  color: #ff1f2f;
+  box-shadow: none;
+  font-size: 11px;
+}
+
+.popupLargeBox {
+  min-height: 150px;
+}
+
+.optionsGrid {
+  gap: 8px;
+}
+
+.popupActions {
+  max-width: 622px;
+  justify-content: flex-end;
+}
+
+@media (max-width: 760px) {
+  .popupInfoGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .customFileBtn {
+    width: 100%;
+  }
+}

@@ -30,6 +30,7 @@ import ProfessorLayout from '../pages/professor/ProfessorLayout';
 import ProfessorFeaturePage from '../pages/professor/ProfessorFeaturePage';
 import ModuleManagement from '../pages/professor/coursemanagement/modulemanagement';
 import AddModule from '../pages/professor/coursemanagement/AddModule';
+import CourseModuleEditor from '../pages/professor/coursemanagement/CourseModuleEditor';
 import ProfessorNotifications from '../pages/professor/ProfessorNotifications';
 import ProfessorProfile from '../pages/professor/ProfessorProfile';
 import ProfessorSetting from '../pages/professor/ProfessorSetting';
@@ -317,7 +318,9 @@ export default function AppRoutes() {
             <Route path="dashboard" element={<ProfessorHome />} />
             <Route path="courses" element={<ModuleManagement />} />
             <Route path="courses/new" element={<AddModule />} />
+            <Route path="courses/new/modules/:moduleId/edit" element={<CourseModuleEditor />} />
             <Route path="courses/edit/:id" element={<AddModule />} />
+            <Route path="courses/edit/:id/modules/:moduleId/edit" element={<CourseModuleEditor />} />
             <Route path="students" element={<AssessmentAnalysis />} />
             <Route path="assessment/:courseId" element={<AssessmentDetail />} />
             <Route path="notifications" element={<ProfessorNotifications />} />
@@ -445,4 +448,6 @@ export default function AppRoutes() {
     </Routes>
   );
 }
+
+
 

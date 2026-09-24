@@ -1351,6 +1351,7 @@ const updateEditExplanation = (index, value) => {
       <main className={styles.main}>
         <div className={styles.pageHeader}>
           <h1>Edit Module</h1>
+          <p className={styles.pageHeaderText}>Build the course using modules. Each module can contain lesson pages and its own quiz.</p>
         </div>
 
         <div className={styles.formCard}>
@@ -1418,11 +1419,11 @@ const updateEditExplanation = (index, value) => {
           </div>
 
           <div className={styles.popupSection}>
-            <label className={styles.popupLabel}>Upload Lesson File</label>
+            <label className={styles.popupLabel}>Generate Module from Material</label>
 
             <div className={styles.uploadRow}>
               <label className={styles.customFileBtn}>
-                Choose File
+                Upload File Here
                 <input
                   type="file"
                   accept=".pdf,.docx,.txt"
@@ -1441,7 +1442,7 @@ const updateEditExplanation = (index, value) => {
                 onClick={handleUploadAndExtract}
                 disabled={extractingFile || !uploadedFile}
               >
-                {extractingFile ? "Sorting..." : "Upload and Auto Sort"}
+                {extractingFile ? "Generating..." : "Generate Module"}
               </button>
             </div>
           </div>

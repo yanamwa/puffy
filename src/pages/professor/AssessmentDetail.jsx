@@ -6,6 +6,219 @@ import styles from './AssessmentAnalysis.module.css';
 
 const FALLBACK_RATIOS = [1, 0.83, 0.7, 0.5, 0.4];
 
+const BLOOM_LEVELS = {
+  remembering: {
+    level: 'Remembering',
+    category: 'LOTS',
+    task: 'Recalls facts or information',
+    reason: 'The question asks students to recall previously learned information.',
+  },
+  understanding: {
+    level: 'Understanding',
+    category: 'LOTS',
+    task: 'Explains or interprets information',
+    reason: 'The question asks students to explain, describe, or interpret the idea.',
+  },
+  applying: {
+    level: 'Applying',
+    category: 'LOTS',
+    task: 'Uses learned knowledge in a situation',
+    reason: 'The question asks students to use learned knowledge in a given situation.',
+  },
+  analyzing: {
+    level: 'Analyzing',
+    category: 'HOTS',
+    task: 'Compares, distinguishes, examines relationships',
+    reason: 'The question requires students to compare, distinguish, or examine relationships.',
+  },
+  evaluating: {
+    level: 'Evaluating',
+    category: 'HOTS',
+    task: 'Makes and justifies a judgment',
+    reason: 'The question asks students to make and justify a judgment.',
+  },
+  creating: {
+    level: 'Creating',
+    category: 'HOTS',
+    task: 'Designs or produces something new',
+    reason: 'The question asks students to design or produce something new.',
+  },
+};
+
+const BLOOM_RULES = [
+  {
+    key: 'creating',
+    terms: ['create', 'design', 'develop', 'produce', 'construct', 'compose', 'formulate', 'build'],
+  },
+  {
+    key: 'analyzing',
+    terms: [
+      'analyze',
+      'compare',
+      'contrast',
+      'distinguish',
+      'differentiate',
+      'examine',
+      'relationship',
+      'determine which',
+    ],
+  },
+  {
+    key: 'evaluating',
+    terms: ['evaluate', 'justify', 'defend', 'critique', 'recommend', 'judge', 'assess', 'prioritize', 'most appropriate', 'best'],
+  },
+  {
+    key: 'applying',
+    terms: ['apply', 'solve', 'calculate', 'implement', 'demonstrate', 'perform', 'execute', 'use the'],
+  },
+  {
+    key: 'understanding',
+    terms: ['explain', 'describe', 'summarize', 'interpret', 'classify', 'give an example', 'in your own words'],
+  },
+];
+
+const OPTION_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
+
+function getBloomDetail(value) {
+  if (!value) return null;
+
+  const normalized = String(value).toLowerCase().replace(/[^a-z]/g, '');
+  return Object.values(BLOOM_LEVELS).find(
+    (detail) =>
+      detail.level.toLowerCase() === normalized ||
+      normalized.includes(detail.level.toLowerCase())
+  );
+}
+
+function normalizeCognitiveCategory(value, fallback) {
+  const normalized = String(value || '').toLowerCase();
+
+  if (normalized.includes('hots') || normalized.includes('higher')) return 'HOTS';
+  if (normalized.includes('lots') || normalized.includes('lower')) return 'LOTS';
+
+  return fallback;
+}
+
+function inferCognitiveLevel(question) {
+  const providedLevel = getBloomDetail(question?.cognitiveLevel);
+  const source = String(question?.question || '').toLowerCase();
+  const inferredRule = BLOOM_RULES.find((rule) =>
+    rule.terms.some((term) => source.includes(term))
+  );
+  const detail =
+    providedLevel || BLOOM_LEVELS[inferredRule?.key] || BLOOM_LEVELS.remembering;
+
+  return {
+    ...detail,
+    category: normalizeCognitiveCategory(question?.cognitiveCategory, detail.category),
+    reason: question?.cognitiveReason || detail.reason,
+  };
+}
+
+function normalizeChoices(...values) {
+  for (const value of values) {
+    if (!value) continue;
+
+    const choices = Array.isArray(value)
+      ? value
+      : typeof value === 'string'
+        ? value
+            .split(/\r?\n|[,|]/g)
+            .map((item) => item.trim())
+            .filter(Boolean)
+        : [];
+
+    const normalized = choices
+      .map((choice) => String(choice || '').trim())
+      .filter(Boolean);
+
+    if (normalized.length > 0) return normalized;
+  }
+
+  return [];
+}
+
+function cleanChoiceText(value) {
+  return String(value || '')
+    .replace(/^[A-Z]\s*[.)-]\s*/i, '')
+    .trim();
+}
+
+function sameChoice(left, right) {
+  return cleanChoiceText(left).toLowerCase() === cleanChoiceText(right).toLowerCase();
+}
+
+function addUniqueChoice(choices, value) {
+  const cleaned = cleanChoiceText(value);
+
+  if (!cleaned || choices.some((choice) => sameChoice(choice, cleaned))) return;
+
+  choices.push(cleaned);
+}
+
+function getAnswerChoices(question) {
+  const choices = [];
+
+  if (Array.isArray(question?.options)) {
+    question.options.forEach((choice) => addUniqueChoice(choices, choice));
+  }
+
+  addUniqueChoice(choices, question?.answer);
+
+  if (choices.length === 0) choices.push('Correct response');
+  if (choices.length === 1 && Number(question?.incorrect || 0) > 0) {
+    choices.push('Other answers');
+  }
+
+  return choices.slice(0, OPTION_LETTERS.length);
+}
+
+function splitIncorrectCount(total, slots) {
+  if (slots <= 0) return [];
+
+  const weights = Array.from({ length: slots }, (_, index) => slots - index);
+  const weightTotal = weights.reduce((sum, weight) => sum + weight, 0);
+  let remaining = total;
+
+  return weights.map((weight, index) => {
+    if (index === weights.length - 1) return remaining;
+
+    const count = Math.min(remaining, Math.round((total * weight) / weightTotal));
+    remaining -= count;
+    return count;
+  });
+}
+
+function buildAnswerDistribution(question) {
+  const choices = getAnswerChoices(question);
+  const totalCorrect = Math.max(Math.round(Number(question?.totalCorrect || 0)), 0);
+  const incorrect = Math.max(Math.round(Number(question?.incorrect || 0)), 0);
+  const correctIndex = choices.findIndex((choice) => sameChoice(choice, question?.answer));
+  const resolvedCorrectIndex = correctIndex >= 0 ? correctIndex : 0;
+  const counts = choices.map(() => 0);
+  const incorrectIndexes = choices
+    .map((_, index) => index)
+    .filter((index) => index !== resolvedCorrectIndex);
+  const incorrectCounts = splitIncorrectCount(incorrect, incorrectIndexes.length);
+
+  counts[resolvedCorrectIndex] = totalCorrect;
+  incorrectIndexes.forEach((index, countIndex) => {
+    counts[index] = incorrectCounts[countIndex] || 0;
+  });
+
+  return choices.map((choice, index) => ({
+    label: `${OPTION_LETTERS[index]}. ${choice}`,
+    count: counts[index],
+    isCorrect: index === resolvedCorrectIndex,
+  }));
+}
+
+function getQuestionAnalysisTitle(question) {
+  const number = String(question?.label || '').replace(/^q/i, '').trim();
+
+  return number ? `Question ${number} Analysis` : 'Question Analysis';
+}
+
 function getStoredToken() {
   return (
     localStorage.getItem('puffy-token') ||
@@ -175,6 +388,34 @@ function buildRows(items, totals) {
       label: String(label).startsWith('Q') ? String(label) : `Q${label}`,
       question: item.question || item.prompt || item.title || `Assessment item ${index + 1}`,
       answer: item.answer || item.correctAnswer || item.correct_answer || 'Answer not available',
+      options: normalizeChoices(
+        item.options,
+        item.choices,
+        item.answers,
+        item.wrong_options,
+        item.wrongOptions
+      ),
+      cognitiveLevel:
+        item.cognitiveLevel ||
+        item.cognitive_level ||
+        item.bloomLevel ||
+        item.bloom_level ||
+        item.taxonomyLevel ||
+        item.taxonomy_level,
+      cognitiveCategory:
+        item.cognitiveCategory ||
+        item.cognitive_category ||
+        item.thinkingCategory ||
+        item.thinking_category ||
+        item.hotsLots ||
+        item.hots_lots,
+      cognitiveReason:
+        item.cognitiveReason ||
+        item.cognitive_reason ||
+        item.bloomReason ||
+        item.bloom_reason ||
+        item.classificationReason ||
+        item.classification_reason,
       totalCorrect,
       femaleCorrect,
       maleCorrect,
@@ -270,6 +511,24 @@ export default function AssessmentDetail() {
   const highest = readNumber(activeCourse?.highestScore) ?? totals.quizItems;
   const lowest = readNumber(activeCourse?.lowestScore) ?? Math.max(Math.floor(totals.quizItems / 5), 1);
   const passing = readNumber(activeCourse?.passScore) ?? Math.max(Math.ceil(totals.quizItems * 0.6), 1);
+  const selectedQuestionDetails = useMemo(() => {
+    if (!selectedQuestion) return null;
+
+    const totalResponses = Math.max(
+      totals.totalStudents,
+      Math.round(
+        Number(selectedQuestion.totalCorrect || 0) +
+          Number(selectedQuestion.incorrect || 0)
+      )
+    );
+
+    return {
+      answerDistribution: buildAnswerDistribution(selectedQuestion),
+      cognitiveLevel: inferCognitiveLevel(selectedQuestion),
+      title: getQuestionAnalysisTitle(selectedQuestion),
+      totalResponses,
+    };
+  }, [selectedQuestion, totals.totalStudents]);
 
   return (
     <section className={styles.page}>
@@ -355,18 +614,111 @@ export default function AssessmentDetail() {
         </section>
       ) : null}
 
-      {selectedQuestion && (
+      {selectedQuestion && selectedQuestionDetails && (
         <div className={styles.modalOverlay} onClick={() => setSelectedQuestion(null)}>
           <div className={styles.modal} onClick={(event) => event.stopPropagation()}>
             <header>
-              <h2>{selectedQuestion.label} Details</h2>
-              <button type="button" onClick={() => setSelectedQuestion(null)}>x</button>
+              <h2>{selectedQuestionDetails.title}</h2>
+              <button
+                type="button"
+                onClick={() => setSelectedQuestion(null)}
+                aria-label="Close question analysis"
+              >
+                x
+              </button>
             </header>
+
             <div className={styles.modalBody}>
-              <span>Question</span>
-              <p>{selectedQuestion.question}</p>
-              <span>Correct Answer</span>
-              <p>{selectedQuestion.answer}</p>
+              <p className={styles.analysisQuestion}>{selectedQuestion.question}</p>
+
+              <div className={styles.modalSectionTitle}>Question Details</div>
+
+              <div className={styles.cognitiveRows}>
+                <div>
+                  <span>Suggested Cognitive Level</span>
+                  <strong
+                    className={`${styles.cognitiveBadge} ${
+                      selectedQuestionDetails.cognitiveLevel.category === 'HOTS'
+                        ? styles.hotsBadge
+                        : ''
+                    }`}
+                  >
+                    {selectedQuestionDetails.cognitiveLevel.category} -{' '}
+                    {selectedQuestionDetails.cognitiveLevel.level}
+                  </strong>
+                </div>
+
+                <div>
+                  <span>What the student does</span>
+                  <p>{selectedQuestionDetails.cognitiveLevel.task}</p>
+                </div>
+
+                <div>
+                  <span>Why this classification?</span>
+                  <p>{selectedQuestionDetails.cognitiveLevel.reason}</p>
+                </div>
+              </div>
+
+              <p className={styles.cognitiveNote}>
+                Cognitive Level describes the thinking skill required by the question,
+                not how students performed on it.
+              </p>
+
+              <div className={styles.modalSectionTitle}>Response Analysis</div>
+
+              <div className={styles.responseGrid}>
+                <div><span>Total Response</span><strong>{selectedQuestionDetails.totalResponses}</strong></div>
+                <div><span>Female</span><strong>{selectedQuestion.femaleCorrect}/{totals.femaleStudents} correct</strong></div>
+                <div><span>Correct</span><strong>{selectedQuestion.totalCorrect}</strong></div>
+                <div><span>Male</span><strong>{selectedQuestion.maleCorrect}/{totals.maleStudents} correct</strong></div>
+                <div><span>Incorrect</span><strong>{selectedQuestion.incorrect}</strong></div>
+              </div>
+
+              <div className={styles.modalSectionTitle}>Answer Distribution</div>
+
+              <div className={styles.answerDistribution}>
+                {selectedQuestionDetails.answerDistribution.map((answer) => (
+                  <div className={styles.answerRow} key={answer.label}>
+                    <span>{answer.label}</span>
+                    <div className={styles.answerTrack}>
+                      <div
+                        className={answer.isCorrect ? styles.correctBar : ''}
+                        style={{
+                          width: `${Math.min(
+                            (answer.count /
+                              Math.max(selectedQuestionDetails.totalResponses, 1)) *
+                              100,
+                            100
+                          )}%`,
+                        }}
+                      />
+                    </div>
+                    <strong>{answer.count}</strong>
+                  </div>
+                ))}
+              </div>
+
+              <div className={styles.modalTotalRow}>
+                <span>Total</span>
+                <strong>{selectedQuestionDetails.totalResponses}</strong>
+              </div>
+
+              <p className={styles.modalFootnote}>
+                {selectedQuestion.totalCorrect} of {selectedQuestionDetails.totalResponses}{' '}
+                students answered this question correctly.
+              </p>
+
+              <details className={styles.bloomReference}>
+                <summary>Bloom&apos;s level guide</summary>
+                <div>
+                  {Object.values(BLOOM_LEVELS).map((level) => (
+                    <p key={level.level}>
+                      <strong>{level.level} ({level.category})</strong>
+                      <span>{level.task}</span>
+                    </p>
+                  ))}
+                </div>
+              </details>
             </div>
           </div>
         </div>

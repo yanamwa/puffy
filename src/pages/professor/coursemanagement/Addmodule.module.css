@@ -1,4 +1,4 @@
-.addModulePage {
+﻿.addModulePage {
   width: 100%;
 }
 
@@ -2045,5 +2045,899 @@
     grid-column: 1 / -1;
     grid-row: 1;
     justify-self: center;
+  }
+}
+
+/* =========================================
+   REFERENCE COURSE BUILDER SKIN
+========================================= */
+
+.addModulePage,
+.addModulePage * {
+  font-family: Arial, Helvetica, sans-serif !important;
+  letter-spacing: 0 !important;
+}
+
+.addModulePage {
+  min-height: 100vh;
+  padding: 0 0 52px;
+  background: #f4f4f4;
+  color: #555;
+}
+
+.pageHeader {
+  padding: 13px 38px 12px;
+  border-bottom: 1px solid #d0d0d0;
+  background: #f3f3f3;
+}
+
+.pageHeader h1 {
+  margin: 0;
+  color: #666;
+  font-size: 26px;
+  font-weight: 600 !important;
+  line-height: 1.05;
+}
+
+.pageHeaderText {
+  margin: 4px 0 0;
+  color: #666;
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+.formCard {
+  max-width: none;
+  margin: 0;
+  padding: 26px 38px 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.popupInfoGrid {
+  display: grid;
+  grid-template-columns: minmax(260px, 405px) minmax(160px, 204px);
+  gap: 54px;
+  align-items: start;
+}
+
+.popupInfoGrid .popupField:nth-child(n + 3) {
+  display: none;
+}
+
+.popupLabel {
+  margin-bottom: 8px;
+  color: #202020;
+  font-size: 12px;
+  font-weight: 400 !important;
+}
+
+.required {
+  margin-left: 4px;
+  color: #a3a3a3;
+  font-size: 10px;
+}
+
+.wordCounter,
+.accessHint {
+  display: none;
+}
+
+.popupInput,
+.popupSelect {
+  height: 27px;
+  min-height: 27px;
+  padding: 4px 10px;
+  border: 1px solid #c9c9c9;
+  border-radius: 12px;
+  background: #f8f8f8;
+  color: #303030;
+  font-size: 11px;
+  box-shadow: none;
+}
+
+.popupTextarea {
+  padding: 10px 12px;
+  border: 1px solid #c9c9c9;
+  border-radius: 10px;
+  background: #f8f8f8;
+  color: #303030;
+  font-size: 11px;
+  line-height: 1.35;
+  box-shadow: none;
+}
+
+.popupInput:focus,
+.popupSelect:focus,
+.popupTextarea:focus {
+  border-color: #9a9a9a;
+  box-shadow: none;
+}
+
+.formCard > .popupSection {
+  max-width: 665px;
+  margin-top: 18px;
+}
+
+.formCard > .popupSection:nth-of-type(3) {
+  display: none;
+}
+
+.popupSmallBox {
+  min-height: 84px;
+  height: 84px;
+}
+
+.moduleBuilderSection {
+  margin: 13px -38px 0;
+  padding: 0 38px 34px;
+  border-top: 1px solid #d0d0d0;
+}
+
+.moduleBuilderHeader {
+  margin: 0 -38px 24px;
+  padding: 13px 108px 13px 38px;
+  border-bottom: 1px solid #d0d0d0;
+  background: #eeeeee;
+}
+
+.moduleBuilderHeader h2 {
+  color: #666;
+  font-size: 26px;
+  font-weight: 500 !important;
+}
+
+.moduleBuilderHeader p {
+  margin-top: 6px;
+  color: #666;
+  font-size: 12px;
+}
+
+.popupAddBtn {
+  min-width: 105px;
+  height: 29px;
+  min-height: 29px;
+  padding: 0 16px;
+  border: 0 !important;
+  border-radius: 9px;
+  background: #8d8d8d !important;
+  color: #fff !important;
+  box-shadow: none !important;
+  font-size: 12px;
+  font-weight: 400 !important;
+}
+
+.moduleCardGrid {
+  max-width: 668px;
+  gap: 24px;
+}
+
+.moduleCard {
+  overflow: visible;
+  border: 1px solid #c8c8c8;
+  border-radius: 10px;
+  background: #f7f7f7;
+  box-shadow: none;
+}
+
+.moduleCardExpanded {
+  max-width: none;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.moduleCardHeader {
+  min-height: 82px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  padding: 12px 16px;
+  background: #f7f7f7;
+}
+
+.moduleCardExpanded .moduleCardHeader {
+  max-width: 668px;
+  margin-bottom: 18px;
+  border: 1px solid #c8c8c8;
+  border-radius: 10px;
+}
+
+.moduleNumber {
+  display: none;
+}
+
+.moduleCardHeading > span {
+  margin: 0 0 5px;
+  color: #333;
+  font-size: 13px;
+  font-weight: 400 !important;
+  text-transform: none;
+}
+
+.moduleCardHeading h3 {
+  color: #333;
+  font-size: 18px;
+  font-weight: 500 !important;
+  line-height: 1.18;
+}
+
+.moduleCardHeading p {
+  color: #858585;
+  font-size: 13px;
+}
+
+.moduleExpandBtn,
+.moduleDeleteBtn {
+  min-width: 85px;
+  height: 26px;
+  border-radius: 9px;
+  box-shadow: none;
+  font-size: 12px;
+  font-weight: 400 !important;
+}
+
+.moduleExpandBtn {
+  background: #8d8d8d;
+  color: #fff;
+}
+
+.moduleDeleteBtn {
+  border: 1px solid #ff4f5e;
+  background: transparent;
+  color: #ff1f2f;
+}
+
+.moduleCardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 0;
+  border-top: 0;
+  background: transparent;
+}
+
+.moduleCardBody > .popupSection:nth-of-type(3) {
+  order: -3;
+  max-width: none;
+  margin: 0 -38px;
+  padding: 8px 38px 12px;
+  border-top: 1px solid #d0d0d0;
+  border-bottom: 1px solid #d0d0d0;
+  background: #eeeeee;
+}
+
+.moduleCardBody > .popupSection:nth-of-type(3) .popupLabel {
+  margin: 0 0 3px;
+  color: #666;
+  font-size: 18px;
+}
+
+.moduleCardBody > .popupSection:nth-of-type(3)::after {
+  content: "Upload your learning material and PuffyBrain will organize the content into lesson pages automatically.";
+  display: block;
+  margin-top: -2px;
+  color: #444;
+  font-size: 10px;
+}
+
+.uploadRow {
+  display: block;
+  margin-top: 7px;
+}
+
+.customFileBtn {
+  width: 376px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed #8fa7ff;
+  border-radius: 8px;
+  background: #eef3ff;
+  color: #172238;
+  font-size: 11px;
+  box-shadow: none;
+}
+
+.fileName {
+  display: block;
+  margin: 5px 0 0;
+  color: #777;
+  font-size: 10px;
+}
+
+.uploadRow .popupAddBtn {
+  width: 115px;
+  margin-top: 7px;
+}
+
+.moduleInfoGrid {
+  max-width: 590px;
+  display: grid;
+  grid-template-columns: minmax(250px, 280px) minmax(250px, 280px);
+  gap: 32px;
+}
+
+.moduleInfoGrid .popupSmallBox {
+  min-height: 27px;
+  height: 27px;
+  overflow: hidden;
+}
+
+.moduleCardBody > .popupSection:nth-of-type(2) {
+  max-width: 590px;
+}
+
+.moduleCardBody > .popupSection:nth-of-type(2) .popupSmallBox {
+  min-height: 92px;
+  height: 92px;
+}
+
+.moduleInnerSection {
+  margin: 4px -38px 0;
+  padding: 14px 32px 22px;
+  border: 0;
+  border-top: 1px solid #d0d0d0;
+  border-radius: 0;
+  background: #eeeeee;
+}
+
+.moduleInnerSection h4 {
+  color: #666;
+  font-size: 25px;
+  font-weight: 500 !important;
+}
+
+.moduleInnerSection .popupSectionRow {
+  align-items: center;
+}
+
+.moduleInnerSection .popupSectionRow p {
+  color: #666;
+  font-size: 11px;
+}
+
+.moduleCardBody > .moduleInnerSection:nth-of-type(4) {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 493px);
+  column-gap: 10px;
+}
+
+.moduleCardBody > .moduleInnerSection:nth-of-type(4) > .popupSectionRow {
+  grid-column: 1 / -1;
+}
+
+.lessonPageTabs {
+  grid-column: 1;
+  grid-row: 2;
+  width: 92px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 20px 0 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid #c8c8c8;
+  border-radius: 8px;
+  background: #f8f8f8;
+}
+
+.lessonPageTab {
+  width: 100%;
+  height: 29px;
+  flex: 0 0 29px;
+  border: 0;
+  border-bottom: 1px solid #d8d8d8;
+  border-radius: 0;
+  background: #f8f8f8;
+  color: #555;
+  font-size: 12px;
+}
+
+.lessonPageTab:last-child {
+  border-bottom: 0;
+}
+
+.lessonPageTabActive {
+  background: #eeeeee;
+  color: #333;
+}
+
+.moduleCardBody > .moduleInnerSection:nth-of-type(4) > .popupQuizCard,
+.moduleCardBody > .moduleInnerSection:nth-of-type(4) > .popupEmptyQuiz {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.popupQuizCard,
+.popupEmptyQuiz {
+  border: 1px solid #c8c8c8;
+  border-radius: 8px;
+  background: #f8f8f8;
+  box-shadow: none;
+}
+
+.popupQuizCard {
+  padding: 12px;
+}
+
+.popupQuizCardTop {
+  margin-bottom: 9px;
+}
+
+.popupQuizCardTitle {
+  color: #333;
+  font-size: 12px !important;
+  font-weight: 400 !important;
+}
+
+.popupRemoveBtn {
+  min-width: 66px;
+  height: 24px;
+  border: 1px solid #ff4f5e;
+  border-radius: 8px;
+  background: transparent;
+  color: #ff1f2f;
+  box-shadow: none;
+  font-size: 11px;
+}
+
+.popupLargeBox {
+  min-height: 150px;
+}
+
+.lessonPageNavigation {
+  margin-top: 12px;
+}
+
+.lessonNavigationBtn {
+  min-width: 84px;
+  min-height: 25px;
+  border-radius: 8px;
+  background: #8d8d8d;
+  color: #fff;
+  font-size: 11px;
+}
+
+.lessonPageIndicator {
+  color: #aaa;
+  font-size: 11px;
+}
+
+.optionsGrid {
+  gap: 8px;
+}
+
+.popupActions {
+  max-width: 668px;
+  margin-top: 28px;
+  justify-content: flex-end;
+}
+
+.popupCancelBtn,
+.popupSaveBtn {
+  min-width: 96px;
+  height: 30px;
+  border-radius: 8px;
+  box-shadow: none !important;
+  font-size: 12px;
+}
+
+.popupSaveBtn {
+  background: #8d8d8d !important;
+}
+
+@media (max-width: 760px) {
+  .formCard {
+    padding-inline: 20px;
+  }
+
+  .popupInfoGrid,
+  .moduleInfoGrid,
+  .moduleCardBody > .moduleInnerSection:nth-of-type(4) {
+    grid-template-columns: 1fr;
+  }
+
+  .moduleBuilderSection,
+  .moduleBuilderHeader,
+  .moduleCardBody > .popupSection:nth-of-type(3),
+  .moduleInnerSection {
+    margin-left: -20px;
+    margin-right: -20px;
+  }
+
+  .lessonPageTabs,
+  .moduleCardBody > .moduleInnerSection:nth-of-type(4) > .popupQuizCard,
+  .moduleCardBody > .moduleInnerSection:nth-of-type(4) > .popupEmptyQuiz {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .lessonPageTabs {
+    width: 100%;
+    flex-direction: row;
+  }
+
+  .customFileBtn {
+    width: 100%;
+  }
+}
+/* =========================================
+   REFERENCE SEPARATE MODULE EDITOR SKIN
+========================================= */
+
+.courseModuleEditorPage {
+  background: #f4f4f4;
+}
+
+.moduleEditorLoading {
+  min-height: 360px;
+  display: grid;
+  place-items: center;
+}
+
+.moduleEditorForm {
+  padding: 0 0 54px;
+}
+
+.moduleMaterialBand {
+  padding: 8px 33px 12px;
+  border-bottom: 1px solid #d0d0d0;
+  background: #eeeeee;
+}
+
+.moduleMaterialBand h2 {
+  margin: 0;
+  color: #666;
+  font-size: 18px;
+  font-weight: 500 !important;
+  line-height: 1.1;
+}
+
+.moduleMaterialBand p {
+  max-width: 620px;
+  margin: 3px 0 7px;
+  color: #444;
+  font-size: 10px;
+}
+
+.moduleMaterialBand .customFileBtn {
+  width: 376px;
+}
+
+.moduleMaterialBand .popupAddBtn {
+  display: block;
+  width: 115px;
+  margin-top: 7px;
+}
+
+.moduleEditorDetails {
+  max-width: 590px;
+  display: grid;
+  grid-template-columns: minmax(250px, 280px) minmax(250px, 280px);
+  gap: 16px 32px;
+  padding: 10px 33px 22px;
+}
+
+.moduleEditorDetails .popupInput {
+  width: 100%;
+}
+
+.moduleEditorObjectives {
+  grid-column: 1 / -1;
+}
+
+.moduleEditorObjectives .popupSmallBox {
+  width: 100%;
+  min-height: 92px;
+  height: 92px;
+}
+
+.moduleEditorBand {
+  padding: 14px 32px 22px;
+  border-top: 1px solid #d0d0d0;
+  background: #eeeeee;
+}
+
+.moduleEditorBand + .moduleEditorBand {
+  margin-top: 0;
+}
+
+.moduleEditorBandHeader {
+  max-width: 590px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 20px;
+}
+
+.moduleEditorBandHeader h2 {
+  margin: 0;
+  color: #666;
+  font-size: 25px;
+  font-weight: 500 !important;
+  line-height: 1.1;
+}
+
+.moduleEditorBandHeader p {
+  margin: 3px 0 0;
+  color: #666;
+  font-size: 11px;
+}
+
+.moduleEditorWorkspace {
+  max-width: 590px;
+  display: grid;
+  grid-template-columns: 92px minmax(0, 493px);
+  gap: 10px;
+}
+
+.moduleEditorWorkspace .lessonPageTabs {
+  grid-column: auto;
+  grid-row: auto;
+  margin: 0;
+}
+
+.moduleEditorWorkspace .lessonPageTab {
+  height: 30px;
+  min-height: 30px;
+  padding: 0 8px;
+}
+
+.moduleEditorEmptyTab {
+  min-height: 30px;
+  display: grid;
+  place-items: center;
+  color: #777;
+  font-size: 11px;
+}
+
+.lessonContentHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.uploadMediaBtn {
+  min-width: 100px;
+  height: 24px;
+  border: 1px dashed #8fa7ff;
+  border-radius: 8px;
+  background: #eef3ff;
+  color: #172238;
+  font-size: 11px;
+}
+
+.moduleEditorWorkspace .popupLargeBox {
+  width: 100%;
+  min-height: 152px;
+  margin-top: 4px;
+}
+
+.moduleEditorWorkspace .popupInput,
+.moduleEditorWorkspace .popupSelect,
+.moduleEditorWorkspace .popupTextarea {
+  width: 100%;
+}
+
+.moduleEditorWorkspace .optionsGrid {
+  margin-top: 10px;
+}
+
+.moduleEditorWorkspace .popupAnswerBox {
+  margin-top: 10px;
+  min-height: 72px;
+}
+
+.moduleEditorActions {
+  max-width: 590px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 18px 32px 0;
+}
+
+@media (max-width: 760px) {
+  .moduleMaterialBand,
+  .moduleEditorDetails,
+  .moduleEditorBand,
+  .moduleEditorActions {
+    padding-inline: 20px;
+  }
+
+  .moduleMaterialBand .customFileBtn,
+  .moduleEditorDetails,
+  .moduleEditorBandHeader,
+  .moduleEditorWorkspace,
+  .moduleEditorActions {
+    max-width: none;
+    width: 100%;
+  }
+
+  .moduleEditorDetails,
+  .moduleEditorWorkspace {
+    grid-template-columns: 1fr;
+  }
+
+  .moduleEditorWorkspace .lessonPageTabs {
+    width: 100%;
+    flex-direction: row;
+  }
+
+  .moduleEditorBandHeader,
+  .lessonContentHeading,
+  .moduleEditorActions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
+
+/* =========================================
+   WIDER BORDERLESS COURSE BUILDER
+========================================= */
+
+.addModulePage:not(.courseModuleEditorPage) .pageHeader {
+  padding: 20px clamp(32px, 5vw, 88px) 16px;
+  border-bottom: 0;
+  background: #f4f4f4;
+}
+
+.addModulePage:not(.courseModuleEditorPage) .pageHeader h1 {
+  font-size: 30px;
+}
+
+.addModulePage:not(.courseModuleEditorPage) .pageHeaderText {
+  font-size: 13px;
+}
+
+.addModulePage:not(.courseModuleEditorPage) .formCard {
+  padding: 34px clamp(32px, 5vw, 88px) 0;
+}
+
+.addModulePage:not(.courseModuleEditorPage) .popupInfoGrid {
+  max-width: 920px;
+  grid-template-columns: minmax(360px, 520px) minmax(220px, 300px);
+  gap: 56px;
+}
+
+.addModulePage:not(.courseModuleEditorPage) .formCard > .popupSection {
+  max-width: 920px;
+  margin-top: 26px;
+}
+
+.addModulePage:not(.courseModuleEditorPage) .popupInput,
+.addModulePage:not(.courseModuleEditorPage) .popupSelect {
+  height: 34px;
+  min-height: 34px;
+  padding-inline: 14px;
+  font-size: 14px;
+}
+
+.addModulePage:not(.courseModuleEditorPage) .popupTextarea {
+  font-size: 14px;
+}
+
+.addModulePage:not(.courseModuleEditorPage) .popupSmallBox {
+  min-height: 110px;
+  height: 110px;
+}
+
+.addModulePage:not(.courseModuleEditorPage) .moduleBuilderSection {
+  margin: 32px calc(clamp(32px, 5vw, 88px) * -1) 0;
+  padding: 0 clamp(32px, 5vw, 88px) 54px;
+  border-top: 0;
+}
+
+.addModulePage:not(.courseModuleEditorPage) .moduleBuilderHeader {
+  margin: 0 calc(clamp(32px, 5vw, 88px) * -1) 28px;
+  padding: 24px clamp(32px, 5vw, 88px) 20px;
+  border-bottom: 0;
+  background: #eeeeee;
+}
+
+.addModulePage:not(.courseModuleEditorPage) .moduleBuilderHeader h2 {
+  font-size: 30px;
+}
+
+.addModulePage:not(.courseModuleEditorPage) .moduleBuilderHeader p {
+  font-size: 14px;
+}
+
+.addModulePage:not(.courseModuleEditorPage) .moduleCardGrid {
+  width: 100%;
+  max-width: none;
+  gap: 18px;
+}
+
+.addModulePage:not(.courseModuleEditorPage) .moduleCard {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.addModulePage:not(.courseModuleEditorPage) .moduleCardHeader {
+  min-height: 104px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: 18px 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.addModulePage:not(.courseModuleEditorPage) .moduleCardHeading > span {
+  font-size: 14px;
+}
+
+.addModulePage:not(.courseModuleEditorPage) .moduleCardHeading h3 {
+  font-size: 22px;
+}
+
+.addModulePage:not(.courseModuleEditorPage) .moduleCardHeading p {
+  font-size: 15px;
+}
+
+.addModulePage:not(.courseModuleEditorPage) .moduleCardHeaderActions {
+  gap: 14px;
+}
+
+.addModulePage:not(.courseModuleEditorPage) .moduleExpandBtn,
+.addModulePage:not(.courseModuleEditorPage) .moduleDeleteBtn {
+  min-width: 100px;
+  height: 32px;
+  font-size: 14px;
+}
+
+.addModulePage:not(.courseModuleEditorPage) .popupAddBtn {
+  height: 34px;
+  min-height: 34px;
+  min-width: 128px;
+  font-size: 14px;
+}
+
+.addModulePage:not(.courseModuleEditorPage) .popupActions {
+  max-width: none;
+  justify-content: center;
+  margin-top: 36px;
+}
+
+.addModulePage:not(.courseModuleEditorPage) .popupCancelBtn,
+.addModulePage:not(.courseModuleEditorPage) .popupSaveBtn {
+  min-width: 116px;
+  height: 34px;
+  font-size: 14px;
+}
+
+@media (max-width: 760px) {
+  .addModulePage:not(.courseModuleEditorPage) .pageHeader,
+  .addModulePage:not(.courseModuleEditorPage) .formCard {
+    padding-inline: 20px;
+  }
+
+  .addModulePage:not(.courseModuleEditorPage) .popupInfoGrid {
+    grid-template-columns: 1fr;
+    max-width: none;
+  }
+
+  .addModulePage:not(.courseModuleEditorPage) .moduleBuilderSection,
+  .addModulePage:not(.courseModuleEditorPage) .moduleBuilderHeader {
+    margin-left: -20px;
+    margin-right: -20px;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .addModulePage:not(.courseModuleEditorPage) .moduleCardHeader {
+    grid-template-columns: 1fr;
+  }
+
+  .addModulePage:not(.courseModuleEditorPage) .moduleCardHeaderActions {
+    justify-content: flex-start;
   }
 }
