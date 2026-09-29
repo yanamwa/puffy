@@ -21,6 +21,23 @@ import {
 } from "./courseContent.js";
 
 
+const cleanObjective = (value) => {
+  return String(value || "")
+    .replace(/^[-•]\s*/, "")
+    .replace(/^\d+[.)]\s*/, "")
+    .replace(
+      /^Upon completing this module,\s*you will be able to:\s*-?\s*/i,
+      ""
+    )
+    .trim();
+};
+
+
+const hasObjectiveText = (value) => {
+  return Boolean(value) && !/^\d+[.)]?$/.test(value);
+};
+
+
 const splitReadableText = (value) => {
   const text = String(value || "").trim();
 
@@ -32,7 +49,9 @@ const splitReadableText = (value) => {
     .filter(Boolean);
 
   if (lines.length > 1) {
-    return lines;
+    return lines
+      .map(cleanObjective)
+      .filter(hasObjectiveText);
   }
 
   return (
@@ -40,17 +59,6 @@ const splitReadableText = (value) => {
       .match(/[^.!?]+[.!?]+|[^.!?]+$/g)
       ?.map((item) => item.trim()) || [text]
   );
-};
-
-
-const cleanObjective = (value) => {
-  return String(value || "")
-    .replace(/^[-•]\s*/, "")
-    .replace(
-      /^Upon completing this module,\s*you will be able to:\s*-?\s*/i,
-      ""
-    )
-    .trim();
 };
 
 
@@ -169,7 +177,7 @@ function Introduction() {
 
       .map(cleanObjective)
 
-      .filter(Boolean);
+      .filter(hasObjectiveText);
 
   }, [learningObjectives]);
 

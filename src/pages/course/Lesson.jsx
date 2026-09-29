@@ -568,7 +568,7 @@ function Lesson() {
               ></div>
             </div>
 
-            <p className={styles.progressText}>{progressPercent}% Complete</p>
+            <p className={styles.progressText}>{progressPercent}% complete</p>
           </div>
 
           <div className={styles.lessonText}>
