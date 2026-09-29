@@ -208,8 +208,15 @@
   box-sizing: border-box;
 }
 
+.detailTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
 .detailTitle h2 {
-  margin: 0;
+  margin: 4px 0 0;
   color: #606060;
   font-size: 24px;
   font-weight: 500;
@@ -219,6 +226,78 @@
   margin: 5px 0 0;
   color: #747474;
   font-size: 13px;
+}
+
+.detailTitle strong {
+  display: block;
+  margin-top: 10px;
+  color: #2f3945;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.detailEyebrow {
+  display: block;
+  color: #4e5a66;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.viewSwitch {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #4f6174;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.viewSwitch > div {
+  display: inline-flex;
+  overflow: hidden;
+  border: 1px solid #b8c4d1;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.viewSwitch button {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 13px;
+  border: 0;
+  border-right: 1px solid #d6dce3;
+  background: #ffffff;
+  color: #4f6174;
+  cursor: pointer;
+  font: inherit;
+}
+
+.viewSwitch button:last-child {
+  border-right: 0;
+}
+
+.viewSwitch svg {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+}
+
+.viewSwitch .activeViewButton {
+  background: #7fa8d6;
+  color: #ffffff;
+}
+
+.overallHeading {
+  margin-top: 24px;
+  color: #3f4b57;
+  font-size: 18px;
+  font-weight: 600;
 }
 
 .metricGrid {
@@ -250,6 +329,552 @@
   color: #222222;
   font-size: 24px;
   font-weight: 500;
+}
+
+.graphicalView,
+.tableView {
+  display: grid;
+  gap: 26px;
+}
+
+.analysisSection {
+  display: grid;
+  gap: 22px;
+}
+
+.analysisSectionTitle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  color: #394552;
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.analysisSectionTitle::before,
+.analysisSectionTitle::after {
+  content: "";
+  height: 1px;
+  flex: 1 1 0;
+  background: #aeb8c4;
+}
+
+.performanceSection h3,
+.chartSection h3,
+.passFailSection h3,
+.questionResponses h3,
+.tableSection h3 {
+  margin: 0 0 14px;
+  color: #394552;
+  font-size: 17px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.performanceGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(155px, 1fr));
+  gap: 16px;
+}
+
+.performanceCard {
+  min-height: 86px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid #cfd6de;
+  border-radius: 6px;
+  background: #ffffff;
+  text-align: center;
+}
+
+.performanceCard span {
+  color: #3f4750;
+  font-size: 13px;
+}
+
+.performanceCard strong {
+  color: #111827;
+  font-size: 21px;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+.performanceCard em {
+  color: #637083;
+  font-size: 13px;
+  font-style: normal;
+}
+
+.chartSection,
+.passFailSection,
+.tableSection {
+  padding-top: 4px;
+}
+
+.chartTitle {
+  margin: 6px 0 0;
+  color: #394552;
+  font-size: 16px;
+  font-weight: 700;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.scoreChart {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  grid-template-rows: 220px auto auto;
+  gap: 10px 14px;
+  align-items: stretch;
+  width: min(100%, 840px);
+  max-width: 840px;
+  margin: 0 auto;
+}
+
+.chartYAxis {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #53616f;
+  font-size: 12px;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.chartBars {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  min-width: 0;
+  padding: 18px 18px 0;
+  border-left: 1px solid #b9c3ce;
+  border-bottom: 1px solid #b9c3ce;
+  background: linear-gradient(to top, #eef2f6 1px, transparent 1px);
+  background-size: 100% 44px;
+}
+
+.scoreBucket {
+  min-width: 34px;
+  flex: 1 1 34px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.scoreBucket span {
+  color: #475569;
+  font-size: 12px;
+}
+
+.scoreBucket div {
+  width: min(100%, 34px);
+  min-height: 8px;
+  border-radius: 5px 5px 0 0;
+  background: #7fa8d6;
+}
+
+.scoreBucket strong {
+  min-height: 20px;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.chartXAxis {
+  grid-column: 2;
+  color: #53616f;
+  font-size: 12px;
+  text-align: center;
+}
+
+.passScoreNote {
+  grid-column: 2;
+  display: flex;
+  justify-content: center;
+  color: #53616f;
+  font-size: 12px;
+}
+
+.passScoreNote span::before {
+  content: "\2191";
+  display: block;
+  margin-bottom: 2px;
+  color: #4f6174;
+  font-size: 16px;
+  line-height: 1;
+  text-align: center;
+}
+
+.emptyChart {
+  max-width: 840px;
+  padding: 20px;
+  border: 1px dashed #b8c4d1;
+  border-radius: 6px;
+  background: #f8fafc;
+  color: #657384;
+  font-size: 13px;
+  text-align: center;
+}
+
+.passFailBars {
+  display: grid;
+  gap: 10px;
+  max-width: 760px;
+  padding: 15px;
+  border: 1px solid #cfd6de;
+  border-radius: 6px;
+  background: #ffffff;
+}
+
+.passFailRow {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr) 112px;
+  align-items: center;
+  gap: 12px;
+  color: #374151;
+  font-size: 13px;
+}
+
+.passFailRow > div {
+  height: 19px;
+  overflow: hidden;
+  border-radius: 5px;
+  background: #edf1f5;
+}
+
+.passFailRow i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+}
+
+.passBar {
+  background: #7fa8d6;
+}
+
+.failBar {
+  background: #c9ced6;
+}
+
+.passFailRow strong {
+  color: #253241;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: right;
+}
+
+.pieGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(230px, 1fr));
+  gap: 24px;
+  width: min(100%, 820px);
+  max-width: 820px;
+  margin: 0 auto;
+}
+
+.pieCard {
+  display: grid;
+  justify-items: center;
+  gap: 13px;
+  padding: 18px;
+  border: 1px solid #cfd6de;
+  border-radius: 6px;
+  background: #ffffff;
+}
+
+.pieCard h3 {
+  margin: 0;
+  color: #394552;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.pieGraphic {
+  width: 144px;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(79, 97, 116, 0.18);
+}
+
+.pieGraphic span {
+  width: 78px;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  padding: 8px;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #4b5563;
+  font-size: 11px;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.pieLegend {
+  width: min(100%, 210px);
+  display: grid;
+  gap: 7px;
+}
+
+.pieLegend div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  color: #4b5563;
+  font-size: 13px;
+}
+
+.pieLegend strong {
+  color: #1f2937;
+  font-weight: 700;
+}
+
+.levelCard {
+  align-content: start;
+}
+
+.levelRows {
+  width: min(100%, 300px);
+  display: grid;
+  gap: 9px;
+}
+
+.levelRows div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 42px 58px;
+  align-items: center;
+  gap: 10px;
+  color: #4b5563;
+  font-size: 13px;
+}
+
+.levelRows strong,
+.levelRows em {
+  color: #1f2937;
+  font-style: normal;
+  font-weight: 700;
+  text-align: right;
+}
+
+.skillPerformance {
+  width: min(100%, 840px);
+  display: grid;
+  gap: 16px;
+  margin: 0 auto;
+}
+
+.skillPerformanceRow {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr) 56px;
+  align-items: center;
+  gap: 12px;
+  color: #303946;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.skillTrack,
+.questionProgress {
+  overflow: hidden;
+  border-radius: 999px;
+  background: #edf1f5;
+}
+
+.skillTrack {
+  height: 18px;
+}
+
+.skillTrack i,
+.questionProgress i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #7fa8d6;
+}
+
+.skillPerformanceRow strong {
+  color: #303946;
+  font-size: 13px;
+  text-align: right;
+}
+
+.questionResponses {
+  display: grid;
+  gap: 0;
+}
+
+.questionResponses h3 {
+  margin-bottom: 0;
+}
+
+.responseCard {
+  display: grid;
+  gap: 15px;
+  padding: 22px 0;
+  border-bottom: 1px solid #d5dbe3;
+  border-radius: 0;
+  background: #ffffff;
+}
+
+.responseCard:first-child {
+  padding-top: 0;
+}
+
+.responseCard:last-child {
+  border-bottom: 0;
+}
+
+.responseCard header {
+  display: grid;
+  gap: 7px;
+}
+
+.questionNumber {
+  color: #1f2937;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.responseCard h4 {
+  margin: 0;
+  color: #303946;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.questionResult {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px;
+  color: #374151;
+  font-size: 14px;
+}
+
+.questionResult strong {
+  color: #1f2937;
+  font-size: 14px;
+}
+
+.questionViewButton {
+  width: fit-content;
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 13px;
+  border: 1px solid #b8c4d1;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #4f6174;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.questionViewButton:hover {
+  border-color: #7fa8d6;
+  background: #eef5fc;
+}
+
+.responseCard header > span:not(.questionNumber) {
+  color: #657384;
+  font-size: 13px;
+}
+
+.responseBars {
+  display: grid;
+  gap: 9px;
+}
+
+.questionProgress {
+  height: 18px;
+  width: 100%;
+}
+
+.responseBarRow {
+  display: grid;
+  grid-template-columns: minmax(110px, 190px) minmax(160px, 1fr) 92px;
+  align-items: center;
+  gap: 12px;
+}
+
+.responseBarRow span {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.responseBarRow span strong {
+  color: #303946;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.responseBarRow span em {
+  overflow: hidden;
+  color: #6b7280;
+  font-size: 12px;
+  font-style: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.responseBarRow > div {
+  height: 16px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #edf1f5;
+}
+
+.responseBarRow i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #c6ccd4;
+}
+
+.responseBarRow .correctResponseBar {
+  background: #7fa8d6;
+}
+
+.responseBarRow b {
+  color: #303946;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.tableView {
+  gap: 24px;
+}
+
+.summaryTable table,
+.scoreTable table,
+.questionSummaryTable table {
+  min-width: 520px;
+}
+
+.summaryTable td:last-child,
+.scoreTable td,
+.scoreTable th {
+  text-align: left;
 }
 
 .analysisGrid {
@@ -317,6 +942,45 @@
   cursor: pointer;
   font: inherit;
   font-size: 13px;
+}
+
+.questionPager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.questionPagerSummary {
+  flex-basis: 100%;
+  color: #555555;
+  font-size: 14px;
+  text-align: center;
+}
+
+.questionPager button {
+  min-width: 86px;
+  height: 36px;
+  border: 1px solid #c7c7c7;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #444444;
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+}
+
+.questionPager button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.questionPager .activeQuestionPage {
+  border-color: #565656;
+  background: #565656;
+  color: #ffffff;
 }
 
 .scoreSummary {
@@ -403,12 +1067,76 @@
   padding: 0 10px 14px;
 }
 
+.modalQuestionBlock,
+.modalResponseBlock {
+  display: grid;
+  gap: 16px;
+  padding: 18px 8px;
+}
+
+.modalQuestionBlock {
+  border-bottom: 1px solid #d9d9d9;
+}
+
+.modalSectionLabel {
+  color: #303946;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
 .analysisQuestion {
   margin: 0;
-  padding: 12px 4px 10px;
+  padding: 0;
   color: #333942;
   font-size: 14px;
   line-height: 1.35;
+}
+
+.modalSkillGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.modalSkillCard {
+  display: grid;
+  gap: 8px;
+  padding: 14px 16px;
+  border: 1px solid #cfd6de;
+  border-radius: 6px;
+  background: #ffffff;
+}
+
+.modalSkillCard span {
+  color: #4b5563;
+  font-size: 13px;
+}
+
+.modalSkillCard strong {
+  color: #1f2937;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.modalExplanation {
+  display: grid;
+  gap: 7px;
+}
+
+.modalExplanation h3 {
+  margin: 0;
+  color: #303946;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.modalExplanation p {
+  margin: 0;
+  color: #3f454d;
+  font-size: 13px;
+  line-height: 1.45;
 }
 
 .modalSectionTitle {
@@ -578,6 +1306,201 @@
   list-style-position: inside;
 }
 
+.modalResponseStats {
+  display: grid;
+  gap: 8px;
+}
+
+.modalResponseStats div {
+  display: grid;
+  grid-template-columns: 90px 1fr 64px;
+  align-items: center;
+  gap: 12px;
+  color: #303946;
+  font-size: 14px;
+}
+
+.modalResponseStats span {
+  font-weight: 700;
+}
+
+.modalResponseStats strong,
+.modalResponseStats em {
+  font-style: normal;
+  font-weight: 700;
+}
+
+.modalResponseStats em {
+  text-align: right;
+}
+
+.modalOptionBars {
+  display: grid;
+  gap: 10px;
+}
+
+.modalOptionRow {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr) 128px;
+  align-items: center;
+  gap: 12px;
+}
+
+.modalOptionRow span {
+  overflow: hidden;
+  color: #303946;
+  font-size: 13px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.modalOptionRow > div {
+  height: 16px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #edf1f5;
+}
+
+.modalOptionRow i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #c6ccd4;
+}
+
+.modalOptionRow .correctBar {
+  background: #7fa8d6;
+}
+
+.modalOptionRow strong {
+  color: #303946;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.correctAnswerLine {
+  margin: 0;
+  color: #303946;
+  font-size: 13px;
+}
+
+.correctAnswerLine span,
+.correctAnswerLine strong {
+  font-weight: 700;
+}
+
+/* Make the question analysis modal readable. */
+.modal {
+  width: min(820px, calc(100vw - 32px));
+}
+
+.modal header {
+  min-height: 58px;
+  padding: 0 18px 0 22px;
+}
+
+.modal header h2 {
+  font-size: 20px;
+}
+
+.modal header button {
+  width: 38px;
+  height: 38px;
+  font-size: 20px;
+}
+
+.modalBody {
+  padding: 0 14px 18px;
+}
+
+.analysisQuestion {
+  padding: 0;
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+.modalSectionTitle {
+  min-height: 42px;
+  padding: 0 16px;
+  font-size: 18px;
+}
+
+.cognitiveRows {
+  gap: 12px;
+  padding: 14px 12px 12px;
+}
+
+.cognitiveRows > div {
+  grid-template-columns: 260px 1fr;
+  gap: 14px;
+  min-height: 30px;
+}
+
+.cognitiveRows span,
+.responseGrid span,
+.modalTotalRow span,
+.cognitiveRows p,
+.cognitiveNote,
+.modalFootnote,
+.responseGrid strong,
+.modalTotalRow strong,
+.answerRow span,
+.answerRow strong,
+.bloomReference {
+  font-size: 18px;
+  line-height: 1.4;
+}
+
+.cognitiveBadge {
+  min-width: 210px;
+  min-height: 36px;
+  padding: 0 16px;
+  font-size: 18px;
+}
+
+.cognitiveNote {
+  margin: 2px 12px 14px;
+}
+
+.responseGrid {
+  column-gap: 28px;
+  padding: 10px 14px 14px;
+}
+
+.responseGrid > div {
+  min-height: 42px;
+}
+
+.answerDistribution {
+  gap: 12px;
+  padding: 14px 18px 12px;
+}
+
+.answerRow {
+  grid-template-columns: 190px minmax(0, 1fr) 48px;
+  gap: 14px;
+}
+
+.answerTrack {
+  height: 7px;
+}
+
+.modalTotalRow {
+  min-height: 54px;
+  padding: 0 22px;
+}
+
+.modalFootnote {
+  padding: 18px 12px 8px;
+}
+
+.bloomReference {
+  margin: 10px 8px 0;
+}
+
 .bloomReference div {
   display: grid;
   gap: 5px;
@@ -623,8 +1546,28 @@
 
   .courseGrid,
   .metricGrid,
+  .performanceGrid,
+  .pieGrid,
   .analysisGrid {
     grid-template-columns: 1fr;
+  }
+
+  .detailTop,
+  .viewSwitch {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .viewSwitch {
+    width: 100%;
+  }
+
+  .viewSwitch > div {
+    width: 100%;
+  }
+
+  .viewSwitch button {
+    flex: 1 1 0;
   }
 
   .courseCard {
@@ -653,4 +1596,77 @@
   .answerRow {
     grid-template-columns: minmax(82px, 1fr) minmax(110px, 2fr) 28px;
   }
+
+  .scoreChart {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 210px auto;
+  }
+
+  .chartYAxis,
+  .chartXAxis {
+    grid-column: 1;
+  }
+
+  .chartBars {
+    overflow-x: auto;
+  }
+
+  .scoreBucket {
+    min-width: 44px;
+  }
+
+  .passFailRow,
+  .responseBarRow,
+  .modalSkillGrid,
+  .modalOptionRow {
+    grid-template-columns: 1fr;
+  }
+
+  .modalResponseStats div {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .analysisSectionTitle {
+    gap: 10px;
+    font-size: 16px;
+  }
+
+  .questionResult {
+    grid-template-columns: 1fr;
+  }
+
+  .passFailRow strong,
+  .responseBarRow b,
+  .modalResponseStats em,
+  .modalOptionRow strong {
+    text-align: left;
+  }
+
+  .responseBarRow span em {
+    white-space: normal;
+  }
+}
+
+/* Professor palette cleanup for analysis controls. */
+.viewButton,
+.questionPager .activeQuestionPage {
+  border-color: #6f98c7;
+  background: #7fa8d6;
+  color: #ffffff;
+}
+
+.viewButton:hover,
+.questionPager .activeQuestionPage:hover {
+  background: #a8c6e7;
+  color: #263c52;
+}
+
+.questionPager button {
+  border-color: #a8c6e7;
+  color: #4f6174;
+}
+
+.modalLevel {
+  background: #7fa8d6;
 }

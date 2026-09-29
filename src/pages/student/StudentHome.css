@@ -873,3 +873,46 @@
     flex-direction: column;
   }
 }
+
+/* Student Buttercup Sky theme */
+.student-home-page {
+  --student-theme-buttercup: #fff2b2;
+  --student-theme-dewy-blue: #a8c6e7;
+  --student-theme-cloud-puff: #fff7d6;
+  --student-theme-morning-breeze: #7fa8d6;
+  --student-theme-accent: #5f86b1;
+}
+
+.home-section-header a,
+.home-todo-item.done > span,
+.home-course-code,
+.home-progress-card strong {
+  color: var(--student-theme-accent);
+}
+
+.home-primary-action,
+.home-course-action,
+.home-progress-fill,
+.home-profile-button,
+.home-calendar-grid button.selected,
+.home-todo-item input:checked {
+  background: var(--student-theme-morning-breeze);
+}
+
+.home-primary-action:hover,
+.home-course-action:hover,
+.home-profile-button:hover {
+  background: var(--student-theme-dewy-blue);
+  color: #263c52;
+}
+
+.home-course-card:focus-visible,
+.home-todo-input:focus,
+.home-progress-filter:hover {
+  outline-color: rgba(127, 168, 214, 0.35);
+}
+
+.home-progress-filter:hover {
+  border-color: var(--student-theme-morning-breeze);
+  color: var(--student-theme-accent);
+}

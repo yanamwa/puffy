@@ -372,3 +372,49 @@
 .start-learning-button.requested-course-status:disabled {
   opacity: 1;
 }
+
+/* Student Buttercup Sky theme */
+.public-courses-page {
+  --student-theme-buttercup: #fff2b2;
+  --student-theme-dewy-blue: #a8c6e7;
+  --student-theme-sunwashed: #ffe08a;
+  --student-theme-cloud-puff: #fff7d6;
+  --student-theme-morning-breeze: #7fa8d6;
+  --student-theme-ink: #4f6174;
+  --student-theme-accent: #5f86b1;
+}
+
+.add-course-button,
+.start-learning-button,
+.enroll-confirm-btn {
+  border-color: #6f98c7;
+  background: var(--student-theme-morning-breeze);
+  color: #ffffff;
+}
+
+.add-course-button:hover:not(:disabled),
+.start-learning-button:hover:not(:disabled),
+.enroll-confirm-btn:hover {
+  background: var(--student-theme-dewy-blue);
+  color: #263c52;
+}
+
+.add-course-button.requested-course-status,
+.start-learning-button.requested-course-status,
+.add-course-button.enrolled-course-status,
+.start-learning-button.enrolled-course-status {
+  border-color: var(--student-theme-sunwashed);
+  background: var(--student-theme-cloud-puff);
+  background-color: var(--student-theme-cloud-puff);
+  color: var(--student-theme-accent);
+}
+
+.enroll-cancel-btn {
+  background: var(--student-theme-cloud-puff);
+  color: var(--student-theme-ink);
+}
+
+.enroll-cancel-btn:hover {
+  background: var(--student-theme-buttercup);
+  color: #263c52;
+}

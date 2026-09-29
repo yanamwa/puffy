@@ -1075,3 +1075,60 @@
     flex-basis: 36px;
   }
 }
+
+/* Student Buttercup Sky theme */
+.student-header {
+  --student-theme-buttercup: #fff2b2;
+  --student-theme-dewy-blue: #a8c6e7;
+  --student-theme-sunwashed: #ffe08a;
+  --student-theme-cloud-puff: #fff7d6;
+  --student-theme-morning-breeze: #7fa8d6;
+  --student-theme-ink: #4f6174;
+  --student-theme-accent: #5f86b1;
+}
+
+.student-header-search:focus-within {
+  border-color: var(--student-theme-morning-breeze);
+  box-shadow: 0 0 0 3px rgba(127, 168, 214, 0.18);
+}
+
+.student-join-course-button {
+  border: 1px solid #6f98c7;
+  background: var(--student-theme-morning-breeze);
+}
+
+.student-join-course-button:hover {
+  background: var(--student-theme-dewy-blue);
+  color: #263c52;
+}
+
+.notification-button:hover,
+.notification-button.active,
+.mark-all-read-button:hover,
+.notification-dropdown-tabs button.active,
+.notification-item.unread,
+.notification-item-icon.course,
+.notification-view-all-button:hover,
+.profile-dropdown-menu > button:hover {
+  background: var(--student-theme-cloud-puff);
+  color: var(--student-theme-accent);
+}
+
+.notification-item.unread:hover {
+  background: var(--student-theme-buttercup);
+}
+
+.notification-button:hover,
+.notification-button.active,
+.mark-all-read-button,
+.notification-item-copy small,
+.notification-view-all-button,
+.profile-dropdown-button:hover,
+.profile-dropdown-button.open {
+  color: var(--student-theme-accent);
+}
+
+.notification-unread-dot,
+.profile-status-dot {
+  background: var(--student-theme-morning-breeze);
+}

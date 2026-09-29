@@ -44,6 +44,7 @@ function createEmptyLessonPage() {
     id: createId('page'),
     title: '',
     content: '',
+    media: null,
   };
 }
 
@@ -170,6 +171,10 @@ function normalizeLessonPage(page) {
         page?.description ||
         ''
     ),
+    media: page?.media || null,
+    mediaUrl: page?.mediaUrl || page?.media_url || '',
+    mediaName: page?.mediaName || page?.media_name || '',
+    mediaType: page?.mediaType || page?.media_type || '',
   };
 }
 
@@ -1892,9 +1897,9 @@ export default function AddModule() {
   if (loading) {
     return (
       <section
-        className={
-          styles.addModulePage
-        }
+        className={`${styles.addModulePage} ${
+          isEditing ? `${styles.editCoursePage} edit-course-page` : ''
+        }`}
       >
         <div
           className={
@@ -1911,9 +1916,9 @@ export default function AddModule() {
 
   return (
     <section
-      className={
-        styles.addModulePage
-      }
+      className={`${styles.addModulePage} ${
+        isEditing ? `${styles.editCoursePage} edit-course-page` : ''
+      }`}
     >
       <div
         className={
@@ -2026,13 +2031,14 @@ export default function AddModule() {
                 styles.popupInput
               }
               value={form.code}
-              onChange={(event) =>
-                updateCourseCode(
-                  event.target.value
-                )
-              }
+              readOnly
+              aria-readonly="true"
               placeholder="Auto-generated course code"
             />
+
+            <p className={styles.courseCodeNote}>
+              Auto-generated course code. It cannot be changed.
+            </p>
 
             <div
               className={counterClass(

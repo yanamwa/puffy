@@ -2025,3 +2025,67 @@
     width: 100%;
   }
 }
+
+/* Professor palette cleanup for legacy edit-module buttons. */
+.gridContainer {
+  --professor-theme-buttercup: #fff2b2;
+  --professor-theme-dewy-blue: #a8c6e7;
+  --professor-theme-sunwashed: #ffe08a;
+  --professor-theme-cloud-puff: #fff7d6;
+  --professor-theme-morning-breeze: #7fa8d6;
+  --professor-theme-ink: #4f6174;
+}
+
+.customFileBtn,
+.popupAddBtn,
+.popupSaveBtn,
+.lessonNavigationBtn:not(:disabled) {
+  border: 1px solid #6f98c7 !important;
+  background: var(--professor-theme-morning-breeze) !important;
+  box-shadow: 3px 3px 0 rgba(79, 97, 116, 0.18) !important;
+  color: #ffffff !important;
+}
+
+.customFileBtn:hover,
+.popupAddBtn:hover,
+.popupSaveBtn:hover,
+.lessonNavigationBtn:not(:disabled):hover {
+  background: var(--professor-theme-dewy-blue) !important;
+  color: #263c52 !important;
+}
+
+.popupCancelBtn {
+  border: 1px solid var(--professor-theme-dewy-blue) !important;
+  background: var(--professor-theme-cloud-puff) !important;
+  color: var(--professor-theme-ink) !important;
+  box-shadow: 3px 3px 0 rgba(79, 97, 116, 0.12) !important;
+}
+
+.lessonNavigationBtn:disabled {
+  border-color: #d5dce4 !important;
+  background: #edf1f5 !important;
+  color: #8a96a4 !important;
+  box-shadow: none !important;
+}
+
+:global(.swal2-confirm) {
+  background: #7fa8d6 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 0 rgba(79, 97, 116, 0.24) !important;
+}
+
+:global(.swal2-confirm:hover) {
+  background: #a8c6e7 !important;
+  color: #263c52 !important;
+}
+
+:global(.swal2-cancel) {
+  background: #fff7d6 !important;
+  color: #4f6174 !important;
+  box-shadow: 0 4px 0 rgba(79, 97, 116, 0.16) !important;
+}
+
+:global(.swal2-cancel:hover) {
+  background: #ffe08a !important;
+  color: #263c52 !important;
+}

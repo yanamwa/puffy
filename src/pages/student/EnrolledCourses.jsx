@@ -326,7 +326,7 @@ export default function EnrolledCourses() {
           title: "Enter Course Code",
           text: "Please enter the course code provided by your professor.",
           confirmButtonText: "OK",
-          confirmButtonColor: "#198754",
+          confirmButtonColor: "#7FA8D6",
         });
         return;
       }
@@ -339,7 +339,7 @@ export default function EnrolledCourses() {
           title: "Course Not Found",
           text: "Course code not found. Please check the code from your professor.",
           confirmButtonText: "OK",
-          confirmButtonColor: "#198754",
+          confirmButtonColor: "#7FA8D6",
         });
         return;
       }
@@ -358,7 +358,7 @@ export default function EnrolledCourses() {
           "the course"
         }.`,
         confirmButtonText: "Continue",
-        confirmButtonColor: "#198754",
+        confirmButtonColor: "#7FA8D6",
       });
 
       const joinedCourseId =
@@ -380,7 +380,7 @@ export default function EnrolledCourses() {
         title: "Unable to Join Course",
         text: error?.message || "Unable to join the course.",
         confirmButtonText: "OK",
-        confirmButtonColor: "#198754",
+        confirmButtonColor: "#7FA8D6",
       });
     }
   };
@@ -457,7 +457,7 @@ export default function EnrolledCourses() {
         text: `${courseTitle} has been moved to Archived Classes.`,
         icon: "success",
         confirmButtonText: "Okay",
-        confirmButtonColor: "#198754",
+        confirmButtonColor: "#7FA8D6",
       });
     } catch (error) {
       console.error("Unenroll course error:", error);
@@ -468,7 +468,7 @@ export default function EnrolledCourses() {
           error.message || "Unable to unenroll from this course.",
         icon: "error",
         confirmButtonText: "Okay",
-        confirmButtonColor: "#198754",
+        confirmButtonColor: "#7FA8D6",
       });
     } finally {
       setUnenrollingCourseId(null);

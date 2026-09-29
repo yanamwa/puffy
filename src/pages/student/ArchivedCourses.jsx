@@ -216,7 +216,7 @@ export default function ArchivedCourses() {
         title: "Enter Course Code",
         text: "Please enter the course code provided by your professor.",
         confirmButtonText: "OK",
-        confirmButtonColor: "#198754",
+        confirmButtonColor: "#7FA8D6",
       });
       return;
     }
@@ -230,7 +230,7 @@ export default function ArchivedCourses() {
           title: "Course Not Found",
           text: "Course code not found. Please check the code from your professor.",
           confirmButtonText: "OK",
-          confirmButtonColor: "#198754",
+          confirmButtonColor: "#7FA8D6",
         });
         return;
       }
@@ -249,7 +249,7 @@ export default function ArchivedCourses() {
           "the course"
         }.`,
         confirmButtonText: "Continue",
-        confirmButtonColor: "#198754",
+        confirmButtonColor: "#7FA8D6",
       });
     } catch (error) {
       console.error("Join course error:", error);
@@ -261,7 +261,7 @@ export default function ArchivedCourses() {
           error?.message ||
           "Something went wrong while joining the course.",
         confirmButtonText: "OK",
-        confirmButtonColor: "#198754",
+        confirmButtonColor: "#7FA8D6",
       });
     }
   };

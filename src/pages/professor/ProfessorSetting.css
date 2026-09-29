@@ -738,3 +738,71 @@
     width: 100%;
   }
 }
+
+/* Professor palette cleanup for settings. */
+.professor-settings-page {
+  --professor-theme-buttercup: #fff2b2;
+  --professor-theme-dewy-blue: #a8c6e7;
+  --professor-theme-cloud-puff: #fff7d6;
+  --professor-theme-morning-breeze: #7fa8d6;
+  --professor-theme-accent: #5f86b1;
+}
+
+.professor-password-settings-card,
+.professor-password-card {
+  box-shadow:
+    0 18px 45px rgba(23, 25, 39, 0.08),
+    5px 6px 0 rgba(127, 168, 214, 0.16);
+}
+
+.professor-password-settings-card::before,
+.professor-password-card::before {
+  background:
+    linear-gradient(135deg, rgba(127, 168, 214, 0.12), transparent 58%),
+    #ffffff;
+}
+
+.professor-settings-eyebrow,
+.professor-password-card-eyebrow,
+.professor-password-requirements-heading svg,
+.professor-password-requirement.met,
+.professor-password-match-message.success {
+  color: var(--professor-theme-accent);
+}
+
+.professor-password-card-icon,
+.professor-password-visibility-button,
+.professor-password-notice.success,
+.professor-security-note-icon {
+  background: var(--professor-theme-cloud-puff);
+  color: var(--professor-theme-accent);
+}
+
+.professor-account-summary,
+.professor-password-security-note {
+  background: #f7fbff;
+}
+
+.professor-account-summary-icon {
+  color: var(--professor-theme-accent);
+}
+
+.professor-password-input-wrapper:focus-within {
+  border-color: var(--professor-theme-morning-breeze);
+  box-shadow: 0 0 0 3px rgba(127, 168, 214, 0.18);
+}
+
+.professor-password-visibility-button:hover,
+.professor-password-requirement.met > span {
+  background: var(--professor-theme-buttercup);
+}
+
+.professor-password-save-button {
+  border-color: #6f98c7;
+  background: var(--professor-theme-morning-breeze);
+}
+
+.professor-password-save-button:hover {
+  background: var(--professor-theme-dewy-blue);
+  color: #263c52;
+}

@@ -1852,8 +1852,8 @@
 
 @media (min-width: 641px) {
   .professor-sidebar {
-    background: #198754;
-    border-right: 1px solid #c4c8cf;
+    background: #7fa8d6;
+    border-right: 1px solid #6f98c7;
     color: #ffffff;
   }
 
@@ -2023,7 +2023,7 @@
 #root .dashboard-eyebrow {
   display: inline-flex;
   margin-bottom: 7px;
-  color: #198754;
+  color: #5f86b1;
   font-size: 12px !important;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -2076,8 +2076,8 @@
 }
 
 #root .dashboard-primary-action {
-  border: 1.5px solid #145c37;
-  background: #198754;
+  border: 1.5px solid #6f98c7;
+  background: #7fa8d6;
   color: #ffffff;
 }
 
@@ -2128,8 +2128,8 @@
   place-items: center;
   flex: 0 0 auto;
   border-radius: 8px;
-  background: #eef8f2;
-  color: #198754;
+  background: #fff2b2;
+  color: #5f86b1;
 }
 
 #root .dashboard-summary-icon svg {
@@ -2146,7 +2146,7 @@
 
 #root .dashboard-summary-card a {
   gap: 6px;
-  color: #198754;
+  color: #5f86b1;
   text-decoration: none;
   font-size: 13px !important;
   font-weight: 700;
@@ -2193,7 +2193,7 @@
 #root .dashboard-section-header a {
   flex: 0 0 auto;
   gap: 6px;
-  color: #198754;
+  color: #5f86b1;
   text-decoration: none;
   font-size: 13px !important;
   font-weight: 700;
@@ -2464,7 +2464,7 @@
 
 #root .dashboard-bar-row i.score,
 #root .dashboard-chart-legend i.score {
-  background: #198754;
+  background: #7fa8d6;
 }
 
 #root .dashboard-bar-row i.completion,
@@ -2558,7 +2558,7 @@
 
 #root .dashboard-mastery-segment.advanced,
 #root .dashboard-mastery-legend i.advanced {
-  background: #198754;
+  background: #7fa8d6;
 }
 
 #root .dashboard-mastery-segment.proficient,
@@ -2929,7 +2929,8 @@
 .professor-layout {
   --professor-sidebar-expanded: 220px;
   --professor-sidebar-collapsed: 76px;
-  --professor-sidebar-green: #198754;
+  --professor-sidebar-morning-breeze: #7fa8d6;
+  --professor-sidebar-primary: var(--professor-sidebar-morning-breeze);
   --professor-dark: #171927;
   --professor-ink: #5f6064;
   --professor-muted: #858d9b;
@@ -2984,7 +2985,7 @@
   overflow-x: hidden;
   overflow-y: auto;
 
-  background: var(--professor-sidebar-green);
+  background: var(--professor-sidebar-primary);
   border-right: 1px solid var(--professor-line);
 
   color: #ffffff;
@@ -3777,7 +3778,7 @@
 
   border-radius: 999px;
 
-  background: #198754;
+  background: #7fa8d6;
   color: #fff;
 
   text-decoration: none;
@@ -3789,10 +3790,243 @@
 }
 
 .professor-create-course:hover {
-  background: #157347;
+  background: #a8c6e7;
+  color: #263c52;
 }
 
 .professor-create-course svg {
   width: 18px;
   height: 18px;
+}
+
+/* Morning Breeze sidebar typography */
+#root .professor-layout {
+  --professor-sidebar-expanded: 320px;
+}
+
+#root .professor-layout .professor-sidebar,
+#root .professor-layout .professor-sidebar :where(a, button, span, p, strong) {
+  font-family: Arial, Helvetica, sans-serif !important;
+}
+
+#root .professor-layout .professor-brand-name,
+#root .professor-layout .professor-nav-label,
+#root .professor-layout .professor-logout-label {
+  font-size: 20px !important;
+  font-weight: 600 !important;
+  line-height: 1.15;
+}
+
+#root .professor-layout .professor-link,
+#root .professor-layout .professor-logout {
+  min-height: 50px;
+  font-size: 20px !important;
+}
+
+#root .professor-layout .professor-menu {
+  padding-left: 28px;
+}
+
+#root .professor-layout .professor-link svg,
+#root .professor-layout .professor-logout svg {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+}
+
+#root .professor-layout.professor-sidebar-collapsed {
+  --professor-sidebar-expanded: 320px;
+}
+
+#root .professor-layout.professor-sidebar-collapsed .professor-menu {
+  padding-left: 18px;
+}
+
+#root .professor-layout.professor-sidebar-collapsed .professor-link,
+#root .professor-layout.professor-sidebar-collapsed .professor-logout {
+  min-height: 50px;
+}
+
+/* Force the final professor sidebar text style over older Jersey rules. */
+#root .professor-layout .professor-sidebar .professor-brand-name,
+#root .professor-layout .professor-sidebar .professor-link .professor-nav-label,
+#root .professor-layout .professor-sidebar .professor-logout .professor-logout-label,
+#root .professor-layout .professor-sidebar .professor-link,
+#root .professor-layout .professor-sidebar .professor-logout {
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-size: 20px !important;
+  font-weight: 600 !important;
+  line-height: 1.2;
+}
+
+#root .professor-layout .professor-sidebar .professor-nav-label {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: nowrap;
+}
+
+/* Professor Buttercup Sky theme */
+#root .professor-layout {
+  --professor-theme-buttercup: #fff2b2;
+  --professor-theme-dewy-blue: #a8c6e7;
+  --professor-theme-sunwashed: #ffe08a;
+  --professor-theme-cloud-puff: #fff7d6;
+  --professor-theme-active-pill: #f7f7f7;
+  --professor-theme-morning-breeze: #7fa8d6;
+  --professor-theme-ink: #4f6174;
+  --professor-theme-accent: #5f86b1;
+  --professor-sidebar-morning-breeze: var(--professor-theme-morning-breeze);
+  --professor-sidebar-primary: var(--professor-theme-morning-breeze);
+}
+
+#root .professor-layout .professor-sidebar {
+  background: var(--professor-theme-morning-breeze);
+  border-right-color: #6f98c7;
+}
+
+#root .professor-layout .professor-brand::after {
+  background: rgba(255, 247, 214, 0.8);
+}
+
+#root .professor-layout .professor-link:not(.active):hover,
+#root .professor-layout .professor-logout:hover {
+  background: rgba(255, 247, 214, 0.22);
+  color: #ffffff;
+}
+
+#root .professor-layout .professor-link.active {
+  border-color: var(--professor-theme-active-pill);
+  background: var(--professor-theme-active-pill);
+  color: var(--professor-theme-ink);
+}
+
+#root .dashboard-eyebrow,
+#root .dashboard-summary-card a,
+#root .dashboard-section-header a,
+#root .dashboard-table-action {
+  color: var(--professor-theme-accent);
+}
+
+#root .dashboard-primary-action,
+#root .professor-create-course {
+  border-color: #6f98c7;
+  background: var(--professor-theme-morning-breeze);
+  color: #ffffff;
+}
+
+#root .dashboard-primary-action:hover,
+#root .professor-create-course:hover {
+  border-color: var(--professor-theme-morning-breeze);
+  background: var(--professor-theme-dewy-blue);
+  color: #263c52;
+}
+
+#root .dashboard-secondary-action:hover,
+#root .dashboard-summary-card:hover,
+#root .dashboard-panel:hover {
+  border-color: var(--professor-theme-dewy-blue);
+}
+
+#root .dashboard-summary-icon {
+  background: var(--professor-theme-buttercup);
+  color: var(--professor-theme-accent);
+}
+
+#root .dashboard-bar-row i.score,
+#root .dashboard-chart-legend i.score,
+#root .dashboard-mastery-segment.advanced,
+#root .dashboard-mastery-legend i.advanced {
+  background: var(--professor-theme-morning-breeze);
+}
+
+#root .dashboard-bar-row i.completion,
+#root .dashboard-chart-legend i.completion,
+#root .dashboard-mastery-segment.proficient,
+#root .dashboard-mastery-legend i.proficient {
+  background: var(--professor-theme-dewy-blue);
+}
+
+#root .dashboard-mastery-segment.developing,
+#root .dashboard-mastery-legend i.developing {
+  background: var(--professor-theme-sunwashed);
+}
+
+#root .dashboard-mastery-segment.beginning,
+#root .dashboard-mastery-legend i.beginning {
+  background: var(--professor-theme-buttercup);
+}
+
+/* Keep the professor theme visible across older professor surfaces. */
+#root .professor-layout .professor-link:not(.active):hover,
+#root .professor-layout .professor-logout:hover {
+  border-color: var(--professor-theme-cloud-puff);
+  background: var(--professor-theme-sunwashed);
+  box-shadow: 3px 3px 0 rgba(79, 97, 116, 0.18);
+  color: #263c52;
+}
+
+#root .professor-layout .professor-link.active {
+  border-color: var(--professor-theme-active-pill);
+  background: var(--professor-theme-active-pill);
+  box-shadow: 3px 3px 0 rgba(79, 97, 116, 0.18);
+  color: #263c52;
+}
+
+#root .monitor-progress-fill.high,
+#root .monitor-status-meters .onTrack,
+#root .professor-avatar-status,
+#root .professor-unread-dot {
+  background: var(--professor-theme-morning-breeze);
+}
+
+#root .monitor-status.onTrack,
+#root .monitor-topic-dots .high,
+#root .dashboard-mastery-pill,
+#root .professor-notification-tabs button:hover,
+#root .professor-notification-tabs button.active,
+#root .professor-notification-item.unread,
+#root .professor-notification-icon.student,
+#root .professor-notification-badge,
+#root .professor-notification-badge.system,
+#root .professor-notification-badge.announcement,
+#root .professor-user-more.open,
+#root .professor-profile-menu button:hover {
+  background: var(--professor-theme-cloud-puff);
+  color: var(--professor-theme-accent);
+}
+
+#root .professor-notification-item.unread:hover {
+  background: var(--professor-theme-buttercup);
+}
+
+#root .dashboard-table-action {
+  border-color: var(--professor-theme-dewy-blue);
+  background: var(--professor-theme-cloud-puff);
+  color: var(--professor-theme-accent);
+}
+
+#root .dashboard-secondary-action:hover {
+  border-color: var(--professor-theme-dewy-blue);
+  background: var(--professor-theme-cloud-puff);
+}
+
+#root .professor-mark-read {
+  border-color: #6f98c7;
+  background: var(--professor-theme-morning-breeze);
+  color: #ffffff;
+}
+
+#root .professor-mark-read:hover {
+  background: var(--professor-theme-dewy-blue);
+  color: #263c52;
+}
+
+#root .professor-notification-meta,
+#root .professor-notification-badge {
+  color: var(--professor-theme-accent);
+}
+
+#root .professor-layout .professor-search:focus-within {
+  border-color: var(--professor-theme-morning-breeze);
+  box-shadow: 0 0 0 3px rgba(127, 168, 214, 0.18);
 }

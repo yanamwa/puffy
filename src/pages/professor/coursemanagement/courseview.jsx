@@ -648,7 +648,7 @@ export default function CourseView() {
           title: 'Student unenrolled',
           text: `${name} has been removed from this course.`,
           confirmButtonText: 'Okay',
-          confirmButtonColor: '#198754',
+          confirmButtonColor: '#7FA8D6',
         });
       } catch (error) {
         console.error(
@@ -661,7 +661,7 @@ export default function CourseView() {
           title: 'Unable to unenroll',
           text: getFriendlyUnenrollMessage(error),
           confirmButtonText: 'Okay',
-          confirmButtonColor: '#198754',
+          confirmButtonColor: '#7FA8D6',
         });
       } finally {
         setProcessingId(null);

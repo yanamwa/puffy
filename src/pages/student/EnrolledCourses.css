@@ -5185,13 +5185,15 @@ a.course-folder:focus-visible {
 .student-module-actions {
   min-width: 206px;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: flex-end;
   gap: 10px;
 }
 
 .student-module-learn-button,
-.student-module-practice-button {
+.student-module-practice-button,
+.student-module-main-quiz-button {
   min-width: 94px !important;
   height: 34px !important;
   border: 0 !important;
@@ -5211,13 +5213,21 @@ a.course-folder:focus-visible {
   color: #ffffff !important;
 }
 
+.student-module-main-quiz-button {
+  background: #7fa8d6 !important;
+  color: #ffffff !important;
+  box-shadow: 0 3px 0 #5f86b1;
+}
+
 .student-module-learn-button:hover:not(:disabled),
-.student-module-practice-button:hover:not(:disabled) {
+.student-module-practice-button:hover:not(:disabled),
+.student-module-main-quiz-button:hover:not(:disabled) {
   transform: translateY(-1px);
 }
 
 .student-module-learn-button:disabled,
-.student-module-practice-button:disabled {
+.student-module-practice-button:disabled,
+.student-module-main-quiz-button:disabled {
   border: 1px solid #d0d4da !important;
   background: #e3e5e8 !important;
   color: #9ca3ad !important;
@@ -5940,4 +5950,164 @@ a.course-folder:focus-visible {
   bottom: 14px;
   height: 52px;
   padding-top: 9px;
+}
+
+/* Student Buttercup Sky theme */
+.enrolled-dashboard,
+.enrolled-courses-page,
+.student-settings-page,
+.student-profile-page {
+  --student-theme-buttercup: #fff2b2;
+  --student-theme-dewy-blue: #a8c6e7;
+  --student-theme-sunwashed: #ffe08a;
+  --student-theme-cloud-puff: #fff7d6;
+  --student-theme-morning-breeze: #7fa8d6;
+  --student-theme-active-pill: #f7f7f7;
+  --student-theme-ink: #4f6174;
+  --student-theme-accent: #5f86b1;
+}
+
+.enrolled-sidebar {
+  background: var(--student-theme-morning-breeze);
+  border-right-color: #6f98c7;
+}
+
+.side-nav-item:hover,
+.sidebar-enrolled-course:hover {
+  border-color: var(--student-theme-sunwashed);
+  background: var(--student-theme-sunwashed);
+  color: #263c52;
+}
+
+.side-nav-item.active,
+.side-nav-item.plain-nav-item.active {
+  border-color: var(--student-theme-active-pill);
+  background: var(--student-theme-active-pill);
+  color: #263c52;
+}
+
+.side-nav-item.active::after,
+.sidebar-enrolled-course:hover::after {
+  background: var(--student-theme-active-pill);
+}
+
+.enrolled-course-folder .course-code,
+.stat-card strong,
+.section-link,
+.student-profile-eyebrow,
+.student-identity-overline,
+.student-identity-number,
+.student-info-section-icon,
+.student-profile-share-button,
+.student-password-toggle,
+.match-success {
+  color: var(--student-theme-accent);
+}
+
+.student-profile-share-button,
+.student-password-toggle,
+.student-info-section-icon,
+.student-identity-role,
+.status-pill,
+.request-status,
+.home-todo-item.done > span {
+  background: var(--student-theme-cloud-puff);
+  color: var(--student-theme-accent);
+}
+
+.primary-action,
+.join-course-submit,
+.password-save-button,
+.student-photo-change-button,
+.student-identity-card-accent,
+.student-info-item::before,
+.progress-bar-fill,
+.course-progress-fill,
+.quiz-progress-fill {
+  border-color: #6f98c7;
+  background: var(--student-theme-morning-breeze);
+  color: #ffffff;
+}
+
+.primary-action:hover,
+.join-course-submit:hover,
+.password-save-button:hover,
+.student-photo-change-button:hover {
+  background: var(--student-theme-dewy-blue);
+  color: #263c52;
+}
+
+.join-course-cancel,
+.password-cancel-button {
+  border-color: var(--student-theme-dewy-blue);
+  background: var(--student-theme-cloud-puff);
+  color: var(--student-theme-ink);
+}
+
+.student-search-input:focus,
+.password-input-wrapper:focus-within,
+.student-profile-share-button:hover,
+.student-password-toggle:hover {
+  border-color: var(--student-theme-morning-breeze);
+  box-shadow: 0 0 0 3px rgba(127, 168, 214, 0.18);
+}
+
+.home-todo-item input:checked {
+  background:
+    linear-gradient(135deg, transparent 45%, #fff 45% 56%, transparent 56%),
+    linear-gradient(45deg, transparent 43%, #fff 43% 56%, transparent 56%),
+    var(--student-theme-morning-breeze);
+}
+
+.practice-scope-option:hover,
+.todo-add-row input:focus {
+  border-color: var(--student-theme-morning-breeze);
+}
+
+.practice-scope-option small,
+.sidebar-course-item:hover,
+.todo-card label.done span,
+.course-code {
+  color: var(--student-theme-accent);
+}
+
+.add-course-button,
+.start-learning-button,
+.enroll-confirm-btn,
+.calendar-grid .selected,
+.sidebar-course-dot,
+.profile-status-dot {
+  background: var(--student-theme-morning-breeze);
+  background-color: var(--student-theme-morning-breeze);
+  color: #ffffff;
+}
+
+.add-course-button:hover,
+.start-learning-button:hover,
+.enroll-confirm-btn:hover {
+  background: var(--student-theme-dewy-blue);
+  background-color: var(--student-theme-dewy-blue);
+  color: #263c52;
+}
+
+.add-course-button.enrolled-course-status,
+.start-learning-button.enrolled-course-status {
+  background: var(--student-theme-cloud-puff);
+  background-color: var(--student-theme-cloud-puff);
+  color: var(--student-theme-accent);
+  box-shadow: 2px 3px 0 rgba(79, 97, 116, 0.16);
+}
+
+.enroll-cancel-btn {
+  background: var(--student-theme-cloud-puff);
+  background-color: var(--student-theme-cloud-puff);
+  color: var(--student-theme-ink);
+  box-shadow: 0 4px 0 rgba(79, 97, 116, 0.16);
+}
+
+.todo-card label input:checked {
+  background:
+    linear-gradient(135deg, transparent 45%, #fff 45% 56%, transparent 56%),
+    linear-gradient(45deg, transparent 43%, #fff 43% 56%, transparent 56%),
+    var(--student-theme-morning-breeze);
 }

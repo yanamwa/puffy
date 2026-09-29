@@ -545,3 +545,22 @@
     min-width: 800px;
   }
 }
+
+/* Professor palette cleanup for course view actions. */
+.activeTab {
+  border-color: #6f98c7;
+  background: #7fa8d6;
+  color: #ffffff;
+}
+
+.tab:hover {
+  border-color: #a8c6e7;
+  background: #fff7d6;
+  color: #4f6174;
+}
+
+.cancelRejectBtn {
+  border-color: #a8c6e7;
+  background: #fff7d6;
+  color: #4f6174;
+}

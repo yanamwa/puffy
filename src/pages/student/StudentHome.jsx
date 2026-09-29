@@ -447,7 +447,7 @@ export default function StudentHome() {
           title: "Enter Course Code",
           text: "Please enter the course code provided by your professor.",
           confirmButtonText: "OK",
-          confirmButtonColor: "#198754",
+          confirmButtonColor: "#7FA8D6",
         });
         return;
       }
@@ -460,7 +460,7 @@ export default function StudentHome() {
           title: "Course Not Found",
           text: "Course code not found. Please check the code from your professor.",
           confirmButtonText: "OK",
-          confirmButtonColor: "#198754",
+          confirmButtonColor: "#7FA8D6",
         });
         return;
       }
@@ -479,7 +479,7 @@ export default function StudentHome() {
           "the course"
         }.`,
         confirmButtonText: "Continue",
-        confirmButtonColor: "#198754",
+        confirmButtonColor: "#7FA8D6",
       });
 
       const courseId =
@@ -497,7 +497,7 @@ export default function StudentHome() {
         title: "Unable to Join Course",
         text: error?.message || "Unable to join the course.",
         confirmButtonText: "OK",
-        confirmButtonColor: "#198754",
+        confirmButtonColor: "#7FA8D6",
       });
     }
   };

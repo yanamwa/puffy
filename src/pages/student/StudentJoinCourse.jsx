@@ -45,7 +45,7 @@ export default function StudentJoinCourse() {
         title: 'Invalid Course Link',
         text: 'Course link is invalid or the course is not published.',
         confirmButtonText: 'OK',
-        confirmButtonColor: '#198754',
+        confirmButtonColor: '#7FA8D6',
       });
 
       if (!active) return;

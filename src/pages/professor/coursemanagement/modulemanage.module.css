@@ -2053,10 +2053,76 @@
 }
 
 .moduleBox:focus-visible {
-  outline: 2px solid #198754;
+  outline: 2px solid #7fa8d6;
   outline-offset: 3px;
 }
 
 .actions button {
   cursor: pointer;
+}
+
+/* Professor palette cleanup for course-management actions and badges. */
+.modulePage,
+.coursePage {
+  --professor-theme-buttercup: #fff2b2;
+  --professor-theme-dewy-blue: #a8c6e7;
+  --professor-theme-sunwashed: #ffe08a;
+  --professor-theme-cloud-puff: #fff7d6;
+  --professor-theme-morning-breeze: #7fa8d6;
+  --professor-theme-ink: #4f6174;
+  --professor-theme-accent: #5f86b1;
+}
+
+.addBtn,
+.toggleActive,
+.popupAddBtn,
+.popupSaveBtn,
+.mmHeaderEdit,
+.mmViewBtn,
+.markReadBtn,
+.confirmBtnSwal,
+.moduleBox .actionEdit,
+.moduleBox .actionView {
+  border: 1px solid #6f98c7 !important;
+  background: var(--professor-theme-morning-breeze) !important;
+  box-shadow: 3px 3px 0 rgba(79, 97, 116, 0.2) !important;
+  color: #ffffff !important;
+}
+
+.addBtn:hover,
+.toggleActive:hover,
+.popupAddBtn:hover,
+.popupSaveBtn:hover,
+.mmHeaderEdit:hover,
+.mmViewBtn:hover,
+.markReadBtn:hover,
+.confirmBtnSwal:hover,
+.moduleBox .actionEdit:hover,
+.moduleBox .actionView:hover {
+  background: var(--professor-theme-dewy-blue) !important;
+  color: #263c52 !important;
+}
+
+.toggleButton,
+.popupCancelBtn,
+.cancelBtnSwal,
+.navBtn,
+.pageBtn {
+  border-color: var(--professor-theme-dewy-blue) !important;
+  background: var(--professor-theme-cloud-puff) !important;
+  color: var(--professor-theme-ink) !important;
+}
+
+.moduleBox .statusActive,
+.moduleBox .accessPublic {
+  background: var(--professor-theme-cloud-puff) !important;
+  border-color: var(--professor-theme-sunwashed) !important;
+  color: var(--professor-theme-accent) !important;
+}
+
+.moduleBox .statusInactive,
+.moduleBox .accessPrivate {
+  background: #f3f7fb !important;
+  border-color: var(--professor-theme-dewy-blue) !important;
+  color: var(--professor-theme-ink) !important;
 }

@@ -334,7 +334,7 @@ export default function ProfessorProfile() {
           title: 'Invalid File',
           text: 'Please select a valid JPG, PNG, or WEBP image.',
           confirmButtonText: 'OK',
-          confirmButtonColor: '#198754',
+          confirmButtonColor: '#7FA8D6',
         });
 
         return;
@@ -354,7 +354,7 @@ export default function ProfessorProfile() {
           title: 'File Too Large',
           text: 'Please choose an image smaller than 5 MB.',
           confirmButtonText: 'OK',
-          confirmButtonColor: '#198754',
+          confirmButtonColor: '#7FA8D6',
         });
 
         return;
@@ -371,7 +371,7 @@ export default function ProfessorProfile() {
           title: 'Session Expired',
           text: 'Your login session was not found. Please log in again.',
           confirmButtonText: 'OK',
-          confirmButtonColor: '#198754',
+          confirmButtonColor: '#7FA8D6',
         });
 
         return;
@@ -614,7 +614,7 @@ export default function ProfessorProfile() {
             error.message ||
             'Unable to update your profile picture.',
           confirmButtonText: 'OK',
-          confirmButtonColor: '#198754',
+          confirmButtonColor: '#7FA8D6',
         });
       } finally {
         setProfileImageUploading(

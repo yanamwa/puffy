@@ -450,7 +450,7 @@ export default function PublicCourses() {
           imageWidth: 160,
           imageHeight: 160,
           confirmButtonText: "OK",
-          confirmButtonColor: "#198754",
+          confirmButtonColor: "#7FA8D6",
         });
 
         return false;
@@ -469,7 +469,7 @@ export default function PublicCourses() {
           imageWidth: 160,
           imageHeight: 160,
           confirmButtonText: "OK",
-          confirmButtonColor: "#198754",
+          confirmButtonColor: "#7FA8D6",
         });
 
         await loadEnrolledCourses();
@@ -494,7 +494,7 @@ export default function PublicCourses() {
         imageWidth: 170,
         imageHeight: 170,
         confirmButtonText: "OK",
-        confirmButtonColor: "#198754",
+        confirmButtonColor: "#7FA8D6",
       });
 
       return true;
@@ -527,7 +527,7 @@ export default function PublicCourses() {
           title: "Enter Course Code",
           text: "Please enter the course code provided by your professor.",
           confirmButtonText: "OK",
-          confirmButtonColor: "#198754",
+          confirmButtonColor: "#7FA8D6",
         });
 
         return;
@@ -542,7 +542,7 @@ export default function PublicCourses() {
           title: "Course Not Found",
           text: "Course code not found. Please check the code from your professor.",
           confirmButtonText: "OK",
-          confirmButtonColor: "#198754",
+          confirmButtonColor: "#7FA8D6",
         });
 
         return;
@@ -560,7 +560,7 @@ export default function PublicCourses() {
           error?.message ||
           "Unable to find or request enrollment for this course.",
         confirmButtonText: "OK",
-        confirmButtonColor: "#198754",
+        confirmButtonColor: "#7FA8D6",
       });
     }
   };

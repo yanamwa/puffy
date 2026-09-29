@@ -861,3 +861,45 @@
     width: 100%;
   }
 }
+
+/* Student Buttercup Sky theme */
+.student-profile-page {
+  --student-theme-buttercup: #fff2b2;
+  --student-theme-dewy-blue: #a8c6e7;
+  --student-theme-cloud-puff: #fff7d6;
+  --student-theme-morning-breeze: #7fa8d6;
+  --student-theme-accent: #5f86b1;
+}
+
+.student-identity-card {
+  box-shadow:
+    0 18px 42px rgba(23, 25, 39, 0.1),
+    5px 6px 0 rgba(127, 168, 214, 0.16);
+}
+
+.student-identity-card-accent,
+.student-photo-change-button,
+.student-info-item::before {
+  background: var(--student-theme-morning-breeze);
+}
+
+.student-identity-role,
+.student-info-section-icon,
+.student-profile-share-button,
+.student-password-toggle {
+  background: var(--student-theme-cloud-puff);
+  color: var(--student-theme-accent);
+}
+
+.student-identity-overline,
+.student-identity-number,
+.student-profile-eyebrow {
+  color: var(--student-theme-accent);
+}
+
+.student-photo-change-button:hover,
+.student-profile-share-button:hover,
+.student-password-toggle:hover {
+  background: var(--student-theme-dewy-blue);
+  color: #263c52;
+}

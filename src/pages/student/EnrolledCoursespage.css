@@ -366,6 +366,39 @@
   stroke-linejoin: round;
 }
 
+/* Student Buttercup Sky theme */
+.enrolled-courses-page {
+  --green: #7fa8d6;
+  --green-dark: #a8c6e7;
+  --student-theme-buttercup: #fff2b2;
+  --student-theme-dewy-blue: #a8c6e7;
+  --student-theme-sunwashed: #ffe08a;
+  --student-theme-cloud-puff: #fff7d6;
+  --student-theme-morning-breeze: #7fa8d6;
+  --student-theme-ink: #4f6174;
+  --student-theme-accent: #5f86b1;
+}
+
+.sort-toggle:hover,
+.course-folder .course-code {
+  border-color: var(--student-theme-morning-breeze);
+  color: var(--student-theme-accent);
+}
+
+.course-folder:focus-visible {
+  outline-color: rgba(127, 168, 214, 0.35);
+}
+
+.course-menu-button:hover,
+.course-menu-button.active {
+  background: var(--student-theme-cloud-puff);
+  color: var(--student-theme-accent);
+}
+
+.course-menu-button span {
+  background: var(--student-theme-accent);
+}
+
 .student-empty-state {
   grid-column: 1 / -1;
   min-height: 190px;

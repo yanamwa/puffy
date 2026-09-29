@@ -398,7 +398,7 @@ export default function StudentCourseDetail() {
     moduleTitle: module.title,
   });
 
-  const getModulePracticeItems = (module, index) => {
+  const getModuleAuthoredQuizItems = (module, index) => {
     if (Array.isArray(module.quizItems) && module.quizItems.length) {
       return module.quizItems;
     }
@@ -440,6 +440,16 @@ export default function StudentCourseDetail() {
 
     if (modules.length === 1 && allQuizItems.length) {
       return allQuizItems;
+    }
+
+    return [];
+  };
+
+  const getModulePracticeItems = (module, index) => {
+    const authoredItems = getModuleAuthoredQuizItems(module, index);
+
+    if (authoredItems.length) {
+      return authoredItems;
     }
 
     return [createFallbackQuiz(module, index)];
@@ -532,6 +542,71 @@ export default function StudentCourseDetail() {
     setQuizModesOpen(true);
   };
 
+  const openModuleMainQuiz = async (module, index) => {
+    if (!isModuleLearnUnlocked(index)) {
+      await Swal.fire({
+        icon: 'info',
+        title: 'Module Locked',
+        text: `Complete Module ${index} before taking the Main Quiz for Module ${
+          index + 1
+        }.`,
+        confirmButtonText: 'OK',
+      });
+
+      return;
+    }
+
+    if (!isModulePracticeUnlocked(index)) {
+      await Swal.fire({
+        icon: 'info',
+        title: 'Finish Reading First',
+        text: `Read all lesson pages in Module ${
+          index + 1
+        } before taking its Main Quiz.`,
+        confirmButtonText: 'OK',
+      });
+
+      return;
+    }
+
+    const quizzes = getModuleAuthoredQuizItems(module, index);
+
+    if (!quizzes.length) {
+      await Swal.fire({
+        icon: 'info',
+        title: 'No Main Quiz Yet',
+        text: 'Your professor has not added Main Quiz questions for this module yet.',
+        confirmButtonText: 'OK',
+      });
+
+      return;
+    }
+
+    const mainQuizModule = {
+      id: module.id,
+      index,
+      title: `${module.title} Main Quiz`,
+      detail: `${quizzes.length} question(s)`,
+      quizzes,
+    };
+
+    localStorage.setItem(
+      'practiceScope',
+      JSON.stringify({
+        courseId: courseRouteId,
+        courseCode: course.code,
+        scopeId: module.id,
+        scopeType: 'main_quiz',
+        moduleIndex: index,
+        scopeTitle: mainQuizModule.title,
+        scopeDetail: mainQuizModule.detail,
+      })
+    );
+
+    setSelectedPracticeModule(mainQuizModule);
+    setQuizModesOpen(true);
+  };
+
   const startCourseLearning = () => {
     const firstIncompleteIndex = moduleProgressValues.findIndex(
       (progress) => progress < 100
@@ -615,7 +690,7 @@ export default function StudentCourseDetail() {
         title: 'Enter Course Code',
         text: 'Please enter the course code provided by your professor.',
         confirmButtonText: 'OK',
-        confirmButtonColor: '#198754',
+        confirmButtonColor: '#7FA8D6',
       });
 
       return;
@@ -630,7 +705,7 @@ export default function StudentCourseDetail() {
         title: 'Course Not Found',
         text: 'Course code not found. Please check the code from your professor.',
         confirmButtonText: 'OK',
-        confirmButtonColor: '#198754',
+        confirmButtonColor: '#7FA8D6',
       });
 
       return;
@@ -652,7 +727,7 @@ export default function StudentCourseDetail() {
         'the course'
       }.`,
       confirmButtonText: 'Continue',
-      confirmButtonColor: '#198754',
+      confirmButtonColor: '#7FA8D6',
     });
 
     const courseId =
@@ -679,7 +754,7 @@ export default function StudentCourseDetail() {
         error?.message ||
         'Unable to join the course.',
       confirmButtonText: 'OK',
-      confirmButtonColor: '#198754',
+      confirmButtonColor: '#7FA8D6',
     });
   }
 };
@@ -869,6 +944,8 @@ export default function StudentCourseDetail() {
                               isModuleLearnUnlocked(index);
                             const practiceUnlocked =
                               isModulePracticeUnlocked(index);
+                            const hasMainQuiz =
+                              getModuleAuthoredQuizItems(module, index).length > 0;
           
                             const moduleState = !learnUnlocked
                               ? 'locked'
@@ -961,6 +1038,24 @@ export default function StudentCourseDetail() {
                                     }
                                   >
                                     Practice
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    className="student-module-main-quiz-button"
+                                    onClick={() =>
+                                      openModuleMainQuiz(module, index)
+                                    }
+                                    disabled={!practiceUnlocked || !hasMainQuiz}
+                                    title={
+                                      !hasMainQuiz
+                                        ? 'No Main Quiz questions have been added yet.'
+                                        : practiceUnlocked
+                                          ? `Take the Main Quiz for ${module.title}`
+                                          : 'Finish reading this module first.'
+                                    }
+                                  >
+                                    Main Quiz
                                   </button>
                                 </div>
                               </article>

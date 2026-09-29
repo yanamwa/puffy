@@ -396,37 +396,8 @@ function buildActivityItems(courses, monitoringByCourse) {
     .sort((first, second) => second.sortValue - first.sortValue)
     .slice(0, 5);
 }
-function MasteryBar({ mastery }) {
-  const entries = Object.entries(mastery);
-  const total = entries.reduce((sum, [, value]) => sum + value, 0) || 1;
-
-  return (
-    <div className="dashboard-mastery">
-      <div className="dashboard-mastery-bar" aria-label="Mastery distribution">
-        {entries.map(([label, value]) => (
-          <span
-            className={`dashboard-mastery-segment ${label.toLowerCase()}`}
-            key={label}
-            style={{ width: `${Math.max(5, (value / total) * 100)}%` }}
-            title={`${label}: ${value}`}
-          />
-        ))}
-      </div>
-      <div className="dashboard-mastery-legend">
-        {entries.map(([label, value]) => (
-          <span key={label}>
-            <i className={label.toLowerCase()} />
-            {label} {value}
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 export default function ProfessorHome() {
   const { user } = useAuth();
-  const [selectedCourseId, setSelectedCourseId] = useState('');
   const [storedCourses, setStoredCourses] = useState(() =>
     readProfessorCourses().filter((course) => !course.archived)
   );
@@ -523,9 +494,6 @@ export default function ProfessorHome() {
     );
   }, [normalizedCourses, monitoringByCourse]);
 
-  const selectedCourse =
-    dashboardCourses.find((course) => course.id === selectedCourseId) ||
-    dashboardCourses[0];
   const overviewCourses = dashboardCourses.slice(0, 4);
   const studentsNeedingAttention = useMemo(
     () => buildStudentsNeedingAttention(dashboardCourses, monitoringByCourse),
@@ -661,78 +629,6 @@ export default function ProfessorHome() {
             </tbody>
           </table>
         </div>
-      </section>
-
-      <section className="dashboard-panel dashboard-performance">
-        <div className="dashboard-section-header">
-          <div>
-            <h2>Class Performance</h2>
-            <p>Quiz scores, completion rates, and mastery levels by course.</p>
-          </div>
-          {dashboardCourses.length > 0 && (
-            <label className="dashboard-course-select">
-              <span>Course</span>
-              <select
-                value={selectedCourse?.id || ''}
-                onChange={(event) => setSelectedCourseId(event.target.value)}
-              >
-                {dashboardCourses.map((course) => (
-                  <option key={course.id} value={course.id}>
-                    {course.title}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
-        </div>
-
-        {dashboardCourses.length === 0 ? (
-          <div className="dashboard-empty-state">
-            No class performance yet. Create a course to start collecting data.
-          </div>
-        ) : (
-          <div className="dashboard-chart-grid">
-            <div className="dashboard-bars" aria-label="Average quiz scores and completion">
-              {dashboardCourses.map((course) => (
-                <div className="dashboard-bar-row" key={course.id}>
-                  <span>{course.title}</span>
-                  <div>
-                    <i
-                      className="score"
-                      style={{ width: `${course.averageQuizScore}%` }}
-                    />
-                    <i
-                      className="completion"
-                      style={{ width: `${course.completionRate}%` }}
-                    />
-                  </div>
-                  <strong>{course.averageQuizScore}%</strong>
-                </div>
-              ))}
-              <div className="dashboard-chart-legend">
-                <span>
-                  <i className="score" />
-                  Average quiz score
-                </span>
-                <span>
-                  <i className="completion" />
-                  Completion rate
-                </span>
-              </div>
-            </div>
-
-            {selectedCourse && (
-              <div className="dashboard-selected-course">
-                <div>
-                  <span>{selectedCourse.title}</span>
-                  <strong>{selectedCourse.averageMastery}%</strong>
-                  <p>Average class mastery</p>
-                </div>
-                <MasteryBar mastery={selectedCourse.mastery} />
-              </div>
-            )}
-          </div>
-        )}
       </section>
 
       <div className="dashboard-main-grid attention-grid">

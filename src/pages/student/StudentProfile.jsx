@@ -481,7 +481,7 @@ export default function StudentProfile() {
 
         confirmButtonText: "OK",
 
-        confirmButtonColor: "#198754",
+        confirmButtonColor: "#7FA8D6",
 
       });
 
@@ -507,7 +507,7 @@ export default function StudentProfile() {
 
           confirmButtonText: "OK",
 
-          confirmButtonColor: "#198754",
+          confirmButtonColor: "#7FA8D6",
 
         });
 
@@ -541,7 +541,7 @@ export default function StudentProfile() {
 
         confirmButtonText: "Continue",
 
-        confirmButtonColor: "#198754",
+        confirmButtonColor: "#7FA8D6",
 
       });
 
@@ -575,7 +575,7 @@ export default function StudentProfile() {
 
         confirmButtonText: "OK",
 
-        confirmButtonColor: "#198754",
+        confirmButtonColor: "#7FA8D6",
 
       });
 
@@ -599,7 +599,7 @@ export default function StudentProfile() {
 
         text: "Your profile link has been copied.",
 
-        confirmButtonColor: "#198754",
+        confirmButtonColor: "#7FA8D6",
 
         timer: 1600,
 
@@ -619,7 +619,7 @@ export default function StudentProfile() {
 
         text: "Unable to copy the profile link.",
 
-        confirmButtonColor: "#198754",
+        confirmButtonColor: "#7FA8D6",
 
       });
 
@@ -645,7 +645,7 @@ export default function StudentProfile() {
 
         text: "Please select a valid image file.",
 
-        confirmButtonColor: "#2ea86b",
+        confirmButtonColor: "#7FA8D6",
 
       });
 
@@ -665,7 +665,7 @@ export default function StudentProfile() {
 
         text: "Please choose an image smaller than 5 MB.",
 
-        confirmButtonColor: "#2ea86b",
+        confirmButtonColor: "#7FA8D6",
 
       });
 
@@ -685,7 +685,7 @@ export default function StudentProfile() {
 
         text: "Please log in again.",
 
-        confirmButtonColor: "#2ea86b",
+        confirmButtonColor: "#7FA8D6",
 
       });
 
@@ -801,7 +801,7 @@ export default function StudentProfile() {
 
         text: "Your profile picture has been updated successfully.",
 
-        confirmButtonColor: "#2ea86b",
+        confirmButtonColor: "#7FA8D6",
 
         timer: 1800,
 
@@ -829,7 +829,7 @@ export default function StudentProfile() {
 
           "Unable to update your profile picture.",
 
-        confirmButtonColor: "#2ea86b",
+        confirmButtonColor: "#7FA8D6",
 
       });
 

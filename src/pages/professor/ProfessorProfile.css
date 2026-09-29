@@ -812,3 +812,45 @@
     flex-direction: column;
   }
 }
+
+/* Professor palette cleanup for profile. */
+.professor-profile-page {
+  --professor-theme-dewy-blue: #a8c6e7;
+  --professor-theme-cloud-puff: #fff7d6;
+  --professor-theme-morning-breeze: #7fa8d6;
+  --professor-theme-accent: #5f86b1;
+}
+
+.professor-identity-card {
+  box-shadow:
+    0 18px 42px rgba(23, 25, 39, 0.1),
+    5px 6px 0 rgba(127, 168, 214, 0.16);
+}
+
+.professor-identity-card-accent,
+.professor-photo-change-button,
+.professor-info-item::before {
+  background: var(--professor-theme-morning-breeze);
+}
+
+.professor-identity-role,
+.professor-info-section-icon,
+.professor-password-toggle:hover {
+  background: var(--professor-theme-cloud-puff);
+  color: var(--professor-theme-accent);
+}
+
+.professor-identity-overline,
+.professor-identity-number,
+.professor-profile-eyebrow,
+.professor-password-toggle {
+  color: var(--professor-theme-accent);
+}
+
+.professor-info-item {
+  background: #f7fbff;
+}
+
+.professor-password-toggle:hover {
+  border-color: var(--professor-theme-morning-breeze);
+}

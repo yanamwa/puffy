@@ -2941,3 +2941,1620 @@
     justify-content: flex-start;
   }
 }
+
+/* =========================================
+   COMPACT EDIT COURSE REFERENCE
+========================================= */
+
+:global(.professor-content:has(.edit-course-page)),
+:global(.professor-content:has(.course-module-editor-page)) {
+  padding: 0;
+}
+
+.editCoursePage {
+  min-height: 100%;
+  padding-bottom: 58px;
+  background: #f4f4f4;
+}
+
+.editCoursePage .pageHeader {
+  min-height: 51px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 8px 28px 9px;
+  border-bottom: 1px solid #d0d0d0;
+  background: #f3f3f3;
+}
+
+.editCoursePage .pageHeader h1 {
+  color: #666;
+  font-size: 20px;
+  font-weight: 500 !important;
+  line-height: 1.1;
+}
+
+.editCoursePage .pageHeaderText {
+  margin: 2px 0 0;
+  color: #666;
+  font-size: 8px;
+  line-height: 1.25;
+}
+
+.editCoursePage .formCard {
+  margin: 0;
+  padding: 21px 28px 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.editCoursePage .popupInfoGrid {
+  width: min(100%, 509px);
+  max-width: 509px;
+  grid-template-columns: minmax(0, 309px) minmax(0, 156px);
+  gap: 44px;
+}
+
+.editCoursePage .formCard > .popupSection {
+  width: min(100%, 510px);
+  max-width: 510px;
+  margin-top: 17px;
+}
+
+.editCoursePage .popupField,
+.editCoursePage .popupSection {
+  gap: 0;
+  margin-bottom: 0;
+}
+
+.editCoursePage .popupLabel {
+  margin: 0 0 8px;
+  color: #202020;
+  font-size: 8px;
+  font-weight: 400 !important;
+  line-height: 1;
+}
+
+.editCoursePage .required {
+  margin-left: 4px;
+  color: #a3a3a3;
+  font-size: 7px;
+}
+
+.editCoursePage .popupInput,
+.editCoursePage .popupSelect {
+  height: 20px;
+  min-height: 20px;
+  padding: 2px 8px;
+  border: 1px solid #c9c9c9;
+  border-radius: 8px;
+  background: #f8f8f8;
+  color: #303030;
+  font-size: 8px;
+  box-shadow: none;
+}
+
+.editCoursePage .popupTextarea {
+  padding: 8px 10px;
+  border: 1px solid #c9c9c9;
+  border-radius: 8px;
+  background: #f8f8f8;
+  color: #303030;
+  font-size: 8px;
+  line-height: 1.35;
+  box-shadow: none;
+}
+
+.editCoursePage .popupSmallBox {
+  min-height: 64px;
+  height: 64px;
+}
+
+.editCoursePage .moduleBuilderSection {
+  margin: 12px -28px 0;
+  padding: 0 28px 34px;
+  border-top: 1px solid #d0d0d0;
+}
+
+.editCoursePage .moduleBuilderHeader {
+  min-height: 52px;
+  display: grid;
+  grid-template-columns: minmax(0, 360px) auto;
+  align-items: center;
+  justify-content: start;
+  column-gap: 78px;
+  margin: 0 -28px 18px;
+  padding: 8px 28px;
+  border-bottom: 1px solid #d0d0d0;
+  background: #eeeeee;
+}
+
+.editCoursePage .moduleBuilderHeader h2 {
+  margin: 0;
+  color: #666;
+  font-size: 22px;
+  font-weight: 500 !important;
+  line-height: 1.08;
+}
+
+.editCoursePage .moduleBuilderHeader p {
+  margin: 4px 0 0;
+  color: #666;
+  font-size: 8px;
+  line-height: 1.2;
+}
+
+.editCoursePage .popupAddBtn {
+  min-width: 80px;
+  height: 22px;
+  min-height: 22px;
+  padding: 0 12px;
+  border: 0 !important;
+  border-radius: 8px;
+  background: #8d8d8d !important;
+  color: #fff !important;
+  box-shadow: none !important;
+  font-size: 8px;
+  font-weight: 400 !important;
+}
+
+.editCoursePage .moduleCardGrid {
+  width: min(100%, 511px);
+  max-width: 511px;
+  display: grid;
+  gap: 18px;
+}
+
+.editCoursePage .moduleCard {
+  overflow: visible;
+  border: 1px solid #c8c8c8;
+  border-radius: 8px;
+  background: #f7f7f7;
+  box-shadow: none;
+}
+
+.editCoursePage .moduleCardExpanded {
+  max-width: none;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.editCoursePage .moduleCardHeader {
+  min-height: 63px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 10px;
+  border: 0;
+  background: #f7f7f7;
+}
+
+.editCoursePage .moduleCardExpanded .moduleCardHeader {
+  width: min(100%, 511px);
+  max-width: 511px;
+  margin-bottom: 18px;
+  border: 1px solid #c8c8c8;
+  border-radius: 8px;
+}
+
+.editCoursePage .moduleNumber {
+  display: none;
+}
+
+.editCoursePage .moduleCardHeading > span {
+  margin: 0 0 5px;
+  color: #333;
+  font-size: 9px;
+  font-weight: 400 !important;
+  line-height: 1;
+  text-transform: none;
+}
+
+.editCoursePage .moduleCardHeading h3 {
+  color: #333;
+  font-size: 14px;
+  font-weight: 400 !important;
+  line-height: 1.18;
+}
+
+.editCoursePage .moduleCardHeading p {
+  margin: 5px 0 0;
+  color: #858585;
+  font-size: 10px;
+  line-height: 1.2;
+}
+
+.editCoursePage .moduleCardHeaderActions {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
+.editCoursePage .moduleExpandBtn,
+.editCoursePage .moduleDeleteBtn {
+  min-width: 65px;
+  height: 20px;
+  border-radius: 7px;
+  box-shadow: none;
+  font-size: 8px;
+  font-weight: 400 !important;
+}
+
+.editCoursePage .moduleExpandBtn {
+  border: 0;
+  background: #8d8d8d;
+  color: #fff;
+}
+
+.editCoursePage .moduleDeleteBtn {
+  border: 1px solid #ff4f5e;
+  background: transparent;
+  color: #ff1f2f;
+}
+
+.editCoursePage .popupActions {
+  width: min(100%, 511px);
+  max-width: 511px;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+.editCoursePage .popupCancelBtn,
+.editCoursePage .popupSaveBtn {
+  min-width: 84px;
+  height: 28px;
+  border-radius: 8px;
+  box-shadow: none !important;
+  font-size: 10px;
+}
+
+@media (max-width: 700px) {
+  :global(.professor-content:has(.edit-course-page)) {
+    padding: 0;
+  }
+
+  .editCoursePage .pageHeader,
+  .editCoursePage .formCard {
+    padding-inline: 20px;
+  }
+
+  .editCoursePage .popupInfoGrid {
+    grid-template-columns: 1fr;
+    gap: 13px;
+    width: 100%;
+    max-width: none;
+  }
+
+  .editCoursePage .formCard > .popupSection {
+    width: 100%;
+    max-width: none;
+  }
+
+  .editCoursePage .moduleBuilderSection,
+  .editCoursePage .moduleBuilderHeader {
+    margin-left: -20px;
+    margin-right: -20px;
+  }
+
+  .editCoursePage .moduleBuilderSection {
+    padding-right: 20px;
+    padding-left: 20px;
+  }
+
+  .editCoursePage .moduleBuilderHeader {
+    grid-template-columns: 1fr;
+    row-gap: 10px;
+    padding-right: 20px;
+    padding-left: 20px;
+  }
+
+  .editCoursePage .moduleCardHeader {
+    grid-template-columns: 1fr;
+  }
+
+  .editCoursePage .moduleCardHeaderActions {
+    justify-content: flex-start;
+  }
+}
+
+/* =========================================
+   ROOMIER SEPARATE MODULE EDITOR
+========================================= */
+
+.courseModuleEditorPage .pageHeader {
+  display: block;
+  padding: 16px 38px 14px;
+}
+
+.courseModuleEditorPage .pageHeader h1 {
+  font-size: 26px;
+}
+
+.courseModuleEditorPage .pageHeaderText {
+  max-width: 720px;
+  margin-top: 4px;
+  font-size: 12px;
+}
+
+.courseModuleEditorPage .moduleEditorForm {
+  padding-bottom: 64px;
+}
+
+.courseModuleEditorPage .moduleMaterialBand {
+  padding: 16px 38px 18px;
+}
+
+.courseModuleEditorPage .moduleMaterialBand h2 {
+  font-size: 20px;
+}
+
+.courseModuleEditorPage .moduleMaterialBand p {
+  max-width: 720px;
+  margin: 5px 0 12px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.courseModuleEditorPage .moduleMaterialBand .customFileBtn {
+  width: min(100%, 330px);
+  height: 34px;
+  display: inline-flex;
+  vertical-align: middle;
+  font-size: 13px;
+}
+
+.courseModuleEditorPage .moduleMaterialBand .fileName {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  margin: 0 12px;
+  vertical-align: middle;
+  font-size: 13px;
+}
+
+.courseModuleEditorPage .moduleMaterialBand .popupAddBtn {
+  width: auto;
+  min-width: 190px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  vertical-align: middle;
+  font-size: 20px;
+  white-space: nowrap;
+}
+
+.courseModuleEditorPage .generatedPageSummary {
+  max-width: 860px;
+  margin-top: 18px;
+  padding: 16px 18px;
+  border: 1px solid #c8c8c8;
+  border-radius: 10px;
+  background: #f8f8f8;
+}
+
+.courseModuleEditorPage .generatedPageSummary h3 {
+  margin: 0 0 10px;
+  color: #555;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.courseModuleEditorPage .generatedPageSummary ul {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding-left: 22px;
+}
+
+.courseModuleEditorPage .generatedPageSummary li {
+  color: #222;
+  font-size: 20px;
+  line-height: 1.35;
+}
+
+.courseModuleEditorPage .moduleEditorDetails {
+  width: 100%;
+  max-width: none;
+  grid-template-columns: minmax(280px, 0.45fr) minmax(360px, 0.55fr);
+  gap: 20px 34px;
+  padding: 18px 38px 30px;
+  box-sizing: border-box;
+}
+
+.courseModuleEditorPage .moduleEditorDetails .popupInput {
+  height: 34px;
+  min-height: 34px;
+  font-size: 14px;
+}
+
+.courseModuleEditorPage .moduleEditorObjectives .popupSmallBox {
+  min-height: 126px;
+  height: 126px;
+  font-size: 14px;
+}
+
+.courseModuleEditorPage .moduleEditorBand {
+  padding: 20px 38px 30px;
+}
+
+.courseModuleEditorPage .moduleEditorBandHeader,
+.courseModuleEditorPage .moduleEditorWorkspace,
+.courseModuleEditorPage .moduleEditorActions {
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
+}
+
+.courseModuleEditorPage .moduleEditorBandHeader {
+  margin-bottom: 18px;
+}
+
+.courseModuleEditorPage .moduleEditorBandActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.courseModuleEditorPage .moduleAssessmentGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(260px, 360px));
+  gap: 18px;
+  align-items: stretch;
+}
+
+.courseModuleEditorPage .moduleAssessmentCard {
+  min-height: 190px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 22px;
+  padding: 22px 24px;
+  border: 1px solid #c7c7c7;
+  border-radius: 6px;
+  background: #ffffff;
+  box-sizing: border-box;
+}
+
+.courseModuleEditorPage .moduleAssessmentCard h3 {
+  margin: 0 0 14px;
+  color: #333333;
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1.15;
+}
+
+.courseModuleEditorPage .moduleAssessmentCard p {
+  margin: 6px 0 0;
+  color: #555f6c;
+  font-size: 16px;
+  line-height: 1.25;
+}
+
+.courseModuleEditorPage .assessmentEditButton {
+  width: fit-content;
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 18px;
+  border: 1px solid #7fa8d6;
+  border-radius: 6px;
+  background: #7fa8d6;
+  color: #ffffff;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.courseModuleEditorPage .assessmentEditButton:hover {
+  background: #a8c6e7;
+  color: #263c52;
+}
+
+.courseModuleEditorPage .moduleAssessmentEditor {
+  display: grid;
+  gap: 16px;
+  margin-top: 22px;
+}
+
+.courseModuleEditorPage .moduleAssessmentEditorHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.courseModuleEditorPage .moduleAssessmentEditorHeader h3 {
+  margin: 0;
+  color: #444444;
+  font-size: 22px;
+  font-weight: 500;
+}
+
+.courseModuleEditorPage .moduleAssessmentEditorHeader p {
+  margin: 4px 0 0;
+  color: #666666;
+  font-size: 13px;
+}
+
+.courseModuleEditorPage .moduleEditorBandActions .popupAddBtn,
+.courseModuleEditorPage .moduleEditorActions .popupCancelBtn,
+.courseModuleEditorPage .moduleEditorActions .popupSaveBtn,
+.courseModuleEditorPage .lessonNavigationBtn,
+.courseModuleEditorPage .uploadMediaBtn {
+  min-height: 44px;
+  padding: 0 22px;
+  font-size: 20px;
+}
+
+.courseModuleEditorPage .moduleEditorBandActions .popupAddBtn {
+  min-width: 150px;
+}
+
+.courseModuleEditorPage .moduleEditorRemoveBtn {
+  border: 1px solid #ff4f5e !important;
+  background: transparent !important;
+  color: #ff1f2f !important;
+}
+
+.courseModuleEditorPage .moduleEditorRemoveBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.courseModuleEditorPage .moduleEditorBandHeader h2 {
+  font-size: 26px;
+}
+
+.courseModuleEditorPage .moduleEditorBandHeader p {
+  font-size: 13px;
+}
+
+.courseModuleEditorPage .moduleEditorWorkspace {
+  grid-template-columns: 116px minmax(0, 1fr);
+  gap: 12px;
+}
+
+.courseModuleEditorPage .moduleEditorWorkspace .lessonPageTabs {
+  width: 116px;
+}
+
+.courseModuleEditorPage .moduleEditorWorkspace .lessonPageTab {
+  height: 34px;
+  min-height: 34px;
+  font-size: 13px;
+}
+
+.courseModuleEditorPage .moduleEditorWorkspace .popupQuizCard {
+  padding: 16px;
+}
+
+.courseModuleEditorPage .moduleQuizEditorCard {
+  display: grid;
+  gap: 12px;
+}
+
+.courseModuleEditorPage .moduleQuizEditorCard .popupLabel {
+  margin-bottom: -4px;
+}
+
+.courseModuleEditorPage .moduleQuizEditorCard .optionsGrid {
+  gap: 12px;
+  margin: 4px 0;
+}
+
+.courseModuleEditorPage .moduleQuizEditorCard .popupAnswerBox {
+  margin-top: 0;
+}
+
+.courseModuleEditorPage .moduleEditorWorkspace .popupInput,
+.courseModuleEditorPage .moduleEditorWorkspace .popupSelect {
+  height: 34px;
+  min-height: 34px;
+  font-size: 14px;
+}
+
+.courseModuleEditorPage .lessonContentHeading {
+  margin-top: 16px;
+}
+
+.courseModuleEditorPage .uploadMediaBtn {
+  min-width: 210px;
+  height: 44px;
+  font-size: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  text-align: center;
+}
+
+.courseModuleEditorPage .uploadMediaBtn input {
+  display: none;
+}
+
+.courseModuleEditorPage .moduleEditorWorkspace .popupLargeBox {
+  min-height: 230px;
+  font-size: 14px;
+}
+
+.courseModuleEditorPage .moduleEditorWorkspace .popupAnswerBox {
+  min-height: 104px;
+  font-size: 14px;
+}
+
+.courseModuleEditorPage .moduleEditorActions {
+  justify-content: center;
+  gap: 16px;
+  padding: 28px 38px 0;
+}
+
+.courseModuleEditorPage .moduleEditorActions .popupCancelBtn,
+.courseModuleEditorPage .moduleEditorActions .popupSaveBtn {
+  min-width: 170px;
+  min-height: 56px;
+  border-radius: 10px;
+  font-size: 20px;
+}
+
+.courseModuleEditorPage .moduleEditorActions .popupSaveBtn {
+  border: 1px solid #6f98c7;
+  background: #7fa8d6 !important;
+  color: #ffffff;
+}
+
+.courseModuleEditorPage .moduleEditorActions .popupSaveBtn:hover {
+  background: #a8c6e7 !important;
+  color: #263c52;
+}
+
+.courseModuleEditorPage .moduleEditorActions .popupCancelBtn {
+  border: 1px solid #b9c1cc;
+  background: #ffffff;
+  color: #4f4f4f;
+}
+
+.courseModuleEditorPage .popupLabel,
+.courseModuleEditorPage .required,
+.courseModuleEditorPage .pageHeaderText,
+.courseModuleEditorPage .moduleMaterialBand h2,
+.courseModuleEditorPage .moduleMaterialBand p,
+.courseModuleEditorPage .moduleMaterialBand .fileName,
+.courseModuleEditorPage .moduleEditorBandHeader p,
+.courseModuleEditorPage .moduleEditorWorkspace .lessonPageTab,
+.courseModuleEditorPage .moduleEditorEmptyTab,
+.courseModuleEditorPage .lessonPageIndicator,
+.courseModuleEditorPage .popupInput,
+.courseModuleEditorPage .popupSelect,
+.courseModuleEditorPage .popupTextarea,
+.courseModuleEditorPage .customFileBtn,
+.courseModuleEditorPage .popupAddBtn,
+.courseModuleEditorPage .popupCancelBtn,
+.courseModuleEditorPage .popupSaveBtn,
+.courseModuleEditorPage .lessonNavigationBtn,
+.courseModuleEditorPage .uploadMediaBtn {
+  font-size: 20px !important;
+  line-height: 1.35;
+}
+
+.courseModuleEditorPage .moduleEditorWorkspace {
+  grid-template-columns: 160px minmax(0, 1fr);
+}
+
+.courseModuleEditorPage .moduleEditorWorkspace .lessonPageTabs {
+  width: 160px;
+}
+
+.courseModuleEditorPage .moduleEditorWorkspace .lessonPageTab,
+.courseModuleEditorPage .moduleEditorEmptyTab {
+  height: 48px;
+  min-height: 48px;
+}
+
+.courseModuleEditorPage .popupInput,
+.courseModuleEditorPage .popupSelect {
+  height: 58px;
+  min-height: 58px;
+  padding: 12px 18px;
+  line-height: 1.35;
+}
+
+.courseModuleEditorPage .moduleEditorDetails .popupInput {
+  height: 52px;
+  min-height: 52px;
+}
+
+.courseModuleEditorPage .moduleEditorObjectives .popupSmallBox {
+  min-height: 160px;
+  height: 160px;
+}
+
+.courseModuleEditorPage .uploadMediaBtn {
+  min-width: 270px;
+  height: 50px;
+}
+
+.courseModuleEditorPage .moduleEditorWorkspace .popupLargeBox {
+  min-height: 280px;
+  padding: 18px 20px;
+  line-height: 1.45;
+}
+
+.courseModuleEditorPage .lessonMediaPreview {
+  display: grid;
+  grid-template-columns: minmax(180px, 320px) minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+  margin: 14px 0;
+  padding: 12px;
+  border: 1px solid #c8c8c8;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.courseModuleEditorPage .lessonMediaFrame {
+  overflow: hidden;
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
+  background: #eeeeee;
+  aspect-ratio: 16 / 9;
+}
+
+.courseModuleEditorPage .lessonMediaFrame img,
+.courseModuleEditorPage .lessonMediaFrame video {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+}
+
+.courseModuleEditorPage .lessonMediaPreview span {
+  color: #333;
+  font-size: 20px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.courseModuleEditorPage .moduleEditorWorkspace .popupAnswerBox {
+  min-height: 180px;
+  padding: 18px 20px;
+  line-height: 1.45;
+}
+
+.courseModuleEditorPage .moduleQuizEditorCard {
+  gap: 18px;
+  padding: 24px;
+  overflow: visible;
+}
+
+.courseModuleEditorPage .moduleQuizEditorCard .popupInput,
+.courseModuleEditorPage .moduleQuizEditorCard .popupSelect {
+  height: 60px;
+  min-height: 60px;
+  padding: 13px 18px;
+  line-height: 1.35;
+}
+
+.courseModuleEditorPage .moduleQuizEditorCard .optionsGrid {
+  gap: 16px;
+  margin: 0;
+}
+
+@media (max-width: 900px) {
+  .courseModuleEditorPage .moduleMaterialBand .customFileBtn,
+  .courseModuleEditorPage .moduleMaterialBand .fileName,
+  .courseModuleEditorPage .moduleMaterialBand .popupAddBtn {
+    display: flex;
+    width: 100%;
+    margin: 8px 0 0;
+  }
+
+  .courseModuleEditorPage .moduleEditorDetails,
+  .courseModuleEditorPage .moduleEditorWorkspace,
+  .courseModuleEditorPage .moduleAssessmentGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .courseModuleEditorPage .moduleAssessmentCard,
+  .courseModuleEditorPage .assessmentEditButton {
+    width: 100%;
+  }
+
+  .courseModuleEditorPage .moduleAssessmentEditorHeader {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .courseModuleEditorPage .moduleEditorWorkspace .lessonPageTabs {
+    width: 100%;
+    flex-direction: row;
+  }
+}
+
+/* =========================================
+   FINAL COMPACT EDIT COURSE LAYOUT
+========================================= */
+
+.addModulePage.editCoursePage {
+  min-height: 100vh;
+  padding-bottom: 42px;
+  background: #f4f4f4;
+}
+
+.addModulePage.editCoursePage .pageHeader {
+  min-height: 0;
+  display: block;
+  margin-bottom: 0 !important;
+  padding: 18px 28px 14px !important;
+  border-bottom: 1px solid #d0d0d0;
+  background: #f3f3f3;
+}
+
+.addModulePage.editCoursePage .pageHeader h1 {
+  margin: 0;
+  color: #666;
+  font-size: 28px;
+  font-weight: 500 !important;
+  line-height: 1.1;
+}
+
+.addModulePage.editCoursePage .pageHeaderText {
+  margin: 3px 0 0;
+  color: #555;
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+.addModulePage.editCoursePage .formCard {
+  margin: 0;
+  padding: 26px 28px 0 !important;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.addModulePage.editCoursePage .popupInfoGrid {
+  width: min(100%, 665px);
+  max-width: 665px;
+  display: grid;
+  grid-template-columns: minmax(260px, 360px) minmax(160px, 220px);
+  align-items: start;
+  gap: 56px;
+}
+
+.addModulePage.editCoursePage .popupInfoGrid .popupField:nth-child(n + 3) {
+  display: none;
+}
+
+.addModulePage.editCoursePage .formCard > .popupSection:nth-of-type(3) {
+  display: none;
+}
+
+.addModulePage.editCoursePage .formCard > .popupSection {
+  width: min(100%, 510px);
+  max-width: 510px;
+  margin-top: 22px;
+}
+
+.addModulePage.editCoursePage .popupField,
+.addModulePage.editCoursePage .popupSection {
+  gap: 0;
+  margin-bottom: 0;
+}
+
+.addModulePage.editCoursePage .popupLabel {
+  margin: 0 0 9px;
+  color: #111;
+  font-size: 14px;
+  font-weight: 400 !important;
+  line-height: 1.1;
+}
+
+.addModulePage.editCoursePage .required {
+  margin-left: 4px;
+  color: #999;
+  font-size: 13px;
+}
+
+.addModulePage.editCoursePage .wordCounter,
+.addModulePage.editCoursePage .accessHint {
+  display: none;
+}
+
+.addModulePage.editCoursePage .popupInput,
+.addModulePage.editCoursePage .popupSelect {
+  height: 34px;
+  min-height: 34px;
+  padding: 6px 14px;
+  border: 1px solid #c9c9c9;
+  border-radius: 8px;
+  background: #f8f8f8;
+  color: #222;
+  font-size: 14px;
+  box-shadow: none;
+}
+
+.addModulePage.editCoursePage .popupTextarea {
+  padding: 12px 14px;
+  border: 1px solid #c9c9c9;
+  border-radius: 8px;
+  background: #f8f8f8;
+  color: #222;
+  font-size: 14px;
+  line-height: 1.35;
+  box-shadow: none;
+}
+
+.addModulePage.editCoursePage .popupSmallBox {
+  min-height: 110px;
+  height: 110px;
+}
+
+.addModulePage.editCoursePage .moduleBuilderSection {
+  margin: 32px -28px 0 !important;
+  padding: 0 28px 34px !important;
+  border-top: 1px solid #d0d0d0;
+}
+
+.addModulePage.editCoursePage .moduleBuilderHeader {
+  min-height: 72px;
+  display: grid;
+  grid-template-columns: minmax(0, 360px) auto;
+  align-items: center;
+  justify-content: start;
+  column-gap: 78px;
+  margin: 0 -28px 24px !important;
+  padding: 14px 28px !important;
+  border-bottom: 0;
+  background: #eeeeee;
+}
+
+.addModulePage.editCoursePage .moduleBuilderHeader h2 {
+  margin: 0;
+  color: #666;
+  font-size: 30px;
+  font-weight: 500 !important;
+  line-height: 1.08;
+}
+
+.addModulePage.editCoursePage .moduleBuilderHeader p {
+  margin: 4px 0 0;
+  color: #555;
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.addModulePage.editCoursePage .popupAddBtn {
+  min-width: 128px;
+  height: 34px;
+  min-height: 34px;
+  padding: 0 16px;
+  border: 0 !important;
+  border-radius: 8px;
+  background: #8d8d8d !important;
+  color: #fff !important;
+  box-shadow: none !important;
+  font-size: 14px;
+  font-weight: 400 !important;
+}
+
+.addModulePage.editCoursePage .moduleCardGrid {
+  width: min(100%, 665px);
+  max-width: 665px;
+  display: grid;
+  gap: 18px;
+}
+
+.addModulePage.editCoursePage .moduleCard {
+  overflow: visible;
+  border: 1px solid #c8c8c8;
+  border-radius: 8px;
+  background: #f7f7f7;
+  box-shadow: none;
+}
+
+.addModulePage.editCoursePage .moduleCardExpanded {
+  max-width: none;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.addModulePage.editCoursePage .moduleCardHeader {
+  min-height: 82px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  border: 0;
+  background: #f7f7f7;
+}
+
+.addModulePage.editCoursePage .moduleCardExpanded .moduleCardHeader {
+  width: min(100%, 665px);
+  max-width: 665px;
+  margin-bottom: 18px;
+  border: 1px solid #c8c8c8;
+  border-radius: 8px;
+}
+
+.addModulePage.editCoursePage .moduleNumber {
+  display: none;
+}
+
+.addModulePage.editCoursePage .moduleCardHeading > span {
+  margin: 0 0 6px;
+  color: #333;
+  font-size: 14px;
+  font-weight: 400 !important;
+  line-height: 1;
+  text-transform: none;
+}
+
+.addModulePage.editCoursePage .moduleCardHeading h3 {
+  margin: 0;
+  color: #222;
+  font-size: 22px;
+  font-weight: 400 !important;
+  line-height: 1.18;
+}
+
+.addModulePage.editCoursePage .moduleCardHeading p {
+  margin: 6px 0 0;
+  color: #777;
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.addModulePage.editCoursePage .moduleCardHeaderActions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.addModulePage.editCoursePage .moduleExpandBtn,
+.addModulePage.editCoursePage .moduleDeleteBtn {
+  min-width: 100px;
+  height: 32px;
+  border-radius: 8px;
+  box-shadow: none;
+  font-size: 14px;
+  font-weight: 400 !important;
+}
+
+.addModulePage.editCoursePage .moduleExpandBtn {
+  border: 0;
+  background: #8d8d8d;
+  color: #fff;
+}
+
+.addModulePage.editCoursePage .moduleDeleteBtn {
+  border: 1px solid #ff4f5e;
+  background: transparent;
+  color: #ff1f2f;
+}
+
+.addModulePage.editCoursePage .popupActions {
+  width: min(100%, 665px);
+  max-width: 665px;
+  justify-content: center;
+  gap: 18px;
+  margin-top: 34px;
+}
+
+.addModulePage.editCoursePage .popupCancelBtn,
+.addModulePage.editCoursePage .popupSaveBtn {
+  min-width: 128px;
+  height: 44px;
+  border-radius: 8px;
+  box-shadow: none !important;
+  font-size: 16px;
+}
+
+.addModulePage.editCoursePage .popupSaveBtn {
+  border: 1px solid #6f98c7;
+  background: #7fa8d6 !important;
+  color: #ffffff;
+}
+
+.addModulePage.editCoursePage .popupSaveBtn:hover {
+  background: #a8c6e7 !important;
+  color: #263c52;
+}
+
+@media (max-width: 760px) {
+  .addModulePage.editCoursePage .pageHeader,
+  .addModulePage.editCoursePage .formCard {
+    padding-inline: 20px !important;
+  }
+
+  .addModulePage.editCoursePage .popupInfoGrid {
+    width: 100%;
+    max-width: none;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .addModulePage.editCoursePage .formCard > .popupSection {
+    width: 100%;
+    max-width: none;
+  }
+
+  .addModulePage.editCoursePage .moduleBuilderSection,
+  .addModulePage.editCoursePage .moduleBuilderHeader {
+    margin-left: -20px !important;
+    margin-right: -20px !important;
+  }
+
+  .addModulePage.editCoursePage .moduleBuilderSection {
+    padding-right: 20px !important;
+    padding-left: 20px !important;
+  }
+
+  .addModulePage.editCoursePage .moduleBuilderHeader {
+    grid-template-columns: 1fr;
+    row-gap: 12px;
+    padding-right: 20px !important;
+    padding-left: 20px !important;
+  }
+
+  .addModulePage.editCoursePage .moduleCardGrid,
+  .addModulePage.editCoursePage .popupActions {
+    width: 100%;
+    max-width: none;
+  }
+
+  .addModulePage.editCoursePage .moduleCardHeader {
+    grid-template-columns: 1fr;
+  }
+
+  .addModulePage.editCoursePage .moduleCardHeaderActions {
+    justify-content: flex-start;
+  }
+}
+
+/* Final edit-course polish: keep the whole editor together and readable. */
+.addModulePage.editCoursePage {
+  --edit-course-width: 1040px;
+  --edit-course-pad: clamp(24px, 4vw, 64px);
+  --edit-course-inset: max(
+    var(--edit-course-pad),
+    calc((100% - var(--edit-course-width)) / 2)
+  );
+}
+
+.addModulePage.editCoursePage .pageHeader,
+.addModulePage.editCoursePage .formCard {
+  padding-left: var(--edit-course-inset) !important;
+  padding-right: var(--edit-course-inset) !important;
+}
+
+.addModulePage.editCoursePage .pageHeader {
+  padding-top: 22px !important;
+  padding-bottom: 18px !important;
+}
+
+.addModulePage.editCoursePage .pageHeader h1 {
+  font-size: 34px;
+}
+
+.addModulePage.editCoursePage .pageHeaderText {
+  font-size: 16px;
+}
+
+.addModulePage.editCoursePage .formCard {
+  padding-top: 30px !important;
+}
+
+.addModulePage.editCoursePage .popupInfoGrid,
+.addModulePage.editCoursePage .formCard > .popupSection,
+.addModulePage.editCoursePage .moduleBuilderHeader,
+.addModulePage.editCoursePage .moduleCardGrid,
+.addModulePage.editCoursePage .popupActions {
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.addModulePage.editCoursePage .popupInfoGrid {
+  width: min(100%, 900px);
+  max-width: 900px;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 270px);
+  gap: 34px;
+}
+
+.addModulePage.editCoursePage .formCard > .popupSection {
+  width: min(100%, 900px);
+  max-width: 900px;
+  margin-top: 26px;
+}
+
+.addModulePage.editCoursePage .popupLabel,
+.addModulePage.editCoursePage .required,
+.addModulePage.editCoursePage .popupInput,
+.addModulePage.editCoursePage .popupSelect,
+.addModulePage.editCoursePage .popupTextarea {
+  font-size: 20px;
+}
+
+.addModulePage.editCoursePage .popupInput,
+.addModulePage.editCoursePage .popupSelect {
+  height: 52px;
+  min-height: 52px;
+  padding: 10px 16px;
+}
+
+.addModulePage.editCoursePage .popupTextarea {
+  min-height: 150px;
+  padding: 16px 18px;
+}
+
+.addModulePage.editCoursePage .popupSmallBox {
+  height: 150px;
+  min-height: 150px;
+}
+
+.addModulePage.editCoursePage .moduleBuilderSection {
+  margin: 34px 0 0 !important;
+  padding: 0 0 40px !important;
+  border-top: 1px solid #d0d0d0;
+}
+
+.addModulePage.editCoursePage .moduleBuilderHeader {
+  width: min(100%, 1040px);
+  min-height: 82px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 20px;
+  margin: 0 auto 24px !important;
+  padding: 18px 22px !important;
+  border-bottom: 0;
+  border-radius: 0;
+  background: #eeeeee;
+}
+
+.addModulePage.editCoursePage .moduleBuilderHeader h2 {
+  font-size: 34px;
+}
+
+.addModulePage.editCoursePage .moduleBuilderHeader p {
+  font-size: 20px;
+}
+
+.addModulePage.editCoursePage .popupAddBtn {
+  min-width: 160px;
+  height: 50px;
+  min-height: 50px;
+  font-size: 20px;
+}
+
+.addModulePage.editCoursePage .moduleCardGrid {
+  width: min(100%, 1040px);
+  max-width: 1040px;
+}
+
+.addModulePage.editCoursePage .moduleCardHeader {
+  min-height: 104px;
+  padding: 18px 22px;
+}
+
+.addModulePage.editCoursePage .moduleCardHeading > span {
+  font-size: 20px;
+}
+
+.addModulePage.editCoursePage .moduleCardHeading h3 {
+  font-size: 28px;
+}
+
+.addModulePage.editCoursePage .moduleCardHeading p {
+  font-size: 20px;
+}
+
+.addModulePage.editCoursePage .moduleExpandBtn,
+.addModulePage.editCoursePage .moduleDeleteBtn {
+  min-width: 140px;
+  height: 48px;
+  font-size: 20px;
+}
+
+.addModulePage.editCoursePage .popupActions {
+  width: min(100%, 1040px);
+  max-width: 1040px;
+  margin-top: 36px;
+}
+
+.addModulePage.editCoursePage .popupCancelBtn,
+.addModulePage.editCoursePage .popupSaveBtn {
+  min-width: 160px;
+  height: 52px;
+  font-size: 20px;
+}
+
+@media (max-width: 760px) {
+  .addModulePage.editCoursePage {
+    --edit-course-inset: 20px;
+  }
+
+  .addModulePage.editCoursePage .popupInfoGrid,
+  .addModulePage.editCoursePage .moduleBuilderHeader,
+  .addModulePage.editCoursePage .moduleCardHeader {
+    grid-template-columns: 1fr;
+  }
+
+  .addModulePage.editCoursePage .moduleCardHeaderActions {
+    justify-content: flex-start;
+  }
+}
+
+/* Clean up the Edit Course modules area so it reads as one tidy card. */
+.addModulePage.editCoursePage .popupInput[readonly] {
+  cursor: default;
+  color: #555;
+  background: #eeeeee;
+}
+
+.addModulePage.editCoursePage .moduleBuilderSection {
+  width: min(100%, 900px);
+  margin: 34px auto 0 !important;
+  padding: 0 0 28px !important;
+  border-top: 0;
+}
+
+.addModulePage.editCoursePage .moduleBuilderHeader {
+  width: 100%;
+  min-height: 0;
+  margin: 0 0 20px !important;
+  padding: 20px 22px !important;
+  border: 1px solid #d4d4d4;
+  border-radius: 8px;
+  background: #eeeeee;
+  box-sizing: border-box;
+}
+
+.addModulePage.editCoursePage .moduleBuilderHeader h2 {
+  font-size: 32px;
+}
+
+.addModulePage.editCoursePage .moduleBuilderHeader p {
+  font-size: 16px;
+}
+
+.addModulePage.editCoursePage .moduleCardGrid {
+  width: 100%;
+  max-width: none;
+  gap: 16px;
+}
+
+.addModulePage.editCoursePage .moduleCard {
+  border: 1px solid #cfcfcf;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.addModulePage.editCoursePage .moduleCardHeader {
+  min-height: 112px;
+  padding: 22px;
+  border: 0;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.addModulePage.editCoursePage .moduleCardHeading > span {
+  margin-bottom: 8px;
+  font-size: 16px;
+}
+
+.addModulePage.editCoursePage .moduleCardHeading h3 {
+  font-size: 26px;
+}
+
+.addModulePage.editCoursePage .moduleCardHeading p {
+  font-size: 16px;
+}
+
+.addModulePage.editCoursePage .moduleCardHeaderActions {
+  gap: 14px;
+}
+
+.addModulePage.editCoursePage .moduleExpandBtn,
+.addModulePage.editCoursePage .moduleDeleteBtn {
+  min-width: 132px;
+  height: 46px;
+  font-size: 16px;
+}
+
+.addModulePage.editCoursePage .popupActions {
+  width: min(100%, 900px);
+  max-width: 900px;
+  margin-top: 28px;
+}
+
+.addModulePage.editCoursePage .popupCancelBtn,
+.addModulePage.editCoursePage .popupSaveBtn {
+  min-width: 160px;
+  height: 52px;
+  font-size: 16px;
+}
+
+@media (max-width: 760px) {
+  .addModulePage.editCoursePage .moduleBuilderSection,
+  .addModulePage.editCoursePage .popupActions {
+    width: 100%;
+  }
+
+  .addModulePage.editCoursePage .moduleBuilderHeader,
+  .addModulePage.editCoursePage .moduleCardHeader {
+    grid-template-columns: 1fr;
+  }
+
+  .addModulePage.editCoursePage .moduleCardHeaderActions {
+    justify-content: flex-start;
+  }
+}
+
+/* Match Course Modules to the same edit-course content lane. */
+.courseCodeNote {
+  margin: 8px 0 0;
+  color: #777;
+  font-size: 14px;
+  line-height: 1.3;
+}
+
+.addModulePage.editCoursePage .courseCodeNote {
+  font-size: 16px;
+}
+
+.addModulePage.editCoursePage .moduleBuilderSection,
+.addModulePage.editCoursePage .popupActions {
+  width: min(100%, 900px);
+  max-width: 900px;
+}
+
+.addModulePage.editCoursePage .moduleBuilderHeader,
+.addModulePage.editCoursePage .moduleCardGrid {
+  width: 100%;
+  max-width: none;
+}
+
+.addModulePage.editCoursePage .moduleBuilderHeader {
+  margin-right: 0 !important;
+  margin-left: 0 !important;
+}
+
+@media (max-width: 760px) {
+  .addModulePage.editCoursePage .courseCodeNote {
+    font-size: 14px;
+  }
+}
+
+/* Professor palette cleanup for edit course and edit module buttons. */
+.addModulePage {
+  --professor-theme-buttercup: #fff2b2;
+  --professor-theme-dewy-blue: #a8c6e7;
+  --professor-theme-sunwashed: #ffe08a;
+  --professor-theme-cloud-puff: #fff7d6;
+  --professor-theme-morning-breeze: #7fa8d6;
+  --professor-theme-ink: #4f6174;
+  --professor-theme-accent: #5f86b1;
+}
+
+.addModulePage .customFileBtn,
+.addModulePage .popupAddBtn:not(.moduleEditorRemoveBtn),
+.addModulePage .popupSaveBtn,
+.addModulePage .moduleExpandBtn,
+.addModulePage .lessonNavigationBtn:not(:disabled),
+.addModulePage .uploadMediaBtn {
+  border: 1px solid #6f98c7 !important;
+  background: var(--professor-theme-morning-breeze) !important;
+  box-shadow: 3px 3px 0 rgba(79, 97, 116, 0.18) !important;
+  color: #ffffff !important;
+}
+
+.addModulePage .customFileBtn:hover,
+.addModulePage .popupAddBtn:not(.moduleEditorRemoveBtn):hover,
+.addModulePage .popupSaveBtn:hover,
+.addModulePage .moduleExpandBtn:hover,
+.addModulePage .lessonNavigationBtn:not(:disabled):hover,
+.addModulePage .uploadMediaBtn:hover {
+  border-color: var(--professor-theme-morning-breeze) !important;
+  background: var(--professor-theme-dewy-blue) !important;
+  color: #263c52 !important;
+}
+
+.addModulePage .popupCancelBtn {
+  border: 1px solid var(--professor-theme-dewy-blue) !important;
+  background: var(--professor-theme-cloud-puff) !important;
+  color: var(--professor-theme-ink) !important;
+  box-shadow: 3px 3px 0 rgba(79, 97, 116, 0.12) !important;
+}
+
+.addModulePage .popupCancelBtn:hover {
+  background: var(--professor-theme-buttercup) !important;
+  color: #263c52 !important;
+}
+
+.addModulePage .lessonNavigationBtn:disabled {
+  border-color: #d5dce4 !important;
+  background: #edf1f5 !important;
+  color: #8a96a4 !important;
+  box-shadow: none !important;
+}
+
+:global(.swal2-confirm) {
+  background: #7fa8d6 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 0 rgba(79, 97, 116, 0.24) !important;
+}
+
+:global(.swal2-confirm:hover) {
+  background: #a8c6e7 !important;
+  color: #263c52 !important;
+}
+
+:global(.swal2-cancel) {
+  background: #fff7d6 !important;
+  color: #4f6174 !important;
+  box-shadow: 0 4px 0 rgba(79, 97, 116, 0.16) !important;
+}
+
+:global(.swal2-cancel:hover) {
+  background: #ffe08a !important;
+  color: #263c52 !important;
+}
+
+:global(.swal2-success-ring) {
+  border-color: #7fa8d6 !important;
+}
+
+:global(.swal2-success-line-tip),
+:global(.swal2-success-line-long) {
+  background: #7fa8d6 !important;
+}
+
+/* Final high-specificity theme pass for edit-course and module-editor actions. */
+.addModulePage.editCoursePage .popupAddBtn,
+.addModulePage.editCoursePage .moduleExpandBtn,
+.addModulePage.editCoursePage .popupSaveBtn,
+.courseModuleEditorPage .customFileBtn,
+.courseModuleEditorPage .moduleMaterialBand .popupAddBtn,
+.courseModuleEditorPage .moduleEditorBandActions .popupAddBtn:not(.moduleEditorRemoveBtn),
+.courseModuleEditorPage .moduleEditorActions .popupSaveBtn,
+.courseModuleEditorPage .lessonNavigationBtn:not(:disabled),
+.courseModuleEditorPage .uploadMediaBtn {
+  border: 1px solid #6f98c7 !important;
+  background: #7fa8d6 !important;
+  box-shadow: 3px 3px 0 rgba(79, 97, 116, 0.18) !important;
+  color: #ffffff !important;
+}
+
+.addModulePage.editCoursePage .popupAddBtn:hover,
+.addModulePage.editCoursePage .moduleExpandBtn:hover,
+.addModulePage.editCoursePage .popupSaveBtn:hover,
+.courseModuleEditorPage .customFileBtn:hover,
+.courseModuleEditorPage .moduleMaterialBand .popupAddBtn:hover,
+.courseModuleEditorPage .moduleEditorBandActions .popupAddBtn:not(.moduleEditorRemoveBtn):hover,
+.courseModuleEditorPage .moduleEditorActions .popupSaveBtn:hover,
+.courseModuleEditorPage .lessonNavigationBtn:not(:disabled):hover,
+.courseModuleEditorPage .uploadMediaBtn:hover {
+  background: #a8c6e7 !important;
+  color: #263c52 !important;
+}
+
+.addModulePage.editCoursePage .popupCancelBtn,
+.courseModuleEditorPage .moduleEditorActions .popupCancelBtn {
+  border: 1px solid #a8c6e7 !important;
+  background: #fff7d6 !important;
+  color: #4f6174 !important;
+  box-shadow: 3px 3px 0 rgba(79, 97, 116, 0.12) !important;
+}

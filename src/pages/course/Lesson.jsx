@@ -27,6 +27,19 @@ const splitReadableText = (value) => {
   return text.match(/[^.!?]+[.!?]+|[^.!?]+$/g)?.map((item) => item.trim()) || [text];
 };
 
+const getLessonPageMedia = (page) => {
+  const media = page?.media || {};
+  const url = media.url || page?.mediaUrl || page?.media_url || "";
+
+  if (!url) return null;
+
+  return {
+    url,
+    name: media.name || page?.mediaName || page?.media_name || "Lesson media",
+    type: media.type || page?.mediaType || page?.media_type || "",
+  };
+};
+
 const getStoredUserId = () => {
   try {
     const user = JSON.parse(localStorage.getItem("puffy-user") || "null");
@@ -179,6 +192,8 @@ function Lesson() {
 
   const currentItem = allSlides[currentSlide];
   const selectedAnswer = selectedAnswers[currentSlide];
+  const currentLessonMedia =
+    currentItem?.type === "lesson" ? getLessonPageMedia(currentItem.content) : null;
 
   const saveProgress = async (slideIndexToSave) => {
     const studiedSlides = totalSlides
@@ -564,6 +579,18 @@ function Lesson() {
                 <h3 className={styles.lessonSlideTitle}>
                   {currentItem.content.title}
                 </h3>
+
+                {currentLessonMedia && (
+                  <figure className={styles.lessonMedia}>
+                    {currentLessonMedia.type.startsWith("video/") ? (
+                      <video src={currentLessonMedia.url} controls />
+                    ) : (
+                      <img src={currentLessonMedia.url} alt={currentLessonMedia.name} />
+                    )}
+
+                    <figcaption>{currentLessonMedia.name}</figcaption>
+                  </figure>
+                )}
 
                 <div className={styles.lessonSlideContent}>
                   {splitReadableText(currentItem.content.content).map(
