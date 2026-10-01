@@ -1,0 +1,437 @@
+/* =====================================================
+   SUPER ADMIN PROFILE
+===================================================== */
+
+.superadmin-profile-page {
+  display: grid;
+  gap: 22px;
+
+  width: 100%;
+}
+
+
+/* =====================================================
+   PAGE HEADER
+===================================================== */
+
+.superadmin-profile-header {
+  padding: 22px 24px;
+
+  border: 1px solid #d7dce0;
+  border-radius: 16px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 12px 30px rgba(23, 25, 39, 0.05),
+    4px 5px 0 rgba(25, 135, 84, 0.09);
+}
+
+
+.superadmin-profile-header-kicker {
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+
+  margin-bottom: 6px;
+
+  color: #198754;
+
+  font-size: 10px;
+  font-weight: 800;
+
+  letter-spacing: 0.7px;
+
+  text-transform: uppercase;
+}
+
+
+.superadmin-profile-header-kicker svg {
+  width: 15px;
+  height: 15px;
+}
+
+
+.superadmin-profile-header h1 {
+  margin: 0;
+
+  color: #4f535a;
+
+  font-size: 32px;
+  font-weight: 700;
+
+  line-height: 1.1;
+}
+
+
+.superadmin-profile-header p {
+  max-width: 650px;
+
+  margin: 8px 0 0;
+
+  color: #858d97;
+
+  font-size: 12px;
+  font-weight: 500;
+
+  line-height: 1.5;
+}
+
+
+/* =====================================================
+   STATUS
+===================================================== */
+
+.superadmin-profile-status {
+  padding: 18px 20px;
+
+  border: 1px solid #d8ddda;
+  border-radius: 13px;
+
+  background: #ffffff;
+
+  color: #707780;
+
+  font-size: 12px;
+  font-weight: 600;
+}
+
+
+.superadmin-profile-error {
+  border-color: #e2c2c2;
+
+  background: #fff6f6;
+
+  color: #a34848;
+}
+
+
+/* =====================================================
+   PROFILE CARD
+===================================================== */
+
+.superadmin-profile-card {
+  overflow: hidden;
+
+  border: 1px solid #d7dce0;
+  border-radius: 16px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 12px 30px rgba(23, 25, 39, 0.05),
+    5px 5px 0 rgba(25, 135, 84, 0.09);
+}
+
+
+.superadmin-profile-card-body {
+  display: grid;
+
+  grid-template-columns:
+    230px minmax(0, 1fr);
+
+  gap: 35px;
+
+  padding: 35px;
+}
+
+
+/* =====================================================
+   PHOTO COLUMN
+===================================================== */
+
+.superadmin-profile-photo-column {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+
+  text-align: center;
+}
+
+
+.superadmin-profile-photo-frame {
+  position: relative;
+
+  width: 145px;
+  height: 145px;
+
+  margin-bottom: 17px;
+
+  border: 4px solid #ffffff;
+  border-radius: 50%;
+
+  background: #edf2ef;
+
+  box-shadow:
+    0 0 0 2px #198754,
+    0 8px 20px rgba(23, 25, 39, 0.12);
+}
+
+
+.superadmin-profile-photo-frame > img {
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  border-radius: 50%;
+
+  object-fit: cover;
+}
+
+
+/* =====================================================
+   CHANGE PHOTO
+===================================================== */
+
+.superadmin-profile-photo-button {
+  position: absolute;
+
+  right: 1px;
+  bottom: 5px;
+
+  width: 38px;
+  height: 38px;
+
+  display: grid;
+  place-items: center;
+
+  border: 3px solid #ffffff;
+  border-radius: 50%;
+
+  background: #198754;
+
+  color: #ffffff;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 4px 10px rgba(23, 25, 39, 0.18);
+
+  transition:
+    transform 150ms ease,
+    background 150ms ease;
+}
+
+
+.superadmin-profile-photo-button:hover {
+  background: #157347;
+
+  transform: scale(1.05);
+}
+
+
+.superadmin-profile-photo-button svg {
+  width: 16px;
+  height: 16px;
+}
+
+
+.superadmin-profile-photo-button input {
+  display: none;
+}
+
+
+/* =====================================================
+   ACCOUNT ID
+===================================================== */
+
+.superadmin-profile-photo-column > strong {
+  color: #454b53;
+
+  font-size: 15px;
+  font-weight: 800;
+}
+
+
+.superadmin-profile-photo-column > span {
+  margin-top: 5px;
+
+  padding: 5px 10px;
+
+  border-radius: 999px;
+
+  background: #eaf6ef;
+
+  color: #198754;
+
+  font-size: 9px;
+  font-weight: 800;
+}
+
+
+/* =====================================================
+   PROFILE INFO
+===================================================== */
+
+.superadmin-profile-info {
+  min-width: 0;
+
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+}
+
+
+.superadmin-profile-kicker {
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+
+  margin-bottom: 8px;
+
+  color: #198754;
+
+  font-size: 9px;
+  font-weight: 800;
+
+  letter-spacing: 0.5px;
+
+  text-transform: uppercase;
+}
+
+
+.superadmin-profile-kicker svg {
+  width: 14px;
+  height: 14px;
+}
+
+
+.superadmin-profile-info h2 {
+  margin: 0;
+
+  color: #40464d;
+
+  font-size: 27px;
+  font-weight: 800;
+}
+
+
+.superadmin-profile-email {
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+
+  margin: 8px 0 23px;
+
+  color: #858d97;
+
+  font-size: 11px;
+  font-weight: 600;
+}
+
+
+.superadmin-profile-email svg {
+  width: 15px;
+  height: 15px;
+
+  color: #198754;
+}
+
+
+/* =====================================================
+   PROFILE DETAILS
+===================================================== */
+
+.superadmin-profile-details-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 13px;
+
+  margin: 0;
+}
+
+
+.superadmin-profile-details-grid > div {
+  min-width: 0;
+
+  padding: 14px;
+
+  border: 1px solid #e0e4e2;
+  border-radius: 11px;
+
+  background: #f8faf9;
+}
+
+
+.superadmin-profile-details-grid dt {
+  display: flex;
+  align-items: center;
+
+  gap: 6px;
+
+  margin-bottom: 7px;
+
+  color: #858d97;
+
+  font-size: 9px;
+  font-weight: 800;
+
+  text-transform: uppercase;
+}
+
+
+.superadmin-profile-details-grid dt svg {
+  width: 13px;
+  height: 13px;
+
+  color: #198754;
+}
+
+
+.superadmin-profile-details-grid dd {
+  margin: 0;
+
+  overflow-wrap: anywhere;
+
+  color: #4c535b;
+
+  font-size: 11px;
+  font-weight: 700;
+
+  line-height: 1.4;
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 850px) {
+
+  .superadmin-profile-card-body {
+    grid-template-columns: 1fr;
+  }
+
+
+  .superadmin-profile-details-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+}
+
+
+@media (max-width: 550px) {
+
+  .superadmin-profile-card-body {
+    padding: 24px 18px;
+  }
+
+
+  .superadmin-profile-details-grid {
+    grid-template-columns: 1fr;
+  }
+
+
+  .superadmin-profile-header h1 {
+    font-size: 27px;
+  }
+
+}

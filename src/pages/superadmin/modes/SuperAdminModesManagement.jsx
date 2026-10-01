@@ -4,7 +4,7 @@ import {
   fetchQuizModes,
   saveQuizMode,
 } from '../../../services/quizModeApi.js';
-import '../Features/AdminFeaturePages.css';
+import './SuperAdminModesManagement.css';
 
 const emptyForm = {
   title: '',
@@ -17,7 +17,7 @@ function getModeCode(mode) {
   return `MD${String(mode.id).padStart(7, '0')}`;
 }
 
-export default function ModePage() {
+export default function SuperAdminModesManagement() {
   const [modes, setModes] = useState([]);
   const [query, setQuery] = useState('');
   const [form, setForm] = useState(emptyForm);

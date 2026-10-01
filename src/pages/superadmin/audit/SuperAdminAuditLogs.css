@@ -1,0 +1,437 @@
+/* =====================================================
+   AUDIT LOGS
+===================================================== */
+
+.audit-log-page {
+  display: grid;
+  gap: 18px;
+}
+
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+.audit-log-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  padding: 22px;
+
+  background: #ffffff;
+
+  border: 1.5px solid var(--admin-line);
+  border-radius: 12px;
+
+  box-shadow: 5px 5px 0 var(--admin-shadow);
+}
+
+
+.audit-log-kicker {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 7px;
+
+  margin-bottom: 8px;
+
+  color: #198754;
+
+  font-size: 11px;
+  font-weight: 950;
+
+  text-transform: uppercase;
+}
+
+
+.audit-log-header h1 {
+  margin: 0 0 7px;
+
+  color: var(--admin-ink);
+
+  font-size: 28px;
+  font-weight: 950;
+}
+
+
+.audit-log-header p {
+  max-width: 700px;
+
+  margin: 0;
+
+  color: var(--admin-muted);
+
+  font-size: 12px;
+  font-weight: 800;
+
+  line-height: 1.5;
+}
+
+
+.audit-refresh-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  min-height: 38px;
+
+  padding: 0 14px;
+
+  border: 1.5px solid var(--admin-line);
+  border-radius: 8px;
+
+  background: #ffffff;
+
+  color: var(--admin-ink);
+
+  font: inherit;
+  font-size: 11px;
+  font-weight: 950;
+
+  cursor: pointer;
+}
+
+
+.audit-refresh-button:hover {
+  background: #f8f9fa;
+}
+
+
+/* =====================================================
+   TOOLBAR
+===================================================== */
+
+.audit-toolbar {
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+}
+
+
+.audit-search,
+.audit-filter {
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+
+  min-height: 42px;
+
+  padding: 0 12px;
+
+  background: #ffffff;
+
+  border: 1.5px solid var(--admin-line);
+  border-radius: 9px;
+}
+
+
+.audit-search {
+  flex: 1;
+}
+
+
+.audit-search svg,
+.audit-filter svg {
+  flex: 0 0 auto;
+
+  color: var(--admin-muted);
+}
+
+
+.audit-search input,
+.audit-filter select {
+  width: 100%;
+
+  border: 0;
+  outline: 0;
+
+  background: transparent;
+
+  color: var(--admin-ink);
+
+  font: inherit;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+
+.audit-filter {
+  min-width: 210px;
+}
+
+
+.audit-filter select {
+  cursor: pointer;
+}
+
+
+/* =====================================================
+   RESULT SUMMARY
+===================================================== */
+
+.audit-result-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 15px;
+
+  color: var(--admin-muted);
+
+  font-size: 10px;
+  font-weight: 800;
+}
+
+
+.audit-result-summary strong {
+  color: var(--admin-ink);
+}
+
+
+/* =====================================================
+   TABLE CARD
+===================================================== */
+
+.audit-table-card {
+  overflow: hidden;
+
+  background: #ffffff;
+
+  border: 1.5px solid var(--admin-line);
+  border-radius: 12px;
+
+  box-shadow: 5px 5px 0 var(--admin-shadow);
+}
+
+
+.audit-table-wrap {
+  width: 100%;
+
+  overflow-x: auto;
+}
+
+
+.audit-table {
+  width: 100%;
+
+  border-collapse: collapse;
+}
+
+
+.audit-table th,
+.audit-table td {
+  padding: 13px 14px;
+
+  border-bottom: 1px solid var(--admin-soft-line);
+
+  text-align: left;
+  vertical-align: middle;
+}
+
+
+.audit-table th {
+  background: #f8f9fa;
+
+  color: var(--admin-muted);
+
+  font-size: 10px;
+  font-weight: 950;
+
+  white-space: nowrap;
+}
+
+
+.audit-table td {
+  color: var(--admin-ink);
+
+  font-size: 10px;
+  font-weight: 800;
+}
+
+
+.audit-table td strong,
+.audit-table td span {
+  display: block;
+}
+
+
+.audit-table td > span:not(.audit-category):not(.audit-status) {
+  margin-top: 3px;
+
+  color: var(--admin-muted);
+
+  font-size: 9px;
+}
+
+
+.audit-table code {
+  padding: 4px 6px;
+
+  background: #f4f5f7;
+
+  border-radius: 5px;
+
+  color: var(--admin-ink);
+
+  font-size: 9px;
+}
+
+
+/* =====================================================
+   CATEGORY
+===================================================== */
+
+.audit-category {
+  display: inline-flex !important;
+
+  padding: 5px 8px;
+
+  background: #f3f5f7;
+
+  border-radius: 999px;
+
+  color: #555d68;
+
+  font-size: 9px;
+  font-weight: 950;
+}
+
+
+/* =====================================================
+   STATUS
+===================================================== */
+
+.audit-status {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+
+  padding: 5px 8px;
+
+  border-radius: 999px;
+
+  font-size: 9px;
+  font-weight: 950;
+}
+
+
+.audit-status.is-success {
+  background: #e9f7ef;
+
+  color: #198754;
+}
+
+
+.audit-status.is-failed {
+  background: #fdecec;
+
+  color: #c0392b;
+}
+
+
+.audit-status.is-warning {
+  background: #fff4df;
+
+  color: #a86a00;
+}
+
+
+/* =====================================================
+   EMPTY STATE
+===================================================== */
+
+.audit-empty {
+  padding: 35px !important;
+
+  color: var(--admin-muted) !important;
+
+  text-align: center !important;
+}
+
+
+/* =====================================================
+   PAGINATION
+===================================================== */
+
+.audit-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  gap: 12px;
+
+  padding: 13px 15px;
+}
+
+
+.audit-pagination span {
+  color: var(--admin-muted);
+
+  font-size: 10px;
+  font-weight: 900;
+}
+
+
+.audit-pagination button {
+  min-height: 32px;
+
+  padding: 0 11px;
+
+  border: 1.5px solid var(--admin-line);
+  border-radius: 7px;
+
+  background: #ffffff;
+
+  color: var(--admin-ink);
+
+  font: inherit;
+  font-size: 10px;
+  font-weight: 950;
+
+  cursor: pointer;
+}
+
+
+.audit-pagination button:hover:not(:disabled) {
+  background: #f8f9fa;
+}
+
+
+.audit-pagination button:disabled {
+  cursor: not-allowed;
+
+  opacity: 0.45;
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 800px) {
+  .audit-log-header {
+    flex-direction: column;
+  }
+
+  .audit-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .audit-filter {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .audit-result-summary {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

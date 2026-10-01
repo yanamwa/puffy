@@ -354,71 +354,89 @@ export default function CourseView() {
      APPROVE
   =================================================== */
 
-  const handleApprove =
-    async (student) => {
-      const confirmed =
-        window.confirm(
-          `Approve enrollment request from ${student.name}?`
-        );
+  const handleApprove = async (student) => {
+  const name = getStudentName(student);
 
-      if (!confirmed) {
-        return;
+  const result = await Swal.fire({
+    title: 'Approve Enrollment?',
+    text: `Are you sure you want to approve ${name}?`,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, approve',
+    cancelButtonText: 'Cancel',
+    confirmButtonColor: '#7FA8D6',
+    cancelButtonColor: '#858d9b',
+    reverseButtons: true,
+  });
+
+  if (!result.isConfirmed) {
+    return;
+  }
+
+  try {
+    setProcessingId(student.enrollmentId);
+
+    const token = getStoredToken();
+
+    if (!token) {
+      throw new Error(
+        'Professor authentication is required.'
+      );
+    }
+
+    const response = await fetch(
+      `${API_BASE_URL}/enrollments/${student.enrollmentId}/approve`,
+      {
+        method: 'PATCH',
+
+        headers: {
+          Accept: 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
       }
+    );
 
-      try {
-        setProcessingId(
-          student.enrollmentId
-        );
+    const data = await response
+      .json()
+      .catch(() => ({}));
 
-        const token =
-          getStoredToken();
+    if (!response.ok) {
+      throw new Error(
+        data.message ||
+          'Unable to approve student.'
+      );
+    }
 
-        const response = await fetch(
-          `${API_BASE_URL}/enrollments/${student.enrollmentId}/approve`,
-          {
-            method: 'PATCH',
+    // Reload enrollment data from database
+    await loadCourseData();
 
-            headers: {
-              Accept:
-                'application/json',
+    // Success SweetAlert
+    await Swal.fire({
+      icon: 'success',
+      title: 'Enrollment Approved',
+      text: `${name} has been successfully enrolled in the course.`,
+      confirmButtonText: 'OK',
+      confirmButtonColor: '#7FA8D6',
+    });
+  } catch (error) {
+    console.error(
+      'Approve enrollment error:',
+      error
+    );
 
-              Authorization:
-                `Bearer ${token}`,
-            },
-          }
-        );
-
-        const data =
-          await response
-            .json()
-            .catch(() => ({}));
-
-        if (!response.ok) {
-          throw new Error(
-            data.message ||
-              'Unable to approve student.'
-          );
-        }
-
-        /*
-         * Reload directly from database
-         * after approval.
-         */
-        await loadCourseData();
-      } catch (error) {
-        console.error(
-          'Approve enrollment error:',
-          error
-        );
-
-        window.alert(
-          error.message ||
-            'Unable to approve student.'
-        );
-      } finally {
-        setProcessingId(null);
-      }
-    };
+    await Swal.fire({
+      icon: 'error',
+      title: 'Approval Failed',
+      text:
+        error.message ||
+        'Unable to approve student.',
+      confirmButtonText: 'OK',
+      confirmButtonColor: '#7FA8D6',
+    });
+  } finally {
+    setProcessingId(null);
+  }
+};
 
 
   /* ===================================================
@@ -541,149 +559,205 @@ export default function CourseView() {
   }
 };
 
-  /* ===================================================
-     UNENROLL
-  =================================================== */
+ /* ===================================================
+   UNENROLL
+=================================================== */
 
-  const getFriendlyUnenrollMessage =
-    (error) => {
-      const message =
-        error?.message ||
-        'Unable to unenroll student.';
+const getFriendlyUnenrollMessage = (error) => {
+  const message =
+    error?.message ||
+    'Unable to unenroll student.';
 
-      if (/route not found/i.test(message)) {
-        return 'The professor unenroll route is not running yet. Please restart the backend server and try again.';
+  if (/route not found/i.test(message)) {
+    return 'The professor unenroll route is not running yet. Please restart the backend server and try again.';
+  }
+
+  if (/not actively enrolled/i.test(message)) {
+    return 'This student is no longer actively enrolled in this course.';
+  }
+
+  return message;
+};
+
+
+const requestProfessorUnenroll = async (
+  student,
+  token,
+  reason
+) => {
+  const enrollmentId = student?.enrollmentId;
+
+  if (!enrollmentId) {
+    throw new Error(
+      'Enrollment record is missing for this student.'
+    );
+  }
+
+  const response = await fetch(
+    `${API_BASE_URL}/enrollments/${enrollmentId}/unenroll`,
+    {
+      method: 'PATCH',
+
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+
+      body: JSON.stringify({
+        reason,
+      }),
+    }
+  );
+
+  const data = await response
+    .json()
+    .catch(() => ({}));
+
+  if (!response.ok) {
+    const message =
+      data.message ||
+      data.error ||
+      'Unable to unenroll student.';
+
+    if (/route not found/i.test(message)) {
+      throw new Error(
+        'The professor unenroll route is not running yet. Please restart the backend server and try again.'
+      );
+    }
+
+    throw new Error(message);
+  }
+
+  return data;
+};
+
+
+const handleUnenroll = async (student) => {
+  const name = getStudentName(student);
+
+  const result = await Swal.fire({
+    title: 'Unenroll Student',
+    html: `
+      <p style="margin-bottom: 12px;">
+        Please provide a reason for unenrolling
+        <strong>${name}</strong>.
+      </p>
+    `,
+    input: 'textarea',
+    inputPlaceholder: 'Enter reason for unenrolling...',
+    inputAttributes: {
+      maxlength: '500',
+      'aria-label': 'Reason for unenrolling student',
+    },
+
+    icon: 'warning',
+
+    showCancelButton: true,
+
+    confirmButtonText: 'Confirm Unenroll',
+    cancelButtonText: 'Cancel',
+
+    confirmButtonColor: '#d93025',
+    cancelButtonColor: '#858d9b',
+
+    reverseButtons: true,
+
+    inputValidator: (value) => {
+      const reason = value?.trim();
+
+      if (!reason) {
+        return 'Please enter a reason before unenrolling this student.';
       }
 
-      if (/not actively enrolled/i.test(message)) {
-        return 'This student is no longer actively enrolled in this course.';
+      if (reason.length > 500) {
+        return 'Reason must be 500 characters or fewer.';
       }
 
-      return message;
-    };
+      return undefined;
+    },
+  });
 
-  const requestProfessorUnenroll =
-    async (student, token) => {
-      const enrollmentId =
-        student?.enrollmentId;
+  if (!result.isConfirmed) {
+    return;
+  }
 
-      if (!enrollmentId) {
-        throw new Error(
-          'Enrollment record is missing for this student.'
-        );
-      }
+  const reason = result.value.trim();
 
-      const response = await fetch(
-        `${API_BASE_URL}/enrollments/${enrollmentId}/unenroll`,
-        {
-          method: 'PATCH',
-          headers: {
-            Accept: 'application/json',
-            Authorization:
-              `Bearer ${token}`,
-          },
-        }
+  const studentKey =
+    getStudentKey(student);
+
+  try {
+    setProcessingId(studentKey);
+
+    const token = getStoredToken();
+
+    if (!token) {
+      throw new Error(
+        'Professor authentication is required.'
+      );
+    }
+
+    const data =
+      await requestProfessorUnenroll(
+        student,
+        token,
+        reason
       );
 
-      const data =
-        await response
-          .json()
-          .catch(() => ({}));
+    // Reload latest enrollment data
+    await loadCourseData();
 
-      if (!response.ok) {
-        const message =
-          data.message ||
-          data.error ||
-          'Unable to unenroll student.';
-
-        if (/route not found/i.test(message)) {
-          throw new Error(
-            'The professor unenroll route is not running yet. Please restart the backend server and try again.'
-          );
-        }
-
-        throw new Error(message);
-      }
-
-      return data;
-    };
-
-  const handleUnenroll =
-    async (student) => {
-      const name =
-        getStudentName(student);
-
-      const result = await Swal.fire({
-        title: 'Unenroll student?',
-        text: `${name} will be removed from this course.`,
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Yes, unenroll',
-        cancelButtonText: 'Cancel',
-        confirmButtonColor: '#d93025',
-        cancelButtonColor: '#858d9b',
-        reverseButtons: true,
+    // Email sent successfully
+    if (data.emailSent) {
+      await Swal.fire({
+        icon: 'success',
+        title: 'Student Unenrolled',
+        text: `${name} has been removed from the course and the email notification was sent successfully.`,
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#7FA8D6',
       });
 
-      if (!result.isConfirmed) {
-        return;
-      }
+      return;
+    }
 
-      const studentKey =
-        getStudentKey(student);
+    // Unenrolled successfully, but email failed
+    await Swal.fire({
+      icon: 'warning',
+      title: 'Student Unenrolled',
+      html: `
+        <p>
+          ${name} has been removed from the course,
+          but the email notification could not be sent.
+        </p>
 
-      try {
-        setProcessingId(studentKey);
+        <p>
+          <strong>Error:</strong>
+          ${data.emailError || 'Unknown email error.'}
+        </p>
+      `,
+      confirmButtonText: 'OK',
+      confirmButtonColor: '#7FA8D6',
+    });
 
-        const token =
-          getStoredToken();
+  } catch (error) {
+    console.error(
+      'Unenroll student error:',
+      error
+    );
 
-        if (!token) {
-          throw new Error(
-            'Professor authentication is required.'
-          );
-        }
+    await Swal.fire({
+      icon: 'error',
+      title: 'Unable to Unenroll',
+      text: getFriendlyUnenrollMessage(error),
+      confirmButtonText: 'OK',
+      confirmButtonColor: '#7FA8D6',
+    });
 
-        await requestProfessorUnenroll(
-          student,
-          token
-        );
-
-        setEnrolledStudents(
-          (previousStudents) =>
-            previousStudents.filter(
-              (item) =>
-                getStudentKey(item) !==
-                studentKey
-            )
-        );
-
-        await loadCourseData();
-
-        await Swal.fire({
-          icon: 'success',
-          title: 'Student unenrolled',
-          text: `${name} has been removed from this course.`,
-          confirmButtonText: 'Okay',
-          confirmButtonColor: '#7FA8D6',
-        });
-      } catch (error) {
-        console.error(
-          'Unenroll student error:',
-          error
-        );
-
-        await Swal.fire({
-          icon: 'error',
-          title: 'Unable to unenroll',
-          text: getFriendlyUnenrollMessage(error),
-          confirmButtonText: 'Okay',
-          confirmButtonColor: '#7FA8D6',
-        });
-      } finally {
-        setProcessingId(null);
-      }
-    };
+  } finally {
+    setProcessingId(null);
+  }
+};
 
   /* ===================================================
      LOADING

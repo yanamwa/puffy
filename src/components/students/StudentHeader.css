@@ -424,6 +424,10 @@
   padding: 7px;
 
   scrollbar-width: thin;
+
+    display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .notification-item {
@@ -488,7 +492,7 @@
 
 .notification-item-icon.course {
   background: #e5f3ea;
-  color: #25714e;
+  color: #2563eb;
 }
 
 .notification-item-icon.announcement {

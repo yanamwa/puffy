@@ -93,10 +93,40 @@ function getUserDisplayName(user = {}) {
   ).replace(/^@+/, '');
 }
 
-function getAnnouncementCreator(authUser, variant) {
-  const user = authUser || readStoredSessionUser() || {};
-  const role = variant === 'announcement' ? 'superAdmin' : 'admin';
-  const name = getUserDisplayName(user) || formatNotificationRoleLabel(role);
+function normalizeCreatorRole(role) {
+  const normalizedRole = String(role || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_-]/g, '');
+
+  if (normalizedRole === 'superadmin') {
+    return 'superAdmin';
+  }
+
+  if (normalizedRole === 'admin') {
+    return 'admin';
+  }
+
+  return role || 'admin';
+}
+
+
+function getAnnouncementCreator(authUser) {
+  const user =
+    authUser ||
+    readStoredSessionUser() ||
+    {};
+
+  const role = normalizeCreatorRole(
+    user.role ||
+    user.userRole ||
+    user.user_role ||
+    '',
+  );
+
+  const name =
+    getUserDisplayName(user) ||
+    formatNotificationRoleLabel(role);
 
   return {
     name,
@@ -108,9 +138,22 @@ export default function NotificationPage({ variant = 'notification' }) {
   const { user: authUser } = useAuth() || {};
   const copy = variant === 'announcement' ? announcementCopy : defaultCopy;
   const creator = useMemo(
-    () => getAnnouncementCreator(authUser, variant),
-    [authUser, variant],
+    () => getAnnouncementCreator(authUser),
+    [authUser],
   );
+  const currentUserRole =
+  normalizeCreatorRole(
+    authUser?.role ||
+    authUser?.userRole ||
+    authUser?.user_role ||
+    creator.role,
+  );
+
+  const isSuperAdmin =
+    currentUserRole === 'superAdmin';
+
+  const isAdmin =
+    currentUserRole === 'admin';
   const [notifications, setNotifications] = useState(() => readManagedNotifications());
   const [title, setTitle] = useState('');
   const [message, setMessage] = useState('');
@@ -215,17 +258,71 @@ export default function NotificationPage({ variant = 'notification' }) {
     }
   };
 
-  const deleteNotification = async (id) => {
-    const ok = window.confirm(copy.deleteConfirm);
+  const canDeleteNotification = (notification) => {
+      const creatorRole =
+        normalizeCreatorRole(
+          notification.createdByRole ||
+          notification.created_by_role ||
+          '',
+        );
+
+      // Super Admin can delete any notification.
+      if (isSuperAdmin) {
+        return true;
+      }
+
+      // Admin cannot delete Super Admin notifications.
+      if (
+        isAdmin &&
+        creatorRole === 'superAdmin'
+      ) {
+        return false;
+      }
+
+      // Admin may delete Admin-created notifications.
+      if (
+        isAdmin &&
+        creatorRole === 'admin'
+      ) {
+        return true;
+      }
+
+      return false;
+    };
+
+  const deleteNotification = async (notification) => {
+    if (!canDeleteNotification(notification)) {
+      window.alert(
+        'You do not have permission to delete this notification.',
+      );
+
+      return;
+    }
+
+    const ok =
+      window.confirm(copy.deleteConfirm);
+
     if (!ok) return;
 
     try {
-      const nextNotifications = await deleteManagedNotificationFromServer(id);
+      const nextNotifications =
+        await deleteManagedNotificationFromServer(
+          notification.id,
+        );
 
       setNotifications(nextNotifications);
     } catch (error) {
-      console.warn('Unable to delete notification from the server.', error);
-      setNotifications((current) => current.filter((item) => item.id !== id));
+      console.warn(
+        'Unable to delete notification from the server.',
+        error,
+      );
+
+      setNotifications((current) =>
+        current.filter(
+          (item) =>
+            item.id !== notification.id,
+        ),
+      );
     }
   };
 
@@ -313,14 +410,18 @@ export default function NotificationPage({ variant = 'notification' }) {
                       </small>
                       <small>{formatDate(item.createdAt)}</small>
                     </div>
-                    <button
-                      className="danger-feature-btn"
-                      type="button"
-                      onClick={() => deleteNotification(item.id)}
-                    >
-                      <FiTrash2 />
-                      Delete
-                    </button>
+                    {canDeleteNotification(item) && (
+                      <button
+                        className="danger-feature-btn"
+                        type="button"
+                        onClick={() =>
+                          deleteNotification(item)
+                        }
+                      >
+                        <FiTrash2 />
+                        Delete
+                      </button>
+                    )}
                   </article>
                 ))
               )}

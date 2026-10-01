@@ -1,58 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-import {
-  markManagedNotificationAsReadForRole,
-  markManagedNotificationsAsReadForRole,
-  mergeManagedNotificationsForRole,
-  subscribeToManagedNotifications,
-} from "../../utils/notifications";
+import Swal from "sweetalert2";
 
 import "./StudentHeader.css";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || "http://localhost:5000/api";
-
 const DEFAULT_PROFILE_IMAGE = "/images/temporary profile.jpg";
-
-/* =====================================================
-   DEFAULT NOTIFICATIONS
-===================================================== */
-
-const defaultNotifications = [
-  {
-    id: 1,
-    title: "Welcome to PuffyBrain!",
-    message:
-      "Your student account is ready. Start exploring your enrolled courses.",
-    time: "Just now",
-    unread: true,
-    icon: "sparkle",
-  },
-  {
-    id: 2,
-    title: "New learning material",
-    message:
-      "A new module was added to ITEC 106 - Web Systems and Technologies 2.",
-    time: "12 minutes ago",
-    unread: true,
-    icon: "course",
-  },
-  {
-    id: 3,
-    title: "Course announcement",
-    message:
-      "Your professor posted an announcement for Introduction to Computing.",
-    time: "Yesterday",
-    unread: false,
-    icon: "announcement",
-  },
-];
-
 /* =====================================================
    GET STORED USER
 ===================================================== */
-
 function getStoredUser() {
   try {
     const storedUser =
@@ -61,23 +18,19 @@ function getStoredUser() {
       localStorage.getItem("currentUser") ||
       sessionStorage.getItem("user") ||
       sessionStorage.getItem("currentUser");
-
     return storedUser ? JSON.parse(storedUser) : null;
   } catch (error) {
     console.error("Unable to read stored user:", error);
     return null;
   }
 }
-
 /* =====================================================
    RESOLVE PROFILE IMAGE
 ===================================================== */
-
 function resolveProfileImage(imagePath) {
   if (!imagePath) {
     return DEFAULT_PROFILE_IMAGE;
   }
-
   if (
     imagePath.startsWith("http://") ||
     imagePath.startsWith("https://") ||
@@ -86,17 +39,115 @@ function resolveProfileImage(imagePath) {
   ) {
     return imagePath;
   }
-
   const serverOrigin = API_BASE_URL.replace(/\/api\/?$/, "");
-
   return `${serverOrigin}${
     imagePath.startsWith("/") ? "" : "/"
   }${imagePath}`;
 }
-
+function getAuthToken() {
+  return (
+    localStorage.getItem("token") ||
+    localStorage.getItem("authToken") ||
+    localStorage.getItem("puffy-token") ||
+    sessionStorage.getItem("token") ||
+    sessionStorage.getItem("authToken") ||
+    sessionStorage.getItem("puffy-token") ||
+    ""
+  );
+}
+function formatNotificationTime(dateValue) {
+  if (!dateValue) return "";
+  const date = new Date(dateValue);
+  if (Number.isNaN(date.getTime())) return "";
+  const difference = Date.now() - date.getTime();
+  const minutes = Math.floor(difference / 60000);
+  if (minutes < 1) return "Just now";
+  if (minutes < 60) {
+    return `${minutes} ${minutes === 1 ? "minute" : "minutes"} ago`;
+  }
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) {
+    return `${hours} ${hours === 1 ? "hour" : "hours"} ago`;
+  }
+  const days = Math.floor(hours / 24);
+  if (days < 7) {
+    return `${days} ${days === 1 ? "day" : "days"} ago`;
+  }
+  return date.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+function getNotificationIcon(type = "") {
+  const normalizedType = String(type).toLowerCase();
+  if (
+    normalizedType === "enrollment_approved" ||
+    normalizedType === "student_unenrolled" ||
+    normalizedType === "course_unenrollment"
+  ) {
+    return "course";
+  }
+  if (normalizedType === "announcement") {
+    return "announcement";
+  }
+  return "sparkle";
+}
+function normalizeNotification(notification) {
+  return {
+    ...notification,
+    id:
+      notification.id ??
+      notification.notificationId ??
+      notification.notification_id,
+    notificationId:
+      notification.notificationId ??
+      notification.notification_id ??
+      notification.id,
+    title: notification.title || "Notification",
+    message: notification.message || "",
+    unread:
+      notification.unread ??
+      !(notification.isRead ?? notification.is_read ?? false),
+    time: formatNotificationTime(
+      notification.createdAt || notification.created_at
+    ),
+    icon: getNotificationIcon(notification.type),
+    source: notification.source || "user",
+  };
+}
 /* =====================================================
    STUDENT HEADER
 ===================================================== */
+function escapeNotificationHtml(value = "") {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function getSweetAlertIcon(type = "") {
+  const normalizedType =
+    String(type || "").toLowerCase();
+
+  if (
+    normalizedType === "enrollment_declined" ||
+    normalizedType === "student_unenrolled" ||
+    normalizedType === "course_unenrollment"
+  ) {
+    return "warning";
+  }
+
+  if (
+    normalizedType === "enrollment_approved"
+  ) {
+    return "success";
+  }
+
+  return "info";
+}
 
 export default function StudentHeader({
   searchValue = "",
@@ -107,60 +158,69 @@ export default function StudentHeader({
   showJoinCourse = true,
 }) {
   const navigate = useNavigate();
-
   const [currentUser, setCurrentUser] = useState(() =>
     getStoredUser()
   );
-
   const [notificationMenuOpen, setNotificationMenuOpen] =
     useState(false);
-
   const [profileMenuOpen, setProfileMenuOpen] =
     useState(false);
-
   const [notificationFilter, setNotificationFilter] =
     useState("all");
-
-  const [notifications, setNotifications] = useState(() =>
-    mergeManagedNotificationsForRole(
-      "student",
-      defaultNotifications
-    )
-  );
-
+  const [notifications, setNotifications] = useState([]);
+  const [notificationsLoading, setNotificationsLoading] =
+    useState(false);
   /* =====================================================
-     NOTIFICATION LISTENER
+     LOAD NOTIFICATIONS FROM BACKEND
   ===================================================== */
-
+  const loadNotifications = async () => {
+    const token = getAuthToken();
+    if (!token) {
+      setNotifications([]);
+      return;
+    }
+    try {
+      setNotificationsLoading(true);
+      const response = await fetch(`${API_BASE_URL}/notifications`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+        credentials: "include",
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data?.message || "Failed to fetch notifications.");
+      }
+      const incomingNotifications = Array.isArray(data?.notifications)
+        ? data.notifications
+        : [];
+      setNotifications(incomingNotifications.map(normalizeNotification));
+    } catch (error) {
+      console.error("Unable to load notifications:", error);
+    } finally {
+      setNotificationsLoading(false);
+    }
+  };
   useEffect(() => {
-    const refreshNotifications = () => {
-      setNotifications((current) =>
-        mergeManagedNotificationsForRole(
-          "student",
-          current
-        )
-      );
+    loadNotifications();
+    const intervalId = window.setInterval(loadNotifications, 30000);
+    return () => {
+      window.clearInterval(intervalId);
     };
-
-    return subscribeToManagedNotifications(
-      refreshNotifications
-    );
   }, []);
-
   /* =====================================================
      USER PROFILE LISTENER
   ===================================================== */
-
   useEffect(() => {
     const handleUserUpdated = (event) => {
       const updatedUser =
         event.detail || getStoredUser();
-
       if (updatedUser) {
         setCurrentUser(updatedUser);
       }
     };
-
     const handleStorageUpdate = (event) => {
       if (
         ![
@@ -171,41 +231,33 @@ export default function StudentHeader({
       ) {
         return;
       }
-
       const updatedUser = getStoredUser();
-
       if (updatedUser) {
         setCurrentUser(updatedUser);
       }
     };
-
     window.addEventListener(
       "puffy-user-updated",
       handleUserUpdated
     );
-
     window.addEventListener(
       "storage",
       handleStorageUpdate
     );
-
     return () => {
       window.removeEventListener(
         "puffy-user-updated",
         handleUserUpdated
       );
-
       window.removeEventListener(
         "storage",
         handleStorageUpdate
       );
     };
   }, []);
-
   /* =====================================================
      CLOSE DROPDOWNS
   ===================================================== */
-
   useEffect(() => {
     const closeDropdowns = (event) => {
       if (
@@ -215,7 +267,6 @@ export default function StudentHeader({
       ) {
         setNotificationMenuOpen(false);
       }
-
       if (
         !event.target.closest(
           ".profile-menu-wrapper"
@@ -224,41 +275,34 @@ export default function StudentHeader({
         setProfileMenuOpen(false);
       }
     };
-
     const closeWithEscape = (event) => {
       if (event.key === "Escape") {
         setNotificationMenuOpen(false);
         setProfileMenuOpen(false);
       }
     };
-
     document.addEventListener(
       "mousedown",
       closeDropdowns
     );
-
     document.addEventListener(
       "keydown",
       closeWithEscape
     );
-
     return () => {
       document.removeEventListener(
         "mousedown",
         closeDropdowns
       );
-
       document.removeEventListener(
         "keydown",
         closeWithEscape
       );
     };
   }, []);
-
   /* =====================================================
      USER INFORMATION
   ===================================================== */
-
   const displayName =
     currentUser?.displayName ||
     currentUser?.display_name ||
@@ -267,12 +311,9 @@ export default function StudentHeader({
     currentUser?.full_name ||
     currentUser?.username ||
     "Student";
-
   const profileHandle = displayName.replace(/^@/, "");
-
   const accountLabel =
     currentUser?.email || "Student account";
-
   const profileImage = useMemo(
     () =>
       resolveProfileImage(
@@ -284,60 +325,271 @@ export default function StudentHeader({
       ),
     [currentUser]
   );
-
   /* =====================================================
      NOTIFICATIONS
   ===================================================== */
-
   const unreadNotificationCount =
     notifications.filter(
       (notification) => notification.unread
     ).length;
-
   const visibleNotifications =
     notificationFilter === "unread"
       ? notifications.filter(
           (notification) => notification.unread
         )
       : notifications;
-
-  const markAllNotificationsAsRead = () => {
-    markManagedNotificationsAsReadForRole("student");
-
-    setNotifications((current) =>
-      current.map((notification) => ({
-        ...notification,
-        unread: false,
-      }))
-    );
+  const markAllNotificationsAsRead = async () => {
+    const token = getAuthToken();
+    if (!token) return;
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/notifications/read-all`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+          },
+          credentials: "include",
+        }
+      );
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(
+          data?.message || "Failed to mark notifications as read."
+        );
+      }
+      setNotifications((current) =>
+        current.map((notification) => ({
+          ...notification,
+          unread: false,
+          isRead: true,
+          is_read: true,
+        }))
+      );
+    } catch (error) {
+      console.error("Unable to mark all notifications as read:", error);
+    }
   };
+  
+  const openNotification = async (notification) => {
+  if (!notification) return;
 
-  const openNotification = (notificationId) => {
-    markManagedNotificationAsReadForRole(
-      "student",
-      notificationId
-    );
+  /* =========================================
+     MARK MANAGED NOTIFICATION AS READ
+  ========================================= */
 
+  if (
+    notification.unread &&
+    notification.source === "managed"
+  ) {
     setNotifications((current) =>
-      current.map((notification) =>
-        notification.id === notificationId
+      current.map((item) =>
+        item.id === notification.id
           ? {
-              ...notification,
+              ...item,
               unread: false,
             }
-          : notification
+          : item
       )
     );
-  };
+  }
 
-  /* =====================================================
+  /* =========================================
+     MARK DATABASE NOTIFICATION AS READ
+  ========================================= */
+
+  if (
+    notification.unread &&
+    notification.source !== "managed"
+  ) {
+    const token = getAuthToken();
+
+    if (token) {
+      try {
+        const notificationId =
+          notification.notificationId ||
+          notification.id;
+
+        const response = await fetch(
+          `${API_BASE_URL}/notifications/${notificationId}/read`,
+          {
+            method: "PATCH",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              Accept: "application/json",
+            },
+            credentials: "include",
+          }
+        );
+
+        const data = await response
+          .json()
+          .catch(() => ({}));
+
+        if (!response.ok) {
+          throw new Error(
+            data?.message ||
+              "Failed to mark notification as read."
+          );
+        }
+
+        setNotifications((current) =>
+          current.map((item) =>
+            item.id === notification.id
+              ? {
+                  ...item,
+                  unread: false,
+                  isRead: true,
+                  is_read: true,
+                }
+              : item
+          )
+        );
+      } catch (error) {
+        console.error(
+          "Unable to mark notification as read:",
+          error
+        );
+      }
+    }
+  }
+
+  /* =========================================
+     CLOSE NOTIFICATION DROPDOWN
+  ========================================= */
+
+  setNotificationMenuOpen(false);
+
+  /* =========================================
+     SEPARATE MESSAGE AND REASON
+  ========================================= */
+
+  const fullMessage =
+    String(notification.message || "").trim();
+
+  let mainMessage = fullMessage;
+  let reason = "";
+
+  const reasonMatch = fullMessage.match(
+    /(?:^|\s)Reason:\s*(.*)$/i
+  );
+
+  if (reasonMatch) {
+    reason = reasonMatch[1].trim();
+
+    mainMessage = fullMessage
+      .replace(/(?:^|\s)Reason:\s*.*$/i, "")
+      .trim();
+  }
+
+  /* =========================================
+     SHOW SWEETALERT
+  ========================================= */
+
+  await Swal.fire({
+    title:
+      notification.title ||
+      "Notification",
+
+    html: `
+      <div style="
+        text-align: left;
+        padding: 4px 6px;
+      ">
+
+        <!-- MAIN MESSAGE -->
+
+        <p style="
+          margin: 0;
+          font-size: 15px;
+          line-height: 1.7;
+          color: #374151;
+        ">
+          ${escapeNotificationHtml(mainMessage)}
+        </p>
+
+        ${
+          reason
+            ? `
+              <!-- REASON BOX -->
+
+              <div style="
+                margin-top: 18px;
+                padding: 14px 16px;
+                background: #f8fafc;
+                border: 1px solid #e2e8f0;
+                border-left: 4px solid #2563eb;
+                border-radius: 8px;
+              ">
+
+                <div style="
+                  font-size: 12px;
+                  font-weight: 700;
+                  text-transform: uppercase;
+                  letter-spacing: 0.5px;
+                  color: #64748b;
+                  margin-bottom: 6px;
+                ">
+                  Reason
+                </div>
+
+                <div style="
+                  font-size: 14px;
+                  line-height: 1.6;
+                  color: #334155;
+                ">
+                  ${escapeNotificationHtml(reason)}
+                </div>
+
+              </div>
+            `
+            : ""
+        }
+
+        ${
+          notification.time
+            ? `
+              <!-- TIME -->
+
+              <div style="
+                border-top: 1px solid #e5e7eb;
+                margin-top: 18px;
+                padding-top: 12px;
+                font-size: 13px;
+                color: #9ca3af;
+              ">
+                ${escapeNotificationHtml(
+                  notification.time
+                )}
+              </div>
+            `
+            : ""
+        }
+
+      </div>
+    `,
+
+    icon: getSweetAlertIcon(
+      notification.type
+    ),
+
+    confirmButtonText: "Okay",
+
+    confirmButtonColor: "#2563eb",
+
+    width: 480,
+
+    showCloseButton: true,
+  });
+};
+
+/* =====================================================
      LOGOUT
   ===================================================== */
-
   const handleLogout = () => {
     setProfileMenuOpen(false);
     setNotificationMenuOpen(false);
-
     [
       "token",
       "authToken",
@@ -352,7 +604,6 @@ export default function StudentHeader({
       "section_name",
       "school_name",
     ].forEach((key) => localStorage.removeItem(key));
-
     [
       "token",
       "authToken",
@@ -360,20 +611,16 @@ export default function StudentHeader({
       "user",
       "currentUser",
     ].forEach((key) => sessionStorage.removeItem(key));
-
     navigate("/login", {
       replace: true,
     });
   };
-
   /* =====================================================
      JSX
   ===================================================== */
-
   return (
     <header className="student-header">
       {/* SEARCH */}
-
       {showSearch && (
         <label className="student-header-search">
           <input
@@ -386,7 +633,6 @@ export default function StudentHeader({
               }
             }}
           />
-
           <span
             className="student-header-search-icon"
             aria-hidden="true"
@@ -397,18 +643,14 @@ export default function StudentHeader({
                 cy="10.5"
                 r="5.5"
               />
-
               <path d="m15 15 4 4" />
             </svg>
           </span>
         </label>
       )}
-
       {/* RIGHT SIDE */}
-
       <div className="student-header-actions">
         {/* NOTIFICATION */}
-
         <div className="notification-menu-wrapper">
           <button
             type="button"
@@ -419,9 +661,7 @@ export default function StudentHeader({
             aria-expanded={notificationMenuOpen}
             onClick={(event) => {
               event.stopPropagation();
-
               setProfileMenuOpen(false);
-
               setNotificationMenuOpen(
                 (current) => !current
               );
@@ -434,7 +674,6 @@ export default function StudentHeader({
               <path d="M6.6 17.4h10.8l-.9-1.6v-4.5a4.5 4.5 0 0 0-9 0v4.5l-.9 1.6Z" />
               <path d="M10 19.2h4" />
             </svg>
-
             {unreadNotificationCount > 0 && (
               <span className="notification-badge">
                 {unreadNotificationCount > 9
@@ -443,9 +682,7 @@ export default function StudentHeader({
               </span>
             )}
           </button>
-
           {/* NOTIFICATION DROPDOWN */}
-
           {notificationMenuOpen && (
             <section
               className="notification-dropdown-menu"
@@ -458,14 +695,12 @@ export default function StudentHeader({
               <div className="notification-dropdown-header">
                 <div>
                   <h2>Notifications</h2>
-
                   <span>
                     {unreadNotificationCount > 0
                       ? `${unreadNotificationCount} unread`
                       : "You are all caught up"}
                   </span>
                 </div>
-
                 {unreadNotificationCount > 0 && (
                   <button
                     type="button"
@@ -478,9 +713,7 @@ export default function StudentHeader({
                   </button>
                 )}
               </div>
-
               {/* FILTER */}
-
               <div className="notification-dropdown-tabs">
                 <button
                   type="button"
@@ -495,7 +728,6 @@ export default function StudentHeader({
                 >
                   All
                 </button>
-
                 <button
                   type="button"
                   className={
@@ -510,11 +742,13 @@ export default function StudentHeader({
                   Unread
                 </button>
               </div>
-
               {/* NOTIFICATION LIST */}
-
               <div className="notification-list">
-                {visibleNotifications.length === 0 ? (
+                {notificationsLoading ? (
+                  <div className="notification-empty-state">
+                    <strong>Loading notifications...</strong>
+                  </div>
+                ) : visibleNotifications.length === 0 ? (
                   <div className="notification-empty-state">
                     <span className="notification-empty-icon">
                       <svg
@@ -525,11 +759,9 @@ export default function StudentHeader({
                         <path d="M10 19.2h4" />
                       </svg>
                     </span>
-
                     <strong>
                       No notifications
                     </strong>
-
                     <p>
                       New updates will appear here.
                     </p>
@@ -546,13 +778,10 @@ export default function StudentHeader({
                             : ""
                         }`}
                         onClick={() =>
-                          openNotification(
-                            notification.id
-                          )
+                          openNotification(notification)
                         }
                       >
                         {/* ICON */}
-
                         <span
                           className={`notification-item-icon ${notification.icon}`}
                           aria-hidden="true"
@@ -575,23 +804,18 @@ export default function StudentHeader({
                             </svg>
                           )}
                         </span>
-
                         {/* COPY */}
-
                         <span className="notification-item-copy">
                           <strong>
                             {notification.title}
                           </strong>
-
                           <span>
                             {notification.message}
                           </span>
-
                           <small>
                             {notification.time}
                           </small>
                         </span>
-
                         {notification.unread && (
                           <span
                             className="notification-unread-dot"
@@ -603,13 +827,11 @@ export default function StudentHeader({
                   )
                 )}
               </div>
-
               <button
                 type="button"
                 className="notification-view-all-button"
                 onClick={() => {
                   setNotificationMenuOpen(false);
-
                   navigate(
                     "/student/notifications"
                   );
@@ -620,9 +842,7 @@ export default function StudentHeader({
             </section>
           )}
         </div>
-
         {/* JOIN COURSE */}
-
         {showJoinCourse && (
           <button
             type="button"
@@ -636,9 +856,7 @@ export default function StudentHeader({
             + Join course
           </button>
         )}
-
         {/* PROFILE */}
-
         <div className="profile-menu-wrapper">
           <div className="profile-chip">
             <button
@@ -658,18 +876,14 @@ export default function StudentHeader({
                       DEFAULT_PROFILE_IMAGE;
                   }}
                 />
-
                 <span className="profile-status-dot" />
               </span>
-
               <span className="profile-user-info">
                 <strong>{profileHandle}</strong>
                 <small>Student</small>
               </span>
             </button>
-
             {/* THREE DOT BUTTON */}
-
             <button
               type="button"
               className={`profile-dropdown-button ${
@@ -679,9 +893,7 @@ export default function StudentHeader({
               aria-expanded={profileMenuOpen}
               onClick={(event) => {
                 event.stopPropagation();
-
                 setNotificationMenuOpen(false);
-
                 setProfileMenuOpen(
                   (current) => !current
                 );
@@ -697,9 +909,7 @@ export default function StudentHeader({
               </svg>
             </button>
           </div>
-
           {/* PROFILE DROPDOWN */}
-
           {profileMenuOpen && (
             <div
               className="profile-dropdown-menu"
@@ -718,22 +928,17 @@ export default function StudentHeader({
                       DEFAULT_PROFILE_IMAGE;
                   }}
                 />
-
                 <div>
                   <strong>{profileHandle}</strong>
                   <span>{accountLabel}</span>
                 </div>
               </div>
-
               <div className="profile-dropdown-divider" />
-
               {/* VIEW PROFILE */}
-
               <button
                 type="button"
                 onClick={() => {
                   setProfileMenuOpen(false);
-
                   navigate("/student/profile");
                 }}
               >
@@ -746,20 +951,15 @@ export default function StudentHeader({
                     cy="8"
                     r="4"
                   />
-
                   <path d="M5 20c.8-4 3.2-6 7-6s6.2 2 7 6" />
                 </svg>
-
                 <span>View profile</span>
               </button>
-
               {/* SETTINGS */}
-
               <button
                 type="button"
                 onClick={() => {
                   setProfileMenuOpen(false);
-
                   navigate("/student/settings");
                 }}
               >
@@ -772,17 +972,12 @@ export default function StudentHeader({
                     cy="12"
                     r="3"
                   />
-
                   <path d="M19 13.5v-3l-2-.6a7 7 0 0 0-.7-1.6l1-1.8-2.1-2.1-1.8 1a7 7 0 0 0-1.6-.7L11.5 3h-3l-.6 2a7 7 0 0 0-1.6.7l-1.8-1-2.1 2.1 1 1.8a7 7 0 0 0-.7 1.6L1 10.5v3l2 .6a7 7 0 0 0 .7 1.6l-1 1.8 2.1 2.1 1.8-1a7 7 0 0 0 1.6.7l.6 2h3l.6-2a7 7 0 0 0 1.6-.7l1.8 1 2.1-2.1-1-1.8a7 7 0 0 0 .7-1.6Z" />
                 </svg>
-
                 <span>Settings</span>
               </button>
-
               <div className="profile-dropdown-divider" />
-
               {/* LOGOUT */}
-
               <button
                 type="button"
                 className="profile-logout-option"
@@ -796,7 +991,6 @@ export default function StudentHeader({
                   <path d="m14 8 4 4-4 4" />
                   <path d="M18 12H9" />
                 </svg>
-
                 <span>Log out</span>
               </button>
             </div>

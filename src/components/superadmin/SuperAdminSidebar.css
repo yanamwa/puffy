@@ -1,0 +1,595 @@
+/* =====================================================
+   SUPER ADMIN SIDEBAR
+   Professor-style collapsible sidebar
+===================================================== */
+
+.superadmin-layout {
+  --superadmin-sidebar-expanded: 220px;
+  --superadmin-sidebar-collapsed: 76px;
+  --superadmin-green: #198754;
+  --superadmin-dark: #171927;
+  --superadmin-line: #c4c8cf;
+
+  grid-template-columns:
+    var(--superadmin-sidebar-expanded)
+    minmax(0, 1fr);
+
+  transition:
+    grid-template-columns 220ms ease;
+}
+
+
+/* =====================================================
+   COLLAPSED LAYOUT
+===================================================== */
+
+.superadmin-layout.superadmin-sidebar-collapsed {
+  grid-template-columns:
+    var(--superadmin-sidebar-collapsed)
+    minmax(0, 1fr);
+}
+
+
+/* =====================================================
+   SIDEBAR
+===================================================== */
+
+.superadmin-layout .admin-sidebar {
+  width: 100%;
+  min-width: 0;
+
+  background: var(--superadmin-green);
+
+  border-right: 1px solid var(--superadmin-line);
+
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  transition:
+    width 220ms ease;
+}
+
+
+/* =====================================================
+   BRAND
+===================================================== */
+
+.superadmin-layout .sidebar-brand {
+  position: relative;
+
+  width: 100%;
+  min-height: 105px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  margin: 0;
+  padding: 18px 12px 15px;
+
+  border-bottom: 0;
+
+  box-sizing: border-box;
+}
+
+
+/* Divider */
+
+.superadmin-layout .sidebar-brand::after {
+  content: "";
+
+  position: absolute;
+
+  right: 22px;
+  bottom: 0;
+  left: 22px;
+
+  height: 1px;
+
+  background: rgba(255, 255, 255, 0.48);
+
+  transition:
+    left 220ms ease,
+    right 220ms ease;
+}
+
+
+/* =====================================================
+   LOGO BUTTON
+===================================================== */
+
+.superadmin-layout .superadmin-logo-button {
+  width: 70px;
+  height: 70px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex: 0 0 50px;
+
+  padding: 0;
+
+  border: 0;
+
+  background: transparent;
+
+  cursor: pointer;
+}
+
+
+/* Logo */
+
+.superadmin-layout
+  .superadmin-logo-button img {
+  width: 70px;
+  height: 70px;
+
+  display: block;
+
+  object-fit: contain;
+
+  transition:
+    transform 180ms ease,
+    width 220ms ease,
+    height 220ms ease;
+}
+
+
+.superadmin-layout
+  .superadmin-logo-button:hover img {
+  transform: scale(1.07);
+}
+
+
+/* =====================================================
+   BRAND NAME
+===================================================== */
+
+.superadmin-layout .superadmin-brand-name {
+  color: #ffffff;
+
+  font-family:
+    "Jersey 15",
+    system-ui,
+    sans-serif;
+
+  font-size: 16px;
+  font-weight: 400;
+
+  line-height: 1;
+
+  white-space: nowrap;
+
+  opacity: 1;
+
+  transition:
+    width 180ms ease,
+    opacity 130ms ease;
+}
+
+
+/* =====================================================
+   COLLAPSED BRAND
+===================================================== */
+
+.superadmin-sidebar-collapsed
+  .sidebar-brand {
+  justify-content: center;
+
+  gap: 0;
+
+  padding-right: 0;
+  padding-left: 0;
+}
+
+
+.superadmin-sidebar-collapsed
+  .superadmin-logo-button {
+  width: 100%;
+
+  flex-basis: 100%;
+}
+
+
+.superadmin-sidebar-collapsed
+  .superadmin-logo-button img {
+  width: 65px;
+  height: 65px;
+}
+
+
+.superadmin-sidebar-collapsed
+  .superadmin-brand-name {
+  width: 0;
+
+  overflow: hidden;
+
+  opacity: 0;
+
+  pointer-events: none;
+}
+
+
+.superadmin-sidebar-collapsed
+  .sidebar-brand::after {
+  right: 10px;
+  left: 10px;
+}
+
+
+/* =====================================================
+   MENU
+===================================================== */
+
+.superadmin-layout .sidebar-menu {
+  width: 100%;
+
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+
+  gap: 14px;
+
+  padding:
+    26px
+    0
+    20px
+    30px;
+
+  box-sizing: border-box;
+}
+
+
+.superadmin-layout .menu-section {
+  display: flex;
+  flex-direction: column;
+
+  gap: 14px;
+
+  padding: 0;
+
+  border: 0;
+}
+
+
+.superadmin-layout
+  .menu-section + .menu-section {
+  padding-top: 0;
+
+  border-top: 0;
+}
+
+
+/* Hide old section headings */
+
+.superadmin-layout
+  .menu-section-title {
+  display: none;
+}
+
+
+/* =====================================================
+   LINKS
+===================================================== */
+
+.superadmin-layout .sidebar-link {
+  position: relative;
+
+  width: 100%;
+  min-height: 42px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+
+  margin: 0;
+
+  padding:
+    0
+    10px
+    0
+    10px;
+
+  border: 1px solid transparent;
+  border-right: 0;
+
+  border-radius:
+    999px
+    0
+    0
+    999px;
+
+  background: transparent;
+
+  box-shadow: none;
+
+  color: #ffffff;
+
+  text-decoration: none;
+
+  box-sizing: border-box;
+
+  transition:
+    color 160ms ease,
+    background 160ms ease,
+    border-color 160ms ease;
+}
+
+
+/* Icon */
+
+.superadmin-layout .sidebar-icon {
+  width: 18px;
+  height: 18px;
+
+  flex: 0 0 18px;
+
+  color: currentColor;
+
+  stroke-width: 1.8;
+}
+
+
+/* Text */
+
+.superadmin-layout .sidebar-nav-label {
+  display: block;
+
+  min-width: 0;
+  max-width: 145px;
+
+  overflow: visible;
+
+  color: currentColor;
+
+  font-family:
+    "Jersey 15",
+    system-ui,
+    sans-serif;
+
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.15;
+
+  white-space: normal;
+  overflow-wrap: normal;
+  word-break: normal;
+
+  opacity: 1;
+}
+
+
+/* =====================================================
+   NORMAL HOVER
+
+   No white pill on hover.
+   Only text/icon gets dark.
+===================================================== */
+
+.superadmin-layout
+  .sidebar-link:not(.active):hover {
+  border-color: transparent;
+
+  background: transparent;
+
+  color: var(--superadmin-dark);
+
+  box-shadow: none;
+
+  transform: none;
+}
+
+
+/* =====================================================
+   ACTIVE LINK
+===================================================== */
+
+.superadmin-layout .sidebar-link.active {
+  z-index: 2;
+
+  border-color: #aeb5bf;
+  border-right: 0;
+
+  background: #ffffff;
+
+  color: #606772;
+
+  box-shadow: none;
+
+  transform: none;
+}
+
+
+/* Connect active item to content */
+
+.superadmin-layout
+  .sidebar-link.active::after {
+  content: "";
+
+  position: absolute;
+
+  top: 1px;
+  right: -2px;
+  bottom: 1px;
+
+  width: 3px;
+
+  background: #ffffff;
+}
+
+
+/* =====================================================
+   COLLAPSED MENU
+===================================================== */
+
+.superadmin-sidebar-collapsed
+  .sidebar-menu {
+  align-items: stretch;
+
+  padding:
+    26px
+    0
+    20px
+    18px;
+}
+
+
+.superadmin-sidebar-collapsed
+  .sidebar-link {
+  min-height: 42px;
+
+  justify-content: flex-start;
+
+  gap: 0;
+
+  padding:
+    0
+    0
+    0
+    18px;
+}
+
+
+.superadmin-sidebar-collapsed
+  .sidebar-nav-label {
+  display: none;
+}
+
+
+/* =====================================================
+   LOGOUT
+   Same as Professor sidebar
+===================================================== */
+
+.superadmin-layout .sidebar-footer {
+  width: 100%;
+
+  margin: auto 0 0;
+  padding: 0;
+
+  border: 0;
+}
+
+
+.superadmin-layout .logout-btn {
+  width: 100%;
+
+  height: 56px;
+  min-height: 56px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 12px;
+
+  margin: 0;
+  padding: 0;
+
+  border: 0;
+  border-top: 1px solid #ececec;
+  border-radius: 0;
+
+  background: #f2f2f2;
+
+  box-shadow: none;
+
+  color: #666666;
+
+  font-family:
+    "Jersey 15",
+    system-ui,
+    sans-serif;
+
+  font-size: 15px;
+  font-weight: 400;
+
+  cursor: pointer;
+
+  box-sizing: border-box;
+}
+
+
+/* Hover */
+.superadmin-layout .logout-btn:hover {
+  border-color: #ececec;
+
+  background: #f2f2f2;
+
+  color: var(--superadmin-dark);
+
+  transform: none;
+
+  box-shadow: none;
+}
+
+
+/* Logout icon */
+.superadmin-layout .logout-btn svg {
+  width: 18px;
+  height: 18px;
+
+  flex: 0 0 18px;
+
+  color: currentColor;
+}
+
+
+/* Logout text */
+.superadmin-layout .sidebar-logout-label {
+  font-family:
+    "Jersey 15",
+    system-ui,
+    sans-serif;
+
+  font-size: 15px;
+  font-weight: 400;
+
+  white-space: nowrap;
+}
+
+
+/* =====================================================
+   COLLAPSED LOGOUT
+===================================================== */
+
+.superadmin-sidebar-collapsed .logout-btn {
+  justify-content: center;
+
+  gap: 0;
+
+  padding: 0;
+}
+
+
+.superadmin-sidebar-collapsed
+  .sidebar-logout-label {
+  display: none;
+}
+
+/* =====================================================
+   MAIN CONTENT
+===================================================== */
+
+.superadmin-layout .admin-main {
+  grid-column: 2;
+
+  min-width: 0;
+}
+
+
+/* =====================================================
+   SMALL SCREEN
+===================================================== */
+
+@media (max-width: 640px) {
+
+  .superadmin-layout,
+  .superadmin-layout.superadmin-sidebar-collapsed {
+    grid-template-columns: 1fr;
+  }
+
+}

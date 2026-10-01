@@ -1,34 +1,14 @@
-import {
-  useState,
-} from 'react';
-
-import {
-  NavLink,
-  useNavigate,
-} from 'react-router-dom';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { API_BASE } from '../../../config.js';
 import { useAuth } from '../../../context/AuthContext';
 
-import {
-  FiActivity,
-  FiBell,
-  FiBook,
-  FiDownload,
-  FiGrid,
-  FiLogOut,
-  FiSearch,
-  FiSettings,
-  FiShield,
-  FiSun,
-  FiUsers,
-} from 'react-icons/fi';
+import SuperAdminSidebar
+  from '../../../components/superadmin/SuperAdminSidebar';
 
-import RoleNotificationMenu
-  from '../../../components/RoleNotificationMenu';
-
-import HeaderProfileChip
-  from '../../../components/HeaderProfileChip';
+import SuperAdminHeader
+  from '../../../components/superadmin/SuperAdminHeader';
 
 import '../../admin/shared/AdminLayout.css';
 import './SuperAdminLayout.css';
@@ -62,9 +42,9 @@ function resolveProfileImage(imagePath) {
   }
 
   const serverOrigin = API_BASE.replace(/\/api\/?$/, '');
+
   return `${serverOrigin}${fixedPath}`;
 }
-
 
 export default function SuperAdminLayout({ children }) {
   const {
@@ -73,11 +53,6 @@ export default function SuperAdminLayout({ children }) {
   } = useAuth();
 
   const navigate = useNavigate();
-
-
-  /* =====================================================
-     SIDEBAR STATE
-  ===================================================== */
 
   const [
     sidebarCollapsed,
@@ -90,18 +65,12 @@ export default function SuperAdminLayout({ children }) {
     );
   });
 
-
-  /* =====================================================
-     USER
-  ===================================================== */
-
   const avatarSrc = resolveProfileImage(
     user?.profileImage ||
     user?.profile_image ||
     user?.avatar ||
     '',
   );
-
 
   const displayUsername =
     String(
@@ -113,11 +82,6 @@ export default function SuperAdminLayout({ children }) {
       user?.username ||
       'Super Admin',
     ).replace(/^@+/, '');
-
-
-  /* =====================================================
-     SIDEBAR TOGGLE
-  ===================================================== */
 
   const toggleSidebar = () => {
     setSidebarCollapsed((currentValue) => {
@@ -132,11 +96,6 @@ export default function SuperAdminLayout({ children }) {
     });
   };
 
-
-  /* =====================================================
-     LOGOUT
-  ===================================================== */
-
   const handleLogout = () => {
     logout();
 
@@ -144,108 +103,6 @@ export default function SuperAdminLayout({ children }) {
       replace: true,
     });
   };
-
-
-  /* =====================================================
-     MENU
-  ===================================================== */
-
-  const mainMenuItems = [
-    {
-      label: 'Dashboard',
-      path: '/super-admin/dashboard',
-      icon: FiGrid,
-    },
-    {
-      label: 'User Management',
-      path: '/super-admin/users',
-      icon: FiUsers,
-    },
-    {
-      label: 'Course Management',
-      path: '/super-admin/courses',
-      icon: FiBook,
-    },
-    {
-      label: 'Modes Management',
-      path: '/super-admin/mode',
-      icon: FiSun,
-    },
-    {
-      label: 'System Analytics',
-      path: '/super-admin/analytics',
-      icon: FiActivity,
-    },
-    {
-      label: 'Announcements & Notifications',
-      path: '/super-admin/announcements',
-      icon: FiBell,
-    },
-    {
-      label: 'Audit Logs',
-      path: '/super-admin/audit-logs',
-      icon: FiShield,
-    },
-    {
-      label: 'Backup and Restore',
-      path: '/super-admin/backup',
-      icon: FiDownload,
-    },
-  ];
-
-
-  const otherMenuItems = [
-    {
-      label: 'System Settings',
-      path: '/super-admin/settings',
-      icon: FiSettings,
-    },
-    {
-      label: 'Security and Permissions',
-      path: '/super-admin/security',
-      icon: FiShield,
-    },
-  ];
-
-
-  /* =====================================================
-     SIDEBAR LINK
-  ===================================================== */
-
-  const renderMenuItem = (item) => {
-    const Icon = item.icon;
-
-    return (
-      <NavLink
-        key={item.path}
-        to={item.path}
-        className={({ isActive }) =>
-          `sidebar-link ${
-            isActive ? 'active' : ''
-          }`
-        }
-        title={
-          sidebarCollapsed
-            ? item.label
-            : undefined
-        }
-      >
-        <Icon
-          className="sidebar-icon"
-          aria-hidden="true"
-        />
-
-        <span className="sidebar-nav-label">
-          {item.label}
-        </span>
-      </NavLink>
-    );
-  };
-
-
-  /* =====================================================
-     PAGE
-  ===================================================== */
 
   return (
     <div
@@ -255,152 +112,23 @@ export default function SuperAdminLayout({ children }) {
           : ''
       }`}
     >
-
-      {/* ================================================
-          SIDEBAR
-      ================================================= */}
-
-      <aside className="admin-sidebar">
-
-        <div className="sidebar-brand">
-
-          <button
-            type="button"
-            className="superadmin-logo-button"
-            onClick={toggleSidebar}
-            aria-label={
-              sidebarCollapsed
-                ? 'Expand Super Admin sidebar'
-                : 'Collapse Super Admin sidebar'
-            }
-            aria-expanded={!sidebarCollapsed}
-            title={
-              sidebarCollapsed
-                ? 'Expand sidebar'
-                : 'Collapse sidebar'
-            }
-          >
-            <img
-              src="/images/logo_solo.png"
-              alt="PuffyBrain logo"
-            />
-          </button>
-
-          <span className="superadmin-brand-name">
-            PuffyBrain
-          </span>
-
-        </div>
-
-
-        <nav
-          className="sidebar-menu"
-          aria-label="Super Admin navigation"
-        >
-
-          <div className="menu-section">
-
-            {mainMenuItems.map(
-              renderMenuItem,
-            )}
-
-          </div>
-
-
-          <div className="menu-section">
-
-            {otherMenuItems.map(
-              renderMenuItem,
-            )}
-
-          </div>
-
-        </nav>
-
-
-        <div className="sidebar-footer">
-
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="logout-btn"
-            title={
-              sidebarCollapsed
-                ? 'Logout'
-                : undefined
-            }
-          >
-            <FiLogOut aria-hidden="true" />
-
-            <span className="sidebar-logout-label">
-              Logout
-            </span>
-          </button>
-
-        </div>
-
-      </aside>
-
-
-      {/* ================================================
-          MAIN
-      ================================================= */}
+      <SuperAdminSidebar
+        sidebarCollapsed={sidebarCollapsed}
+        toggleSidebar={toggleSidebar}
+        onLogout={handleLogout}
+      />
 
       <main className="admin-main">
-
-        <header className="admin-header">
-
-          <div className="admin-header-search">
-
-            <FiSearch className="search-icon" />
-
-            <input
-              type="search"
-              placeholder="Search system records..."
-              aria-label="Search system records"
-            />
-
-          </div>
-
-
-          <div className="admin-header-actions">
-
-            <RoleNotificationMenu
-              role="superAdmin"
-            />
-
-
-            <HeaderProfileChip
-              username={displayUsername}
-              accountLabel="Super admin account"
-              avatarSrc={avatarSrc}
-              profilePath="/super-admin/profile"
-              menuItems={[
-                {
-                  label: 'Profile',
-                  path: '/super-admin/profile',
-                  icon: 'user',
-                },
-                {
-                  label: 'Settings',
-                  path: '/super-admin/settings',
-                  icon: 'settings',
-                },
-              ]}
-              onLogout={handleLogout}
-            />
-
-          </div>
-
-        </header>
-
+        <SuperAdminHeader
+          displayUsername={displayUsername}
+          avatarSrc={avatarSrc}
+          onLogout={handleLogout}
+        />
 
         <div className="admin-content">
           {children}
         </div>
-
       </main>
-
     </div>
   );
 }

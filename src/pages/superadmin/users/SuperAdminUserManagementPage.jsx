@@ -20,7 +20,7 @@ import {
   FiX,
 } from 'react-icons/fi';
 import { API_BASE } from '../../../config';
-import '../../admin/users/Users.css';
+import './SuperAdminUserManagementPage.css';
 
 const USER_TABS = [
   { id: 'all', label: 'All Users' },

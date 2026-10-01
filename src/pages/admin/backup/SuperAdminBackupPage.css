@@ -1,0 +1,313 @@
+/* =====================================================
+   SUPER ADMIN BACKUP & RESTORE
+===================================================== */
+
+.superadmin-backup-page {
+  width: 100%;
+  min-width: 0;
+
+  display: grid;
+  gap: 22px;
+}
+
+
+/* =====================================================
+   PAGE HEADER
+===================================================== */
+
+.superadmin-backup-header {
+  padding: 22px 24px;
+
+  border: 1px solid #d7dce0;
+  border-radius: 14px;
+
+  background: #ffffff;
+
+  box-shadow:
+    4px 5px 0 rgba(25, 135, 84, 0.09);
+}
+
+
+.superadmin-backup-header h1 {
+  margin: 0;
+
+  color: #4f535a;
+
+  font-size: 28px;
+  font-weight: 800;
+}
+
+
+.superadmin-backup-header p {
+  max-width: 700px;
+
+  margin: 8px 0 0;
+
+  color: #858d97;
+
+  font-size: 12px;
+  font-weight: 600;
+
+  line-height: 1.5;
+}
+
+
+/* =====================================================
+   GRID
+===================================================== */
+
+.superadmin-backup-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 20px;
+}
+
+
+/* =====================================================
+   CARD
+===================================================== */
+
+.superadmin-backup-card {
+  position: relative;
+
+  overflow: hidden;
+
+  min-width: 0;
+
+  border: 1px solid #d7dce0;
+  border-radius: 14px;
+
+  background: #ffffff;
+
+  box-shadow:
+    5px 5px 0 rgba(25, 135, 84, 0.09);
+}
+
+
+.superadmin-backup-card-accent {
+  height: 5px;
+
+  background: #198754;
+}
+
+
+.superadmin-backup-card-body {
+  padding: 25px;
+}
+
+
+.superadmin-backup-label {
+  display: inline-flex;
+
+  margin-bottom: 10px;
+
+  padding: 5px 9px;
+
+  border-radius: 999px;
+
+  background: #eaf6ef;
+
+  color: #198754;
+
+  font-size: 9px;
+  font-weight: 900;
+
+  letter-spacing: 0.5px;
+
+  text-transform: uppercase;
+}
+
+
+.superadmin-backup-card h2 {
+  margin: 0 0 8px;
+
+  color: #4f535a;
+
+  font-size: 18px;
+  font-weight: 900;
+}
+
+
+.superadmin-backup-card p {
+  min-height: 42px;
+
+  margin: 0 0 18px;
+
+  color: #858d97;
+
+  font-size: 11px;
+  font-weight: 600;
+
+  line-height: 1.6;
+}
+
+
+/* =====================================================
+   NOTE
+===================================================== */
+
+.superadmin-backup-note {
+  margin-bottom: 18px;
+
+  padding: 12px 14px;
+
+  border: 1px solid #dce8e1;
+  border-radius: 10px;
+
+  background: #f7fbf8;
+
+  color: #69736d;
+
+  font-size: 10px;
+  font-weight: 600;
+
+  line-height: 1.5;
+}
+
+
+/* =====================================================
+   FILE INPUT
+===================================================== */
+
+.superadmin-restore-file {
+  display: grid;
+
+  gap: 8px;
+
+  margin-bottom: 12px;
+}
+
+
+.superadmin-restore-file > span {
+  color: #606771;
+
+  font-size: 10px;
+  font-weight: 800;
+}
+
+
+.superadmin-restore-file input {
+  width: 100%;
+
+  box-sizing: border-box;
+
+  padding: 10px;
+
+  border: 1px solid #cbd1d6;
+  border-radius: 10px;
+
+  background: #fafbfb;
+
+  color: #606771;
+
+  font-size: 10px;
+}
+
+
+.superadmin-selected-file {
+  margin-bottom: 14px;
+
+  padding: 9px 11px;
+
+  border-radius: 8px;
+
+  background: #f3f5f4;
+
+  color: #69716f;
+
+  font-size: 9px;
+  font-weight: 700;
+
+  overflow-wrap: anywhere;
+}
+
+
+/* =====================================================
+   BUTTONS
+===================================================== */
+
+.superadmin-backup-primary,
+.superadmin-backup-restore {
+  min-height: 40px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 17px;
+
+  border: 0;
+  border-radius: 10px;
+
+  font-size: 11px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  transition:
+    transform 150ms ease,
+    filter 150ms ease;
+}
+
+
+.superadmin-backup-primary {
+  background: #198754;
+
+  color: #ffffff;
+}
+
+
+.superadmin-backup-restore {
+  background: #343a40;
+
+  color: #ffffff;
+}
+
+
+.superadmin-backup-primary:hover,
+.superadmin-backup-restore:not(:disabled):hover {
+  filter: brightness(1.05);
+
+  transform: translateY(-1px);
+}
+
+
+.superadmin-backup-restore:disabled {
+  background: #c8ccd0;
+
+  color: #ffffff;
+
+  cursor: not-allowed;
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 800px) {
+
+  .superadmin-backup-grid {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+
+@media (max-width: 550px) {
+
+  .superadmin-backup-header,
+  .superadmin-backup-card-body {
+    padding: 18px;
+  }
+
+
+  .superadmin-backup-primary,
+  .superadmin-backup-restore {
+    width: 100%;
+  }
+
+}

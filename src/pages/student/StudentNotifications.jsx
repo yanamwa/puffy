@@ -3,18 +3,21 @@ import {
   useEffect,
   useMemo,
   useState,
-} from 'react';
+} from "react";
 
 import {
   FiBell,
   FiBookOpen,
   FiCheckCircle,
   FiMessageSquare,
-} from 'react-icons/fi';
+} from "react-icons/fi";
 
-import Swal from 'sweetalert2';
+import Swal from "sweetalert2";
 
-import './ProfessorLayout.css';
+import StudentSidebar from "../../components/students/StudentSidebar";
+import StudentHeader from "../../components/students/StudentHeader";
+
+import "./StudentNotifications.css";
 
 
 /* =====================================================
@@ -23,7 +26,7 @@ import './ProfessorLayout.css';
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL ||
-  'http://localhost:5000/api';
+  "http://localhost:5000/api";
 
 
 /* =====================================================
@@ -32,16 +35,16 @@ const API_BASE_URL =
 
 const tabs = [
   {
-    label: 'All',
-    value: 'all',
+    label: "All",
+    value: "all",
   },
   {
-    label: 'Unread',
-    value: 'unread',
+    label: "Unread",
+    value: "unread",
   },
   {
-    label: 'Announcements',
-    value: 'announcement',
+    label: "Announcements",
+    value: "announcement",
   },
 ];
 
@@ -52,13 +55,13 @@ const tabs = [
 
 function getStoredToken() {
   return (
-    localStorage.getItem('token') ||
-    localStorage.getItem('authToken') ||
-    localStorage.getItem('puffy-token') ||
-    sessionStorage.getItem('token') ||
-    sessionStorage.getItem('authToken') ||
-    sessionStorage.getItem('puffy-token') ||
-    ''
+    localStorage.getItem("token") ||
+    localStorage.getItem("authToken") ||
+    localStorage.getItem("puffy-token") ||
+    sessionStorage.getItem("token") ||
+    sessionStorage.getItem("authToken") ||
+    sessionStorage.getItem("puffy-token") ||
+    ""
   );
 }
 
@@ -68,95 +71,92 @@ function getStoredToken() {
 ===================================================== */
 
 function formatNotificationTime(value) {
-  if (!value) {
-    return '';
-  }
+  if (!value) return "";
 
   const date = new Date(value);
 
   if (Number.isNaN(date.getTime())) {
-    return '';
+    return "";
   }
 
   const difference =
     Date.now() - date.getTime();
 
-  const minutes = Math.floor(
-    difference / 60000
-  );
+  const minutes =
+    Math.floor(difference / 60000);
 
   if (minutes < 1) {
-    return 'Just now';
+    return "Just now";
   }
 
   if (minutes < 60) {
     return `${minutes} ${
       minutes === 1
-        ? 'minute'
-        : 'minutes'
+        ? "minute"
+        : "minutes"
     } ago`;
   }
 
-  const hours = Math.floor(
-    minutes / 60
-  );
+  const hours =
+    Math.floor(minutes / 60);
 
   if (hours < 24) {
     return `${hours} ${
       hours === 1
-        ? 'hour'
-        : 'hours'
+        ? "hour"
+        : "hours"
     } ago`;
   }
 
-  const days = Math.floor(
-    hours / 24
-  );
+  const days =
+    Math.floor(hours / 24);
 
   if (days < 7) {
     return `${days} ${
       days === 1
-        ? 'day'
-        : 'days'
+        ? "day"
+        : "days"
     } ago`;
   }
 
   return date.toLocaleDateString(
     undefined,
     {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
+      month: "short",
+      day: "numeric",
+      year: "numeric",
     }
   );
 }
 
 
 /* =====================================================
-   ICON TYPE
+   NOTIFICATION ICON TYPE
 ===================================================== */
 
-function getNotificationIconType(type = '') {
+function getNotificationIconType(type = "") {
   const normalizedType =
-    String(type || '')
+    String(type || "")
       .trim()
       .toLowerCase();
 
   if (
-    normalizedType === 'enrollment_request' ||
-    normalizedType === 'enrollment_approved' ||
-    normalizedType === 'enrollment_declined' ||
-    normalizedType === 'student_unenrolled' ||
-    normalizedType === 'course_unenrollment'
+    normalizedType === "enrollment_request" ||
+    normalizedType === "enrollment_approved" ||
+    normalizedType === "enrollment_declined" ||
+    normalizedType === "student_unenrolled" ||
+    normalizedType === "course_unenrollment"
   ) {
-    return 'course';
+    return "course";
   }
 
-  if (normalizedType === 'announcement') {
-    return 'announcement';
+  if (
+    normalizedType === "announcement"
+  ) {
+    return "announcement";
   }
 
-  return 'system';
+  return "system";
 }
 
 
@@ -165,15 +165,15 @@ function getNotificationIconType(type = '') {
 ===================================================== */
 
 function getIcon(type) {
-  if (type === 'announcement') {
+  if (type === "announcement") {
     return <FiMessageSquare />;
   }
 
-  if (type === 'course') {
+  if (type === "course") {
     return <FiBookOpen />;
   }
 
-  if (type === 'system') {
+  if (type === "system") {
     return <FiCheckCircle />;
   }
 
@@ -185,13 +185,15 @@ function getIcon(type) {
    ESCAPE HTML
 ===================================================== */
 
-function escapeNotificationHtml(value = '') {
+function escapeNotificationHtml(
+  value = ""
+) {
   return String(value)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
 
@@ -199,26 +201,31 @@ function escapeNotificationHtml(value = '') {
    SWEETALERT ICON
 ===================================================== */
 
-function getSweetAlertIcon(type = '') {
+function getSweetAlertIcon(type = "") {
   const normalizedType =
-    String(type || '').toLowerCase();
+    String(type || "")
+      .trim()
+      .toLowerCase();
 
   if (
-    normalizedType === 'enrollment_declined' ||
-    normalizedType === 'student_unenrolled' ||
-    normalizedType === 'course_unenrollment'
+    normalizedType ===
+      "enrollment_declined" ||
+    normalizedType ===
+      "student_unenrolled" ||
+    normalizedType ===
+      "course_unenrollment"
   ) {
-    return 'warning';
+    return "warning";
   }
 
   if (
-    normalizedType === 'enrollment_approved' ||
-    normalizedType === 'enrollment_request'
+    normalizedType ===
+    "enrollment_approved"
   ) {
-    return 'success';
+    return "success";
   }
 
-  return 'info';
+  return "info";
 }
 
 
@@ -226,7 +233,9 @@ function getSweetAlertIcon(type = '') {
    NORMALIZE NOTIFICATION
 ===================================================== */
 
-function normalizeNotification(notification) {
+function normalizeNotification(
+  notification
+) {
   const isRead =
     notification.isRead ??
     notification.is_read ??
@@ -234,7 +243,7 @@ function normalizeNotification(notification) {
 
   const type =
     notification.type ||
-    'notification';
+    "notification";
 
   return {
     ...notification,
@@ -251,11 +260,11 @@ function normalizeNotification(notification) {
 
     title:
       notification.title ||
-      'Notification',
+      "Notification",
 
     message:
       notification.message ||
-      '',
+      "",
 
     type,
 
@@ -273,7 +282,7 @@ function normalizeNotification(notification) {
       notification.course ||
       notification.courseName ||
       notification.course_name ||
-      '',
+      "",
 
     time:
       notification.time ||
@@ -286,14 +295,14 @@ function normalizeNotification(notification) {
 
 
 /* =====================================================
-   PROFESSOR NOTIFICATIONS
+   STUDENT NOTIFICATIONS PAGE
 ===================================================== */
 
-export default function ProfessorNotifications() {
+export default function StudentNotifications() {
   const [
     activeTab,
     setActiveTab,
-  ] = useState('all');
+  ] = useState("all");
 
   const [
     notifications,
@@ -322,24 +331,22 @@ export default function ProfessorNotifications() {
       }
 
       try {
-        setIsLoading(true);
-
         const response =
           await fetch(
             `${API_BASE_URL}/notifications`,
             {
-              method: 'GET',
+              method: "GET",
 
               headers: {
                 Accept:
-                  'application/json',
+                  "application/json",
 
                 Authorization:
                   `Bearer ${token}`,
               },
 
               credentials:
-                'include',
+                "include",
             }
           );
 
@@ -351,7 +358,7 @@ export default function ProfessorNotifications() {
         if (!response.ok) {
           throw new Error(
             data?.message ||
-              'Failed to fetch notifications.'
+              "Failed to fetch notifications."
           );
         }
 
@@ -369,7 +376,7 @@ export default function ProfessorNotifications() {
         );
       } catch (error) {
         console.error(
-          'Unable to load professor notifications:',
+          "Unable to load student notifications:",
           error
         );
 
@@ -381,18 +388,11 @@ export default function ProfessorNotifications() {
 
 
   /* ===================================================
-     LOAD + AUTO REFRESH
+     AUTO REFRESH
   =================================================== */
 
   useEffect(() => {
     loadNotifications();
-
-    /*
-      Same behavior as the notification bell.
-
-      It checks the server every 30 seconds,
-      so no manual page reload is required.
-    */
 
     const intervalId =
       window.setInterval(
@@ -409,16 +409,16 @@ export default function ProfessorNotifications() {
 
 
   /* ===================================================
-     FILTER NOTIFICATIONS
+     FILTER
   =================================================== */
 
   const visibleNotifications =
     useMemo(() => {
-      if (activeTab === 'all') {
+      if (activeTab === "all") {
         return notifications;
       }
 
-      if (activeTab === 'unread') {
+      if (activeTab === "unread") {
         return notifications.filter(
           (notification) =>
             notification.unread
@@ -426,12 +426,12 @@ export default function ProfessorNotifications() {
       }
 
       if (
-        activeTab === 'announcement'
+        activeTab === "announcement"
       ) {
         return notifications.filter(
           (notification) =>
             notification.type ===
-            'announcement'
+            "announcement"
         );
       }
 
@@ -454,7 +454,7 @@ export default function ProfessorNotifications() {
 
 
   /* ===================================================
-     MARK ALL AS READ
+     MARK ALL READ
   =================================================== */
 
   const markAllRead =
@@ -466,27 +466,25 @@ export default function ProfessorNotifications() {
       const token =
         getStoredToken();
 
-      if (!token) {
-        return;
-      }
+      if (!token) return;
 
       try {
         const response =
           await fetch(
             `${API_BASE_URL}/notifications/read-all`,
             {
-              method: 'PATCH',
+              method: "PATCH",
 
               headers: {
                 Accept:
-                  'application/json',
+                  "application/json",
 
                 Authorization:
                   `Bearer ${token}`,
               },
 
               credentials:
-                'include',
+                "include",
             }
           );
 
@@ -498,7 +496,7 @@ export default function ProfessorNotifications() {
         if (!response.ok) {
           throw new Error(
             data?.message ||
-              'Failed to mark notifications as read.'
+              "Failed to mark notifications as read."
           );
         }
 
@@ -515,7 +513,7 @@ export default function ProfessorNotifications() {
         );
       } catch (error) {
         console.error(
-          'Unable to mark all notifications as read:',
+          "Unable to mark all notifications as read:",
           error
         );
       }
@@ -528,13 +526,9 @@ export default function ProfessorNotifications() {
 
   const openNotification =
     async (notification) => {
-      if (!notification) {
-        return;
-      }
+      if (!notification) return;
 
-      /* ===============================================
-         MARK ONE AS READ
-      =============================================== */
+      /* MARK ONE AS READ */
 
       if (notification.unread) {
         const token =
@@ -550,18 +544,18 @@ export default function ProfessorNotifications() {
               await fetch(
                 `${API_BASE_URL}/notifications/${notificationId}/read`,
                 {
-                  method: 'PATCH',
+                  method: "PATCH",
 
                   headers: {
                     Accept:
-                      'application/json',
+                      "application/json",
 
                     Authorization:
                       `Bearer ${token}`,
                   },
 
                   credentials:
-                    'include',
+                    "include",
                 }
               );
 
@@ -573,7 +567,7 @@ export default function ProfessorNotifications() {
             if (!response.ok) {
               throw new Error(
                 data?.message ||
-                  'Failed to mark notification as read.'
+                  "Failed to mark notification as read."
               );
             }
 
@@ -594,7 +588,7 @@ export default function ProfessorNotifications() {
             );
           } catch (error) {
             console.error(
-              'Unable to mark notification as read:',
+              "Unable to mark notification as read:",
               error
             );
           }
@@ -603,18 +597,18 @@ export default function ProfessorNotifications() {
 
 
       /* ===============================================
-         SEPARATE MESSAGE + REASON
+         SEPARATE REASON FROM MESSAGE
       =============================================== */
 
       const fullMessage =
         String(
-          notification.message || ''
+          notification.message || ""
         ).trim();
 
       let mainMessage =
         fullMessage;
 
-      let reason = '';
+      let reason = "";
 
       const reasonMatch =
         fullMessage.match(
@@ -629,7 +623,7 @@ export default function ProfessorNotifications() {
           fullMessage
             .replace(
               /(?:^|\s)Reason:\s*.*$/i,
-              ''
+              ""
             )
             .trim();
       }
@@ -642,7 +636,7 @@ export default function ProfessorNotifications() {
       await Swal.fire({
         title:
           notification.title ||
-          'Notification',
+          "Notification",
 
         html: `
           <div style="
@@ -652,9 +646,9 @@ export default function ProfessorNotifications() {
 
             <p style="
               margin: 0;
+              color: #374151;
               font-size: 15px;
               line-height: 1.7;
-              color: #374151;
             ">
               ${escapeNotificationHtml(
                 mainMessage
@@ -709,7 +703,7 @@ export default function ProfessorNotifications() {
 
                   </div>
                 `
-                : ''
+                : ""
             }
 
             ${
@@ -731,7 +725,7 @@ export default function ProfessorNotifications() {
                     )}
                   </div>
                 `
-                : ''
+                : ""
             }
 
           </div>
@@ -743,10 +737,10 @@ export default function ProfessorNotifications() {
           ),
 
         confirmButtonText:
-          'Okay',
+          "Okay",
 
         confirmButtonColor:
-          '#2563eb',
+          "#4f67d8",
 
         width: 480,
 
@@ -758,224 +752,226 @@ export default function ProfessorNotifications() {
   /* ===================================================
      PAGE
   =================================================== */
+return (
+  <div className="student-notifications-layout">
 
-  return (
-    <section className="professor-page professor-notifications">
+    {/* SIDEBAR */}
+    <StudentSidebar />
 
-      {/* =============================================
-          PAGE HEADER
-      ============================================= */}
+    {/* MAIN AREA */}
+    <div className="student-notifications-main-area">
 
-      <div>
-        <h1>
-          Notifications
-        </h1>
+      {/* HEADER */}
+      <StudentHeader
+        searchPlaceholder="Search notifications"
+      />
 
-        <p>
-          Review your course,
-          enrollment, and platform
-          notifications.
-        </p>
-      </div>
+      {/* PAGE BODY */}
+      <main className="student-notifications-body">
 
+        <section className="student-notifications-page">
 
-      {/* =============================================
-          TOOLBAR
-      ============================================= */}
+          {/* PAGE HEADING */}
+          <div className="student-notifications-heading">
+            <div>
+              <p className="student-notifications-eyebrow">
+                Student
+              </p>
 
-      <div className="professor-notification-toolbar">
+              <h1>Notifications</h1>
 
-        <div className="professor-notification-tabs">
-          {tabs.map((tab) => (
-            <button
-              key={tab.value}
-              type="button"
+              <p className="student-notifications-description">
+                Review your course, enrollment, and platform notifications.
+              </p>
+            </div>
 
-              className={
-                activeTab === tab.value
-                  ? 'active'
-                  : ''
-              }
+            {unreadCount > 0 && (
+              <div className="student-notifications-summary">
+                <FiBell />
 
-              onClick={() =>
-                setActiveTab(
-                  tab.value
-                )
-              }
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-
-        <button
-          className="professor-mark-read"
-          type="button"
-
-          onClick={
-            markAllRead
-          }
-
-          disabled={
-            unreadCount === 0
-          }
-        >
-          Mark all as read
-          {' '}
-          ({unreadCount})
-        </button>
-
-      </div>
-
-
-      {/* =============================================
-          NOTIFICATION LIST
-      ============================================= */}
-
-      <div className="professor-notification-list">
-
-        {isLoading &&
-        notifications.length === 0 ? (
-
-          <div className="professor-card">
-            Loading notifications...
+                <div>
+                  <strong>{unreadCount}</strong>
+                  <span>
+                    {unreadCount === 1
+                      ? "Unread notification"
+                      : "Unread notifications"}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
 
-        ) : visibleNotifications.length === 0 ? (
+          {/* TOOLBAR */}
+          <div className="student-notification-toolbar">
 
-          <div className="professor-card">
-            No notifications found.
-          </div>
-
-        ) : (
-
-          visibleNotifications.map(
-            (notification) => {
-
-              const iconType =
-                notification.iconType ||
-                'system';
-
-              return (
-                <article
-                  className={`professor-notification-item ${
-                    notification.unread
-                      ? 'unread'
-                      : ''
-                  }`}
-
-                  key={
-                    notification.id
+            <div className="student-notification-tabs">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.value}
+                  type="button"
+                  className={
+                    activeTab === tab.value
+                      ? "active"
+                      : ""
                   }
-
-                  role="button"
-
-                  tabIndex={0}
-
                   onClick={() =>
-                    openNotification(
-                      notification
-                    )
+                    setActiveTab(tab.value)
                   }
-
-                  onKeyDown={(event) => {
-                    if (
-                      event.key ===
-                        'Enter' ||
-                      event.key === ' '
-                    ) {
-                      event.preventDefault();
-
-                      openNotification(
-                        notification
-                      );
-                    }
-                  }}
                 >
+                  {tab.label}
 
-                  {/* ICON */}
-
-                  <div
-                    className={`professor-notification-icon ${iconType}`}
-                  >
-                    {getIcon(
-                      iconType
-                    )}
-                  </div>
-
-
-                  {/* CONTENT */}
-
-                  <div className="professor-notification-content">
-
-                    <h2>
-                      {
-                        notification.title
-                      }
-                    </h2>
-
-                    <p>
-                      {
-                        notification.message
-                      }
-                    </p>
-
-                    <div className="professor-notification-meta">
-
-                      {notification.course && (
-                        <span>
-                          {
-                            notification.course
-                          }
-                        </span>
-                      )}
-
-                      <span>
-                        {
-                          notification.time
-                        }
+                  {tab.value === "unread" &&
+                    unreadCount > 0 && (
+                      <span className="student-tab-count">
+                        {unreadCount}
                       </span>
+                    )}
+                </button>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              className="student-mark-read"
+              onClick={markAllRead}
+              disabled={unreadCount === 0}
+            >
+              Mark all as read ({unreadCount})
+            </button>
+
+          </div>
+
+          {/* NOTIFICATIONS */}
+          <div className="student-notification-list">
+
+            {isLoading && notifications.length === 0 ? (
+
+              <div className="student-notification-empty">
+                <span className="student-empty-icon">
+                  <FiBell />
+                </span>
+
+                <strong>
+                  Loading notifications...
+                </strong>
+              </div>
+
+            ) : visibleNotifications.length === 0 ? (
+
+              <div className="student-notification-empty">
+
+                <span className="student-empty-icon">
+                  <FiBell />
+                </span>
+
+                <strong>
+                  No notifications found
+                </strong>
+
+                <p>
+                  New updates will appear here.
+                </p>
+
+              </div>
+
+            ) : (
+
+              visibleNotifications.map((notification) => {
+                const iconType =
+                  notification.iconType || "system";
+
+                return (
+                  <article
+                    key={notification.id}
+                    className={`student-notification-item ${
+                      notification.unread
+                        ? "unread"
+                        : ""
+                    }`}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() =>
+                      openNotification(notification)
+                    }
+                    onKeyDown={(event) => {
+                      if (
+                        event.key === "Enter" ||
+                        event.key === " "
+                      ) {
+                        event.preventDefault();
+
+                        openNotification(
+                          notification
+                        );
+                      }
+                    }}
+                  >
+
+                    {/* ICON */}
+                    <div
+                      className={`student-notification-icon ${iconType}`}
+                    >
+                      {getIcon(iconType)}
+                    </div>
+
+                    {/* CONTENT */}
+                    <div className="student-notification-content">
+
+                      <h2>
+                        {notification.title}
+                      </h2>
+
+                      <p>
+                        {notification.message}
+                      </p>
+
+                      <div className="student-notification-meta">
+
+                        {notification.course && (
+                          <span>
+                            {notification.course}
+                          </span>
+                        )}
+
+                        <span>
+                          {notification.time}
+                        </span>
+
+                      </div>
 
                     </div>
 
-                  </div>
+                    {/* TYPE */}
+                    <div
+                      className={`student-notification-type ${iconType}`}
+                    >
+                      {String(
+                        notification.type ||
+                        "notification"
+                      ).replace(/_/g, " ")}
+                    </div>
 
+                    {/* UNREAD */}
+                    {notification.unread && (
+                      <span
+                        className="student-notification-unread-dot"
+                        aria-label="Unread"
+                      />
+                    )}
 
-                  {/* TYPE */}
+                  </article>
+                );
+              })
 
-                  <div
-                    className={`professor-notification-badge ${iconType}`}
-                  >
-                    {String(
-                      notification.type ||
-                      'notification'
-                    )
-                      .replace(
-                        /_/g,
-                        ' '
-                      )}
-                  </div>
+            )}
 
+          </div>
 
-                  {/* UNREAD DOT */}
+        </section>
 
-                  {notification.unread && (
-                    <span
-                      className="professor-unread-dot"
-                      aria-label="Unread"
-                    />
-                  )}
+      </main>
 
-                </article>
-              );
-            }
-          )
-
-        )}
-
-      </div>
-
-    </section>
-  );
+    </div>
+  </div>
+);
 }

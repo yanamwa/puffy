@@ -14,16 +14,21 @@ import DashboardPage from '../pages/admin/dashboard/DashboardPage';
 import UserManagementPage from '../pages/admin/users/UserManagementPage';
 import ModuleManagementPage from '../pages/admin/modules/ModuleManagementPage';
 import NotificationPage from '../pages/admin/notification/NotificationPage';
-import ModePage from '../pages/admin/mode/ModePage';
 import DecksPage from '../pages/admin/decks/DecksPage';
 import ReportsPage from '../pages/admin/reports/ReportsPage';
 import AdminAccountPage from '../pages/admin/settings/AdminAccountPage';
 import SettingsPage from '../pages/admin/settings/SettingsPage';
+
 import SuperAdminHome from '../pages/superadmin/SuperAdminHome';
 import SuperAdminLayout from '../pages/superadmin/shared/SuperAdminLayout';
 import SuperAdminUserManagementPage from '../pages/superadmin/users/SuperAdminUserManagementPage';
-import SuperAdminFeaturePage from '../pages/superadmin/SuperAdminFeaturePage';
 import SuperAdminBackupPage from '../pages/superadmin/backup/SuperAdminBackupPage';
+import SuperAdminSystemAnalytics from '../pages/superadmin/analytics/SuperAdminSystemAnalytics';
+import SuperAdminAuditLogs from '../pages/superadmin/audit/SuperAdminAuditLogs';
+import SuperAdminSystemSettings from '../pages/superadmin/settings/SuperAdminSystemSettings';
+import SuperAdminSecurityPermissions from '../pages/superadmin/security/SuperAdminSecurityPermissions';
+import SuperAdminProfile from '../pages/superadmin/profile/SuperAdminProfile';
+import SuperAdminModesManagement from '../pages/superadmin/modes/SuperAdminModesManagement';
 
 import ProfessorHome from '../pages/professor/ProfessorHome';
 import ProfessorLayout from '../pages/professor/ProfessorLayout';
@@ -46,6 +51,7 @@ import StudentSettings from '../pages/student/StudentSettings';
 import StudentCourseDetail from '../pages/student/StudentCourseDetail';
 import StudentJoinCourse from '../pages/student/StudentJoinCourse';
 import StudentProfile from '../pages/student/StudentProfile';
+import StudentNotifications from "../pages/student/StudentNotifications";
 
 import Introduction from '../pages/course/Introduction';
 import Lesson from '../pages/course/Lesson';
@@ -123,7 +129,7 @@ export default function AppRoutes() {
             path="/super-admin/analytics"
             element={
               <SuperAdminLayout>
-                <SuperAdminFeaturePage type="analytics" />
+                <SuperAdminSystemAnalytics />
               </SuperAdminLayout>
             }
           />
@@ -147,24 +153,10 @@ export default function AppRoutes() {
           />
 
           <Route
-            path="/super-admin/mode"
-            element={
-              <SuperAdminLayout>
-                <ModePage />
-              </SuperAdminLayout>
-            }
-          />
-
-          <Route
-            path="/super-admin/modes"
-            element={<Navigate to="/super-admin/mode" replace />}
-          />
-
-          <Route
             path="/super-admin/audit-logs"
             element={
               <SuperAdminLayout>
-                <SuperAdminFeaturePage type="audit" />
+                <SuperAdminAuditLogs />
               </SuperAdminLayout>
             }
           />
@@ -175,13 +167,13 @@ export default function AppRoutes() {
           />
 
           <Route
-            path="/super-admin/profile"
-            element={
-              <SuperAdminLayout>
-                <SuperAdminFeaturePage type="profile" />
-              </SuperAdminLayout>
-            }
-          />
+              path="/super-admin/profile"
+              element={
+                <SuperAdminLayout>
+                  <SuperAdminProfile />
+                </SuperAdminLayout>
+              }
+            />
 
           <Route
             path="/super-admin/backup"
@@ -193,22 +185,31 @@ export default function AppRoutes() {
           />
 
           <Route
+              path="/super-admin/security"
+              element={
+                <SuperAdminLayout>
+                  <SuperAdminSecurityPermissions />
+                </SuperAdminLayout>
+              }
+            />
+
+          <Route
             path="/super-admin/settings"
             element={
               <SuperAdminLayout>
-                <SuperAdminFeaturePage type="settings" />
+                <SuperAdminSystemSettings />
               </SuperAdminLayout>
             }
           />
 
           <Route
-            path="/super-admin/security"
-            element={
-              <SuperAdminLayout>
-                <SuperAdminFeaturePage type="security" />
-              </SuperAdminLayout>
-            }
-          />
+              path="/super-admin/modes"
+              element={
+                <SuperAdminLayout>
+                  <SuperAdminModesManagement />
+                </SuperAdminLayout>
+              }
+            />
 
           {/* ==========================
               ADMIN
@@ -371,6 +372,11 @@ export default function AppRoutes() {
           <Route path="/student/profile" 
           element={<StudentProfile />} 
           />
+
+          <Route
+              path="/student/notifications"
+              element={<StudentNotifications />}
+            />
 
           {/* ==========================
               COURSE STUDY FLOW

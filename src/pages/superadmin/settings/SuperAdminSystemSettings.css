@@ -1,0 +1,595 @@
+/* =====================================================
+   SUPER ADMIN SYSTEM SETTINGS
+===================================================== */
+
+.super-system-settings-page {
+  width: 100%;
+
+  display: grid;
+
+  gap: 22px;
+
+  color: var(--admin-ink, #4f535a);
+}
+
+
+/* =====================================================
+   PAGE HEADING
+===================================================== */
+
+.super-system-settings-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 24px;
+
+  padding: 22px 24px;
+
+  border: 1px solid #d9dde2;
+  border-radius: 16px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 14px 35px rgba(23, 25, 39, 0.06),
+    4px 5px 0 rgba(37, 113, 78, 0.08);
+}
+
+
+.super-system-settings-eyebrow {
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+
+  margin-bottom: 6px;
+
+  color: #25714e;
+
+  font-family: system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 800;
+
+  letter-spacing: 0.7px;
+
+  text-transform: uppercase;
+}
+
+
+.super-system-settings-eyebrow svg {
+  width: 15px;
+  height: 15px;
+}
+
+
+.super-system-settings-heading h1 {
+  margin: 0;
+
+  color: var(--admin-ink, #4f535a);
+
+  font-size: 34px;
+  font-weight: 400;
+
+  line-height: 1.05;
+}
+
+
+.super-system-settings-heading p {
+  max-width: 650px;
+
+  margin: 8px 0 0;
+
+  color: var(--admin-muted, #8a919c);
+
+  font-family: system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+
+  line-height: 1.5;
+}
+
+
+/* =====================================================
+   HEADER ACTIONS
+===================================================== */
+
+.super-system-settings-actions {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  flex: 0 0 auto;
+}
+
+
+.super-settings-reset-button,
+.super-settings-save-button {
+  min-height: 39px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  padding: 0 15px;
+
+  border-radius: 999px;
+
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    transform 150ms ease,
+    background 150ms ease,
+    opacity 150ms ease;
+}
+
+
+.super-settings-reset-button {
+  border: 1px solid #cbd1d5;
+
+  background: #ffffff;
+
+  color: #646b74;
+}
+
+
+.super-settings-save-button {
+  border: 1px solid #25714e;
+
+  background: #25714e;
+
+  color: #ffffff;
+
+  box-shadow: 3px 4px 0 rgba(23, 25, 39, 0.15);
+}
+
+
+.super-settings-reset-button:hover:not(:disabled),
+.super-settings-save-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+
+.super-settings-save-button:hover:not(:disabled) {
+  background: #1f6746;
+}
+
+
+.super-settings-reset-button:disabled,
+.super-settings-save-button:disabled {
+  cursor: not-allowed;
+
+  opacity: 0.45;
+
+  transform: none;
+}
+
+
+/* =====================================================
+   NOTICE
+===================================================== */
+
+.super-settings-notice {
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+
+  padding: 13px 15px;
+
+  border: 1px solid #bfd8c8;
+  border-radius: 11px;
+
+  background: #edf8f1;
+
+  color: #25714e;
+
+  font-family: system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+
+.super-settings-notice svg {
+  width: 17px;
+  height: 17px;
+
+  flex: 0 0 17px;
+}
+
+
+/* =====================================================
+   SETTINGS CARD
+===================================================== */
+
+.super-settings-card {
+  overflow: hidden;
+
+  border: 1px solid #d8dedb;
+  border-radius: 16px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 12px 30px rgba(23, 25, 39, 0.05),
+    4px 5px 0 rgba(37, 113, 78, 0.07);
+}
+
+
+/* =====================================================
+   CARD HEADER
+===================================================== */
+
+.super-settings-card-header {
+  display: flex;
+  align-items: center;
+
+  gap: 14px;
+
+  padding: 20px 22px;
+
+  border-bottom: 1px solid #e6eae7;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(37, 113, 78, 0.05),
+      transparent 60%
+    ),
+    #ffffff;
+}
+
+
+.super-settings-card-icon {
+  width: 42px;
+  height: 42px;
+
+  flex: 0 0 42px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 12px;
+
+  background: #eaf4ee;
+
+  color: #25714e;
+}
+
+
+.super-settings-card-icon svg {
+  width: 19px;
+  height: 19px;
+}
+
+
+.super-settings-card-eyebrow {
+  display: block;
+
+  margin-bottom: 3px;
+
+  color: #25714e;
+
+  font-family: system-ui, sans-serif;
+  font-size: 9px;
+  font-weight: 800;
+
+  letter-spacing: 0.6px;
+
+  text-transform: uppercase;
+}
+
+
+.super-settings-card-header h2 {
+  margin: 0;
+
+  color: var(--admin-ink, #343940);
+
+  font-size: 20px;
+  font-weight: 500;
+}
+
+
+.super-settings-card-header p {
+  margin: 5px 0 0;
+
+  color: var(--admin-muted, #858d97);
+
+  font-family: system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+
+  line-height: 1.45;
+}
+
+
+/* =====================================================
+   CARD BODY
+===================================================== */
+
+.super-settings-card-body {
+  padding: 5px 22px 8px;
+}
+
+
+/* =====================================================
+   TOGGLE SETTING
+===================================================== */
+
+.super-setting-row {
+  min-height: 76px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 25px;
+
+  padding: 15px 2px;
+
+  border-bottom: 1px solid #edf0ee;
+}
+
+
+.super-setting-row:last-child {
+  border-bottom: 0;
+}
+
+
+.super-setting-row-text {
+  min-width: 0;
+}
+
+
+.super-setting-row-text strong {
+  display: block;
+
+  color: #444b53;
+
+  font-family: system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+
+.super-setting-row-text p {
+  max-width: 720px;
+
+  margin: 5px 0 0;
+
+  color: #8a929c;
+
+  font-family: system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+
+  line-height: 1.45;
+}
+
+
+/* =====================================================
+   TOGGLE
+===================================================== */
+
+.super-setting-toggle {
+  position: relative;
+
+  width: 44px;
+  height: 24px;
+
+  flex: 0 0 44px;
+
+  padding: 0;
+
+  border: 0;
+  border-radius: 999px;
+
+  background: #ccd2d0;
+
+  cursor: pointer;
+
+  transition: background 160ms ease;
+}
+
+
+.super-setting-toggle span {
+  position: absolute;
+
+  top: 3px;
+  left: 3px;
+
+  width: 18px;
+  height: 18px;
+
+  border-radius: 50%;
+
+  background: #ffffff;
+
+  box-shadow: 0 2px 5px rgba(23, 25, 39, 0.18);
+
+  transition: transform 160ms ease;
+}
+
+
+.super-setting-toggle.is-active {
+  background: #25714e;
+}
+
+
+.super-setting-toggle.is-active span {
+  transform: translateX(20px);
+}
+
+
+/* =====================================================
+   GENERAL SETTINGS FORM
+===================================================== */
+
+.super-settings-form-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 16px;
+
+  padding: 20px 0;
+}
+
+
+.super-settings-field {
+  display: grid;
+
+  gap: 7px;
+}
+
+
+.super-settings-field > span {
+  color: #555d67;
+
+  font-family: system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 750;
+}
+
+
+.super-settings-field input,
+.super-settings-field select {
+  width: 100%;
+  height: 42px;
+
+  padding: 0 12px;
+
+  border: 1px solid #cdd4d0;
+  border-radius: 10px;
+
+  outline: none;
+
+  background: #ffffff;
+
+  color: #343940;
+
+  font-family: system-ui, sans-serif;
+  font-size: 11px;
+}
+
+
+.super-settings-field input:focus,
+.super-settings-field select:focus {
+  border-color: #25714e;
+
+  box-shadow:
+    0 0 0 3px rgba(37, 113, 78, 0.1);
+}
+
+
+/* =====================================================
+   MAINTENANCE WARNING
+===================================================== */
+
+.super-settings-warning {
+  display: flex;
+  align-items: flex-start;
+
+  gap: 11px;
+
+  margin: 13px 0 16px;
+  padding: 13px 14px;
+
+  border: 1px solid #e5d6b8;
+  border-radius: 11px;
+
+  background: #fff9eb;
+
+  color: #8b6b28;
+}
+
+
+.super-settings-warning > svg {
+  width: 18px;
+  height: 18px;
+
+  flex: 0 0 18px;
+}
+
+
+.super-settings-warning strong {
+  display: block;
+
+  font-family: system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+
+.super-settings-warning p {
+  margin: 4px 0 0;
+
+  font-family: system-ui, sans-serif;
+  font-size: 10px;
+
+  line-height: 1.45;
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 900px) {
+  .super-system-settings-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .super-settings-form-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+}
+
+
+@media (max-width: 600px) {
+  .super-system-settings-heading {
+    padding: 18px;
+  }
+
+  .super-system-settings-heading h1 {
+    font-size: 29px;
+  }
+
+  .super-system-settings-actions {
+    width: 100%;
+  }
+
+  .super-settings-reset-button,
+  .super-settings-save-button {
+    flex: 1;
+  }
+
+  .super-settings-card-header {
+    align-items: flex-start;
+
+    padding: 18px;
+  }
+
+  .super-settings-card-body {
+    padding-right: 18px;
+    padding-left: 18px;
+  }
+
+  .super-settings-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .super-setting-row {
+    gap: 15px;
+  }
+}
