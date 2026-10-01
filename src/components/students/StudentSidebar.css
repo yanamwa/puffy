@@ -10,7 +10,7 @@
   left: 0;
   z-index: 100;
 
-  width: 220px;
+  width: 240px;
   height: 100vh;
 
   display: flex;
@@ -22,7 +22,7 @@
   background: #198754;
   border-right: 1px solid #c4c8cf;
 
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Jersey 15", "Arial Rounded MT Bold", system-ui, sans-serif;
 
   box-sizing: border-box;
 
@@ -84,8 +84,8 @@
 .brand-name {
   color: #ffffff;
 
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 28px;
+  font-family: "Jersey 15", "Arial Rounded MT Bold", system-ui, sans-serif;
+  font-size: 30px;
   font-weight: 700;
   line-height: 1;
 
@@ -139,8 +139,9 @@
 
   text-decoration: none;
 
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Jersey 15", "Arial Rounded MT Bold", system-ui, sans-serif;
   font-weight: 400;
+  font-size: 20px;
 
   cursor: pointer;
 
@@ -152,8 +153,8 @@
 }
 
 .side-nav-item .nav-label {
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 16px;
+  font-family: "Jersey 15", "Arial Rounded MT Bold", system-ui, sans-serif;
+  font-size: 20px;
   font-weight: 400;
 
   white-space: nowrap;

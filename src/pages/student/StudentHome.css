@@ -29,11 +29,14 @@
   Reserve that exact space so Home never slides underneath it.
 */
 .student-home-main-area {
-  width: calc(100% - 220px);
+  width: calc(100% - 240px);
   min-width: 0;
   min-height: 100vh;
-  margin-left: 220px;
-  transition: width 220ms ease, margin-left 220ms ease;
+  margin-left: 240px;
+
+  transition:
+    width 220ms ease,
+    margin-left 220ms ease;
 }
 
 /* Supports the old collapsed sidebar width. */

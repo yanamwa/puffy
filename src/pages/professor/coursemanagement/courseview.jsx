@@ -443,86 +443,103 @@ export default function CourseView() {
       setRejectError('');
     };
 
-  const handleDecline =
-    async (student, reason) => {
-      const cleanReason =
-        reason.trim();
+  const handleDecline = async (student, reason) => {
+  const cleanReason = reason.trim();
 
-      if (!cleanReason) {
-        setRejectError(
-          'Please enter a reason before declining this request.'
-        );
-        return;
+  if (!cleanReason) {
+    setRejectError(
+      'Please enter a reason before declining this request.'
+    );
+    return;
+  }
+
+  if (cleanReason.length > 500) {
+    setRejectError(
+      'Reason must be 500 characters or fewer.'
+    );
+    return;
+  }
+
+  try {
+    setProcessingId(student.enrollmentId);
+    setRejectError('');
+
+    const token = getStoredToken();
+
+    const response = await fetch(
+      `${API_BASE_URL}/enrollments/${student.enrollmentId}/decline`,
+      {
+        method: 'PATCH',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          reason: cleanReason,
+        }),
       }
+    );
 
-      if (cleanReason.length > 500) {
-        setRejectError(
-          'Reason must be 500 characters or fewer.'
-        );
-        return;
-      }
+    const data = await response.json().catch(() => ({}));
 
-      try {
-        setProcessingId(
-          student.enrollmentId
-        );
-        setRejectError('');
+    if (!response.ok) {
+      throw new Error(
+        data.message ||
+          'Unable to decline enrollment request.'
+      );
+    }
 
-        const token =
-          getStoredToken();
+    // Refresh enrollment data
+    await loadCourseData();
 
-        const response = await fetch(
-          `${API_BASE_URL}/enrollments/${student.enrollmentId}/decline`,
-          {
-            method: 'PATCH',
+    // Close decline modal
+    setRejectTarget(null);
+    setRejectReason('');
+    setRejectError('');
 
-            headers: {
-              Accept:
-                'application/json',
+    // Email successfully sent
+    if (data.emailSent) {
+      await Swal.fire({
+        icon: 'success',
+        title: 'Enrollment Declined',
+        text: 'The enrollment request was declined and the email was sent successfully.',
+        confirmButtonText: 'OK',
+      });
 
-              'Content-Type':
-                'application/json',
+      return;
+    }
 
-              Authorization:
-                `Bearer ${token}`,
-            },
+    // Enrollment declined but email failed
+    await Swal.fire({
+      icon: 'warning',
+      title: 'Enrollment Declined',
+      html: `
+        <p>The enrollment request was declined, but the email notification could not be sent.</p>
+        <p><strong>Error:</strong> ${
+          data.emailError || 'Unknown email error.'
+        }</p>
+      `,
+      confirmButtonText: 'OK',
+    });
+  } catch (error) {
+    console.error(
+      'Decline enrollment error:',
+      error
+    );
 
-            body: JSON.stringify({
-              reason: cleanReason,
-            }),
-          }
-        );
-
-        const data =
-          await response
-            .json()
-            .catch(() => ({}));
-
-        if (!response.ok) {
-          throw new Error(
-            data.message ||
-              'Unable to decline request.'
-          );
-        }
-
-        await loadCourseData();
-        setRejectTarget(null);
-        setRejectReason('');
-      } catch (error) {
-        console.error(
-          'Decline enrollment error:',
-          error
-        );
-
-        window.alert(
-          error.message ||
-            'Unable to decline request.'
-        );
-      } finally {
-        setProcessingId(null);
-      }
-    };
-
+    await Swal.fire({
+      icon: 'error',
+      title: 'Decline Failed',
+      text:
+        error.message ||
+        'Unable to decline enrollment request.',
+      confirmButtonText: 'OK',
+    });
+  } finally {
+    setProcessingId(null);
+  }
+};
 
   /* ===================================================
      UNENROLL
