@@ -181,7 +181,24 @@ function newestFirst(a, b) {
 }
 
 function keepOnlyNewestNotification(notifications) {
-  return [...notifications].sort(newestFirst).slice(0, 1);
+  const uniqueNotifications = new Map();
+
+  notifications.forEach((notification) => {
+    if (!notification) return;
+
+    const id = String(
+      notification.id ||
+      notification.notificationId ||
+      notification.notification_id ||
+      ''
+    );
+
+    if (!id) return;
+
+    uniqueNotifications.set(id, notification);
+  });
+
+  return [...uniqueNotifications.values()].sort(newestFirst);
 }
 
 function isAnnouncementNotification(notification) {
@@ -421,14 +438,19 @@ export async function fetchManagedNotificationsFromServer() {
 }
 
 export async function saveManagedNotificationToServer(notification) {
-  const normalizedNotification = normalizeStoredNotification(notification);
+  const normalizedNotification =
+    normalizeStoredNotification(notification);
 
   if (!normalizedNotification) {
     throw new Error('Notification is invalid.');
   }
 
-  const data = await requestManagedNotificationApi('/notifications', {
+  /*
+   * First create the new announcement.
+   */
+  await requestManagedNotificationApi('/notifications', {
     method: 'POST',
+
     body: JSON.stringify({
       title: normalizedNotification.title,
       message: normalizedNotification.message,
@@ -438,9 +460,19 @@ export async function saveManagedNotificationToServer(notification) {
       createdByRole: normalizedNotification.createdByRole,
     }),
   });
-  const notifications = normalizeNotificationApiPayload(data, [
-    normalizedNotification,
-  ]);
+
+  /*
+   * IMPORTANT:
+   * Do not use the POST response as the entire notification list.
+   *
+   * After creating the announcement, fetch the complete list
+   * from the server again.
+   */
+  const data =
+    await requestManagedNotificationApi('/notifications');
+
+  const notifications =
+    normalizeNotificationApiPayload(data);
 
   return writeManagedNotifications(notifications);
 }

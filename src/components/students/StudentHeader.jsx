@@ -376,39 +376,17 @@ export default function StudentHeader({
   if (!notification) return;
 
   /* =========================================
-     MARK MANAGED NOTIFICATION AS READ
+     MARK NOTIFICATION AS READ
   ========================================= */
 
-  if (
-    notification.unread &&
-    notification.source === "managed"
-  ) {
-    setNotifications((current) =>
-      current.map((item) =>
-        item.id === notification.id
-          ? {
-              ...item,
-              unread: false,
-            }
-          : item
-      )
-    );
-  }
-
-  /* =========================================
-     MARK DATABASE NOTIFICATION AS READ
-  ========================================= */
-
-  if (
-    notification.unread &&
-    notification.source !== "managed"
-  ) {
+  if (notification.unread) {
     const token = getAuthToken();
 
     if (token) {
       try {
         const notificationId =
           notification.notificationId ||
+          notification.notification_id ||
           notification.id;
 
         const response = await fetch(
@@ -461,126 +439,81 @@ export default function StudentHeader({
 
   setNotificationMenuOpen(false);
 
+
   /* =========================================
-     SEPARATE MESSAGE AND REASON
+     SHOW NOTIFICATION DETAILS
   ========================================= */
 
-  const fullMessage =
-    String(notification.message || "").trim();
+  const notificationTitle =
+    notification.title ||
+    'Notification';
 
-  let mainMessage = fullMessage;
-  let reason = "";
+  const notificationMessage =
+    notification.message ||
+    'No additional information available.';
 
-  const reasonMatch = fullMessage.match(
-    /(?:^|\s)Reason:\s*(.*)$/i
-  );
+  const notificationReason =
+    notification.reason ||
+    notification.declineReason ||
+    notification.decline_reason ||
+    '';
 
-  if (reasonMatch) {
-    reason = reasonMatch[1].trim();
+  const notificationTime =
+    notification.time ||
+    '';
 
-    mainMessage = fullMessage
-      .replace(/(?:^|\s)Reason:\s*.*$/i, "")
-      .trim();
+
+  let html = `
+    <div style="
+      text-align: left;
+      line-height: 1.6;
+    ">
+      <p style="
+        margin: 0 0 12px;
+      ">
+        ${notificationMessage}
+      </p>
+  `;
+
+
+  if (notificationReason) {
+    html += `
+      <div style="
+        margin-top: 14px;
+        padding: 12px 14px;
+        border-radius: 10px;
+        background: #f5f6f7;
+      ">
+        <strong>Reason:</strong>
+        <div style="margin-top: 5px;">
+          ${notificationReason}
+        </div>
+      </div>
+    `;
   }
 
-  /* =========================================
-     SHOW SWEETALERT
-  ========================================= */
+
+  if (notificationTime) {
+    html += `
+      <div style="
+        margin-top: 14px;
+        color: #7b8189;
+        font-size: 12px;
+      ">
+        ${notificationTime}
+      </div>
+    `;
+  }
+
+
+  html += `</div>`;
+
 
   await Swal.fire({
-    title:
-      notification.title ||
-      "Notification",
-
-    html: `
-      <div style="
-        text-align: left;
-        padding: 4px 6px;
-      ">
-
-        <!-- MAIN MESSAGE -->
-
-        <p style="
-          margin: 0;
-          font-size: 15px;
-          line-height: 1.7;
-          color: #374151;
-        ">
-          ${escapeNotificationHtml(mainMessage)}
-        </p>
-
-        ${
-          reason
-            ? `
-              <!-- REASON BOX -->
-
-              <div style="
-                margin-top: 18px;
-                padding: 14px 16px;
-                background: #f8fafc;
-                border: 1px solid #e2e8f0;
-                border-left: 4px solid #2563eb;
-                border-radius: 8px;
-              ">
-
-                <div style="
-                  font-size: 12px;
-                  font-weight: 700;
-                  text-transform: uppercase;
-                  letter-spacing: 0.5px;
-                  color: #64748b;
-                  margin-bottom: 6px;
-                ">
-                  Reason
-                </div>
-
-                <div style="
-                  font-size: 14px;
-                  line-height: 1.6;
-                  color: #334155;
-                ">
-                  ${escapeNotificationHtml(reason)}
-                </div>
-
-              </div>
-            `
-            : ""
-        }
-
-        ${
-          notification.time
-            ? `
-              <!-- TIME -->
-
-              <div style="
-                border-top: 1px solid #e5e7eb;
-                margin-top: 18px;
-                padding-top: 12px;
-                font-size: 13px;
-                color: #9ca3af;
-              ">
-                ${escapeNotificationHtml(
-                  notification.time
-                )}
-              </div>
-            `
-            : ""
-        }
-
-      </div>
-    `,
-
-    icon: getSweetAlertIcon(
-      notification.type
-    ),
-
-    confirmButtonText: "Okay",
-
-    confirmButtonColor: "#2563eb",
-
-    width: 480,
-
-    showCloseButton: true,
+    title: notificationTitle,
+    html,
+    confirmButtonText: 'Close',
+    confirmButtonColor: '#7fa9d6',
   });
 };
 

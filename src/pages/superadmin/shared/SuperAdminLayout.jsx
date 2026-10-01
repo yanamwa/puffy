@@ -4,19 +4,23 @@ import { useNavigate } from 'react-router-dom';
 import { API_BASE } from '../../../config.js';
 import { useAuth } from '../../../context/AuthContext';
 
-import SuperAdminSidebar
-  from '../../../components/superadmin/SuperAdminSidebar';
-
-import SuperAdminHeader
-  from '../../../components/superadmin/SuperAdminHeader';
+import SuperAdminSidebar from '../../../components/superadmin/SuperAdminSidebar.jsx';
+import SuperAdminHeader from '../../../components/superadmin/SuperAdminHeader.jsx';
 
 import '../../admin/shared/AdminLayout.css';
 import './SuperAdminLayout.css';
 
 const DEFAULT_PROFILE_IMAGE = '/images/temporaryimg.png';
 
+
+/* =====================================================
+   PROFILE IMAGE
+===================================================== */
+
 function resolveProfileImage(imagePath) {
-  if (!imagePath) return DEFAULT_PROFILE_IMAGE;
+  if (!imagePath) {
+    return DEFAULT_PROFILE_IMAGE;
+  }
 
   if (
     imagePath.startsWith('http://') ||
@@ -30,10 +34,14 @@ function resolveProfileImage(imagePath) {
 
   let fixedPath = imagePath;
 
-  if (fixedPath.startsWith('/api/uploads/profile-images/')) {
+  if (
+    fixedPath.startsWith(
+      '/api/uploads/profile-images/'
+    )
+  ) {
     fixedPath = fixedPath.replace(
       '/api/uploads/profile-images/',
-      '/uploads/profile-images/',
+      '/uploads/profile-images/'
     );
   }
 
@@ -41,12 +49,20 @@ function resolveProfileImage(imagePath) {
     fixedPath = `/${fixedPath}`;
   }
 
-  const serverOrigin = API_BASE.replace(/\/api\/?$/, '');
+  const serverOrigin =
+    API_BASE.replace(/\/api\/?$/, '');
 
   return `${serverOrigin}${fixedPath}`;
 }
 
-export default function SuperAdminLayout({ children }) {
+
+/* =====================================================
+   SUPER ADMIN LAYOUT
+===================================================== */
+
+export default function SuperAdminLayout({
+  children,
+}) {
   const {
     user,
     logout,
@@ -54,34 +70,48 @@ export default function SuperAdminLayout({ children }) {
 
   const navigate = useNavigate();
 
+
+  /* ===================================================
+     SIDEBAR STATE
+  =================================================== */
+
   const [
     sidebarCollapsed,
     setSidebarCollapsed,
   ] = useState(() => {
     return (
       localStorage.getItem(
-        'superAdminSidebarCollapsed',
+        'superAdminSidebarCollapsed'
       ) === 'true'
     );
   });
+
+
+  /* ===================================================
+     USER INFORMATION
+  =================================================== */
 
   const avatarSrc = resolveProfileImage(
     user?.profileImage ||
     user?.profile_image ||
     user?.avatar ||
-    '',
+    ''
   );
 
-  const displayUsername =
-    String(
-      user?.displayName ||
-      user?.display_name ||
-      user?.name ||
-      user?.fullName ||
-      user?.full_name ||
-      user?.username ||
-      'Super Admin',
-    ).replace(/^@+/, '');
+  const displayUsername = String(
+    user?.displayName ||
+    user?.display_name ||
+    user?.name ||
+    user?.fullName ||
+    user?.full_name ||
+    user?.username ||
+    'Super Admin'
+  ).replace(/^@+/, '');
+
+
+  /* ===================================================
+     SIDEBAR TOGGLE
+  =================================================== */
 
   const toggleSidebar = () => {
     setSidebarCollapsed((currentValue) => {
@@ -89,12 +119,17 @@ export default function SuperAdminLayout({ children }) {
 
       localStorage.setItem(
         'superAdminSidebarCollapsed',
-        String(newValue),
+        String(newValue)
       );
 
       return newValue;
     });
   };
+
+
+  /* ===================================================
+     LOGOUT
+  =================================================== */
 
   const handleLogout = () => {
     logout();
@@ -103,6 +138,11 @@ export default function SuperAdminLayout({ children }) {
       replace: true,
     });
   };
+
+
+  /* ===================================================
+     PAGE
+  =================================================== */
 
   return (
     <div
