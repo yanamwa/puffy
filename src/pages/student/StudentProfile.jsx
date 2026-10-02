@@ -7,7 +7,7 @@ import Swal from "sweetalert2";
 import StudentSidebar from "../../components/students/StudentSidebar";
 
 import StudentHeader from "../../components/students/StudentHeader";
-
+import StudentIdentityCard from "../../components/students/StudentIdentityCard";
 import JoinCourseModal from "./JoinCourseModal";
 
 import {
@@ -895,201 +895,13 @@ export default function StudentProfile() {
 
               <div className="student-profile-layout">
 
-                <article className="student-identity-card">
-
-                  <div className="student-identity-card-accent" />
-
-                  <div className="student-identity-header">
-
-                    <div className="student-identity-brand">
-
-                      <img
-
-                        src="/images/logo_solo.png"
-
-                        alt="PuffyBrain"
-
-                      />
-
-                      <div>
-
-                        <strong>
-
-                          PuffyBrain
-
-                        </strong>
-
-                        <span>
-
-                          Student Identification
-
-                          Card
-
-                        </span>
-
-                      </div>
-
-                    </div>
-
-                    <span className="student-identity-role">
-
-                      Student
-
-                    </span>
-
-                  </div>
-
-                  <div className="student-identity-photo-area">
-
-                    <div className="student-id-photo-frame">
-
-                      <img
-
-                        src={profileImage}
-
-                        alt={`${studentData.name}'s profile`}
-
-                        className="student-id-photo"
-
-                      />
-
-                      <label
-
-                        className="student-photo-change-button"
-
-                        title="Change profile picture"
-
-                        aria-label="Change profile picture"
-
-                      >
-
-                        {profileImageUploading ? (
-
-                          <span className="student-photo-uploading">...</span>
-
-                        ) : (
-
-                        <svg
-
-                          viewBox="0 0 24 24"
-
-                          aria-hidden="true"
-
-                        >
-
-                          <path d="M4 8.5h3l1.4-2h7.2l1.4 2h3v10H4v-10Z" />
-
-                          <circle
-
-                            cx="12"
-
-                            cy="13.5"
-
-                            r="3.2"
-
-                          />
-
-                        </svg>
-
-                        )}
-
-                        <input
-
-                          type="file"
-
-                          accept="image/png, image/jpeg, image/jpg, image/webp"
-
-                          className="student-photo-input"
-
-                          onChange={
-
-                            changeProfilePicture
-
-                          }
-
-                          disabled={
-
-                            profileImageUploading
-
-                          }
-
-                        />
-
-                      </label>
-
-                    </div>
-
-                    <div className="student-identity-main">
-
-                      <span className="student-identity-overline">
-
-                        Official student profile
-
-                      </span>
-
-                      <h2>
-
-                        {studentData.name}
-
-                      </h2>
-
-                      <strong className="student-identity-number">
-
-                        {
-
-                          studentData.studentNumber
-
-                        }
-
-                      </strong>
-
-                      <p>
-
-                        {studentData.course}
-
-                      </p>
-
-                      <div className="student-identity-academic-row">
-
-                        <span>
-
-                          {studentData.year}
-
-                        </span>
-
-                        <i aria-hidden="true" />
-
-                        <span>
-
-                          {studentData.section}
-
-                        </span>
-
-                      </div>
-
-                    </div>
-
-                  </div>
-
-                  <div className="student-identity-footer">
-
-                    <div>
-
-                      <span>Issued by</span>
-
-                      <strong>
-
-                        PuffyBrain Learning
-
-                        System
-
-                      </strong>
-
-                    </div>
-
-                  </div>
-
-                </article>
+                <StudentIdentityCard
+                  student={studentData}
+                  editable={true}
+                  profileImage={profileImage}
+                  profileImageUploading={profileImageUploading}
+                  onProfileImageChange={changeProfilePicture}
+                />
 
                 <div className="student-profile-details">
 

@@ -12,6 +12,7 @@ import {
 
 import Swal from 'sweetalert2';
 import styles from './courseview.module.css';
+import StudentIdentityCard from "../../../components/students/StudentIdentityCard";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL ||
@@ -1317,141 +1318,43 @@ const handleUnenroll = async (student) => {
         </div>
 
       </div>
-
       {selectedStudent && (
-        <div
-          className={
-            styles.studentModalOverlay
-          }
-          role="presentation"
-          onClick={() =>
-            setSelectedStudent(null)
-          }
-        >
-          <div
-            className={
-              styles.studentModal
-            }
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="student-details-title"
-            onClick={(event) =>
-              event.stopPropagation()
-            }
-          >
             <div
-              className={
-                styles.studentModalHeader
-              }
+              className={styles.studentModalOverlay}
+              onClick={() => setSelectedStudent(null)}
             >
-              <div>
-                <p>
-                  Student Details
-                </p>
-
-                <h2 id="student-details-title">
-                  {getStudentName(
-                    selectedStudent
-                  )}
-                </h2>
-              </div>
-
-              <button
-                type="button"
-                aria-label="Close student details"
-                onClick={() =>
-                  setSelectedStudent(null)
-                }
+              <div
+                className={styles.studentIdModal}
+                onClick={(event) => event.stopPropagation()}
               >
-                x
-              </button>
-            </div>
+                <StudentIdentityCard
+                    student={{
+                      ...selectedStudent,
 
-            <div
-              className={
-                styles.studentModalProfile
-              }
-            >
-              <img
-                src={resolveProfileImage(
-                  selectedStudent.profileImage
-                )}
-                alt={getStudentName(
-                  selectedStudent
-                )}
-                onError={(event) => {
-                  event.currentTarget.src =
-                    DEFAULT_PROFILE_IMAGE;
-                }}
-              />
+                      course:
+                        selectedStudent.course ||
+                        selectedStudent.program ||
+                        course.program ||
+                        course.courseName ||
+                        course.course_name ||
+                        course.title,
 
-              <div>
-                <strong>
-                  {getStudentName(
-                    selectedStudent
-                  )}
-                </strong>
+                      yearLevel:
+                        selectedStudent.yearLevel ||
+                        selectedStudent.year_level,
 
-                <span>
-                  {selectedStudent.email ||
-                    'N/A'}
-                </span>
+                      sectionName:
+                        selectedStudent.sectionName ||
+                        selectedStudent.section_name ||
+                        selectedStudent.section,
+                    }}
+                    editable={false}
+                  />
               </div>
             </div>
+)}
 
-            <div
-              className={
-                styles.studentModalGrid
-              }
-            >
-              <div>
-                <span>
-                  Student ID
-                </span>
-
-                <strong>
-                  {selectedStudent.studentId ||
-                    selectedStudent.studentNumber ||
-                    'N/A'}
-                </strong>
-              </div>
-
-              <div>
-                <span>
-                  Year Level
-                </span>
-
-                <strong>
-                  {selectedStudent.yearLevel ||
-                    'N/A'}
-                </strong>
-              </div>
-
-              <div>
-                <span>
-                  Section
-                </span>
-
-                <strong>
-                  {selectedStudent.sectionName ||
-                    selectedStudent.section ||
-                    'N/A'}
-                </strong>
-              </div>
-
-              <div>
-                <span>
-                  Course
-                </span>
-
-                <strong>
-                  {courseTitle}
-                </strong>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      
       {rejectTarget && (
         <div
           className={

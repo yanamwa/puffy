@@ -416,16 +416,10 @@ export default function ModuleManagement() {
                     ACTION BUTTONS
                 ========================== */}
 
-                <div
-                  className={
-                    styles.actions
-                  }
-                >
+                <div className={styles.actions}>
                   <button
                     type="button"
-                    className={
-                      styles.actionEdit
-                    }
+                    className={styles.actionEdit}
                     onClick={(event) => {
                       event.stopPropagation();
 
@@ -439,34 +433,14 @@ export default function ModuleManagement() {
 
                   <button
                     type="button"
-                    className={
-                      styles.actionDelete
-                    }
+                    className={styles.actionDelete}
                     onClick={(event) => {
                       event.stopPropagation();
 
-                      archiveCourse(
-                        course
-                      );
+                      archiveCourse(course);
                     }}
                   >
                     Archive
-                  </button>
-
-                  <button
-                    type="button"
-                    className={
-                      styles.actionView
-                    }
-                    onClick={(event) => {
-                      event.stopPropagation();
-
-                      openCourse(
-                        course.id
-                      );
-                    }}
-                  >
-                    View
                   </button>
                 </div>
               </article>
