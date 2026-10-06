@@ -1,3 +1,4 @@
+import TutorialBackButton from "../TutorialBackButton.jsx";
 import React, { useEffect, useState } from "react";
 import styles from "./timedquiz.module.css";
 import { useNavigate, useParams } from "react-router-dom";
@@ -98,6 +99,8 @@ export default function TimedQuiz() {
 
   return (
     <div className={styles.page}>
+      <TutorialBackButton />
+
       {(showIntro || startLoading) && (
         <div className={styles.introScreen}>
           {!showCircle && !startLoading && (
@@ -137,6 +140,7 @@ export default function TimedQuiz() {
           </div>
 
           <div className={styles.slideshowBox}>
+            <div className={styles.demoHeader}>Quiz Tutorial</div>
             <div className={styles.timerBox}>
               <div className={styles.timer}>
               {String(Math.floor(timeLeft / 60)).padStart(2, "0")}:

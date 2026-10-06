@@ -121,9 +121,9 @@
 }
 
 .retry {
-  background: #7bd473;
-  border: 1px solid #80c586;
-  box-shadow: 2px 4px 0 #a8e9b3;
+  background: #7fa8d6;
+  border: 1px solid #5f86b1;
+  box-shadow: 2px 4px 0 #a8c6e7;
 }
 
 .lesson {
@@ -413,26 +413,36 @@
 
 .reviewAndGoal {
   display: grid;
-  grid-template-columns: 1.15fr 1fr;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
   gap: 12px;
   padding: 0 38px 20px;
 }
 
 .reviewAndGoal > div {
+  min-width: 0;
   padding: 12px 14px;
   border: 1px solid #e0e0e0;
   border-radius: 12px;
 }
 
 .reviewTopics {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
 }
 
 .reviewTopics span {
-  padding: 5px 8px;
-  border-radius: 999px;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border-radius: 12px;
+  line-height: 1.45;
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: normal;
+  text-align: left;
   background: #5a5a5a;
   color: #fff;
   font-size: 18px;
@@ -730,8 +740,8 @@
   }
 
   .masteryRingCenter {
-    width: 46px;
-    height: 46px;
+    width: 60px;
+    height: 60px;
   }
 
   .topicHeading {
@@ -841,9 +851,9 @@
   --course-bg: #f7f7f7;
   --course-card: #ffffff;
   --course-ink: #171927;
-  --course-accent: #198754;
-  --course-accent-dark: #12673f;
-  --course-accent-soft: #eef8f2;
+  --course-accent: #7fa8d6;
+  --course-accent-dark: #5f86b1;
+  --course-accent-soft: #edf4fc;
   --course-muted: #858d9b;
   --course-line: #c4c8cf;
   --course-soft-line: #dde2e8;
@@ -905,9 +915,12 @@
   color: var(--course-muted);
 }
 
-.percentage,
+.percentage {
+  color: var(--course-accent-dark);
+}
+
 .correctText {
-  color: var(--course-accent);
+  color: #198754;
 }
 
 .wrongText,
@@ -921,7 +934,7 @@
 .modeGrid button {
   background: var(--course-accent);
   border: 0;
-  box-shadow: 4px 4px 0 rgba(25, 135, 84, 0.24);
+  box-shadow: 4px 4px 0 rgba(95, 134, 177, 0.24);
   color: #ffffff;
 }
 
@@ -962,18 +975,18 @@
 
 .scrollTopButton {
   position: fixed;
-  right: 28px;
-  bottom: 28px;
+  right: max(20px, calc((100vw - 900px) / 2 - 100px));
+  bottom: 36px;
   z-index: 200;
-  width: 54px;
-  height: 54px;
+  width: 76px;
+  height: 76px;
   display: grid;
   place-items: center;
   border: 0;
   border-radius: 50%;
   background: var(--course-accent);
   color: #ffffff;
-  box-shadow: 4px 4px 0 rgba(25, 135, 84, 0.24);
+  box-shadow: 4px 4px 0 rgba(95, 134, 177, 0.24);
   cursor: pointer;
   transition:
     background 0.16s ease,
@@ -987,8 +1000,8 @@
 }
 
 .scrollTopButton svg {
-  width: 24px;
-  height: 24px;
+  width: 36px;
+  height: 36px;
   fill: none;
   stroke: currentColor;
   stroke-linecap: round;
@@ -1000,7 +1013,7 @@
   .scrollTopButton {
     right: 16px;
     bottom: 16px;
-    width: 46px;
-    height: 46px;
+    width: 60px;
+    height: 60px;
   }
 }

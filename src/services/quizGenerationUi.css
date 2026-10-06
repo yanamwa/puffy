@@ -1,0 +1,105 @@
+.quizGeneratorPopup { 
+    font-family: Arial, sans-serif !important; 
+    border-radius: 16px !important; 
+    color: #294765 !important; 
+}
+
+.quizGeneratorPopup .swal2-title { 
+    font-size: 25px !important; 
+    color: #294765 !important; 
+}
+.quizGeneratorIntro { 
+    color: #6b7d90; 
+    font-size: 20px; 
+    line-height: 1.6; 
+    margin: 0 0 20px; 
+}
+.quizGeneratorFields { 
+    display: grid; 
+    gap: 12px; 
+    text-align: left; 
+}
+.quizGeneratorFields label { 
+    font-size: 20px; 
+    font-weight: 600; 
+    color: #375675; 
+}
+.quizGeneratorFields input, .quizGeneratorFields select { 
+    width: 100%; 
+    min-height: 56px; 
+    padding: 10px 12px; 
+    margin: 0 0 9px; 
+    box-sizing: border-box; 
+    border: 1px solid #d2deeb; 
+    border-radius: 9px; 
+    font: 20px Arial, sans-serif; 
+    background: #f9fbfe; 
+    color: #294765; 
+}
+.quizGeneratorFields input:focus, .quizGeneratorFields select:focus { 
+    outline: 3px solid #b9d5f344; 
+    border-color: #7fa6d2; 
+}
+.quizGeneratorHint { 
+    margin: -3px 0 12px; 
+    padding: 10px 12px; 
+    border-radius: 8px; 
+    background: #edf4fc; 
+    color: #587697; 
+    font-size: 20px; 
+}
+.quizGeneratorConfirm, .quizGeneratorCancel { 
+    min-height: 52px; 
+    padding: 10px 20px; 
+    margin: 0 5px; 
+    border-radius: 9px; 
+    border: 1px solid #d1deec; 
+    font: 600 20px Arial, sans-serif; 
+    cursor: pointer; 
+}
+.quizGeneratorConfirm { 
+    background: #7199c6; 
+    border-color: #7199c6; 
+    color: #fff; 
+}
+.quizGeneratorConfirm:hover { 
+    background: #537eaf; 
+}
+.quizGeneratorCancel { 
+    background: #f5f8fc; 
+    color: #496787; 
+}
+.quizGeneratorConfirm:focus-visible, .quizGeneratorCancel:focus-visible { 
+    outline: 3px solid #b9d5f3; 
+    outline-offset: 3px; 
+}
+
+.quizGeneratorPopup:not(.swal2-toast) { 
+    width: min(720px, calc(100vw - 32px)) !important; 
+    padding: 30px !important; 
+    box-sizing: border-box; 
+}
+
+.quizGeneratorPopup:not(.swal2-toast) .swal2-html-container {
+     margin: 20px 0 0 !important; 
+    }
+
+.quizGeneratorPopup:not(.swal2-toast) .swal2-actions { 
+    flex-wrap: 
+    wrap; gap: 10px; 
+}
+
+.quizGeneratorPopup .swal2-validation-message { 
+    font-size: 20px; 
+    line-height: 1.5; 
+}
+
+@media (max-width: 540px) { 
+.quizGeneratorPopup:not(.swal2-toast) { 
+    padding: 22px 18px !important; 
+} 
+
+.quizGeneratorPopup .swal2-title { 
+    padding: 0 !important; 
+    } 
+}

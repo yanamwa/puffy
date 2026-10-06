@@ -1,3 +1,4 @@
+import TutorialBackButton from "../TutorialBackButton.jsx";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import styles from "./matching-tutorial.module.css";
@@ -79,6 +80,8 @@ export default function MatchingType() {
 
   return (
     <div className={styles.pageWrapper}>
+      <TutorialBackButton />
+
       {(showIntro || startLoading) && (
         <div className={styles.introScreen}>
           {!showCircle && !startLoading && (
@@ -116,6 +119,7 @@ export default function MatchingType() {
             </div>
 
             <div className={styles.slideshowBox}>
+            <div className={styles.demoHeader}>Quiz Tutorial</div>
               {[0, 1, 2].map((slide) => (
                 <div
                   key={slide}

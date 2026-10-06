@@ -310,6 +310,7 @@
 .student-module-progress strong { min-width: 38px; text-align: right; font-family: system-ui, sans-serif; font-size: 11px; }
 .student-module-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
 .student-module-actions button:disabled, .student-course-actions button:disabled { cursor: not-allowed; opacity: .48; box-shadow: none; }
+.student-module-main-quiz-lock-message { grid-column: 2 / -1; display: block; margin-top: -4px; color: #69717f; font-family: system-ui, sans-serif; font-size: 12px; line-height: 1.35; text-align: right; }
 .student-empty-state { border: 1px dashed #c4c8cf; border-radius: 14px; padding: 28px; background: #fff; color: #69717f; text-align: center; font-family: system-ui, sans-serif; }
 
 @media (max-width: 1180px) {
@@ -330,6 +331,7 @@
   .student-course-section-title { flex-direction: column; }
   .student-module-actions { width: 100%; }
   .student-module-row button { width: 100%; }
+  .student-module-main-quiz-lock-message { grid-column: 1; text-align: left; }
 }
 
 /* Student Buttercup Sky theme */
@@ -370,6 +372,27 @@
   color: #ffffff !important;
 }
 
+.student-module-learn-button,
+.student-module-practice-button {
+  border-color: #6f98c7 !important;
+  color: #ffffff !important;
+  box-shadow: 0 3px 0 var(--student-theme-accent) !important;
+}
+
+.student-module-learn-button {
+  background: #5f86b1 !important;
+}
+
+.student-module-practice-button {
+  background: #6f98c7 !important;
+}
+
+.student-module-main-quiz-button {
+  background: #8ab3df !important;
+}
+
+.student-module-learn-button:hover:not(:disabled),
+.student-module-practice-button:hover:not(:disabled),
 .student-module-main-quiz-button:hover:not(:disabled) {
   background: var(--student-theme-accent) !important;
 }
@@ -378,4 +401,19 @@
   border-color: var(--student-theme-sunwashed);
   background: var(--student-theme-cloud-puff);
   color: var(--student-theme-accent);
+}
+
+.student-module-learn-button:disabled,
+.student-module-practice-button:disabled,
+.student-module-main-quiz-button:disabled,
+.student-module-main-quiz-button.is-disabled,
+.student-module-main-quiz-button[aria-disabled="true"] {
+  border: 1px solid #c8cdd5 !important;
+  background: #e3e7ed !important;
+  color: #89919d !important;
+  box-shadow: none !important;
+  cursor: not-allowed !important;
+  opacity: 1 !important;
+  transform: none !important;
+  pointer-events: none;
 }

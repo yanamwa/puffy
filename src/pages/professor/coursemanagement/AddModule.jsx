@@ -1,5 +1,13 @@
+import QuizSourceEvidence from '../../../components/QuizSourceEvidence.jsx';
+import { requestQuizSettings, quizSourceFields, notifyQuizGenerated } from '../../../services/quizGenerationUi.js';
+import { notifyLessonGenerated } from '../../../services/lessonNotifications.js';
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { lessonAuthHeaders } from '../../../services/lessonAuth.js';
+import { uploadLessonSource } from '../../../services/lessonRagApi.js';
+import LessonSourceEvidence from '../../../components/LessonSourceEvidence.jsx';
+import LessonSourceManager from '../../../components/LessonSourceManager.jsx';
+import LessonFilePicker from '../../../components/LessonFilePicker.jsx';
 import Swal from 'sweetalert2';
 
 import { useAuth } from '../../../context/AuthContext.jsx';
@@ -67,6 +75,13 @@ function createEmptyContentModule(index = 0) {
     learningObjectives: '',
     lessonPages: [],
     quizItems: [],
+    mainQuizSettings: {
+      enabled: true,
+      unlockAt: '',
+      lockAt: '',
+    },
+    mainQuizEnabled: true,
+    mainQuizUnlockAt: '',
   };
 }
 
@@ -164,6 +179,7 @@ function counterClass(current, max) {
 
 function normalizeLessonPage(page) {
   return {
+    ...page,
     id: page?.id || createId('page'),
     title: String(page?.title || ''),
     content: String(
@@ -180,9 +196,7 @@ function normalizeLessonPage(page) {
 
 function normalizeQuizItem(item) {
   const type =
-    item?.type === 'true_false'
-      ? 'true_false'
-      : 'multiple_choice';
+    ['multiple_choice', 'identification', 'true_false'].includes(item?.type) ? item.type : 'multiple_choice';
 
   let options = Array.isArray(item?.options)
     ? item.options.map((option) =>
@@ -190,7 +204,9 @@ function normalizeQuizItem(item) {
       )
     : [];
 
-  if (type === 'true_false') {
+  if (type === 'identification') {
+    options = [];
+  } else if (type === 'true_false') {
     options = ['True', 'False'];
   } else {
     options = options.slice(0, 4);
@@ -201,6 +217,7 @@ function normalizeQuizItem(item) {
   }
 
   return {
+    ...item,
     id: item?.id || createId('quiz'),
     type,
     question: String(item?.question || ''),
@@ -216,7 +233,86 @@ function normalizeQuizItem(item) {
   };
 }
 
+function parseSettingsObject(value) {
+  if (value && typeof value === 'object' && !Array.isArray(value)) {
+    return value;
+  }
+
+  try {
+    const parsed = JSON.parse(value || '{}');
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed)
+      ? parsed
+      : {};
+  } catch {
+    return {};
+  }
+}
+
+function normalizeBoolean(value, fallback = true) {
+  if (value === undefined || value === null || value === '') {
+    return fallback;
+  }
+
+  if (typeof value === 'boolean') {
+    return value;
+  }
+
+  return ['1', 'true', 'yes', 'on'].includes(String(value).toLowerCase());
+}
+
+function normalizeDateTimeLocal(value) {
+  const text = String(value || '').trim();
+
+  if (!text) {
+    return '';
+  }
+
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(text)) {
+    return text.slice(0, 16);
+  }
+
+  const date = new Date(text);
+
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+
+  const timezoneOffsetMs = date.getTimezoneOffset() * 60 * 1000;
+  return new Date(date.getTime() - timezoneOffsetMs).toISOString().slice(0, 16);
+}
+
+function normalizeMainQuizSettings(module = {}) {
+  const settings = parseSettingsObject(
+    module?.mainQuizSettings || module?.main_quiz_settings
+  );
+  const enabled = normalizeBoolean(
+    settings.enabled ??
+      settings.isEnabled ??
+      module?.mainQuizEnabled ??
+      module?.main_quiz_enabled,
+    true
+  );
+  const unlockAt = normalizeDateTimeLocal(
+    settings.unlockAt ||
+      settings.unlock_at ||
+      module?.mainQuizUnlockAt ||
+      module?.main_quiz_unlock_at
+  );
+
+  const lockAt = normalizeDateTimeLocal(
+    settings.lockAt || settings.lock_at || module?.mainQuizLockAt || module?.main_quiz_lock_at
+  );
+
+  return {
+    enabled,
+    unlockAt,
+    lockAt,
+  };
+}
+
 function normalizeContentModule(module, index) {
+  const mainQuizSettings = normalizeMainQuizSettings(module);
+
   return {
     id:
       module?.id ||
@@ -254,6 +350,14 @@ function normalizeContentModule(module, index) {
       module?.quizModule,
       module?.quiz_contents
     ).map(normalizeQuizItem),
+
+    mainQuizSettings,
+    mainQuizEnabled: mainQuizSettings.enabled,
+    main_quiz_enabled: mainQuizSettings.enabled,
+    mainQuizUnlockAt: mainQuizSettings.unlockAt,
+    main_quiz_unlock_at: mainQuizSettings.unlockAt,
+    mainQuizLockAt: mainQuizSettings.lockAt,
+    main_quiz_lock_at: mainQuizSettings.lockAt,
   };
 }
 
@@ -925,6 +1029,7 @@ export default function AddModule() {
                               ...page,
                               [field]:
                                 value,
+                              ...(field === 'content' ? { grounding: { ...page.grounding, model_review_passed: false, human_review_required: true } } : {}),
                             }
                           : page
                     ),
@@ -1156,16 +1261,15 @@ export default function AddModule() {
 
   const uploadAndAutoSort =
     async (moduleId) => {
-      const uploadedFile =
-        moduleFiles[moduleId];
+      const uploadedFile = moduleFiles[moduleId] || [];
 
-      if (!uploadedFile) {
+      if (!uploadedFile.length) {
         await Swal.fire({
           icon: 'warning',
           title:
             'No File Selected',
           text:
-            'Please choose a PDF, DOCX, or TXT lesson file first.',
+            'Please choose PDF, PPT, PPTX, DOCX, or TXT lesson files first.',
           confirmButtonText: 'OK',
         });
 
@@ -1180,33 +1284,26 @@ export default function AddModule() {
 
       const formData =
         new FormData();
+      if (!Number.isInteger(Number(id)) || Number(id) < 1) {
+        Swal.fire('Save the course first', 'Save this course before indexing a source document.', 'info');
+        return;
+      }
+      formData.append('course_id', id);
+      formData.append('client_module_key', moduleId);
+      if (Number.isInteger(Number(moduleId)) && Number(moduleId) > 0) formData.append('lesson_id', moduleId);
 
-      formData.append(
-        'file',
-        uploadedFile
-      );
+      uploadedFile.forEach(file => formData.append('files', file));
 
       try {
         setProcessingModuleId(
           moduleId
         );
 
-        const response =
-          await fetch(
-            `${API_BASE}/lessons/process-file`,
-            {
-              method: 'POST',
-              credentials:
-                'include',
-              body: formData,
-            }
-          );
-
-        const data =
-          await response.json();
+        const data = await uploadLessonSource(formData, job => {
+          if (Swal.isVisible()) Swal.update({ text: `Organizing lesson: ${job.progress}% (${job.phase})` });
+        });
 
         if (
-          !response.ok ||
           !data.success
         ) {
           throw new Error(
@@ -1221,6 +1318,7 @@ export default function AddModule() {
           )
             ? data.lesson_pages
                 .map((page) => ({
+                  ...page,
                   id:
                     createId('page'),
 
@@ -1246,7 +1344,7 @@ export default function AddModule() {
         if (generatedPages.length === 0) {
           throw new Error(
             data.message ||
-              'The file uploaded, but no lesson pages were created. Try a searchable PDF, DOCX, or TXT file.'
+              'The materials uploaded, but no lesson pages were created. Use files containing selectable text.'
           );
         }
 
@@ -1314,15 +1412,7 @@ export default function AddModule() {
           })
         );
 
-        await Swal.fire({
-          icon: 'success',
-          title:
-            'Module Processed',
-          text:
-            'The lesson file was processed and added to this module.',
-          confirmButtonText:
-            'Continue',
-        });
+        notifyLessonGenerated(generatedPages.length);
       } catch (error) {
         await Swal.fire({
           icon: 'error',
@@ -1384,130 +1474,8 @@ export default function AddModule() {
         return;
       }
 
-      const result =
-        await Swal.fire({
-          title:
-            'Generate Module Quiz',
+      const result = await requestQuizSettings();
 
-          html: `
-            <div class="quiz-generator-fields" style="display:grid; gap:10px; text-align:left;">
-              <label for="quiz-question-count">
-                Total number of questions
-              </label>
-
-              <input
-                id="quiz-question-count"
-                class="swal2-input"
-                type="number"
-                min="1"
-                max="50"
-                value="5"
-                style="width:100%; margin:0; box-sizing:border-box;"
-              />
-
-              <label for="quiz-true-false-count">
-                Number of True or False questions
-              </label>
-
-              <input
-                id="quiz-true-false-count"
-                class="swal2-input"
-                type="number"
-                min="0"
-                max="50"
-                value="0"
-                style="width:100%; margin:0; box-sizing:border-box;"
-              />
-
-              <label for="quiz-difficulty">
-                Difficulty
-              </label>
-
-              <select
-                id="quiz-difficulty"
-                class="swal2-select"
-                style="width:100%; margin:0; box-sizing:border-box;"
-              >
-                <option value="easy">
-                  Easy
-                </option>
-
-                <option value="medium" selected>
-                  Medium
-                </option>
-
-                <option value="hard">
-                  Hard
-                </option>
-              </select>
-            </div>
-          `,
-
-          showCancelButton: true,
-          confirmButtonText:
-            'Generate',
-          cancelButtonText: 'Cancel',
-          focusConfirm: false,
-
-          preConfirm: () => {
-            const questionCount =
-              Number.parseInt(
-                document.getElementById(
-                  'quiz-question-count'
-                )?.value,
-                10
-              );
-
-            const trueFalseCount =
-              Number.parseInt(
-                document.getElementById(
-                  'quiz-true-false-count'
-                )?.value,
-                10
-              );
-
-            const difficulty =
-              document.getElementById(
-                'quiz-difficulty'
-              )?.value ||
-              'medium';
-
-            if (
-              !Number.isInteger(
-                questionCount
-              ) ||
-              questionCount < 1 ||
-              questionCount > 50
-            ) {
-              Swal.showValidationMessage(
-                'Enter a total question count from 1 to 50.'
-              );
-
-              return false;
-            }
-
-            if (
-              !Number.isInteger(
-                trueFalseCount
-              ) ||
-              trueFalseCount < 0 ||
-              trueFalseCount >
-                questionCount
-            ) {
-              Swal.showValidationMessage(
-                'The True or False count must be between 0 and the total question count.'
-              );
-
-              return false;
-            }
-
-            return {
-              questionCount,
-              trueFalseCount,
-              difficulty,
-            };
-          },
-        });
 
       if (
         !result.isConfirmed ||
@@ -1525,7 +1493,7 @@ export default function AddModule() {
           title:
             'Generating Quiz',
           text:
-            'Gemini is creating questions for this module.',
+            'Retrieving source passages and checking the questions and answers.',
           allowOutsideClick:
             false,
           allowEscapeKey: false,
@@ -1546,11 +1514,12 @@ export default function AddModule() {
               headers: {
                 'Content-Type':
                   'application/json',
+                ...lessonAuthHeaders(),
               },
 
               body: JSON.stringify({
-                lesson_title:
-                  selectedModule.title,
+                ...quizSourceFields(id, selectedModule.id, selectedModule.lessonPages),
+                lesson_title: selectedModule.title,
 
                 lesson_content:
                   lessonContent,
@@ -1563,9 +1532,7 @@ export default function AddModule() {
                   result.value
                     .questionCount,
 
-                true_false_count:
-                  result.value
-                    .trueFalseCount,
+                identification_count: result.value.identificationCount,
 
                 difficulty:
                   result.value
@@ -1616,15 +1583,7 @@ export default function AddModule() {
           generatedQuestions
         );
 
-        await Swal.fire({
-          icon: 'success',
-          title:
-            'Quiz Generated',
-          text:
-            `${generatedQuestions.length} questions were generated for ${selectedModule.title}.`,
-          confirmButtonText:
-            'Review Questions',
-        });
+        notifyQuizGenerated(generatedQuestions.length);
       } catch (error) {
         await Swal.fire({
           icon: 'error',
@@ -1651,31 +1610,14 @@ export default function AddModule() {
       }
 
       if (
-        !form.title.trim() ||
-        !form.summary.trim()
+        !form.title.trim()
       ) {
         await Swal.fire({
           icon: 'warning',
           title:
             'Required Fields Missing',
           text:
-            'Course title and description are required.',
-          confirmButtonText: 'OK',
-        });
-
-        return;
-      }
-
-      if (
-        form.contentModules.length ===
-        0
-      ) {
-        await Swal.fire({
-          icon: 'warning',
-          title:
-            'Add a Module',
-          text:
-            'Create at least one module before saving the course.',
+            'Course title is required to save a draft.',
           confirmButtonText: 'OK',
         });
 
@@ -1693,22 +1635,8 @@ export default function AddModule() {
               0
         );
 
-      if (incompleteModule) {
-        await Swal.fire({
-          icon: 'warning',
-          title:
-            'Incomplete Module',
-          text:
-            `${incompleteModule.title || 'A module'} needs a title, learning objectives, and at least one lesson page.`,
-          confirmButtonText: 'OK',
-        });
-
-        openModuleEditor(
-          incompleteModule.id
-        );
-
-        return;
-      }
+      const saveAsDraft = form.status !== 'published' || !form.summary.trim()
+        || form.contentModules.length === 0 || Boolean(incompleteModule);
 
       const normalizedCode =
         (form.code.trim() || createCourseCode())
@@ -1783,10 +1711,7 @@ export default function AddModule() {
 
         subject: courseSubject,
 
-        status:
-          form.status === 'published'
-            ? 'published'
-            : 'draft',
+        status: saveAsDraft ? 'draft' : 'published',
 
         contentModules:
           form.contentModules,
@@ -1862,9 +1787,9 @@ export default function AddModule() {
             ? 'Course Updated'
             : 'Course Added',
 
-          text: isEditing
-            ? 'The course changes were saved successfully.'
-            : 'The new course was added successfully.',
+          text: saveAsDraft
+            ? 'Saved as a draft. You can now generate modules. Students cannot access it until it is complete and published.'
+            : 'The course was published successfully.',
 
           confirmButtonText:
             'Done',
@@ -1897,8 +1822,8 @@ export default function AddModule() {
   if (loading) {
     return (
       <section
-        className={`${styles.addModulePage} ${
-          isEditing ? `${styles.editCoursePage} edit-course-page` : ''
+        className={`${styles.addModulePage} ${styles.courseBuilderPage} course-builder-page ${
+          isEditing ? 'edit-course-page' : ''
         }`}
       >
         <div
@@ -1916,8 +1841,8 @@ export default function AddModule() {
 
   return (
     <section
-      className={`${styles.addModulePage} ${
-        isEditing ? `${styles.editCoursePage} edit-course-page` : ''
+      className={`${styles.addModulePage} ${styles.courseBuilderPage} course-builder-page ${
+        isEditing ? 'edit-course-page' : ''
       }`}
     >
       <div
@@ -2546,49 +2471,7 @@ export default function AddModule() {
                                 styles.uploadRow
                               }
                             >
-                              <label
-                                className={
-                                  styles.customFileBtn
-                                }
-                              >
-                                Upload File Here
-
-                                <input
-                                  type="file"
-                                  accept=".pdf,.docx,.txt"
-                                  disabled={
-                                    isProcessing
-                                  }
-                                  onChange={(
-                                    event
-                                  ) =>
-                                    setModuleFiles(
-                                      (
-                                        current
-                                      ) => ({
-                                        ...current,
-
-                                        [module.id]:
-                                          event
-                                            .target
-                                            .files?.[0] ||
-                                          null,
-                                      })
-                                    )
-                                  }
-                                />
-                              </label>
-
-                              <span
-                                className={
-                                  styles.fileName
-                                }
-                              >
-                                {moduleFiles[
-                                  module.id
-                                ]?.name ||
-                                  'No file chosen'}
-                              </span>
+                              <LessonFilePicker files={moduleFiles[module.id] || []} disabled={isProcessing} buttonClassName={styles.customFileBtn} onChange={files => setModuleFiles(current => ({ ...current, [module.id]: files }))} />
 
                               <button
                                 className={
@@ -2602,9 +2485,7 @@ export default function AddModule() {
                                 }
                                 disabled={
                                   isProcessing ||
-                                  !moduleFiles[
-                                    module.id
-                                  ]
+                                  !moduleFiles[module.id]?.length
                                 }
                               >
                                 {isProcessing
@@ -2612,6 +2493,14 @@ export default function AddModule() {
                                   : 'Generate Module'}
                               </button>
                             </div>
+                            <LessonSourceManager courseId={id} jobScope={module.id}
+                              lessonId={Number.isInteger(Number(module.id)) && Number(module.id) > 0 ? Number(module.id) : null}
+                              onGenerated={result => setForm(current => ({ ...current,
+                                contentModules: current.contentModules.map(item => item.id !== module.id ? item : { ...item,
+                                  title: result.module_title, description: result.description,
+                                  learningObjectives: result.learning_objectives,
+                                  lessonPages: result.lesson_pages.map(page => ({ ...page, id: createId('page') })),
+                                }) }))} />
                           </div>
 
                           <div
@@ -2800,6 +2689,7 @@ export default function AddModule() {
                                     }
                                     placeholder="Page content"
                                   />
+                                  <LessonSourceEvidence page={activePage} />
 
                                   <div
                                     className={
@@ -3039,18 +2929,7 @@ export default function AddModule() {
                                           module.id,
                                           quizIndex,
                                           'options',
-                                          type ===
-                                            'true_false'
-                                            ? [
-                                                'True',
-                                                'False',
-                                              ]
-                                            : [
-                                                '',
-                                                '',
-                                                '',
-                                                '',
-                                              ]
+                                          type === 'identification' ? [] : ['', '', '', '']
                                         );
 
                                         updateQuizItem(
@@ -3066,10 +2945,7 @@ export default function AddModule() {
                                         Choice
                                       </option>
 
-                                      <option value="true_false">
-                                        True or
-                                        False
-                                      </option>
+                                      <option value="identification">Identification</option>
                                     </select>
 
                                     <input
@@ -3145,7 +3021,7 @@ export default function AddModule() {
                                       )}
                                     </div>
 
-                                    <select
+                                    {item.type === 'identification' ? <input className={styles.popupInput} value={item.correct_answer} onChange={event => updateQuizItem(module.id, quizIndex, 'correct_answer', event.target.value)} placeholder="Correct identification answer" aria-label="Correct identification answer" maxLength={150} /> : (<select
                                       className={
                                         styles.popupSelect
                                       }
@@ -3195,7 +3071,8 @@ export default function AddModule() {
                                           </option>
                                         )
                                       )}
-                                    </select>
+                                    </select>)}
+                                    <QuizSourceEvidence question={item} />
 
                                     <textarea
                                       className={`${styles.popupTextarea} ${styles.popupAnswerBox}`}

@@ -1,3 +1,4 @@
+import TutorialBackButton from "../TutorialBackButton.jsx";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import styles from "./multipleChoice-tutorial.module.css";
@@ -87,6 +88,8 @@ export default function MultipleChoiceTutorial() {
 
   return (
     <div className={styles.page}>
+      <TutorialBackButton />
+
       {(showIntro || startLoading) && (
         <div className={styles.introScreen}>
           {!showCircle && !startLoading && (
@@ -124,6 +127,7 @@ export default function MultipleChoiceTutorial() {
           </div>
 
           <div className={styles.slideshowBox}>
+            <div className={styles.demoHeader}>Quiz Tutorial</div>
             {slidesData.map((slide, i) => (
               <div
                 key={i}

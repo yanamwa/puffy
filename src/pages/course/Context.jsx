@@ -46,9 +46,6 @@ function Tutorial() {
           <button className={styles.howitworksactive} type="button" disabled>
             Lesson
           </button>
-          <button className={styles.aboutyou} type="button" disabled>
-            Review
-          </button>
         </div>
 
         <div className={styles.greets}>

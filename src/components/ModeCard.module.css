@@ -19,9 +19,9 @@
 
 .modeCard:hover {
   transform: translateY(-4px);
-  border-color: #198754;
-  background: #eef8f2;
-  box-shadow: 5px 5px 0 rgba(25, 135, 84, 0.24);
+  border-color: var(--quiz-card-hover-border, #198754);
+  background: var(--quiz-card-hover-background, #eef8f2);
+  box-shadow: 5px 5px 0 var(--quiz-card-hover-shadow, rgba(25, 135, 84, 0.24));
 }
 
 .icon {
@@ -42,7 +42,7 @@
 }
 
 .modeCard:hover .title {
-  color: #198754;
+  color: var(--quiz-card-hover-title, #198754);
 }
 
 .desc {

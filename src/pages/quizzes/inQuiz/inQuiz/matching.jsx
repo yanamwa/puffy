@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { API_BASE } from "../../../../config.js";
 import { updateDeckCardMemorized } from "../../../../utils/cardMemorization.js";
@@ -32,7 +32,8 @@ export default function MatchingType() {
   const [wrongPair, setWrongPair] = useState([]);
   const [checkpointOpen, setCheckpointOpen] = useState(false);
   const [checkpointStartIndex, setCheckpointStartIndex] = useState(0);
-  const [checkpointReviewEndIndex, setCheckpointReviewEndIndex] = useState(0);
+  const [firstAttempts, setFirstAttempts] = useState({});
+  const clickPending = useRef(false);
 
   const [ttsEnabled, setTtsEnabled] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -202,7 +203,8 @@ export default function MatchingType() {
             "";
 
           return {
-            id: item.cardId || item.card_id || item.id || index + 1,
+            id: `pair-${index}`,
+            cardId: item.cardId || item.card_id || item.id || index + 1,
             question: cleanQuestionText(question),
             answer: cleanAnswerText(answer),
           };
@@ -214,23 +216,31 @@ export default function MatchingType() {
     }
   }, [lesson]);
 
+  const roundPairs = useMemo(
+    () => matchingPairs.slice(checkpointStartIndex, checkpointStartIndex + 10),
+    [matchingPairs, checkpointStartIndex]
+  );
+  const roundEndIndex = checkpointStartIndex + roundPairs.length;
+  const roundScore = roundPairs.filter(item => firstAttempts[item.id]?.isCorrect).length;
+  const isLastRound = roundEndIndex >= matchingPairs.length;
+
   const leftCards = useMemo(() => {
     return shuffleArray(
-      matchingPairs.map((item) => ({
+      roundPairs.map((item) => ({
         id: item.id,
         text: item.question,
       }))
     );
-  }, [matchingPairs]);
+  }, [roundPairs]);
 
   const rightCards = useMemo(() => {
     return shuffleArray(
-      matchingPairs.map((item) => ({
+      roundPairs.map((item) => ({
         id: item.id,
         text: item.answer,
       }))
     );
-  }, [matchingPairs]);
+  }, [roundPairs]);
 
   const progressCurrent =
     matchingPairs.length > 0
@@ -250,12 +260,12 @@ export default function MatchingType() {
     const answers = matchingPairs
       .filter((item) => !completedSet || completedSet.has(item.id))
       .map((item) => ({
-      cardId: item.id,
+      cardId: item.cardId,
       question: item.question,
-      userAnswer: item.answer,
+      userAnswer: firstAttempts[item.id]?.answer || item.answer,
       correctAnswer: item.answer,
       explanation: item.answer,
-      isCorrect: true,
+      isCorrect: Boolean(firstAttempts[item.id]?.isCorrect),
     }));
 
     const resultPayload = {
@@ -279,7 +289,10 @@ export default function MatchingType() {
   };
 
   const finishMatching = (finalMatchedIds = matchedIds, returnToDeck = false) => {
-    saveMatchingResult(finalMatchedIds.length, finalMatchedIds);
+    const finalScore = matchingPairs.filter(item =>
+      finalMatchedIds.includes(item.id) && firstAttempts[item.id]?.isCorrect
+    ).length;
+    saveMatchingResult(finalScore, finalMatchedIds);
 
     setTimeout(() => {
       navigate(
@@ -293,62 +306,55 @@ export default function MatchingType() {
   };
 
   const repeatCheckpointPairs = () => {
-    setMatchedIds((prev) => prev.slice(0, checkpointStartIndex));
+    const roundIds = new Set(roundPairs.map(item => item.id));
+    setMatchedIds(prev => prev.filter(id => !roundIds.has(id)));
+    setFirstAttempts(prev => Object.fromEntries(
+      Object.entries(prev).filter(([id]) => !roundIds.has(id))
+    ));
     setFirstCard(null);
     setWrongPair([]);
     setCheckpointOpen(false);
   };
 
   const continueAfterCheckpoint = () => {
-    setCheckpointStartIndex(checkpointReviewEndIndex);
+    setCheckpointStartIndex(roundEndIndex);
     setFirstCard(null);
     setWrongPair([]);
     setCheckpointOpen(false);
   };
 
   const handleCardClick = async (card, side) => {
-    if (matchedIds.includes(card.id)) return;
-
-    if (!firstCard) {
+    if (checkpointOpen || clickPending.current || wrongPair.length || matchedIds.includes(card.id)) return;
+    if (!firstCard || firstCard.side === side) {
       setFirstCard({ ...card, side });
       return;
     }
-
-    if (firstCard.side === side) {
-      setFirstCard({ ...card, side });
-      return;
-    }
-
-    if (firstCard.id === card.id) {
-      await updateDeckCardMemorized(isDeckMode, card.id, true, {
-        question: card.question,
-        answer: card.answer,
-      });
-
-      setMatchedIds((prev) => {
-        const updated = [...prev, card.id];
-
-        if (updated.length % 10 === 0 && updated.length < matchingPairs.length) {
-          setCheckpointReviewEndIndex(updated.length);
-          setCheckpointOpen(true);
-          return updated;
-        }
-
-        if (updated.length === matchingPairs.length) {
-          finishMatching(updated);
-        }
-
-        return updated;
-      });
-
-      setFirstCard(null);
+    const questionCard = side === 'left' ? card : firstCard;
+    const answerCard = side === 'right' ? card : firstCard;
+    const expected = roundPairs.find(item => item.id === questionCard.id);
+    const isCorrect = questionCard.id === answerCard.id;
+    setFirstAttempts(prev => prev[questionCard.id] ? prev : {
+      ...prev,
+      [questionCard.id]: { isCorrect, answer: answerCard.text },
+    });
+    if (isCorrect) {
+      clickPending.current = true;
+      try {
+        await updateDeckCardMemorized(isDeckMode, expected.cardId, true, {
+          question: expected.question,
+          answer: expected.answer,
+        });
+        const updated = [...matchedIds, questionCard.id];
+        setMatchedIds(updated);
+        setFirstCard(null);
+        if (roundPairs.every(item => updated.includes(item.id))) setCheckpointOpen(true);
+      } finally {
+        clickPending.current = false;
+      }
     } else {
       setWrongPair([firstCard, { ...card, side }]);
-
-      setTimeout(() => {
-        setWrongPair([]);
-        setFirstCard(null);
-      }, 500);
+      setFirstCard(null);
+      setTimeout(() => setWrongPair([]), 500);
     }
   };
 
@@ -389,19 +395,10 @@ if (matchingPairs.length === 0) {
     </div>
   );
 }
-  const checkpointEndIndex = checkpointOpen
-    ? checkpointReviewEndIndex
-    : Math.min(matchedIds.length, matchingPairs.length);
-  const checkpointIds = matchedIds.slice(checkpointStartIndex, checkpointEndIndex);
-  const checkpointCards = checkpointIds
-    .map((id) => matchingPairs.find((item) => item.id === id))
-    .filter(Boolean);
-  const checkpointProgress = matchingPairs.length
-    ? (checkpointEndIndex / matchingPairs.length) * 100
-    : 0;
 
   return (
     <div className={styles.wrapper}>
+
       <button
         type="button"
         className={styles.settingsBtn}
@@ -476,69 +473,40 @@ if (matchingPairs.length === 0) {
         </div>
       )}
 
-      {checkpointOpen ? (
-        <div className={styles.checkpointWrapper}>
-          <div className={styles.checkpointHeader}>
-            <span className={styles.checkpointEyebrow}>The previous cards</span>
-            <h2>Review Complete</h2>
-
-            <div className={styles.checkpointProgressBar}>
-              <div
-                className={styles.checkpointProgressFill}
-                style={{ width: `${checkpointProgress}%` }}
-              />
-            </div>
-
-            <p className={styles.checkpointQuestionCount}>
-              {checkpointEndIndex} of {matchingPairs.length} cards reviewed
-            </p>
-          </div>
-
-          <div className={styles.checkpointCards}>
-            {checkpointCards.map((item, index) => (
-              <div
-                className={styles.checkpointCard}
-                key={`${item.id}-${checkpointStartIndex + index}`}
-              >
-                <span>Card {checkpointStartIndex + index + 1}</span>
-                <p>{item.question}</p>
+      {checkpointOpen && (
+        <div className={styles.roundOverlay}>
+          <section className={styles.roundModal} role="dialog" aria-modal="true" aria-labelledby="matching-round-title">
+            <h2 id="matching-round-title">{isLastRound ? 'Matching Quiz Complete' : 'Set Complete'}</h2>
+            <div className={styles.roundStats}>
+              <div className={styles.correctStat}>
+                <span className={styles.statIcon} aria-hidden="true">✓</span>
+                <strong>{roundScore}</strong>
+                <span>Correct answers</span>
               </div>
-            ))}
-          </div>
-
-          <div className={styles.checkpointActions}>
-            <button
-              type="button"
-              className={styles.repeatCardsBtn}
-              onClick={repeatCheckpointPairs}
-            >
-              Repeat Cards
-            </button>
-
-            <button
-              type="button"
-              className={styles.nextCardsBtn}
-              onClick={continueAfterCheckpoint}
-            >
-              Next Cards
-            </button>
-
-            <button
-              type="button"
-              className={styles.doneCardsBtn}
-              onClick={() => finishMatching(matchedIds, true)}
-            >
-              Done
-            </button>
-          </div>
+              <div className={styles.incorrectStat}>
+                <span className={styles.statIcon} aria-hidden="true">×</span>
+                <strong>{roundPairs.length - roundScore}</strong>
+                <span>Incorrect answers</span>
+              </div>
+            </div>
+            <p className={styles.remainingCards}>Remaining cards: <strong>{matchingPairs.length - roundEndIndex}</strong></p>
+            <p className={styles.scoringNote}>Based on your first attempt for each question.</p>
+            <div className={styles.checkpointActions}>
+              <button type="button" className={styles.repeatCardsBtn} onClick={repeatCheckpointPairs}>Repeat Cards</button>
+              <button type="button" className={styles.doneCardsBtn} onClick={() => finishMatching(matchedIds)}>Done</button>
+              {!isLastRound && (
+                <button autoFocus type="button" className={styles.nextCardsBtn} onClick={continueAfterCheckpoint}>Continue</button>
+              )}
+            </div>
+          </section>
         </div>
-      ) : (
-        <>
+      )}
       <div className={styles.paperBackground}>
         <header className={styles.siteHeader}>
           <h1 className={styles.courseTitle}>
             {lesson.title || "Matching Quiz"}
           </h1>
+          <p>Set {Math.floor(checkpointStartIndex / 10) + 1} · {roundPairs.length} questions · {matchedIds.filter(id => roundPairs.some(item => item.id === id)).length}/{roundPairs.length} matched</p>
 
 
         </header>
@@ -625,8 +593,6 @@ if (matchingPairs.length === 0) {
           </div>
         </main>
       </div>
-        </>
-      )}
     </div>
   );
 }

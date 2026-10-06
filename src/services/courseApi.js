@@ -33,6 +33,83 @@ function readList(...values) {
   return [];
 }
 
+function parseSettingsObject(value) {
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    return value;
+  }
+
+  try {
+    const parsed = JSON.parse(value || "{}");
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed)
+      ? parsed
+      : {};
+  } catch {
+    return {};
+  }
+}
+
+function normalizeBoolean(value, fallback = true) {
+  if (value === undefined || value === null || value === "") {
+    return fallback;
+  }
+
+  if (typeof value === "boolean") {
+    return value;
+  }
+
+  return ["1", "true", "yes", "on"].includes(String(value).toLowerCase());
+}
+
+function normalizeDateTimeLocal(value) {
+  const text = String(value || "").trim();
+
+  if (!text) {
+    return "";
+  }
+
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(text)) {
+    return text.slice(0, 16);
+  }
+
+  const date = new Date(text);
+
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  const timezoneOffsetMs = date.getTimezoneOffset() * 60 * 1000;
+  return new Date(date.getTime() - timezoneOffsetMs).toISOString().slice(0, 16);
+}
+
+function normalizeMainQuizSettings(module = {}) {
+  const settings = parseSettingsObject(
+    module?.mainQuizSettings || module?.main_quiz_settings
+  );
+  const enabled = normalizeBoolean(
+    settings.enabled ??
+      settings.isEnabled ??
+      module?.mainQuizEnabled ??
+      module?.main_quiz_enabled,
+    true
+  );
+  const unlockAt = normalizeDateTimeLocal(
+    settings.unlockAt ||
+      settings.unlock_at ||
+      module?.mainQuizUnlockAt ||
+      module?.main_quiz_unlock_at
+  );
+
+  const lockAt = normalizeDateTimeLocal(
+    settings.lockAt || settings.lock_at || module?.mainQuizLockAt || module?.main_quiz_lock_at
+  );
+
+  return {
+    enabled,
+    unlockAt,
+    lockAt,
+  };
+}
+
 function getStoredToken() {
   return (
     localStorage.getItem("puffy-token") ||
@@ -57,6 +134,8 @@ function getAuthHeaders(headers = {}) {
 }
 
 function normalizeContentModule(module, index) {
+  const mainQuizSettings = normalizeMainQuizSettings(module);
+
   return {
     ...module,
     id: module?.id || module?.lesson_id || module?.module_id || `module-${index + 1}`,
@@ -77,6 +156,13 @@ function normalizeContentModule(module, index) {
       module?.quizModule,
       module?.quiz_contents
     ),
+    mainQuizSettings,
+    mainQuizEnabled: mainQuizSettings.enabled,
+    main_quiz_enabled: mainQuizSettings.enabled,
+    mainQuizUnlockAt: mainQuizSettings.unlockAt,
+    main_quiz_unlock_at: mainQuizSettings.unlockAt,
+    mainQuizLockAt: mainQuizSettings.lockAt,
+    main_quiz_lock_at: mainQuizSettings.lockAt,
   };
 }
 
@@ -349,6 +435,25 @@ export async function fetchCourse(id) {
 }
 
 export async function saveCourse(course) {
+  // Carry module metadata through APIs that persist only flat lesson/quiz JSON.
+  if (Array.isArray(course.contentModules)) {
+    const flatten = (field) => course.contentModules.flatMap((module, moduleIndex) =>
+      (module[field] || []).map((item) => ({
+        ...item,
+        moduleId: module.id,
+        moduleIndex,
+        moduleTitle: module.title,
+        moduleDescription: module.description,
+        moduleLearningObjectives: module.learningObjectives,
+        mainQuizSettings: normalizeMainQuizSettings(module),
+      }))
+    );
+    const lessonPages = flatten('lessonPages');
+    const quizItems = flatten('quizItems');
+    course = { ...course, content_modules: course.contentModules,
+      lessonPages, lessonContent: JSON.stringify(lessonPages), lesson_content: JSON.stringify(lessonPages),
+      quizItems, quizModule: JSON.stringify(quizItems), quiz_contents: JSON.stringify(quizItems) };
+  }
   const hasId = course.id !== undefined && course.id !== null && course.id !== "";
 
   try {

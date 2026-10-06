@@ -1,0 +1,18 @@
+.lessonGenerationToast { 
+    font-family: Arial, 
+    sans-serif !important; 
+    border-radius: 12px !important; 
+    border: 1px solid #dce5ee; 
+    box-shadow: 0 8px 28px #29476524 
+    !important; 
+}
+
+.lessonGenerationToast .swal2-title { 
+    color: #294765 !important; 
+    font-size: 15px !important; 
+}
+.lessonGenerationToast .swal2-html-container { 
+    color: #536b82 !important; 
+    font-size: 13px !important; 
+    line-height: 1.5 !important; 
+}

@@ -426,6 +426,7 @@ export default function Flashcards() {
 
   return (
     <div className={styles.container}>
+
       {notifOpen && (
         <div className={styles.slideNotif}>
           <img

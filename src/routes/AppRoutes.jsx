@@ -49,6 +49,7 @@ import PublicCourses from '../pages/student/PublicCourses';
 import ArchivedCourses from '../pages/student/ArchivedCourses';
 import StudentSettings from '../pages/student/StudentSettings';
 import StudentCourseDetail from '../pages/student/StudentCourseDetail';
+import StudentModuleQuizPage from '../pages/student/StudentModuleQuizPage';
 import StudentJoinCourse from '../pages/student/StudentJoinCourse';
 import StudentProfile from '../pages/student/StudentProfile';
 import StudentNotifications from "../pages/student/StudentNotifications";
@@ -320,8 +321,10 @@ export default function AppRoutes() {
             <Route path="courses" element={<ModuleManagement />} />
             <Route path="courses/new" element={<AddModule />} />
             <Route path="courses/new/modules/:moduleId/edit" element={<CourseModuleEditor />} />
+            <Route path="courses/new/modules/:moduleId/:assessmentType/edit" element={<CourseModuleEditor />} />
             <Route path="courses/edit/:id" element={<AddModule />} />
             <Route path="courses/edit/:id/modules/:moduleId/edit" element={<CourseModuleEditor />} />
+            <Route path="courses/edit/:id/modules/:moduleId/:assessmentType/edit" element={<CourseModuleEditor />} />
             <Route path="students" element={<AssessmentAnalysis />} />
             <Route path="assessment/:courseId" element={<AssessmentDetail />} />
             <Route path="notifications" element={<ProfessorNotifications />} />
@@ -347,6 +350,11 @@ export default function AppRoutes() {
           <Route
             path="/student/enrolled-courses/:courseId"
             element={<StudentCourseDetail />}
+          />
+
+          <Route
+            path="/student/enrolled-courses/:courseId/quiz/:quizType/:moduleId"
+            element={<StudentModuleQuizPage />}
           />
 
           <Route

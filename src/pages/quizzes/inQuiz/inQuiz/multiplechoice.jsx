@@ -33,6 +33,8 @@ export default function Quiz() {
   const [current, setCurrent] = useState(0);
   const [score, setScore] = useState(0);
   const [selected, setSelected] = useState(null);
+  const [typedAnswer, setTypedAnswer] = useState("");
+  useEffect(() => setTypedAnswer(""), [current]);
   const [locked, setLocked] = useState(false);
   const [answers, setAnswers] = useState([]);
   const [checkpointOpen, setCheckpointOpen] = useState(false);
@@ -227,6 +229,9 @@ export default function Quiz() {
               const { questionOnly, extractedOptions } =
                 splitQuestionAndOptions(rawQuestionText);
               const correctAnswer = getQuizItemAnswer(item);
+              if (item.type === 'identification' && String(correctAnswer).trim()) {
+                return { type: 'identification', cardId: item.cardId || item.id || null, q: questionOnly, options: [], correctAnswer, explanation: item.explanation || correctAnswer };
+              }
               const answerLower = String(correctAnswer).trim().toLowerCase();
               const questionLower = String(rawQuestionText).trim().toLowerCase();
 
@@ -296,7 +301,10 @@ export default function Quiz() {
             const correctAnswer =
               item.correct_answer || item.correctAnswer || item.answer || "";
 
-            const answerLower = String(correctAnswer).trim().toLowerCase();
+            if (item.type === 'identification' && String(correctAnswer).trim()) {
+                return { type: 'identification', cardId: item.cardId || item.id || null, q: questionOnly, options: [], correctAnswer, explanation: item.explanation || correctAnswer };
+              }
+              const answerLower = String(correctAnswer).trim().toLowerCase();
             const questionLower = String(rawQuestionText).trim().toLowerCase();
 
             if (
@@ -543,14 +551,16 @@ export default function Quiz() {
     setCheckpointOpen(false);
   }
 
-  async function handleAnswer(index) {
+  async function handleAnswer(index, identificationValue) {
     if (locked || !question) return;
 
     setSelected(index);
     setLocked(true);
 
-    const chosenAnswer = visibleOptions[index] || question.options[index] || "";
-    const isCorrect = isSameText(chosenAnswer, question.correctAnswer);
+    const chosenAnswer = question.type === 'identification' ? String(identificationValue || "").trim() : visibleOptions[index] || question.options[index] || "";
+    const isCorrect = question.type === 'identification'
+      ? chosenAnswer.replace(/\s+/g, ' ').toLowerCase() === String(question.correctAnswer).trim().replace(/\s+/g, ' ').toLowerCase()
+      : isSameText(chosenAnswer, question.correctAnswer);
     const newScore = score + (isCorrect ? 1 : 0);
 
     const newAnswer = {
@@ -643,6 +653,7 @@ export default function Quiz() {
 
   return (
     <div className={styles.wrapper}>
+
       <button
         type="button"
         className={styles.settingsBtn}
@@ -808,7 +819,10 @@ export default function Quiz() {
           <p className={styles.question}>{question.q}</p>
         </div>
 
-        <div className={styles.options}>
+        {question.type === 'identification' ? <form className={styles.options} onSubmit={event => { event.preventDefault(); if (typedAnswer.trim()) handleAnswer(-1, typedAnswer); }}>
+          <input className={styles.identificationInput} aria-label="Your identification answer" placeholder="Type your answer" maxLength={150} value={typedAnswer} onChange={event => setTypedAnswer(event.target.value)} disabled={locked} />
+          <button className={styles.option} type="submit" disabled={locked || !typedAnswer.trim()}>Submit answer</button>
+        </form> : <div className={styles.options}>
           {visibleOptions.map((opt, i) => {
             const isSelected = selected === i;
 
@@ -839,7 +853,7 @@ export default function Quiz() {
               </button>
             );
           })}
-        </div>
+        </div>}
       </div>
         </>
       )}

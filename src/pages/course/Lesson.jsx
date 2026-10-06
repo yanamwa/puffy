@@ -1,5 +1,6 @@
 import styles from "./lesson.module.css";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import LessonSourceEvidence from '../../components/LessonSourceEvidence.jsx';
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useState, useEffect, useMemo } from "react";
 import Swal from "sweetalert2";
 import { API_BASE } from "../../config.js";
@@ -12,6 +13,8 @@ import {
   getCourseQuizItems,
 } from "./courseContent.js";
 import { saveStudentReadingProgress } from "../student/studentCourseData.js";
+
+const LESSON_QUIZ_LIMIT = 5;
 
 const splitReadableText = (value) => {
   const text = String(value || "").trim();
@@ -57,6 +60,8 @@ function Lesson() {
   const [lesson, setLesson] = useState(null);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState({});
+  const [identificationAnswer, setIdentificationAnswer] = useState("");
+  useEffect(() => setIdentificationAnswer(""), [currentSlide]);
   const [quizResults, setQuizResults] = useState([]);
   const [hasTakenQuiz, setHasTakenQuiz] = useState(false);
   const [quizModesOpen, setQuizModesOpen] = useState(false);
@@ -75,6 +80,7 @@ function Lesson() {
     activeModule?.id || `module-${moduleNumber}`
   }`;
   const moduleTitle = activeModule?.title || lesson?.title || "Untitled module";
+  const moduleQuery = `?module=${moduleIndex}`;
 
   const quizResultKey = `lessonQuizResults_${lessonId}_module_${moduleIndex}`;
 
@@ -101,11 +107,15 @@ function Lesson() {
       : getCourseLessonPages(lesson);
   }, [activeModule, lesson]);
 
-  const quizSlides = useMemo(() => {
+  const moduleQuizItems = useMemo(() => {
     return activeModule?.quizItems?.length
       ? activeModule.quizItems
       : getCourseQuizItems(lesson);
   }, [activeModule, lesson]);
+
+  const quizSlides = useMemo(() => {
+    return moduleQuizItems.slice(0, LESSON_QUIZ_LIMIT);
+  }, [moduleQuizItems]);
 
   const allSlides = useMemo(() => {
     return [
@@ -157,16 +167,26 @@ function Lesson() {
       }
 
       const savedAnswers = Array.isArray(parsed.answers) ? parsed.answers : [];
+      const visibleQuizSlides = allSlides.filter((slide) => slide.type === "quiz");
+      const visibleQuizQuestions = new Set(
+        visibleQuizSlides.map((slide) => slide.content.question)
+      );
+      const visibleSavedAnswers = savedAnswers.filter((item) =>
+        visibleQuizQuestions.has(item.question)
+      );
+      const hasCompletedVisibleQuiz = visibleQuizSlides.every((slide) =>
+        visibleSavedAnswers.some((item) => item.question === slide.content.question)
+      );
 
-      setHasTakenQuiz(true);
-      setQuizResults(savedAnswers);
+      setHasTakenQuiz(hasCompletedVisibleQuiz);
+      setQuizResults(visibleSavedAnswers);
 
       const restoredAnswers = {};
 
       allSlides.forEach((slide, index) => {
         if (slide.type !== "quiz") return;
 
-        const savedAnswer = savedAnswers.find(
+        const savedAnswer = visibleSavedAnswers.find(
           (item) => item.question === slide.content.question
         );
 
@@ -314,7 +334,7 @@ function Lesson() {
   };
 
   const openModulePracticeModes = () => {
-    if (!quizSlides.length) {
+    if (!moduleQuizItems.length) {
       Swal.fire({
         icon: "info",
         title: "No Module Quiz Yet",
@@ -406,8 +426,8 @@ function Lesson() {
     const explanation = quiz?.explanation || "No explanation available.";
 
     const isCorrect =
-      String(option).trim().toLowerCase() ===
-      String(correctAnswer).trim().toLowerCase();
+      String(option).trim().replace(/\s+/g, " ").toLowerCase() ===
+      String(correctAnswer).trim().replace(/\s+/g, " ").toLowerCase();
 
     setSelectedAnswers((prev) => ({
       ...prev,
@@ -535,17 +555,15 @@ function Lesson() {
         <div className={styles.ribbon}></div>
 
         <div className={styles.tabs}>
-          <button className={styles.welcome} type="button" disabled>
-            Introduction
-          </button>
+          <Link to={`/introduction/${lessonId}${moduleQuery}`}>
+            <button className={styles.welcome} type="button">
+              Introduction
+            </button>
+          </Link>
 
           <button className={styles.howitworksactive} type="button" disabled>
             Lesson
           </button>
-
-  <button className={styles.aboutyou} type="button" disabled>
-  Overview
-</button>
         </div>
 <div className={styles.greets}>
   <p className={styles.slideCounter}>
@@ -599,12 +617,13 @@ function Lesson() {
                     )
                   )}
                 </div>
+                <LessonSourceEvidence page={currentItem.content} />
               </div>
             )}
 
             {currentItem?.type === "quiz" && (
               <div className={styles.quizSlide}>
-                <h4 className={styles.quizTitle}>Quick Check</h4>
+                <h4 className={styles.quizTitle}>Quick Recap</h4>
 
                 <p className={styles.quizQuestion}>
                   {currentItem.content.question || "No question available."}
@@ -616,7 +635,12 @@ function Lesson() {
                   </p>
                 )}
 
-                {hasOptions ? (
+                {currentItem.content.type === 'identification' ? (
+                  <form className={styles.optionsContainer} onSubmit={event => { event.preventDefault(); if (identificationAnswer.trim()) handleOptionSelect(currentSlide, identificationAnswer.trim()); }}>
+                    <input className={styles.optionButton} aria-label="Your identification answer" placeholder="Type your answer" maxLength={150} value={identificationAnswer} onChange={event => setIdentificationAnswer(event.target.value)} disabled={hasTakenQuiz || Boolean(selectedAnswer)} />
+                    <button className={styles.button} type="submit" disabled={hasTakenQuiz || Boolean(selectedAnswer) || !identificationAnswer.trim()}>Submit answer</button>
+                  </form>
+                ) : hasOptions ? (
                   <div className={styles.optionsContainer}>
                     {currentItem.content.options.map((option, index) => (
                       <button
@@ -663,7 +687,7 @@ function Lesson() {
         <QuizModesModal
           source="module"
           lessonId={modulePracticeId}
-          quizzes={quizSlides}
+          quizzes={moduleQuizItems}
           onClose={() => setQuizModesOpen(false)}
         />
       )}

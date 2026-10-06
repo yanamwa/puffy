@@ -211,6 +211,10 @@ function buildModulesFromFlatContent(content) {
         String(content?.learningObjectives || content?.learning_objectives || "").trim(),
       lessonPages: [],
       quizItems: [],
+      mainQuizSettings: item?.mainQuizSettings || item?.main_quiz_settings,
+      mainQuizEnabled: item?.mainQuizEnabled ?? item?.main_quiz_enabled,
+      mainQuizUnlockAt: item?.mainQuizUnlockAt || item?.main_quiz_unlock_at,
+      mainQuizLockAt: item?.mainQuizLockAt || item?.main_quiz_lock_at,
       order,
     };
 
@@ -241,8 +245,8 @@ export function getCourseContentModules(content) {
     content?.learningModules,
     content?.learning_modules,
   ]
-    .flatMap(parseModuleList)
-    .filter(Boolean);
+    .map((value) => parseModuleList(value).filter(Boolean))
+    .find((modules) => modules.length > 0) || [];
 
   if (nestedModules.length) {
     return nestedModules.map((module, index) =>

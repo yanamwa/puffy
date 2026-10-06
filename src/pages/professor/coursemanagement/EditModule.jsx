@@ -1,5 +1,13 @@
+import QuizSourceEvidence from '../../../components/QuizSourceEvidence.jsx';
+import { requestQuizSettings, quizSourceFields, notifyQuizGenerated } from '../../../services/quizGenerationUi.js';
+import { notifyLessonGenerated } from '../../../services/lessonNotifications.js';
 import React, { useEffect, useState } from "react";
 import { NavLink, useNavigate, useParams } from "react-router-dom";
+import { lessonAuthHeaders } from '../../../services/lessonAuth.js';
+import { uploadLessonSource } from '../../../services/lessonRagApi.js';
+import LessonSourceEvidence from '../../../components/LessonSourceEvidence.jsx';
+import LessonSourceManager from '../../../components/LessonSourceManager.jsx';
+import LessonFilePicker from '../../../components/LessonFilePicker.jsx';
 import {
   LayoutDashboard,
   Users,
@@ -28,6 +36,7 @@ function parseDeckCards(raw) {
   if (Array.isArray(raw)) {
     return raw.map((item, index) =>
       normalizeQuizItem({
+        ...item,
         id: item.id || index + 1,
         question: String(item.question || "").trim(),
         options: item.options,
@@ -46,6 +55,7 @@ function parseDeckCards(raw) {
     if (Array.isArray(parsed)) {
       return parsed.map((x, i) =>
         normalizeQuizItem({
+          ...x,
           id: i + 1,
           question: String(x.question || "").trim(),
           options: x.options,
@@ -64,6 +74,7 @@ function parseDeckCards(raw) {
 function serializeQuizItems(items) {
   return JSON.stringify(
     items.map((item) => ({
+      ...item,
       question: String(item.question || "").trim(),
       options: Array.isArray(item.options)
         ? item.options.map((opt) => String(opt || "").trim())
@@ -79,6 +90,7 @@ function parseLessonPages(raw) {
 
   if (Array.isArray(raw)) {
     return raw.map((page, index) => ({
+      ...page,
       id: page.id || index + 1,
       title: String(page.title || `Lesson Page ${index + 1}`).trim(),
       content: String(page.content || page.description || "").trim(),
@@ -90,6 +102,7 @@ function parseLessonPages(raw) {
 
     if (Array.isArray(parsed)) {
       return parsed.map((page, index) => ({
+        ...page,
         id: index + 1,
         title: String(page.title || `Lesson Page ${index + 1}`).trim(),
         content: String(page.content || "").trim(),
@@ -111,6 +124,7 @@ function parseLessonPages(raw) {
 function serializeLessonPages(pages) {
   return JSON.stringify(
     pages.map((page) => ({
+      ...page,
       title: String(page.title || "").trim(),
       content: String(page.content || "").trim(),
     }))
@@ -210,6 +224,8 @@ function counterClass(current, limit) {
 }
 
 function normalizeQuizItem(item) {
+  if (item.type === 'identification') return { ...item, options: [], correct_answer: String(item.correct_answer || item.correctAnswer || '').trim() };
+
   const correctAnswer = limitChars(
     String(item.correct_answer || item.correctAnswer || "").trim(),
     QUIZ_CHAR_LIMIT
@@ -266,6 +282,7 @@ export default function EditModule() {
   ).length;
 
   const [loading, setLoading] = useState(true);
+  const [sourceCourseId, setSourceCourseId] = useState(null);
 
   const [admin, setAdmin] = useState({
     username: "Admin",
@@ -285,7 +302,7 @@ export default function EditModule() {
   const [editQuizItems, setEditQuizItems] = useState([]);
   const [generatingEditQuiz, setGeneratingEditQuiz] = useState(false);
 
-  const [uploadedFile, setUploadedFile] = useState(null);
+  const [uploadedFile, setUploadedFile] = useState([]);
   const [extractingFile, setExtractingFile] = useState(false);
 
   const handleLimitedChange = (setter, limit) => (e) => {
@@ -418,6 +435,7 @@ export default function EditModule() {
           }
 
           setEditTitle(mod.title || "");
+          setSourceCourseId(mod.course_id || mod.courseId || null);
           setEditDesc(mod.description || "");
           setEditSubject(mod.subject || "");
           setEditLearningObjectives(mod.learning_objectives || "");
@@ -471,11 +489,11 @@ export default function EditModule() {
   }, [id, navigate]);
 
   const handleUploadAndExtract = async () => {
-    if (!uploadedFile) {
+    if (!uploadedFile.length) {
       await Swal.fire({
         icon: "warning",
         title: "No File Selected",
-        text: "Please choose a PDF, DOCX, or TXT file first.",
+        text: "Please choose PDF, PPT, PPTX, DOCX, or TXT files first.",
       });
       return;
     }
@@ -500,7 +518,13 @@ export default function EditModule() {
     if (!confirm.isConfirmed) return;
 
     const formData = new FormData();
-    formData.append("file", uploadedFile);
+    uploadedFile.forEach(file => formData.append('files', file));
+    if (!sourceCourseId) {
+      Swal.fire('Course required', 'This module needs a saved course association before indexing a source.', 'info');
+      return;
+    }
+    formData.append('course_id', sourceCourseId);
+    formData.append('lesson_id', id);
 
     setExtractingFile(true);
 
@@ -523,30 +547,20 @@ export default function EditModule() {
     });
 
     try {
-      const res = await fetch(EXTRACT_API_URL, {
-        method: "POST",
-        credentials: "include",
-        body: formData,
+      const data = await uploadLessonSource(formData, job => {
+        if (Swal.isVisible()) Swal.update({ text: `Organizing lesson: ${job.progress}% (${job.phase})` });
       });
-
-      const text = await res.text();
-
-      let data;
-      try {
-        data = JSON.parse(text);
-      } catch {
-        throw new Error("Server did not return valid lesson content.");
-      }
 
       Swal.close();
 
-      if (!res.ok || !data.success) {
+      if (!data.success) {
         throw new Error(data.message || "Could not extract module content.");
       }
 
       const pages =
         Array.isArray(data.lesson_pages) && data.lesson_pages.length > 0
           ? data.lesson_pages.map((page, index) => ({
+              ...page,
               id: index + 1,
               title: String(page.title || `Lesson Page ${index + 1}`).trim(),
               content: String(page.content || "").trim(),
@@ -556,7 +570,7 @@ export default function EditModule() {
       if (pages.length === 0) {
         throw new Error(
           data.message ||
-            "The file uploaded, but no lesson pages were created. Try a searchable PDF, DOCX, or TXT file."
+            "The materials uploaded, but no lesson pages were created. Use files containing selectable text."
         );
       }
 
@@ -565,13 +579,9 @@ export default function EditModule() {
       setEditDesc(data.description || "");
       setEditLearningObjectives(data.learning_objectives || "");
       setEditLessonPages(pages);
-      setUploadedFile(null);
+      setUploadedFile([]);
 
-      await Swal.fire({
-        icon: "success",
-        title: "Lesson Sorted",
-        text: `${pages.length} lesson page(s) were created automatically.`,
-      });
+      notifyLessonGenerated(pages.length);
     } catch (err) {
       console.error("UPLOAD EXTRACT ERROR:", err);
       Swal.close();
@@ -594,7 +604,7 @@ export default function EditModule() {
 
   const generateQuizFromAI = async ({
     questionCount = 5,
-    trueFalseCount = 0,
+    identificationCount = 0,
     difficulty = "medium",
   }) => {
     const res = await fetch(AI_API_URL, {
@@ -602,13 +612,15 @@ export default function EditModule() {
       credentials: "include",
       headers: {
         "Content-Type": "application/json",
+        ...lessonAuthHeaders(),
       },
       body: JSON.stringify({
+        ...quizSourceFields(sourceCourseId, id, editLessonPages),
         lesson_title: editTitle,
         learning_objectives: editLearningObjectives,
         lesson_content: getLessonContentForAI(),
         question_count: questionCount,
-        true_false_count: trueFalseCount,
+        identification_count: identificationCount,
         difficulty,
       }),
     });
@@ -636,8 +648,9 @@ export default function EditModule() {
       questions = data.questions;
     }
 
-    return questions.slice(0, 10).map((item, index) =>
+    return questions.map((item, index) =>
       normalizeQuizItem({
+        ...item,
         id: index + 1,
         question: String(item.question || "").trim(),
         options: item.options,
@@ -674,102 +687,7 @@ export default function EditModule() {
       return;
     }
 
-    const { value: formValues } = await Swal.fire({
-      html: `
-        <div class="${styles.quizGenerateModal}">
-          <div class="${styles.quizGenerateHeader}">
-            <span>Generate Quiz</span>
-          </div>
-
-          <div class="${styles.quizGenerateBody}">
-            <div class="${styles.quizGenerateGroup}">
-              <label>How many questions?</label>
-              <input id="swal-question-count" type="number" min="1" max="100" value="5" />
-              <small id="total-hint">Only 10 generated items will be shown</small>
-            </div>
-
-            <div class="${styles.quizGenerateGroup}">
-              <label>How many True or False questions?</label>
-              <input id="swal-truefalse-count" type="number" min="0" max="100" value="0" />
-              <small id="mc-hint">Multiple Choice Questions: 5</small>
-            </div>
-
-            <div class="${styles.quizGenerateGroup}">
-              <label>Difficulty</label>
-              <select id="swal-difficulty">
-                <option value="easy">Easy</option>
-                <option value="medium" selected>Medium</option>
-                <option value="hard">Hard</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      `,
-      showCancelButton: true,
-      buttonsStyling: false,
-      confirmButtonText: "Generate",
-      cancelButtonText: "Cancel",
-      customClass: {
-        popup: styles.quizGeneratePopup,
-        htmlContainer: styles.quizGenerateHtml,
-        actions: styles.quizGenerateActions,
-        confirmButton: styles.quizGenerateConfirm,
-        cancelButton: styles.quizGenerateCancel,
-      },
-      didOpen: () => {
-        const questionInput = document.getElementById("swal-question-count");
-        const tfInput = document.getElementById("swal-truefalse-count");
-        const mcHint = document.getElementById("mc-hint");
-
-        const updateCounts = () => {
-          let total = Number(questionInput.value) || 1;
-          let trueFalse = Number(tfInput.value) || 0;
-
-          total = Math.min(100, Math.max(1, total));
-          trueFalse = Math.min(total, Math.max(0, trueFalse));
-
-          questionInput.value = total;
-          tfInput.value = trueFalse;
-
-          const multipleChoice = total - trueFalse;
-          mcHint.textContent = `Multiple Choice Questions: ${multipleChoice}`;
-        };
-
-        questionInput.addEventListener("input", updateCounts);
-        tfInput.addEventListener("input", updateCounts);
-
-        updateCounts();
-      },
-      preConfirm: () => {
-        const questionCount = Number(
-          document.getElementById("swal-question-count").value
-        );
-
-        const trueFalseCount = Number(
-          document.getElementById("swal-truefalse-count").value
-        );
-
-        const difficulty = document.getElementById("swal-difficulty").value;
-
-        if (!questionCount || questionCount < 1 || questionCount > 100) {
-          Swal.showValidationMessage("Questions must be between 1 and 100 only.");
-          return false;
-        }
-
-        if (trueFalseCount < 0 || trueFalseCount > questionCount) {
-          Swal.showValidationMessage(
-            "True or False questions cannot be higher than total questions."
-          );
-          return false;
-        }
-
-        return {
-          questionCount,
-          trueFalseCount,
-          difficulty,
-        };
-      },
-    });
+    const { value: formValues } = await requestQuizSettings();
 
     if (!formValues) return;
 
@@ -778,19 +696,14 @@ export default function EditModule() {
     try {
       const quizItems = await generateQuizFromAI({
         questionCount: formValues.questionCount,
-        trueFalseCount: formValues.trueFalseCount,
+        identificationCount: formValues.identificationCount,
         difficulty: formValues.difficulty,
       });
 
       setEditQuizItems(quizItems);
       localStorage.setItem(GENERATE_COOLDOWN_KEY, String(Date.now()));
 
-      await Swal.fire({
-        icon: "success",
-        title: "Quiz Generated",
-        text: `${quizItems.length} quiz item(s) generated successfully.`,
-        buttonsStyling: false,
-      });
+      notifyQuizGenerated(quizItems.length);
     } catch (err) {
       console.error("AI GENERATE EDIT ERROR:", err);
 
@@ -1098,7 +1011,8 @@ export default function EditModule() {
 
   const updateLessonPage = (index, field, value) => {
     setEditLessonPages((prev) =>
-      prev.map((page, i) => (i === index ? { ...page, [field]: value } : page))
+      prev.map((page, i) => (i === index ? { ...page, [field]: value,
+        ...(field === 'content' ? { grounding: { ...page.grounding, model_review_passed: false, human_review_required: true } } : {}) } : page))
     );
   };
 
@@ -1422,29 +1336,22 @@ const updateEditExplanation = (index, value) => {
             <label className={styles.popupLabel}>Generate Module from Material</label>
 
             <div className={styles.uploadRow}>
-              <label className={styles.customFileBtn}>
-                Upload File Here
-                <input
-                  type="file"
-                  accept=".pdf,.docx,.txt"
-                  disabled={extractingFile}
-                  onChange={(e) => setUploadedFile(e.target.files?.[0] || null)}
-                />
-              </label>
-
-              <span className={styles.fileName}>
-                {uploadedFile ? uploadedFile.name : "No file chosen"}
-              </span>
+              <LessonFilePicker files={uploadedFile} disabled={extractingFile} buttonClassName={styles.customFileBtn} onChange={setUploadedFile} />
 
               <button
                 type="button"
                 className={styles.popupAddBtn}
                 onClick={handleUploadAndExtract}
-                disabled={extractingFile || !uploadedFile}
+                disabled={extractingFile || !uploadedFile.length}
               >
                 {extractingFile ? "Generating..." : "Generate Module"}
               </button>
             </div>
+            <LessonSourceManager courseId={sourceCourseId} lessonId={Number(id)} onGenerated={result => {
+              setEditTitle(result.module_title); setEditDesc(result.description); setEditSubject(result.subject);
+              setEditLearningObjectives(result.learning_objectives);
+              setEditLessonPages(result.lesson_pages.map((page, index) => ({ ...page, id: index + 1 })));
+            }} />
           </div>
 
           <div className={styles.popupSection}>
@@ -1516,6 +1423,7 @@ const updateEditExplanation = (index, value) => {
                   <div className={counterClass(getCharCount(page.content), LESSON_CONTENT_CHAR_LIMIT)}>
                     {getCharCount(page.content)}/{LESSON_CONTENT_CHAR_LIMIT} characters
                   </div>
+                  <LessonSourceEvidence page={page} />
                 </div>
               ))
             )}
@@ -1590,6 +1498,9 @@ const updateEditExplanation = (index, value) => {
                     ))}
                   </div>
 
+                  {item.type === 'identification' ? <input className={styles.popupInput} value={item.correct_answer}
+                    aria-label="Correct identification answer" placeholder="Correct identification answer" maxLength={150}
+                    onChange={event => setEditQuizItems(current => current.map((q, i) => i === index ? { ...q, correct_answer: event.target.value } : q))} /> : (
                   <select
                     className={styles.popupInput}
                     value={getCorrectOptionIndex(item)}
@@ -1605,7 +1516,7 @@ const updateEditExplanation = (index, value) => {
                         Option {optionIndex + 1}
                       </option>
                     ))}
-                  </select>
+                  </select>)}
                   <div className={counterClass(getCharCount(item.correct_answer), QUIZ_CHAR_LIMIT)}>
                     {getCharCount(item.correct_answer)}/{QUIZ_CHAR_LIMIT} characters
                   </div>
@@ -1616,6 +1527,7 @@ const updateEditExplanation = (index, value) => {
   onChange={(e) => updateEditExplanation(index, e.target.value)}
   placeholder="Explanation"
 />
+<QuizSourceEvidence question={item} />
 
 <div className={counterClass(getCharCount(item.explanation), EXPLANATION_CHAR_LIMIT)}>
   {getCharCount(item.explanation)}/{EXPLANATION_CHAR_LIMIT} characters

@@ -7,16 +7,7 @@
   font-family: "Jersey 15", sans-serif;
   font-weight: normal;
   font-style: normal;
-  background-image: url('/images/background_notebook.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
 }
-
-/* =========================
-   HEADER
-========================= */
-
 .headerWrapper {
   width: 90%;
   max-width: 1100px;
@@ -24,7 +15,7 @@
 }
 
 .headerTop {
-  background: #07832a;
+  background: #7fa8d6;
   padding: 18px;
   border-radius: 25px 25px 0 0;
   text-align: center;
@@ -55,10 +46,6 @@
   line-height: 1.5;
 }
 
-/* =========================
-   START BUTTON
-========================= */
-
 .startBtn {
   margin-top: 20px;
   width: 60%;
@@ -66,9 +53,9 @@
 }
 
 .startBtn {
-  background: #07832a;
-  border: 1px solid #044a17;
-  box-shadow: 0 4px #044a17;
+  background: #7fa8d6;
+  border: 1px solid #4f6174;
+  box-shadow: 0 4px #4f6174;
   padding: 10px 35px;
   border-radius: 20px;
   cursor: pointer;
@@ -86,13 +73,13 @@
 
 .startBtn:active {
   transform: translateY(3px);
-  box-shadow: 0 1px #044a17;
+  box-shadow: 0 1px #4f6174;
 }
 
 .startBtn {
-  background: #07832a;
-  border: 1px solid #044a17;
-  box-shadow: 0 4px #044a17;
+  background: #7fa8d6;
+  border: 1px solid #4f6174;
+  box-shadow: 0 4px #4f6174;
   padding: 10px 35px;
   border-radius: 20px;
   cursor: pointer;
@@ -110,12 +97,8 @@
 
 .startBtn:active {
   transform: translateY(3px);
-  box-shadow: 0 1px #044a17;
+  box-shadow: 0 1px #4f6174;
 }
-
-/* =========================
-   FLASHCARD WRAPPER
-========================= */
 
 .flashcardWrapper {
   background: #ececec;
@@ -151,7 +134,7 @@
   border-radius: 12px 12px 0 0;
   text-align: center;
   font-size: 16px;
-  border-bottom: 4px solid #07832a;
+  border-bottom: 4px solid #7fa8d6;
   cursor: pointer;
   color: #111;
   box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.06);
@@ -184,7 +167,7 @@
   background-repeat: repeat-y;
   background-position: top left;
 
-  border: 1.8px solid #07832a;
+  border: 1.8px solid #7fa8d6;
   overflow: hidden;
 }
 
@@ -223,7 +206,7 @@
   display: flex;
   justify-content: center;
   gap: 30px;
-  background: #e7f5eb;
+  background: #edf4fc;
   border-radius: 0 0 26px 26px;
   box-sizing: border-box;
   z-index: 4;
@@ -243,9 +226,9 @@
 }
 
 .easy {
-  background: #07832a;
-  border: 1px solid #044a17;
-  box-shadow: 0 4px 0 #044a17;
+  background: #7fa8d6;
+  border: 1px solid #4f6174;
+  box-shadow: 0 4px 0 #4f6174;
 }
 
 .good {
@@ -277,7 +260,7 @@
   inset: 0;
   z-index: 999;
 
-  background: #07832a;
+  background: #7fa8d6;
 
   display: flex;
   align-items: center;
@@ -411,4 +394,85 @@
     min-width: auto;
     font-size: 16px;
   }
+}
+
+.flashcardsApp { 
+  padding: 0 0 32px; 
+  box-sizing: border-box; 
+}
+
+.mainContent { 
+  width: 100%; 
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+}
+
+.headerWrapper {
+  width: min(900px, calc(100% - 32px));
+  margin: 32px auto 24px;
+  border-radius: 32px;
+  overflow: hidden;
+  box-shadow: 0 8px 15px rgba(0,0,0,0.12);
+}
+.headerTop { 
+  min-height: 60px; 
+  padding: 12px 20px; 
+  border-radius: 0; 
+  box-sizing: border-box; 
+}
+
+.headerBody { 
+  padding: 18px 24px 24px; 
+  border-radius: 0; 
+  box-shadow: none; 
+}
+
+.headerBody p { 
+  margin: 8px 0; 
+}
+
+.startBtn { 
+  width: auto;
+  min-width: 120px;
+  padding: 8px 28px; 
+  margin-top: 12px; 
+}
+
+.flashcardWrapper {
+  width: min(880px, calc(100% - 32px));
+  height: auto;
+  margin: 0 auto 32px;
+  padding: 0 24px 24px;
+  border-radius: 40px;
+  background: white;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+.demoHeader {
+  width: calc(100% + 48px);
+  flex: 0 0 auto;
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  min-height: 64px; 
+  margin: 0 -24px 20px; 
+  padding: 12px 24px;
+  background: #7fa8d6; 
+  color: white; 
+  box-sizing: border-box;
+  font-size: 26px;
+}
+
+.flashcard { 
+  width: 100%; 
+  flex: 0 0 auto; 
+  box-sizing: border-box; 
+}
+
+@media (max-width: 600px) {
+  .headerWrapper { margin-top: 20px; }
+  .flashcardWrapper { padding-right: 16px; padding-left: 16px; }
+  .demoHeader { width: calc(100% + 32px); margin-left: -16px; margin-right: -16px; }
 }

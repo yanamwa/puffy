@@ -1,3 +1,4 @@
+import TutorialBackButton from "../TutorialBackButton.jsx";
 import { useState, useEffect } from "react";
 import styles from "./QandA-tutorial.module.css";
 import { useNavigate, useParams } from "react-router-dom";
@@ -84,6 +85,8 @@ export default function QandATutorial() {
 
   return (
     <div className={styles.container}>
+      <TutorialBackButton />
+
       {(showIntro || startLoading) && (
         <div className={styles.introScreen}>
           {!showCircle && !startLoading && (
@@ -122,6 +125,7 @@ export default function QandATutorial() {
           </div>
 
           <div className={styles.slideshowBox}>
+            <div className={styles.demoHeader}>Quiz Tutorial</div>
             {slidesData.map((slide, i) => (
               <div
                 key={i}

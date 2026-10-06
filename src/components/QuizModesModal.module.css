@@ -14,7 +14,7 @@
   background: white;
   width: min(1120px, 94vw);
   height: min(670px, 88vh);
-  border: 2px solid #c4c8cf;
+  border: 2px solid #a8c6e7;
   border-radius: 22px;
   text-align: center;
   position: relative;
@@ -24,8 +24,8 @@
 }
 
 .modalHeader {
-  background: #eef8f2;
-  border-bottom: 1px solid #d6dce4;
+  background: #7fa8d6;
+  border-bottom: 1px solid #a8c6e7;
   height: 78px;
   display: flex;
   align-items: center;
@@ -36,7 +36,7 @@
 .modalTitle {
   margin: 0;
   font-size: clamp(26px, 4vw, 34px);
-  color: #171927;
+  color: #172c43;
   font-weight: normal;
   font-family: "Jersey 15", sans-serif;
 }
@@ -49,13 +49,13 @@
   border: none;
   font-size: 34px;
   cursor: pointer;
-  color: #198754;
+  color: #172c43;
   z-index: 10000;
   transition: color 0.16s ease, transform 0.16s ease;
 }
 
 .closeModal:hover {
-  color: #12673f;
+  color: #ffffff;
   transform: translateY(-1px);
 }
 
@@ -65,6 +65,7 @@
   overflow-x: hidden;
   padding: 20px;
   box-sizing: border-box;
+  scrollbar-color: #7fa8d6 #edf4fc;
 }
 
 .cardsScroll::-webkit-scrollbar {
@@ -72,16 +73,20 @@
 }
 
 .cardsScroll::-webkit-scrollbar-thumb {
-  background: #198754;
+  background: #7fa8d6;
   border-radius: 4px;
 }
 
 .cardsScroll::-webkit-scrollbar-track {
-  background: #eef8f2;
+  background: #edf4fc;
 }
 
 /* DESKTOP */
 .modeOptions {
+  --quiz-card-hover-border: #7fa8d6;
+  --quiz-card-hover-background: #edf4fc;
+  --quiz-card-hover-shadow: rgba(95, 134, 177, 0.28);
+  --quiz-card-hover-title: #4f6174;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   justify-content: center;
@@ -183,3 +188,16 @@
   font-family: "Jersey 15", sans-serif;
   font-size: 22px;
 }
+
+/* Keep the popup cards aligned with the student blue palette. */
+.modeOptions > div {
+  border-color: #a8c6e7;
+  box-shadow: 5px 5px 0 rgba(95, 134, 177, 0.2);
+}
+
+.modeOptions > div:hover {
+  border-color: #7fa8d6;
+  background: #edf4fc;
+  box-shadow: 5px 5px 0 rgba(95, 134, 177, 0.28);
+}
+

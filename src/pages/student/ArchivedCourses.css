@@ -1,11 +1,4 @@
 @import url("https://fonts.googleapis.com/css2?family=Jersey+15&display=swap");
-
-/*
-  ARCHIVED COURSES
-  Styles extracted from the structure/design of the original Archived Courses
-  page. Shared card styles continue to come from EnrolledCourses.css.
-*/
-
 .archived-courses-page {
   width: 100%;
   min-height: 100vh;
@@ -38,7 +31,6 @@
   padding: 10px 0px 64px;
 }
 
-/* Same heading treatment as Enrolled Courses and Public Courses */
 .archived-heading {
   display: flex;
   align-items: center;
@@ -59,7 +51,6 @@
   font-weight: 400;
 }
 
-/* Notice shown directly under the Archived Classes heading */
 .archive-notice {
   width: 100%;
   box-sizing: border-box;
@@ -76,7 +67,6 @@
   font-weight: 600;
 }
 
-/* The original page uses public-courses-grid for archived cards too */
 .archived-courses-grid {
   align-items: stretch;
 }
@@ -87,7 +77,6 @@
   padding-top: 69px;
 }
 
-/* Archived label in the upper-right corner */
 .archived-course-badge {
   position: absolute;
   top: 63px;

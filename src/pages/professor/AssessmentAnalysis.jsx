@@ -143,8 +143,6 @@ export default function AssessmentAnalysis() {
                 className={styles.courseCard}
                 onClick={() => openAssessment(course)}
               >
-                <span className={styles.folderTab} aria-hidden="true" />
-
                 <span className={styles.dateText}>Date created: {course.date}</span>
 
                 <span className={styles.codeText}>

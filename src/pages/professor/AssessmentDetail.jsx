@@ -60,6 +60,72 @@ const BLOOM_DISPLAY_ORDER = [
   'Creating',
 ];
 const THINKING_SKILL_ORDER = ['LOTS', 'HOTS'];
+const CHART_COLORS = {
+  Male: '#7fa8d6', Female: '#a8c0dc',
+  Passed: '#7fa8d6', Failed: '#c9ced6', LOTS: '#24476b', HOTS: '#7fa8d6',
+};
+
+function ChartLabel({ label }) {
+  return (
+    <span className={styles.pieLegendLabel}>
+      <i className={styles.pieLegendSwatch} style={{ backgroundColor: CHART_COLORS[label] }} aria-hidden="true" />
+      {label}
+    </span>
+  );
+}
+
+function ScoreDistributionChart({ distribution, totalItems }) {
+  const maximumScore = Math.max(1, totalItems || 0, ...distribution.map((bucket) => bucket.score));
+  const largestCount = Math.max(1, ...distribution.map((bucket) => bucket.count));
+  const countStep = Math.max(1, Math.ceil(largestCount / 4));
+  const countMaximum = Math.ceil(largestCount / countStep) * countStep;
+  const left = 65;
+  const top = 30;
+  const plotWidth = 680;
+  const plotHeight = 210;
+  const x = (score) => left + ((score + 0.5) / (maximumScore + 1)) * plotWidth;
+  const y = (count) => top + plotHeight - (count / countMaximum) * plotHeight;
+  const scoreStep = Math.max(1, Math.ceil(maximumScore / 20));
+  const scoreTicks = Array.from({ length: Math.floor(maximumScore / scoreStep) + 1 }, (_, index) => index * scoreStep);
+  if (scoreTicks.at(-1) !== maximumScore) scoreTicks.push(maximumScore);
+  const barWidth = Math.min(32, plotWidth / (maximumScore + 1) * 0.7);
+  const summary = distribution.map((bucket) => `${bucket.count} ${bucket.count === 1 ? 'student' : 'students'} scored ${bucket.score}`).join('; ');
+
+  return (
+    <div className={styles.scoreDistributionChart}>
+      <svg viewBox="0 0 780 305" role="img" aria-label={`Score distribution: ${summary}.`}>
+        <title>Overall score distribution</title>
+        <text x="16" y="135" transform="rotate(-90 16 135)" textAnchor="middle">Students</text>
+        {Array.from({ length: countMaximum / countStep + 1 }, (_, index) => index * countStep).map((count) => (
+          <g key={count}>
+            <line x1={left} x2={left + plotWidth} y1={y(count)} y2={y(count)} stroke="#e2e8f0" />
+            <text x={left - 12} y={y(count) + 4} textAnchor="end">{count}</text>
+          </g>
+        ))}
+        <line x1={left} x2={left} y1={top} y2={top + plotHeight} stroke="#b9c3ce" />
+        <line x1={left} x2={left + plotWidth} y1={top + plotHeight} y2={top + plotHeight} stroke="#b9c3ce" />
+        {distribution.map((bucket) => (
+          <g key={bucket.score}>
+            <title>{bucket.count} {bucket.count === 1 ? 'student' : 'students'} scored {bucket.score}</title>
+            <rect x={x(bucket.score) - barWidth / 2} y={y(bucket.count)} width={barWidth} height={top + plotHeight - y(bucket.count)} fill="#7fa8d6" rx="3" />
+            <text x={x(bucket.score)} y={y(bucket.count) - 8} textAnchor="middle">{bucket.count} {bucket.count === 1 ? 'student' : 'students'}</text>
+          </g>
+        ))}
+
+        {scoreTicks.map((score) => <text key={score} x={x(score)} y="260" textAnchor="middle">{score}</text>)}
+        <text x={left + plotWidth / 2} y="290" textAnchor="middle">Quiz score (out of {maximumScore})</text>
+      </svg>
+      <ul className={styles.scoreDistributionLabels} aria-label="Score labels">
+        {distribution.map((bucket) => (
+          <li key={bucket.score}>
+            <i className={styles.pieLegendSwatch} style={{ backgroundColor: '#7fa8d6' }} aria-hidden="true" />
+            <span>{bucket.count} {bucket.count === 1 ? 'student' : 'students'} — score {bucket.score} out of {maximumScore}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 const BLOOM_RULES = [
   {
@@ -1415,14 +1481,7 @@ export default function AssessmentDetail() {
             ? '1 examinee only'
             : '',
       },
-      {
-        label: 'Pass Score',
-        primary: formatScore(quizAnalytics.passScore, totals.quizItems),
-        secondary:
-          Number.isFinite(getScorePercent(quizAnalytics.passScore, totals.quizItems))
-            ? formatPercent(getScorePercent(quizAnalytics.passScore, totals.quizItems))
-            : '',
-      },
+
       {
         label: 'Pass Rate',
         primary: Number.isFinite(quizAnalytics.passRate)
@@ -1436,24 +1495,10 @@ export default function AssessmentDetail() {
     ],
     [quizAnalytics, totals.quizItems]
   );
-  const maxScoreBucket = Math.max(
-    ...quizAnalytics.scoreDistribution.map((bucket) => bucket.count),
-    1
-  );
-  const unspecifiedStudents = Math.max(
-    totals.totalStudents - totals.maleStudents - totals.femaleStudents,
-    0
-  );
-  const genderTotal = Math.max(
-    totals.maleStudents + totals.femaleStudents + unspecifiedStudents,
-    totals.totalStudents,
-    0
-  );
+  const genderTotal = totals.maleStudents + totals.femaleStudents;
   const malePercent = genderTotal ? (totals.maleStudents / genderTotal) * 100 : 0;
-  const femalePercent = genderTotal ? (totals.femaleStudents / genderTotal) * 100 : 0;
-  const knownGenderPercent = malePercent + femalePercent;
   const genderGradient = genderTotal
-    ? `conic-gradient(#7fa8d6 0 ${malePercent}%, #a8c0dc ${malePercent}% ${knownGenderPercent}%, #d6dce4 ${knownGenderPercent}% 100%)`
+    ? `conic-gradient(#7fa8d6 0 ${malePercent}%, #a8c0dc ${malePercent}% 100%)`
     : '#edf1f5';
   const passedCount = Number.isFinite(quizAnalytics.studentsPassed)
     ? quizAnalytics.studentsPassed
@@ -1461,18 +1506,13 @@ export default function AssessmentDetail() {
   const failedCount = Number.isFinite(quizAnalytics.studentsFailed)
     ? quizAnalytics.studentsFailed
     : 0;
-  const resultTotal = Math.max(quizAnalytics.responseTotal || 0, passedCount + failedCount, totals.totalStudents);
+  const resultTotal = passedCount + failedCount;
   const passedPercent = resultTotal ? (passedCount / resultTotal) * 100 : 0;
-  const skillPercentStops = cognitiveAnalytics.skills.reduce((stops, skill, index) => {
-    const start = index === 0 ? 0 : stops[index - 1].end;
-    const end = start + skill.percent;
-
-    return [...stops, { ...skill, end, start }];
-  }, []);
-  const lotsStop = skillPercentStops.find((skill) => skill.label === 'LOTS');
-  const hotsStop = skillPercentStops.find((skill) => skill.label === 'HOTS');
-  const cognitiveGradient = rows.length
-    ? `conic-gradient(#7fa8d6 ${lotsStop?.start || 0}% ${lotsStop?.end || 0}%, #596879 ${hotsStop?.start || 0}% ${hotsStop?.end || 100}%)`
+  const skillTotal = cognitiveAnalytics.skills.reduce((total, skill) => total + skill.count, 0);
+  const lotsCount = cognitiveAnalytics.skills.find((skill) => skill.label === 'LOTS')?.count || 0;
+  const lotsPercent = skillTotal ? (lotsCount / skillTotal) * 100 : 0;
+  const cognitiveGradient = skillTotal
+    ? `conic-gradient(${CHART_COLORS.LOTS} 0 ${lotsPercent}%, ${CHART_COLORS.HOTS} ${lotsPercent}% 100%)`
     : '#edf1f5';
 
   return (
@@ -1548,26 +1588,10 @@ export default function AssessmentDetail() {
                 </div>
                 <h3 className={styles.chartTitle}>Overall Score Distribution</h3>
                 {quizAnalytics.scoreDistribution.length > 0 ? (
-                  <div className={styles.scoreChart} aria-label="Score distribution">
-                    <div className={styles.chartYAxis}>Students</div>
-                    <div className={styles.chartBars}>
-                      {quizAnalytics.scoreDistribution.map((bucket) => (
-                        <div className={styles.scoreBucket} key={bucket.score}>
-                          <span>{bucket.count}</span>
-                          <div
-                            style={{
-                              height: `${Math.max((bucket.count / maxScoreBucket) * 100, 8)}%`,
-                            }}
-                          />
-                          <strong>{bucket.score}</strong>
-                        </div>
-                      ))}
-                    </div>
-                    <div className={styles.chartXAxis}>Quiz Score</div>
-                    <div className={styles.passScoreNote}>
-                      <span>Pass Score: {formatNumber(quizAnalytics.passScore)}</span>
-                    </div>
-                  </div>
+                  <ScoreDistributionChart
+                    distribution={quizAnalytics.scoreDistribution}
+                    totalItems={totals.quizItems || rows.length}
+                  />
                 ) : (
                   <div className={styles.emptyChart}>
                     Score distribution appears after recorded attempts include student scores.
@@ -1585,14 +1609,14 @@ export default function AssessmentDetail() {
                       style={{
                         background: genderGradient,
                       }}
-                      aria-label={`Male ${totals.maleStudents}, Female ${totals.femaleStudents}, Unspecified ${unspecifiedStudents}`}
+                      role="img"
+                      aria-label={`Male ${totals.maleStudents}, Female ${totals.femaleStudents}`}
                     >
                       <span>Male / Female</span>
                     </div>
                     <div className={styles.pieLegend}>
-                      <div><span>Male</span><strong>{totals.maleStudents}</strong></div>
-                      <div><span>Female</span><strong>{totals.femaleStudents}</strong></div>
-                      <div><span>Unspecified</span><strong>{unspecifiedStudents}</strong></div>
+                      <div><ChartLabel label="Male" /><strong>{totals.maleStudents}</strong></div>
+                      <div><ChartLabel label="Female" /><strong>{totals.femaleStudents}</strong></div>
                     </div>
                   </article>
 
@@ -1601,15 +1625,16 @@ export default function AssessmentDetail() {
                     <div
                       className={styles.pieGraphic}
                       style={{
-                        background: `conic-gradient(#7fa8d6 0 ${passedPercent}%, #c9ced6 ${passedPercent}% 100%)`,
+                        background: resultTotal ? `conic-gradient(${CHART_COLORS.Passed} 0 ${passedPercent}%, ${CHART_COLORS.Failed} ${passedPercent}% 100%)` : '#edf1f5',
                       }}
+                      role="img"
                       aria-label={`Passed ${passedCount}, Failed ${failedCount}`}
                     >
                       <span>Pass / Fail</span>
                     </div>
                     <div className={styles.pieLegend}>
-                      <div><span>Passed</span><strong>{passedCount}</strong></div>
-                      <div><span>Failed</span><strong>{failedCount}</strong></div>
+                      <div><ChartLabel label="Passed" /><strong>{passedCount}</strong></div>
+                      <div><ChartLabel label="Failed" /><strong>{failedCount}</strong></div>
                     </div>
                   </article>
                 </div>
@@ -1623,14 +1648,16 @@ export default function AssessmentDetail() {
                     <div
                       className={styles.pieGraphic}
                       style={{ background: cognitiveGradient }}
-                      aria-label="HOTS and LOTS question distribution"
+                      role="img"
+                      title={cognitiveAnalytics.skills.map((skill) => `${skill.label}: ${skill.count} (${formatPercent(skill.percent)})`).join(", ")}
+                      aria-label={cognitiveAnalytics.skills.map((skill) => `${skill.label}: ${skill.count} (${formatPercent(skill.percent)})`).join(", ")}
                     >
                       <span>HOTS / LOTS</span>
                     </div>
                     <div className={styles.pieLegend}>
                       {cognitiveAnalytics.skills.map((skill) => (
                         <div key={skill.label}>
-                          <span>{skill.label}</span>
+                          <ChartLabel label={skill.label} />
                           <strong>
                             {skill.count} / {rows.length || 0} {formatPercent(skill.percent)}
                           </strong>
@@ -1666,6 +1693,15 @@ export default function AssessmentDetail() {
                       <strong>{formatPercent(skill.percent)}</strong>
                     </div>
                   ))}
+                </div>
+
+                <div className={styles.thinkingSkillMeaning}>
+                  <span>
+                    <strong>LOTS</strong> means Lower-Order Thinking Skills.
+                  </span>
+                  <span>
+                    <strong>HOTS</strong> means Higher-Order Thinking Skills.
+                  </span>
                 </div>
               </section>
 
@@ -1748,7 +1784,6 @@ export default function AssessmentDetail() {
                             : 'N/A'}
                         </td>
                       </tr>
-                      <tr><td>Pass Score</td><td>{formatScoreWithPercent(quizAnalytics.passScore, totals.quizItems)}</td></tr>
                       <tr><td>Students Passed</td><td>{Number.isFinite(quizAnalytics.studentsPassed) ? `${quizAnalytics.studentsPassed} / ${quizAnalytics.responseTotal}` : 'N/A'}</td></tr>
                       <tr><td>Students Failed</td><td>{Number.isFinite(quizAnalytics.studentsFailed) ? `${quizAnalytics.studentsFailed} / ${quizAnalytics.responseTotal}` : 'N/A'}</td></tr>
                       <tr><td>Pass Rate</td><td>{Number.isFinite(quizAnalytics.passRate) ? formatPercent(quizAnalytics.passRate) : 'N/A'}</td></tr>

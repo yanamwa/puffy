@@ -1,4 +1,4 @@
-﻿.addModulePage {
+.addModulePage {
   width: 100%;
 }
 
@@ -2946,18 +2946,18 @@
    COMPACT EDIT COURSE REFERENCE
 ========================================= */
 
-:global(.professor-content:has(.edit-course-page)),
+:global(.professor-content:has(.course-builder-page)),
 :global(.professor-content:has(.course-module-editor-page)) {
   padding: 0;
 }
 
-.editCoursePage {
+.courseBuilderPage {
   min-height: 100%;
   padding-bottom: 58px;
   background: #f4f4f4;
 }
 
-.editCoursePage .pageHeader {
+.courseBuilderPage .pageHeader {
   min-height: 51px;
   display: flex;
   align-items: flex-start;
@@ -2967,21 +2967,21 @@
   background: #f3f3f3;
 }
 
-.editCoursePage .pageHeader h1 {
+.courseBuilderPage .pageHeader h1 {
   color: #666;
   font-size: 20px;
   font-weight: 500 !important;
   line-height: 1.1;
 }
 
-.editCoursePage .pageHeaderText {
+.courseBuilderPage .pageHeaderText {
   margin: 2px 0 0;
   color: #666;
   font-size: 8px;
   line-height: 1.25;
 }
 
-.editCoursePage .formCard {
+.courseBuilderPage .formCard {
   margin: 0;
   padding: 21px 28px 0;
   border: 0;
@@ -2990,26 +2990,26 @@
   box-shadow: none;
 }
 
-.editCoursePage .popupInfoGrid {
+.courseBuilderPage .popupInfoGrid {
   width: min(100%, 509px);
   max-width: 509px;
   grid-template-columns: minmax(0, 309px) minmax(0, 156px);
   gap: 44px;
 }
 
-.editCoursePage .formCard > .popupSection {
+.courseBuilderPage .formCard > .popupSection {
   width: min(100%, 510px);
   max-width: 510px;
   margin-top: 17px;
 }
 
-.editCoursePage .popupField,
-.editCoursePage .popupSection {
+.courseBuilderPage .popupField,
+.courseBuilderPage .popupSection {
   gap: 0;
   margin-bottom: 0;
 }
 
-.editCoursePage .popupLabel {
+.courseBuilderPage .popupLabel {
   margin: 0 0 8px;
   color: #202020;
   font-size: 8px;
@@ -3017,14 +3017,14 @@
   line-height: 1;
 }
 
-.editCoursePage .required {
+.courseBuilderPage .required {
   margin-left: 4px;
   color: #a3a3a3;
   font-size: 7px;
 }
 
-.editCoursePage .popupInput,
-.editCoursePage .popupSelect {
+.courseBuilderPage .popupInput,
+.courseBuilderPage .popupSelect {
   height: 20px;
   min-height: 20px;
   padding: 2px 8px;
@@ -3036,7 +3036,7 @@
   box-shadow: none;
 }
 
-.editCoursePage .popupTextarea {
+.courseBuilderPage .popupTextarea {
   padding: 8px 10px;
   border: 1px solid #c9c9c9;
   border-radius: 8px;
@@ -3047,18 +3047,18 @@
   box-shadow: none;
 }
 
-.editCoursePage .popupSmallBox {
+.courseBuilderPage .popupSmallBox {
   min-height: 64px;
   height: 64px;
 }
 
-.editCoursePage .moduleBuilderSection {
+.courseBuilderPage .moduleBuilderSection {
   margin: 12px -28px 0;
   padding: 0 28px 34px;
   border-top: 1px solid #d0d0d0;
 }
 
-.editCoursePage .moduleBuilderHeader {
+.courseBuilderPage .moduleBuilderHeader {
   min-height: 52px;
   display: grid;
   grid-template-columns: minmax(0, 360px) auto;
@@ -3071,7 +3071,7 @@
   background: #eeeeee;
 }
 
-.editCoursePage .moduleBuilderHeader h2 {
+.courseBuilderPage .moduleBuilderHeader h2 {
   margin: 0;
   color: #666;
   font-size: 22px;
@@ -3079,14 +3079,14 @@
   line-height: 1.08;
 }
 
-.editCoursePage .moduleBuilderHeader p {
+.courseBuilderPage .moduleBuilderHeader p {
   margin: 4px 0 0;
   color: #666;
   font-size: 8px;
   line-height: 1.2;
 }
 
-.editCoursePage .popupAddBtn {
+.courseBuilderPage .popupAddBtn {
   min-width: 80px;
   height: 22px;
   min-height: 22px;
@@ -3100,14 +3100,14 @@
   font-weight: 400 !important;
 }
 
-.editCoursePage .moduleCardGrid {
+.courseBuilderPage .moduleCardGrid {
   width: min(100%, 511px);
   max-width: 511px;
   display: grid;
   gap: 18px;
 }
 
-.editCoursePage .moduleCard {
+.courseBuilderPage .moduleCard {
   overflow: visible;
   border: 1px solid #c8c8c8;
   border-radius: 8px;
@@ -3115,7 +3115,7 @@
   box-shadow: none;
 }
 
-.editCoursePage .moduleCardExpanded {
+.courseBuilderPage .moduleCardExpanded {
   max-width: none;
   border: 0;
   border-radius: 0;
@@ -3123,7 +3123,7 @@
   box-shadow: none;
 }
 
-.editCoursePage .moduleCardHeader {
+.courseBuilderPage .moduleCardHeader {
   min-height: 63px;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -3134,7 +3134,7 @@
   background: #f7f7f7;
 }
 
-.editCoursePage .moduleCardExpanded .moduleCardHeader {
+.courseBuilderPage .moduleCardExpanded .moduleCardHeader {
   width: min(100%, 511px);
   max-width: 511px;
   margin-bottom: 18px;
@@ -3142,11 +3142,11 @@
   border-radius: 8px;
 }
 
-.editCoursePage .moduleNumber {
+.courseBuilderPage .moduleNumber {
   display: none;
 }
 
-.editCoursePage .moduleCardHeading > span {
+.courseBuilderPage .moduleCardHeading > span {
   margin: 0 0 5px;
   color: #333;
   font-size: 9px;
@@ -3155,28 +3155,28 @@
   text-transform: none;
 }
 
-.editCoursePage .moduleCardHeading h3 {
+.courseBuilderPage .moduleCardHeading h3 {
   color: #333;
   font-size: 14px;
   font-weight: 400 !important;
   line-height: 1.18;
 }
 
-.editCoursePage .moduleCardHeading p {
+.courseBuilderPage .moduleCardHeading p {
   margin: 5px 0 0;
   color: #858585;
   font-size: 10px;
   line-height: 1.2;
 }
 
-.editCoursePage .moduleCardHeaderActions {
+.courseBuilderPage .moduleCardHeaderActions {
   display: flex;
   align-items: center;
   gap: 13px;
 }
 
-.editCoursePage .moduleExpandBtn,
-.editCoursePage .moduleDeleteBtn {
+.courseBuilderPage .moduleExpandBtn,
+.courseBuilderPage .moduleDeleteBtn {
   min-width: 65px;
   height: 20px;
   border-radius: 7px;
@@ -3185,27 +3185,27 @@
   font-weight: 400 !important;
 }
 
-.editCoursePage .moduleExpandBtn {
+.courseBuilderPage .moduleExpandBtn {
   border: 0;
   background: #8d8d8d;
   color: #fff;
 }
 
-.editCoursePage .moduleDeleteBtn {
+.courseBuilderPage .moduleDeleteBtn {
   border: 1px solid #ff4f5e;
   background: transparent;
   color: #ff1f2f;
 }
 
-.editCoursePage .popupActions {
+.courseBuilderPage .popupActions {
   width: min(100%, 511px);
   max-width: 511px;
   justify-content: flex-end;
   margin-top: 24px;
 }
 
-.editCoursePage .popupCancelBtn,
-.editCoursePage .popupSaveBtn {
+.courseBuilderPage .popupCancelBtn,
+.courseBuilderPage .popupSaveBtn {
   min-width: 84px;
   height: 28px;
   border-radius: 8px;
@@ -3218,46 +3218,46 @@
     padding: 0;
   }
 
-  .editCoursePage .pageHeader,
-  .editCoursePage .formCard {
+  .courseBuilderPage .pageHeader,
+  .courseBuilderPage .formCard {
     padding-inline: 20px;
   }
 
-  .editCoursePage .popupInfoGrid {
+  .courseBuilderPage .popupInfoGrid {
     grid-template-columns: 1fr;
     gap: 13px;
     width: 100%;
     max-width: none;
   }
 
-  .editCoursePage .formCard > .popupSection {
+  .courseBuilderPage .formCard > .popupSection {
     width: 100%;
     max-width: none;
   }
 
-  .editCoursePage .moduleBuilderSection,
-  .editCoursePage .moduleBuilderHeader {
+  .courseBuilderPage .moduleBuilderSection,
+  .courseBuilderPage .moduleBuilderHeader {
     margin-left: -20px;
     margin-right: -20px;
   }
 
-  .editCoursePage .moduleBuilderSection {
+  .courseBuilderPage .moduleBuilderSection {
     padding-right: 20px;
     padding-left: 20px;
   }
 
-  .editCoursePage .moduleBuilderHeader {
+  .courseBuilderPage .moduleBuilderHeader {
     grid-template-columns: 1fr;
     row-gap: 10px;
     padding-right: 20px;
     padding-left: 20px;
   }
 
-  .editCoursePage .moduleCardHeader {
+  .courseBuilderPage .moduleCardHeader {
     grid-template-columns: 1fr;
   }
 
-  .editCoursePage .moduleCardHeaderActions {
+  .courseBuilderPage .moduleCardHeaderActions {
     justify-content: flex-start;
   }
 }
@@ -3412,22 +3412,69 @@
 }
 
 .courseModuleEditorPage .moduleAssessmentCard {
-  min-height: 190px;
+  position: relative;
+  isolation: isolate;
+  min-height: 260px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 22px;
-  padding: 22px 24px;
-  border: 1px solid #c7c7c7;
-  border-radius: 6px;
-  background: #ffffff;
+  gap: 20px;
+  padding: 76px 24px 18px 18px;
+  border: 0;
+  background: transparent;
   box-sizing: border-box;
+}
+
+.courseModuleEditorPage .moduleAssessmentCard::before,
+.courseModuleEditorPage .moduleAssessmentCard::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+
+.courseModuleEditorPage .moduleAssessmentCard::before {
+  inset: 5px 0 0 8px;
+  z-index: -2;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 377 250' preserveAspectRatio='none'%3E%3Cpath d='M12 1H122Q132 1 140 9L174 38Q182 45 192 45H364Q376 45 376 58V237Q376 249 364 249H12Q1 249 1 237V13Q1 1 12 1Z' fill='%23c4c9d1' stroke='%23aeb5bf' stroke-width='1.5'/%3E%3C/svg%3E");
+}
+
+.courseModuleEditorPage .moduleAssessmentCard::after {
+  inset: 0 10px 3px 0;
+  z-index: -1;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 377 250' preserveAspectRatio='none'%3E%3Cpath d='M12 1H122Q132 1 140 9L174 38Q182 45 192 45H364Q376 45 376 58V237Q376 249 364 249H12Q1 249 1 237V13Q1 1 12 1Z' fill='white' stroke='%23b6bec9' stroke-width='2'/%3E%3C/svg%3E");
+}
+
+.assessmentFolderAccent {
+  position: absolute;
+  top: 57px;
+  right: 22px;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #7fa8d6;
+  box-shadow: 1px 3px 0 #225b38;
+  color: white;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.assessmentCardFooter {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 14px;
+  border-top: 1px solid #d8d8d8;
 }
 
 .courseModuleEditorPage .moduleAssessmentCard h3 {
   margin: 0 0 14px;
-  color: #333333;
-  font-size: 24px;
+  padding-right: 32px;
+  color: #595959;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 28px;
   font-weight: 500;
   line-height: 1.15;
 }
@@ -3441,24 +3488,30 @@
 
 .courseModuleEditorPage .assessmentEditButton {
   width: fit-content;
-  min-height: 42px;
+  min-height: 32px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 0 18px;
   border: 1px solid #7fa8d6;
-  border-radius: 6px;
+  border-radius: 999px;
   background: #7fa8d6;
   color: #ffffff;
   cursor: pointer;
   font-family: inherit;
-  font-size: 18px;
+  box-shadow: 0 3px 0 #c8dfd0;
+  font-size: 15px;
   line-height: 1;
 }
 
 .courseModuleEditorPage .assessmentEditButton:hover {
   background: #a8c6e7;
   color: #263c52;
+}
+
+.courseModuleEditorPage .assessmentEditButton:focus-visible {
+  outline: 3px solid #4f6174;
+  outline-offset: 4px;
 }
 
 .courseModuleEditorPage .moduleAssessmentEditor {
@@ -3485,6 +3538,88 @@
   margin: 4px 0 0;
   color: #666666;
   font-size: 13px;
+}
+
+.courseModuleEditorPage .assessmentBackButton {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 18px;
+  border: 1px solid #c7c7c7;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #333333;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.courseModuleEditorPage .assessmentBackButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.courseModuleEditorPage .mainQuizSettingsPanel {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid #c7c7c7;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.courseModuleEditorPage .mainQuizSettingsPanel h4 {
+  margin: 0;
+  color: #333333;
+  font-size: 22px;
+  font-weight: 500;
+}
+
+.courseModuleEditorPage .mainQuizSettingsPanel p {
+  margin: 5px 0 0;
+  color: #555f6c;
+  font-size: 15px;
+}
+
+.courseModuleEditorPage .mainQuizSettingsControls {
+  display: grid;
+  grid-template-columns: auto minmax(240px, 360px) auto;
+  align-items: end;
+  gap: 14px;
+}
+
+.courseModuleEditorPage .mainQuizToggle {
+  min-height: 52px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: 999px;
+  color: #ffffff;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 20px;
+  box-shadow: 4px 4px 0 rgba(95, 97, 106, 0.2);
+}
+
+.courseModuleEditorPage .mainQuizToggleOn {
+  background: #7fa8d6;
+}
+
+.courseModuleEditorPage .mainQuizToggleOff {
+  background: #4f6174;
+}
+
+.courseModuleEditorPage .mainQuizTimerField {
+  display: grid;
+  gap: 8px;
+  color: #333333;
+  font-family: inherit;
+  font-size: 16px;
+}
+
+.courseModuleEditorPage .mainQuizAccessHint {
+  padding-top: 4px;
 }
 
 .courseModuleEditorPage .moduleEditorBandActions .popupAddBtn,
@@ -3726,28 +3861,130 @@
 }
 
 .courseModuleEditorPage .moduleEditorWorkspace .popupAnswerBox {
-  min-height: 180px;
-  padding: 18px 20px;
+  min-height: 112px;
+  padding: 12px 16px;
   line-height: 1.45;
 }
 
 .courseModuleEditorPage .moduleQuizEditorCard {
-  gap: 18px;
-  padding: 24px;
+  gap: 10px;
+  padding: 16px;
+  align-content: start;
   overflow: visible;
 }
 
 .courseModuleEditorPage .moduleQuizEditorCard .popupInput,
 .courseModuleEditorPage .moduleQuizEditorCard .popupSelect {
-  height: 60px;
-  min-height: 60px;
-  padding: 13px 18px;
+  height: 46px;
+  min-height: 46px;
+  padding: 10px 16px;
   line-height: 1.35;
 }
 
 .courseModuleEditorPage .moduleQuizEditorCard .optionsGrid {
-  gap: 16px;
+  gap: 10px 14px;
   margin: 0;
+}
+
+.courseModuleEditorPage .moduleAssessmentEditor .lessonPageTabs {
+  border-color: #b7d0ef;
+  background: #eef6ff;
+}
+
+.courseModuleEditorPage .moduleAssessmentEditor .lessonPageTab {
+  border-bottom-color: #c9ddf3;
+  background: #f8fbff;
+  color: #375a7f;
+}
+
+.courseModuleEditorPage .moduleAssessmentEditor .lessonPageTabActive {
+  background: #5f86b1;
+  color: #ffffff;
+}
+
+.courseModuleEditorPage .questionTabPager {
+  display: grid;
+  gap: 7px;
+  padding: 8px;
+  background: #e4f0fb;
+  border-top: 1px solid #c9ddf3;
+}
+
+.courseModuleEditorPage .questionTabPagerControls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.courseModuleEditorPage .questionTabPager button {
+  min-width: 0;
+  min-height: 28px;
+  padding: 0 6px;
+  border: 1px solid #7fa8d6;
+  border-radius: 7px;
+  background: #7fa8d6;
+  color: #ffffff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+}
+
+.courseModuleEditorPage .questionTabPager button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.courseModuleEditorPage .questionTabPages {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.courseModuleEditorPage .questionTabPages button {
+  min-height: 25px;
+  padding: 0;
+  border-color: #b7d0ef;
+  background: #ffffff;
+  color: #375a7f;
+  box-shadow: none;
+}
+
+.courseModuleEditorPage .questionTabPages .questionTabPageActive {
+  border-color: #5f86b1;
+  background: #5f86b1;
+  color: #ffffff;
+}
+
+.courseModuleEditorPage .lessonPageCenterNavigation {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+}
+
+.courseModuleEditorPage .lessonBottomPageGroups {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  max-width: 320px;
+}
+
+.courseModuleEditorPage .lessonBottomPageGroups button {
+  min-width: 34px;
+  height: 30px;
+  border: 1px solid #7fa8d6;
+  border-radius: 7px;
+  background: #ffffff;
+  color: #375a7f;
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.courseModuleEditorPage .lessonBottomPageGroups .lessonBottomPageGroupActive {
+  background: #5f86b1;
+  color: #ffffff;
 }
 
 @media (max-width: 900px) {
@@ -3765,14 +4002,17 @@
     grid-template-columns: 1fr;
   }
 
-  .courseModuleEditorPage .moduleAssessmentCard,
-  .courseModuleEditorPage .assessmentEditButton {
+  .courseModuleEditorPage .moduleAssessmentCard {
     width: 100%;
   }
 
   .courseModuleEditorPage .moduleAssessmentEditorHeader {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .courseModuleEditorPage .mainQuizSettingsControls {
+    grid-template-columns: 1fr;
   }
 
   .courseModuleEditorPage .moduleEditorWorkspace .lessonPageTabs {
@@ -3785,13 +4025,13 @@
    FINAL COMPACT EDIT COURSE LAYOUT
 ========================================= */
 
-.addModulePage.editCoursePage {
+.addModulePage.courseBuilderPage {
   min-height: 100vh;
   padding-bottom: 42px;
   background: #f4f4f4;
 }
 
-.addModulePage.editCoursePage .pageHeader {
+.addModulePage.courseBuilderPage .pageHeader {
   min-height: 0;
   display: block;
   margin-bottom: 0 !important;
@@ -3800,7 +4040,7 @@
   background: #f3f3f3;
 }
 
-.addModulePage.editCoursePage .pageHeader h1 {
+.addModulePage.courseBuilderPage .pageHeader h1 {
   margin: 0;
   color: #666;
   font-size: 28px;
@@ -3808,14 +4048,14 @@
   line-height: 1.1;
 }
 
-.addModulePage.editCoursePage .pageHeaderText {
+.addModulePage.courseBuilderPage .pageHeaderText {
   margin: 3px 0 0;
   color: #555;
   font-size: 13px;
   line-height: 1.25;
 }
 
-.addModulePage.editCoursePage .formCard {
+.addModulePage.courseBuilderPage .formCard {
   margin: 0;
   padding: 26px 28px 0 !important;
   border: 0;
@@ -3824,7 +4064,7 @@
   box-shadow: none;
 }
 
-.addModulePage.editCoursePage .popupInfoGrid {
+.addModulePage.courseBuilderPage .popupInfoGrid {
   width: min(100%, 665px);
   max-width: 665px;
   display: grid;
@@ -3833,27 +4073,27 @@
   gap: 56px;
 }
 
-.addModulePage.editCoursePage .popupInfoGrid .popupField:nth-child(n + 3) {
+.addModulePage.courseBuilderPage .popupInfoGrid .popupField:nth-child(n + 3) {
   display: none;
 }
 
-.addModulePage.editCoursePage .formCard > .popupSection:nth-of-type(3) {
+.addModulePage.courseBuilderPage .formCard > .popupSection:nth-of-type(3) {
   display: none;
 }
 
-.addModulePage.editCoursePage .formCard > .popupSection {
+.addModulePage.courseBuilderPage .formCard > .popupSection {
   width: min(100%, 510px);
   max-width: 510px;
   margin-top: 22px;
 }
 
-.addModulePage.editCoursePage .popupField,
-.addModulePage.editCoursePage .popupSection {
+.addModulePage.courseBuilderPage .popupField,
+.addModulePage.courseBuilderPage .popupSection {
   gap: 0;
   margin-bottom: 0;
 }
 
-.addModulePage.editCoursePage .popupLabel {
+.addModulePage.courseBuilderPage .popupLabel {
   margin: 0 0 9px;
   color: #111;
   font-size: 14px;
@@ -3861,19 +4101,19 @@
   line-height: 1.1;
 }
 
-.addModulePage.editCoursePage .required {
+.addModulePage.courseBuilderPage .required {
   margin-left: 4px;
   color: #999;
   font-size: 13px;
 }
 
-.addModulePage.editCoursePage .wordCounter,
-.addModulePage.editCoursePage .accessHint {
+.addModulePage.courseBuilderPage .wordCounter,
+.addModulePage.courseBuilderPage .accessHint {
   display: none;
 }
 
-.addModulePage.editCoursePage .popupInput,
-.addModulePage.editCoursePage .popupSelect {
+.addModulePage.courseBuilderPage .popupInput,
+.addModulePage.courseBuilderPage .popupSelect {
   height: 34px;
   min-height: 34px;
   padding: 6px 14px;
@@ -3885,7 +4125,7 @@
   box-shadow: none;
 }
 
-.addModulePage.editCoursePage .popupTextarea {
+.addModulePage.courseBuilderPage .popupTextarea {
   padding: 12px 14px;
   border: 1px solid #c9c9c9;
   border-radius: 8px;
@@ -3896,18 +4136,18 @@
   box-shadow: none;
 }
 
-.addModulePage.editCoursePage .popupSmallBox {
+.addModulePage.courseBuilderPage .popupSmallBox {
   min-height: 110px;
   height: 110px;
 }
 
-.addModulePage.editCoursePage .moduleBuilderSection {
+.addModulePage.courseBuilderPage .moduleBuilderSection {
   margin: 32px -28px 0 !important;
   padding: 0 28px 34px !important;
   border-top: 1px solid #d0d0d0;
 }
 
-.addModulePage.editCoursePage .moduleBuilderHeader {
+.addModulePage.courseBuilderPage .moduleBuilderHeader {
   min-height: 72px;
   display: grid;
   grid-template-columns: minmax(0, 360px) auto;
@@ -3920,7 +4160,7 @@
   background: #eeeeee;
 }
 
-.addModulePage.editCoursePage .moduleBuilderHeader h2 {
+.addModulePage.courseBuilderPage .moduleBuilderHeader h2 {
   margin: 0;
   color: #666;
   font-size: 30px;
@@ -3928,14 +4168,14 @@
   line-height: 1.08;
 }
 
-.addModulePage.editCoursePage .moduleBuilderHeader p {
+.addModulePage.courseBuilderPage .moduleBuilderHeader p {
   margin: 4px 0 0;
   color: #555;
   font-size: 14px;
   line-height: 1.2;
 }
 
-.addModulePage.editCoursePage .popupAddBtn {
+.addModulePage.courseBuilderPage .popupAddBtn {
   min-width: 128px;
   height: 34px;
   min-height: 34px;
@@ -3949,14 +4189,14 @@
   font-weight: 400 !important;
 }
 
-.addModulePage.editCoursePage .moduleCardGrid {
+.addModulePage.courseBuilderPage .moduleCardGrid {
   width: min(100%, 665px);
   max-width: 665px;
   display: grid;
   gap: 18px;
 }
 
-.addModulePage.editCoursePage .moduleCard {
+.addModulePage.courseBuilderPage .moduleCard {
   overflow: visible;
   border: 1px solid #c8c8c8;
   border-radius: 8px;
@@ -3964,7 +4204,7 @@
   box-shadow: none;
 }
 
-.addModulePage.editCoursePage .moduleCardExpanded {
+.addModulePage.courseBuilderPage .moduleCardExpanded {
   max-width: none;
   border: 0;
   border-radius: 0;
@@ -3972,7 +4212,7 @@
   box-shadow: none;
 }
 
-.addModulePage.editCoursePage .moduleCardHeader {
+.addModulePage.courseBuilderPage .moduleCardHeader {
   min-height: 82px;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -3983,7 +4223,7 @@
   background: #f7f7f7;
 }
 
-.addModulePage.editCoursePage .moduleCardExpanded .moduleCardHeader {
+.addModulePage.courseBuilderPage .moduleCardExpanded .moduleCardHeader {
   width: min(100%, 665px);
   max-width: 665px;
   margin-bottom: 18px;
@@ -3991,11 +4231,11 @@
   border-radius: 8px;
 }
 
-.addModulePage.editCoursePage .moduleNumber {
+.addModulePage.courseBuilderPage .moduleNumber {
   display: none;
 }
 
-.addModulePage.editCoursePage .moduleCardHeading > span {
+.addModulePage.courseBuilderPage .moduleCardHeading > span {
   margin: 0 0 6px;
   color: #333;
   font-size: 14px;
@@ -4004,7 +4244,7 @@
   text-transform: none;
 }
 
-.addModulePage.editCoursePage .moduleCardHeading h3 {
+.addModulePage.courseBuilderPage .moduleCardHeading h3 {
   margin: 0;
   color: #222;
   font-size: 22px;
@@ -4012,21 +4252,21 @@
   line-height: 1.18;
 }
 
-.addModulePage.editCoursePage .moduleCardHeading p {
+.addModulePage.courseBuilderPage .moduleCardHeading p {
   margin: 6px 0 0;
   color: #777;
   font-size: 14px;
   line-height: 1.2;
 }
 
-.addModulePage.editCoursePage .moduleCardHeaderActions {
+.addModulePage.courseBuilderPage .moduleCardHeaderActions {
   display: flex;
   align-items: center;
   gap: 14px;
 }
 
-.addModulePage.editCoursePage .moduleExpandBtn,
-.addModulePage.editCoursePage .moduleDeleteBtn {
+.addModulePage.courseBuilderPage .moduleExpandBtn,
+.addModulePage.courseBuilderPage .moduleDeleteBtn {
   min-width: 100px;
   height: 32px;
   border-radius: 8px;
@@ -4035,19 +4275,19 @@
   font-weight: 400 !important;
 }
 
-.addModulePage.editCoursePage .moduleExpandBtn {
+.addModulePage.courseBuilderPage .moduleExpandBtn {
   border: 0;
   background: #8d8d8d;
   color: #fff;
 }
 
-.addModulePage.editCoursePage .moduleDeleteBtn {
+.addModulePage.courseBuilderPage .moduleDeleteBtn {
   border: 1px solid #ff4f5e;
   background: transparent;
   color: #ff1f2f;
 }
 
-.addModulePage.editCoursePage .popupActions {
+.addModulePage.courseBuilderPage .popupActions {
   width: min(100%, 665px);
   max-width: 665px;
   justify-content: center;
@@ -4055,8 +4295,8 @@
   margin-top: 34px;
 }
 
-.addModulePage.editCoursePage .popupCancelBtn,
-.addModulePage.editCoursePage .popupSaveBtn {
+.addModulePage.courseBuilderPage .popupCancelBtn,
+.addModulePage.courseBuilderPage .popupSaveBtn {
   min-width: 128px;
   height: 44px;
   border-radius: 8px;
@@ -4064,155 +4304,155 @@
   font-size: 16px;
 }
 
-.addModulePage.editCoursePage .popupSaveBtn {
+.addModulePage.courseBuilderPage .popupSaveBtn {
   border: 1px solid #6f98c7;
   background: #7fa8d6 !important;
   color: #ffffff;
 }
 
-.addModulePage.editCoursePage .popupSaveBtn:hover {
+.addModulePage.courseBuilderPage .popupSaveBtn:hover {
   background: #a8c6e7 !important;
   color: #263c52;
 }
 
 @media (max-width: 760px) {
-  .addModulePage.editCoursePage .pageHeader,
-  .addModulePage.editCoursePage .formCard {
+  .addModulePage.courseBuilderPage .pageHeader,
+  .addModulePage.courseBuilderPage .formCard {
     padding-inline: 20px !important;
   }
 
-  .addModulePage.editCoursePage .popupInfoGrid {
+  .addModulePage.courseBuilderPage .popupInfoGrid {
     width: 100%;
     max-width: none;
     grid-template-columns: 1fr;
     gap: 16px;
   }
 
-  .addModulePage.editCoursePage .formCard > .popupSection {
+  .addModulePage.courseBuilderPage .formCard > .popupSection {
     width: 100%;
     max-width: none;
   }
 
-  .addModulePage.editCoursePage .moduleBuilderSection,
-  .addModulePage.editCoursePage .moduleBuilderHeader {
+  .addModulePage.courseBuilderPage .moduleBuilderSection,
+  .addModulePage.courseBuilderPage .moduleBuilderHeader {
     margin-left: -20px !important;
     margin-right: -20px !important;
   }
 
-  .addModulePage.editCoursePage .moduleBuilderSection {
+  .addModulePage.courseBuilderPage .moduleBuilderSection {
     padding-right: 20px !important;
     padding-left: 20px !important;
   }
 
-  .addModulePage.editCoursePage .moduleBuilderHeader {
+  .addModulePage.courseBuilderPage .moduleBuilderHeader {
     grid-template-columns: 1fr;
     row-gap: 12px;
     padding-right: 20px !important;
     padding-left: 20px !important;
   }
 
-  .addModulePage.editCoursePage .moduleCardGrid,
-  .addModulePage.editCoursePage .popupActions {
+  .addModulePage.courseBuilderPage .moduleCardGrid,
+  .addModulePage.courseBuilderPage .popupActions {
     width: 100%;
     max-width: none;
   }
 
-  .addModulePage.editCoursePage .moduleCardHeader {
+  .addModulePage.courseBuilderPage .moduleCardHeader {
     grid-template-columns: 1fr;
   }
 
-  .addModulePage.editCoursePage .moduleCardHeaderActions {
+  .addModulePage.courseBuilderPage .moduleCardHeaderActions {
     justify-content: flex-start;
   }
 }
 
 /* Final edit-course polish: keep the whole editor together and readable. */
-.addModulePage.editCoursePage {
-  --edit-course-width: 1040px;
-  --edit-course-pad: clamp(24px, 4vw, 64px);
+.addModulePage.courseBuilderPage {
+  --edit-course-width: 100%;
+  --edit-course-pad: 28px;
   --edit-course-inset: max(
     var(--edit-course-pad),
     calc((100% - var(--edit-course-width)) / 2)
   );
 }
 
-.addModulePage.editCoursePage .pageHeader,
-.addModulePage.editCoursePage .formCard {
+.addModulePage.courseBuilderPage .pageHeader,
+.addModulePage.courseBuilderPage .formCard {
   padding-left: var(--edit-course-inset) !important;
   padding-right: var(--edit-course-inset) !important;
 }
 
-.addModulePage.editCoursePage .pageHeader {
+.addModulePage.courseBuilderPage .pageHeader {
   padding-top: 22px !important;
   padding-bottom: 18px !important;
 }
 
-.addModulePage.editCoursePage .pageHeader h1 {
+.addModulePage.courseBuilderPage .pageHeader h1 {
   font-size: 34px;
 }
 
-.addModulePage.editCoursePage .pageHeaderText {
+.addModulePage.courseBuilderPage .pageHeaderText {
   font-size: 16px;
 }
 
-.addModulePage.editCoursePage .formCard {
-  padding-top: 30px !important;
+.addModulePage.courseBuilderPage .formCard {
+  padding-top: 20px !important;
 }
 
-.addModulePage.editCoursePage .popupInfoGrid,
-.addModulePage.editCoursePage .formCard > .popupSection,
-.addModulePage.editCoursePage .moduleBuilderHeader,
-.addModulePage.editCoursePage .moduleCardGrid,
-.addModulePage.editCoursePage .popupActions {
+.addModulePage.courseBuilderPage .popupInfoGrid,
+.addModulePage.courseBuilderPage .formCard > .popupSection,
+.addModulePage.courseBuilderPage .moduleBuilderHeader,
+.addModulePage.courseBuilderPage .moduleCardGrid,
+.addModulePage.courseBuilderPage .popupActions {
   margin-right: auto;
   margin-left: auto;
 }
 
-.addModulePage.editCoursePage .popupInfoGrid {
-  width: min(100%, 900px);
-  max-width: 900px;
+.addModulePage.courseBuilderPage .popupInfoGrid {
+  width: 100%;
+  max-width: none;
   grid-template-columns: minmax(0, 1fr) minmax(220px, 270px);
   gap: 34px;
 }
 
-.addModulePage.editCoursePage .formCard > .popupSection {
-  width: min(100%, 900px);
-  max-width: 900px;
-  margin-top: 26px;
+.addModulePage.courseBuilderPage .formCard > .popupSection {
+  width: 100%;
+  max-width: none;
+  margin-top: 18px;
 }
 
-.addModulePage.editCoursePage .popupLabel,
-.addModulePage.editCoursePage .required,
-.addModulePage.editCoursePage .popupInput,
-.addModulePage.editCoursePage .popupSelect,
-.addModulePage.editCoursePage .popupTextarea {
+.addModulePage.courseBuilderPage .popupLabel,
+.addModulePage.courseBuilderPage .required,
+.addModulePage.courseBuilderPage .popupInput,
+.addModulePage.courseBuilderPage .popupSelect,
+.addModulePage.courseBuilderPage .popupTextarea {
   font-size: 20px;
 }
 
-.addModulePage.editCoursePage .popupInput,
-.addModulePage.editCoursePage .popupSelect {
+.addModulePage.courseBuilderPage .popupInput,
+.addModulePage.courseBuilderPage .popupSelect {
   height: 52px;
   min-height: 52px;
   padding: 10px 16px;
 }
 
-.addModulePage.editCoursePage .popupTextarea {
+.addModulePage.courseBuilderPage .popupTextarea {
   min-height: 150px;
   padding: 16px 18px;
 }
 
-.addModulePage.editCoursePage .popupSmallBox {
+.addModulePage.courseBuilderPage .popupSmallBox {
   height: 150px;
   min-height: 150px;
 }
 
-.addModulePage.editCoursePage .moduleBuilderSection {
+.addModulePage.courseBuilderPage .moduleBuilderSection {
   margin: 34px 0 0 !important;
   padding: 0 0 40px !important;
   border-top: 1px solid #d0d0d0;
 }
 
-.addModulePage.editCoursePage .moduleBuilderHeader {
+.addModulePage.courseBuilderPage .moduleBuilderHeader {
   width: min(100%, 1040px);
   min-height: 82px;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -4224,94 +4464,94 @@
   background: #eeeeee;
 }
 
-.addModulePage.editCoursePage .moduleBuilderHeader h2 {
+.addModulePage.courseBuilderPage .moduleBuilderHeader h2 {
   font-size: 34px;
 }
 
-.addModulePage.editCoursePage .moduleBuilderHeader p {
+.addModulePage.courseBuilderPage .moduleBuilderHeader p {
   font-size: 20px;
 }
 
-.addModulePage.editCoursePage .popupAddBtn {
+.addModulePage.courseBuilderPage .popupAddBtn {
   min-width: 160px;
   height: 50px;
   min-height: 50px;
   font-size: 20px;
 }
 
-.addModulePage.editCoursePage .moduleCardGrid {
+.addModulePage.courseBuilderPage .moduleCardGrid {
   width: min(100%, 1040px);
   max-width: 1040px;
 }
 
-.addModulePage.editCoursePage .moduleCardHeader {
+.addModulePage.courseBuilderPage .moduleCardHeader {
   min-height: 104px;
   padding: 18px 22px;
 }
 
-.addModulePage.editCoursePage .moduleCardHeading > span {
+.addModulePage.courseBuilderPage .moduleCardHeading > span {
   font-size: 20px;
 }
 
-.addModulePage.editCoursePage .moduleCardHeading h3 {
+.addModulePage.courseBuilderPage .moduleCardHeading h3 {
   font-size: 28px;
 }
 
-.addModulePage.editCoursePage .moduleCardHeading p {
+.addModulePage.courseBuilderPage .moduleCardHeading p {
   font-size: 20px;
 }
 
-.addModulePage.editCoursePage .moduleExpandBtn,
-.addModulePage.editCoursePage .moduleDeleteBtn {
+.addModulePage.courseBuilderPage .moduleExpandBtn,
+.addModulePage.courseBuilderPage .moduleDeleteBtn {
   min-width: 140px;
   height: 48px;
   font-size: 20px;
 }
 
-.addModulePage.editCoursePage .popupActions {
+.addModulePage.courseBuilderPage .popupActions {
   width: min(100%, 1040px);
   max-width: 1040px;
   margin-top: 36px;
 }
 
-.addModulePage.editCoursePage .popupCancelBtn,
-.addModulePage.editCoursePage .popupSaveBtn {
+.addModulePage.courseBuilderPage .popupCancelBtn,
+.addModulePage.courseBuilderPage .popupSaveBtn {
   min-width: 160px;
   height: 52px;
   font-size: 20px;
 }
 
 @media (max-width: 760px) {
-  .addModulePage.editCoursePage {
+  .addModulePage.courseBuilderPage {
     --edit-course-inset: 20px;
   }
 
-  .addModulePage.editCoursePage .popupInfoGrid,
-  .addModulePage.editCoursePage .moduleBuilderHeader,
-  .addModulePage.editCoursePage .moduleCardHeader {
+  .addModulePage.courseBuilderPage .popupInfoGrid,
+  .addModulePage.courseBuilderPage .moduleBuilderHeader,
+  .addModulePage.courseBuilderPage .moduleCardHeader {
     grid-template-columns: 1fr;
   }
 
-  .addModulePage.editCoursePage .moduleCardHeaderActions {
+  .addModulePage.courseBuilderPage .moduleCardHeaderActions {
     justify-content: flex-start;
   }
 }
 
 /* Clean up the Edit Course modules area so it reads as one tidy card. */
-.addModulePage.editCoursePage .popupInput[readonly] {
+.addModulePage.courseBuilderPage .popupInput[readonly] {
   cursor: default;
   color: #555;
   background: #eeeeee;
 }
 
-.addModulePage.editCoursePage .moduleBuilderSection {
-  width: min(100%, 900px);
-  margin: 34px auto 0 !important;
-  padding: 0 0 28px !important;
+.addModulePage.courseBuilderPage .moduleBuilderSection {
+  width: 100%;
+  margin: 24px auto 0 !important;
+  padding: 0 !important;
   border-top: 0;
 }
 
-.addModulePage.editCoursePage .moduleBuilderHeader {
+.addModulePage.courseBuilderPage .moduleBuilderHeader {
   width: 100%;
   min-height: 0;
   margin: 0 0 20px !important;
@@ -4322,27 +4562,27 @@
   box-sizing: border-box;
 }
 
-.addModulePage.editCoursePage .moduleBuilderHeader h2 {
+.addModulePage.courseBuilderPage .moduleBuilderHeader h2 {
   font-size: 32px;
 }
 
-.addModulePage.editCoursePage .moduleBuilderHeader p {
+.addModulePage.courseBuilderPage .moduleBuilderHeader p {
   font-size: 16px;
 }
 
-.addModulePage.editCoursePage .moduleCardGrid {
+.addModulePage.courseBuilderPage .moduleCardGrid {
   width: 100%;
   max-width: none;
   gap: 16px;
 }
 
-.addModulePage.editCoursePage .moduleCard {
+.addModulePage.courseBuilderPage .moduleCard {
   border: 1px solid #cfcfcf;
   border-radius: 8px;
   background: #ffffff;
 }
 
-.addModulePage.editCoursePage .moduleCardHeader {
+.addModulePage.courseBuilderPage .moduleCardHeader {
   min-height: 112px;
   padding: 22px;
   border: 0;
@@ -4350,55 +4590,55 @@
   background: #ffffff;
 }
 
-.addModulePage.editCoursePage .moduleCardHeading > span {
+.addModulePage.courseBuilderPage .moduleCardHeading > span {
   margin-bottom: 8px;
   font-size: 16px;
 }
 
-.addModulePage.editCoursePage .moduleCardHeading h3 {
+.addModulePage.courseBuilderPage .moduleCardHeading h3 {
   font-size: 26px;
 }
 
-.addModulePage.editCoursePage .moduleCardHeading p {
+.addModulePage.courseBuilderPage .moduleCardHeading p {
   font-size: 16px;
 }
 
-.addModulePage.editCoursePage .moduleCardHeaderActions {
+.addModulePage.courseBuilderPage .moduleCardHeaderActions {
   gap: 14px;
 }
 
-.addModulePage.editCoursePage .moduleExpandBtn,
-.addModulePage.editCoursePage .moduleDeleteBtn {
+.addModulePage.courseBuilderPage .moduleExpandBtn,
+.addModulePage.courseBuilderPage .moduleDeleteBtn {
   min-width: 132px;
   height: 46px;
   font-size: 16px;
 }
 
-.addModulePage.editCoursePage .popupActions {
-  width: min(100%, 900px);
-  max-width: 900px;
-  margin-top: 28px;
+.addModulePage.courseBuilderPage .popupActions {
+  width: 100%;
+  max-width: none;
+  margin-top: 24px;
 }
 
-.addModulePage.editCoursePage .popupCancelBtn,
-.addModulePage.editCoursePage .popupSaveBtn {
+.addModulePage.courseBuilderPage .popupCancelBtn,
+.addModulePage.courseBuilderPage .popupSaveBtn {
   min-width: 160px;
   height: 52px;
   font-size: 16px;
 }
 
 @media (max-width: 760px) {
-  .addModulePage.editCoursePage .moduleBuilderSection,
-  .addModulePage.editCoursePage .popupActions {
+  .addModulePage.courseBuilderPage .moduleBuilderSection,
+  .addModulePage.courseBuilderPage .popupActions {
     width: 100%;
   }
 
-  .addModulePage.editCoursePage .moduleBuilderHeader,
-  .addModulePage.editCoursePage .moduleCardHeader {
+  .addModulePage.courseBuilderPage .moduleBuilderHeader,
+  .addModulePage.courseBuilderPage .moduleCardHeader {
     grid-template-columns: 1fr;
   }
 
-  .addModulePage.editCoursePage .moduleCardHeaderActions {
+  .addModulePage.courseBuilderPage .moduleCardHeaderActions {
     justify-content: flex-start;
   }
 }
@@ -4411,29 +4651,29 @@
   line-height: 1.3;
 }
 
-.addModulePage.editCoursePage .courseCodeNote {
+.addModulePage.courseBuilderPage .courseCodeNote {
   font-size: 16px;
 }
 
-.addModulePage.editCoursePage .moduleBuilderSection,
-.addModulePage.editCoursePage .popupActions {
-  width: min(100%, 900px);
-  max-width: 900px;
-}
-
-.addModulePage.editCoursePage .moduleBuilderHeader,
-.addModulePage.editCoursePage .moduleCardGrid {
+.addModulePage.courseBuilderPage .moduleBuilderSection,
+.addModulePage.courseBuilderPage .popupActions {
   width: 100%;
   max-width: none;
 }
 
-.addModulePage.editCoursePage .moduleBuilderHeader {
+.addModulePage.courseBuilderPage .moduleBuilderHeader,
+.addModulePage.courseBuilderPage .moduleCardGrid {
+  width: 100%;
+  max-width: none;
+}
+
+.addModulePage.courseBuilderPage .moduleBuilderHeader {
   margin-right: 0 !important;
   margin-left: 0 !important;
 }
 
 @media (max-width: 760px) {
-  .addModulePage.editCoursePage .courseCodeNote {
+  .addModulePage.courseBuilderPage .courseCodeNote {
     font-size: 14px;
   }
 }
@@ -4523,9 +4763,9 @@
 }
 
 /* Final high-specificity theme pass for edit-course and module-editor actions. */
-.addModulePage.editCoursePage .popupAddBtn,
-.addModulePage.editCoursePage .moduleExpandBtn,
-.addModulePage.editCoursePage .popupSaveBtn,
+.addModulePage.courseBuilderPage .popupAddBtn,
+.addModulePage.courseBuilderPage .moduleExpandBtn,
+.addModulePage.courseBuilderPage .popupSaveBtn,
 .courseModuleEditorPage .customFileBtn,
 .courseModuleEditorPage .moduleMaterialBand .popupAddBtn,
 .courseModuleEditorPage .moduleEditorBandActions .popupAddBtn:not(.moduleEditorRemoveBtn),
@@ -4538,9 +4778,9 @@
   color: #ffffff !important;
 }
 
-.addModulePage.editCoursePage .popupAddBtn:hover,
-.addModulePage.editCoursePage .moduleExpandBtn:hover,
-.addModulePage.editCoursePage .popupSaveBtn:hover,
+.addModulePage.courseBuilderPage .popupAddBtn:hover,
+.addModulePage.courseBuilderPage .moduleExpandBtn:hover,
+.addModulePage.courseBuilderPage .popupSaveBtn:hover,
 .courseModuleEditorPage .customFileBtn:hover,
 .courseModuleEditorPage .moduleMaterialBand .popupAddBtn:hover,
 .courseModuleEditorPage .moduleEditorBandActions .popupAddBtn:not(.moduleEditorRemoveBtn):hover,
@@ -4551,10 +4791,116 @@
   color: #263c52 !important;
 }
 
-.addModulePage.editCoursePage .popupCancelBtn,
+.addModulePage.courseBuilderPage .popupCancelBtn,
 .courseModuleEditorPage .moduleEditorActions .popupCancelBtn {
   border: 1px solid #a8c6e7 !important;
   background: #fff7d6 !important;
   color: #4f6174 !important;
   box-shadow: 3px 3px 0 rgba(79, 97, 116, 0.12) !important;
 }
+/* Assessment editor layout: a compact navigation lane and a question canvas. */
+.courseModuleEditorPage.assessmentPage .pageHeader {
+  position: relative;
+  padding-right: 230px;
+}
+.assessmentBreadcrumb { padding: 10px 40px; background: #e3ebf4; }
+.assessmentBreadcrumb button { border: 0; background: transparent; color: #4f6174; font: inherit; cursor: pointer; }
+.assessmentSettingsButton { border: 1px solid #6f98c7; border-radius: 8px; padding: 11px 18px; background: #7fa8d6; color: #fff; font: inherit; cursor: pointer; }
+.assessmentPage .pageHeader > .assessmentSettingsButton { position: absolute; right: 40px; top: 50%; transform: translateY(-50%); }
+.courseModuleEditorPage.assessmentPage .moduleEditorBand { background: transparent; border: 0; padding: 32px 40px; }
+.courseModuleEditorPage.assessmentPage .moduleAssessmentEditor { margin-top: 0; }
+.courseModuleEditorPage.assessmentPage .moduleEditorWorkspace { grid-template-columns: 160px minmax(0, 1fr); gap: 36px; align-items: start; max-width: 1440px; margin: 0 auto; }
+.courseModuleEditorPage.assessmentPage .moduleEditorWorkspace .lessonPageTabs { width: 100%; min-width: 0; }
+.courseModuleEditorPage.assessmentPage .lessonPageTabs { margin-top: 12px; border-radius: 14px; overflow: hidden; }
+.courseModuleEditorPage.assessmentPage .lessonPageTab { height: 48px; min-height: 48px; }
+.courseModuleEditorPage.assessmentPage .moduleQuizEditorCard { padding: 0; gap: 0; border: 0; border-radius: 26px; background: #fff; overflow: hidden; }
+.quizEditorToolbar { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 14px 28px; background: #e8eff7; }
+.quizEditorToolbar h2 { margin: 0; color: #4f6174; font-size: 26px; font-weight: 500; }
+.courseModuleEditorPage .quizEditorToolbar .moduleEditorBandActions { gap: 16px; }
+.courseModuleEditorPage .quizEditorToolbar .popupAddBtn { min-width: 130px; min-height: 38px; padding: 0 16px; font-size: 14px; }
+.courseModuleEditorPage .quizEditorToolbar .moduleEditorRemoveBtn { border: 1px solid #cc4050 !important; background: #d94d5c !important; color: #fff !important; box-shadow: 3px 3px 0 #d94d5c26 !important; }
+.courseModuleEditorPage .quizEditorToolbar .moduleEditorRemoveBtn:hover:not(:disabled) { background: #bd3545 !important; }
+.quizEditorFields { display: grid; gap: 14px; padding: 26px 28px; }
+.courseModuleEditorPage .quizEditorFields .popupInput,
+.courseModuleEditorPage .quizEditorFields .popupSelect,
+.courseModuleEditorPage .quizEditorFields .popupTextarea { background: #fff; border: 1px solid #d5dce4; border-radius: 9px; }
+.courseModuleEditorPage .quizEditorFields .popupAnswerBox { min-height: 112px; }
+.mainQuizSettingsDialog { width: min(640px, calc(100vw - 40px)); max-height: calc(100vh - 48px); padding: 0; border: 1px solid #b7cbe0; border-radius: 20px; background: #fff; color: #4f6174; box-shadow: 0 20px 70px #263c5238; }
+.mainQuizSettingsDialog::backdrop { background: #263c5266; }
+.courseModuleEditorPage .mainQuizSettingsDialog .mainQuizSettingsPanel { position: relative; margin: 0; padding: 30px; border: 0; }
+.courseModuleEditorPage .mainQuizSettingsDialog .mainQuizSettingsControls { grid-template-columns: 1fr; }
+.courseModuleEditorPage .mainQuizSettingsDialog h4 { padding-right: 28px; }
+.settingsDialogClose { position: absolute; top: 14px; right: 16px; width: 32px; height: 32px; border: 0; border-radius: 50%; background: #e8eff7; color: #4f6174; font-size: 24px; cursor: pointer; }
+.assessmentSettingsButton:focus-visible, .settingsDialogClose:focus-visible { outline: 3px solid #4f6174; outline-offset: 3px; }
+@media (max-width: 900px) {
+  .quizEditorToolbar { align-items: flex-start; flex-direction: column; }
+  .courseModuleEditorPage.assessmentPage .moduleEditorWorkspace { gap: 16px; }
+}
+@media (max-width: 600px) {
+  .courseModuleEditorPage.assessmentPage .moduleEditorBand { padding: 24px 20px; }
+  .courseModuleEditorPage.assessmentPage .pageHeader { padding-right: 20px; }
+  .assessmentPage .pageHeader > .assessmentSettingsButton { position: static; transform: none; margin-top: 16px; }
+  .assessmentBreadcrumb { padding: 10px 20px; }
+  .courseModuleEditorPage.assessmentPage .moduleEditorWorkspace { grid-template-columns: 1fr; }
+  .courseModuleEditorPage.assessmentPage .lessonPageTabs { width: 100%; }
+  .quizEditorToolbar, .quizEditorFields { padding: 18px; }
+  .courseModuleEditorPage .quizEditorFields .optionsGrid { grid-template-columns: 1fr; }
+}
+/* Header action and material generation popup in the module editor. */
+.courseModuleEditorPage .pageHeader { position: relative; padding-right: 230px; }
+.courseModuleEditorPage .pageHeader > .assessmentSettingsButton { position: absolute; right: 40px; top: 50%; transform: translateY(-50%); }
+.generateModuleDialog { width: min(760px, calc(100vw - 40px)); max-height: calc(100vh - 48px); padding: 0; border: 1px solid #b7cbe0; border-radius: 20px; background: #fff; color: #4f6174; box-shadow: 0 20px 70px #263c5238; }
+.generateModuleDialog::backdrop { background: #263c5266; }
+.courseModuleEditorPage .generateModuleDialog .moduleMaterialBand { position: relative; display: flex; flex-direction: column; align-items: stretch; gap: 16px; padding: 30px; border: 0; background: #fff; }
+.courseModuleEditorPage .generateModuleDialog .moduleMaterialBand h2 { margin: 0; padding-right: 30px; font-size: 24px; }
+.courseModuleEditorPage .generateModuleDialog .moduleMaterialBand p { margin: 0; }
+.courseModuleEditorPage .generateModuleDialog .moduleMaterialBand > .popupAddBtn { align-self: flex-start; min-height: 44px; padding: 0 24px; }
+.generatorDialogFooter { display: flex; justify-content: flex-end; padding-top: 16px; border-top: 1px solid #d5dce4; }
+@media (max-width: 600px) {
+  .courseModuleEditorPage .pageHeader { padding-right: 20px; }
+  .courseModuleEditorPage .pageHeader > .assessmentSettingsButton { position: static; transform: none; margin-top: 16px; }
+  .courseModuleEditorPage .generateModuleDialog .moduleMaterialBand { padding: 24px 20px; }
+}
+/* Stack generator controls to match the quiz access dialog. */
+.generateModuleDialog { width: min(640px, calc(100vw - 40px)); }
+.generatorFilePicker > div { display: flex; width: 100%; margin: 0; }
+.courseModuleEditorPage .generateModuleDialog .customFileBtn { width: 100% !important; min-height: 50px; border-radius: 999px; }
+.courseModuleEditorPage .generateModuleDialog .moduleMaterialBand > .popupAddBtn { align-self: stretch; width: 100%; min-height: 44px; margin: 0; border-radius: 8px; }
+/* Keep generation notifications above the material popup. */
+.generatorOverlay { position: fixed; inset: 0; z-index: 900; display: flex; align-items: center; justify-content: center; padding: 24px; background: #263c5266; box-sizing: border-box; }
+.generatorOverlay .generateModuleDialog { width: min(900px, 100%); max-height: calc(100dvh - 48px); overflow-y: auto; box-sizing: border-box; }
+.courseModuleEditorPage .generatorOverlay .moduleMaterialBand { padding: 40px; gap: 22px; }
+.courseModuleEditorPage .generatorOverlay .moduleMaterialBand h2 { font-size: 28px; }
+.courseModuleEditorPage .generatorOverlay .moduleMaterialBand p,
+.courseModuleEditorPage .generatorOverlay .generatorFilePicker { font-size: 16px; }
+.courseModuleEditorPage .generatorOverlay .customFileBtn { min-height: 56px; }
+.courseModuleEditorPage .generatorOverlay .moduleMaterialBand > .popupAddBtn { min-height: 52px; }
+@media (max-width: 600px) {
+ .generatorOverlay { padding: 16px; }
+ .courseModuleEditorPage .generatorOverlay .moduleMaterialBand { padding: 28px 20px; }
+}
+
+/* Readable quiz editing controls and workspace. */
+.courseModuleEditorPage.assessmentPage { font-size: 20px; }
+.courseModuleEditorPage.assessmentPage .moduleEditorWorkspace { max-width: 1600px; grid-template-columns: 200px minmax(0, 1fr); gap: 28px; }
+.courseModuleEditorPage.assessmentPage .moduleEditorBand { padding-top: 28px; }
+.courseModuleEditorPage .quizEditorToolbar { padding: 22px 28px; flex-wrap: wrap; }
+.courseModuleEditorPage .quizEditorToolbar h2 { font-size: 25px; }
+.courseModuleEditorPage .quizEditorToolbar .moduleEditorBandActions { flex-wrap: wrap; gap: 12px; }
+.courseModuleEditorPage .quizEditorToolbar .popupAddBtn { font-size: 20px; min-height: 52px; padding: 12px 18px; }
+.courseModuleEditorPage .quizEditorFields { gap: 18px; padding: 30px; }
+.courseModuleEditorPage .quizEditorFields label { font-size: 20px; line-height: 1.5; }
+.courseModuleEditorPage .quizEditorFields .popupInput,
+.courseModuleEditorPage .quizEditorFields .popupSelect,
+.courseModuleEditorPage .quizEditorFields .popupTextarea { font-size: 20px; line-height: 1.5; padding: 14px 16px; min-height: 58px; box-sizing: border-box; }
+.courseModuleEditorPage .quizEditorFields .popupAnswerBox { min-height: 190px; }
+.courseModuleEditorPage.assessmentPage .moduleEditorWorkspace .lessonPageTab { font-size: 20px; min-height: 58px; height: auto; padding: 14px 12px; }
+.courseModuleEditorPage.assessmentPage .pageHeader h1,
+.courseModuleEditorPage.assessmentPage .pageHeader h2 { font-size: 25px; }
+.courseModuleEditorPage.assessmentPage .pageHeader p,
+.courseModuleEditorPage.assessmentPage .assessmentSettingsButton,
+.courseModuleEditorPage.assessmentPage .assessmentBackButton { font-size: 20px; line-height: 1.5; }
+.courseModuleEditorPage.assessmentPage .moduleEditorActions .popupCancelBtn,
+.courseModuleEditorPage.assessmentPage .moduleEditorActions .popupSaveBtn { font-size: 20px; min-height: 56px; min-width: 170px; padding: 14px 24px; }
+@media (max-width: 1000px) { .courseModuleEditorPage.assessmentPage .moduleEditorWorkspace { grid-template-columns: 160px minmax(0, 1fr); gap: 18px; } .courseModuleEditorPage .quizEditorFields .optionsGrid { grid-template-columns: 1fr; } }
+@media (max-width: 650px) { .courseModuleEditorPage.assessmentPage .moduleEditorWorkspace { grid-template-columns: 1fr; } .courseModuleEditorPage .quizEditorFields { padding: 20px; } .courseModuleEditorPage .quizEditorToolbar { padding: 20px; } .courseModuleEditorPage.assessmentPage .moduleEditorActions { flex-wrap: wrap; gap: 12px; } }

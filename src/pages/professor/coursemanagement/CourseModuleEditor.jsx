@@ -1,9 +1,17 @@
-﻿import { useEffect, useMemo, useState } from 'react';
+import QuizSourceEvidence from '../../../components/QuizSourceEvidence.jsx';
+import { lessonAuthHeaders } from '../../../services/lessonAuth.js';
+import { requestQuizSettings, quizSourceFields, notifyQuizGenerated } from '../../../services/quizGenerationUi.js';
+import { notifyLessonGenerated } from '../../../services/lessonNotifications.js';
+﻿import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
 import { API_BASE } from '../../../config.js';
-import { fetchCourse } from '../../../services/courseApi.js';
+import { fetchCourse, saveCourse } from '../../../services/courseApi.js';
+import { uploadLessonSource } from '../../../services/lessonRagApi.js';
+import LessonFilePicker from '../../../components/LessonFilePicker.jsx';
+import LessonSourceEvidence from '../../../components/LessonSourceEvidence.jsx';
+import LessonSourceManager from '../../../components/LessonSourceManager.jsx';
 import LoadingState from '../../../components/LoadingState.jsx';
 
 import styles from './Addmodule.module.css';
@@ -12,7 +20,10 @@ const TITLE_LIMIT = 100;
 const LONG_LIMIT = 750;
 const LESSON_LIMIT = 6000;
 const QUIZ_LIMIT = 500;
+const LESSON_TAB_PAGE_SIZE = 10;
+const QUIZ_TAB_PAGE_SIZE = 10;
 const COURSE_DRAFT_STORAGE_PREFIX = 'puffy-course-builder-draft';
+const MAIN_QUIZ_SETTINGS_STORAGE_KEY = 'puffy-main-quiz-settings';
 
 function createId(prefix = 'item') {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
@@ -79,6 +90,7 @@ function readList(...values) {
 
 function normalizeLessonPage(page) {
   return {
+    ...page,
     id: page?.id || createId('page'),
     title: String(page?.title || ''),
     content: String(page?.content || page?.description || ''),
@@ -105,12 +117,14 @@ function getLessonPageMedia(page) {
 }
 
 function normalizeQuizItem(item) {
-  const type = item?.type === 'true_false' ? 'true_false' : 'multiple_choice';
+  const type = ['multiple_choice', 'identification', 'true_false'].includes(item?.type) ? item.type : 'multiple_choice';
   let options = Array.isArray(item?.options)
     ? item.options.map((option) => String(option || ''))
     : [];
 
-  if (type === 'true_false') {
+  if (type === 'identification') {
+    options = [];
+  } else if (type === 'true_false') {
     options = ['True', 'False'];
   } else {
     options = options.slice(0, 4);
@@ -121,6 +135,7 @@ function normalizeQuizItem(item) {
   }
 
   return {
+    ...item,
     id: item?.id || createId('quiz'),
     type,
     question: String(item?.question || ''),
@@ -130,7 +145,127 @@ function normalizeQuizItem(item) {
   };
 }
 
+function parseSettingsObject(value) {
+  if (value && typeof value === 'object' && !Array.isArray(value)) {
+    return value;
+  }
+
+  try {
+    const parsed = JSON.parse(value || '{}');
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed)
+      ? parsed
+      : {};
+  } catch {
+    return {};
+  }
+}
+
+function normalizeBoolean(value, fallback = true) {
+  if (value === undefined || value === null || value === '') {
+    return fallback;
+  }
+
+  if (typeof value === 'boolean') {
+    return value;
+  }
+
+  return ['1', 'true', 'yes', 'on'].includes(String(value).toLowerCase());
+}
+
+function normalizeDateTimeLocal(value) {
+  const text = String(value || '').trim();
+
+  if (!text) {
+    return '';
+  }
+
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(text)) {
+    return text.slice(0, 16);
+  }
+
+  const date = new Date(text);
+
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+
+  const timezoneOffsetMs = date.getTimezoneOffset() * 60 * 1000;
+  return new Date(date.getTime() - timezoneOffsetMs).toISOString().slice(0, 16);
+}
+
+function normalizeMainQuizSettings(module = {}) {
+  const settings = parseSettingsObject(
+    module?.mainQuizSettings || module?.main_quiz_settings
+  );
+  const enabled = normalizeBoolean(
+    settings.enabled ??
+      settings.isEnabled ??
+      module?.mainQuizEnabled ??
+      module?.main_quiz_enabled,
+    true
+  );
+  const unlockAt = normalizeDateTimeLocal(
+    settings.unlockAt ||
+      settings.unlock_at ||
+      module?.mainQuizUnlockAt ||
+      module?.main_quiz_unlock_at
+  );
+
+  const lockAt = normalizeDateTimeLocal(
+    settings.lockAt || settings.lock_at || module?.mainQuizLockAt || module?.main_quiz_lock_at
+  );
+
+  return {
+    enabled,
+    unlockAt,
+    lockAt,
+  };
+}
+
+function formatDateTimeLabel(value) {
+  const normalized = normalizeDateTimeLocal(value);
+
+  if (!normalized) {
+    return '';
+  }
+
+  const date = new Date(normalized);
+
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+
+  return date.toLocaleString([], {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  });
+}
+
+function normalizeAssessmentRoute(value = '') {
+  const assessment = String(value || '').toLowerCase();
+
+  if (assessment === 'main' || assessment === 'main-quiz') {
+    return 'main';
+  }
+
+  if (assessment === 'practice' || assessment === 'practice-quiz') {
+    return 'practice';
+  }
+
+  return '';
+}
+
+function getAssessmentRouteSegment(assessment) {
+  return assessment === 'main' ? 'main-quiz' : 'practice-quiz';
+}
+
+function getAssessmentLabel(assessment) {
+  return assessment === 'main' ? 'Main Quiz' : 'Practice Quiz';
+}
+
 function normalizeContentModule(module, index = 0) {
+  const mainQuizSettings = normalizeMainQuizSettings(module);
+
   return {
     id: module?.id || module?.lesson_id || module?.module_id || createId('module'),
     title: String(module?.title || '').trim() || `Module ${index + 1}`,
@@ -151,7 +286,108 @@ function normalizeContentModule(module, index = 0) {
       module?.quizModule,
       module?.quiz_contents
     ).map(normalizeQuizItem),
+    mainQuizSettings,
+    mainQuizEnabled: mainQuizSettings.enabled,
+    main_quiz_enabled: mainQuizSettings.enabled,
+    mainQuizUnlockAt: mainQuizSettings.unlockAt,
+    main_quiz_unlock_at: mainQuizSettings.unlockAt,
+    mainQuizLockAt: mainQuizSettings.lockAt,
+    main_quiz_lock_at: mainQuizSettings.lockAt,
   };
+}
+
+function readMainQuizSettingsMap() {
+  const mergedSettings = {};
+
+  [sessionStorage, localStorage].forEach((storage) => {
+    try {
+      const saved = storage.getItem(MAIN_QUIZ_SETTINGS_STORAGE_KEY);
+      const parsed = saved ? JSON.parse(saved) : {};
+
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        Object.assign(mergedSettings, parsed);
+      }
+    } catch {
+      // Ignore malformed storage and keep the editor usable.
+    }
+  });
+
+  return mergedSettings;
+}
+
+function writeMainQuizSettingsMap(settingsMap) {
+  [localStorage, sessionStorage].forEach((storage) => {
+    try {
+      storage.setItem(MAIN_QUIZ_SETTINGS_STORAGE_KEY, JSON.stringify(settingsMap));
+    } catch {
+      // Storage can fail in private windows. The in-memory draft still updates.
+    }
+  });
+}
+
+function getPagerPages(totalItems, pageSize) {
+  const pageCount = Math.ceil(totalItems / pageSize);
+
+  return Array.from({ length: pageCount }, (_, index) => index);
+}
+
+function clampPageStart(pageIndex, totalItems, pageSize) {
+  if (!totalItems) {
+    return 0;
+  }
+
+  return Math.min(totalItems - 1, Math.max(0, pageIndex * pageSize));
+}
+
+function getCourseSettingKeys(course = {}, routeId = '') {
+  const keys = [
+    routeId,
+    course?.id,
+    course?.course_id,
+    course?.code,
+    course?.courseCode,
+    course?.course_code,
+    course?.title,
+    course?.courseTitle,
+    course?.course_title,
+    course?.courseName,
+    course?.course_name,
+    course?.subject,
+  ]
+    .map((value) => String(value || '').trim())
+    .filter(Boolean);
+
+  return [...new Set(keys.flatMap((key) => [key, key.toLowerCase()]))];
+}
+
+function getModuleSettingKeys(module = {}, moduleIndex = 0) {
+  const keys = [
+    module?.id,
+    module?.module_id,
+    module?.moduleId,
+    module?.lesson_id,
+    module?.title,
+    String(moduleIndex),
+  ]
+    .map((value) => String(value || '').trim())
+    .filter(Boolean);
+
+  return [...new Set(keys.flatMap((key) => [key, key.toLowerCase()]))];
+}
+
+function writeMainQuizSettingsOverride(course, module, settings, routeId, moduleIndex) {
+  const settingsMap = readMainQuizSettingsMap();
+  const courseKeys = getCourseSettingKeys(course, routeId);
+  const moduleKeys = getModuleSettingKeys(module, moduleIndex);
+
+  courseKeys.forEach((courseKey) => {
+    moduleKeys.forEach((moduleKey) => {
+      settingsMap[`${courseKey}::${moduleKey}`] = settings;
+    });
+  });
+
+  writeMainQuizSettingsMap(settingsMap);
+  window.dispatchEvent(new CustomEvent('puffy-main-quiz-settings-updated'));
 }
 
 function normalizeCourse(course) {
@@ -200,21 +436,33 @@ function writeCourseBuilderDraft(courseId, draft) {
 }
 
 export default function CourseModuleEditor() {
-  const { id, moduleId } = useParams();
+  const { id, moduleId, assessmentType } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
+  const routeAssessment = normalizeAssessmentRoute(assessmentType);
 
+  const mainQuizSettingsDialog = useRef(null);
+  const [generatorOpen, setGeneratorOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [courseDraft, setCourseDraft] = useState(null);
   const [moduleDraft, setModuleDraft] = useState(null);
-  const [uploadedFile, setUploadedFile] = useState(null);
+  const [uploadedFile, setUploadedFile] = useState([]);
+  const [generationProgress, setGenerationProgress] = useState('');
   const [processingFile, setProcessingFile] = useState(false);
+  const [generatingQuiz, setGeneratingQuiz] = useState(false);
   const [generatedPageTitles, setGeneratedPageTitles] = useState([]);
   const [activePageIndex, setActivePageIndex] = useState(0);
   const [activeQuizIndex, setActiveQuizIndex] = useState(0);
-  const [activeAssessment, setActiveAssessment] = useState('');
+  const [activeAssessment, setActiveAssessment] = useState(routeAssessment);
 
   const builderPath = id ? `/professor/courses/edit/${id}` : '/professor/courses/new';
+  const moduleEditorPath = `${builderPath}/modules/${moduleId}/edit`;
+  const isAssessmentPage = Boolean(routeAssessment);
+
+  useEffect(() => {
+    setActiveAssessment(routeAssessment);
+    setActiveQuizIndex(0);
+  }, [routeAssessment]);
 
   useEffect(() => {
     let active = true;
@@ -283,6 +531,31 @@ export default function CourseModuleEditor() {
 
   const lessonCount = moduleDraft?.lessonPages?.length || 0;
   const quizCount = moduleDraft?.quizItems?.length || 0;
+  const activeLessonTabPageIndex = Math.floor(
+    activePageIndex / LESSON_TAB_PAGE_SIZE
+  );
+  const activeLessonTabPageStart =
+    activeLessonTabPageIndex * LESSON_TAB_PAGE_SIZE;
+  const activeLessonTabPageEnd = Math.min(
+    activeLessonTabPageStart + LESSON_TAB_PAGE_SIZE,
+    lessonCount
+  );
+  const visibleLessonPages =
+    moduleDraft?.lessonPages?.slice(
+      activeLessonTabPageStart,
+      activeLessonTabPageEnd
+    ) || [];
+  const lessonTabPages = getPagerPages(lessonCount, LESSON_TAB_PAGE_SIZE);
+  const activeQuizPageIndex = Math.floor(activeQuizIndex / QUIZ_TAB_PAGE_SIZE);
+  const activeQuizPageStart = activeQuizPageIndex * QUIZ_TAB_PAGE_SIZE;
+  const activeQuizPageEnd = Math.min(
+    activeQuizPageStart + QUIZ_TAB_PAGE_SIZE,
+    quizCount
+  );
+  const visibleQuizItems =
+    moduleDraft?.quizItems?.slice(activeQuizPageStart, activeQuizPageEnd) || [];
+  const mainQuizSettings = normalizeMainQuizSettings(moduleDraft || {});
+  const mainQuizUnlockLabel = formatDateTimeLabel(mainQuizSettings.unlockAt);
 
   const canMovePrevious = useMemo(
     () => activePageIndex > 0,
@@ -294,11 +567,84 @@ export default function CourseModuleEditor() {
     [activePageIndex, lessonCount]
   );
 
+  const canShowPreviousQuizPage = activeQuizPageStart > 0;
+  const canShowNextQuizPage = activeQuizPageEnd < quizCount;
+
+  const goToLessonTabPage = (pageIndex) => {
+    setActivePageIndex(
+      clampPageStart(pageIndex, lessonCount, LESSON_TAB_PAGE_SIZE)
+    );
+  };
+
+  const goToPreviousQuizPage = () => {
+    setActiveQuizIndex(Math.max(0, activeQuizPageStart - QUIZ_TAB_PAGE_SIZE));
+  };
+
+  const goToNextQuizPage = () => {
+    setActiveQuizIndex(Math.min(quizCount - 1, activeQuizPageEnd));
+  };
+
   const updateModuleField = (field, value) => {
     setModuleDraft((current) => ({
       ...current,
       [field]: value,
     }));
+  };
+
+  const updateMainQuizSettings = async (field, value) => {
+    if (!moduleDraft || !courseDraft) {
+      return;
+    }
+
+    const nextSettings = {
+      ...normalizeMainQuizSettings(moduleDraft),
+      [field]: value,
+    };
+    if (nextSettings.unlockAt && nextSettings.lockAt &&
+        new Date(nextSettings.lockAt).getTime() <= new Date(nextSettings.unlockAt).getTime()) {
+      await Swal.fire({ icon: 'error', title: 'Invalid quiz dates',
+        text: 'The lock date must be after the unlock date.' });
+      return;
+    }
+    const nextModule = {
+      ...moduleDraft,
+      mainQuizSettings: nextSettings,
+      main_quiz_settings: nextSettings,
+      mainQuizEnabled: nextSettings.enabled,
+      main_quiz_enabled: nextSettings.enabled,
+      mainQuizUnlockAt: nextSettings.unlockAt,
+      main_quiz_unlock_at: nextSettings.unlockAt,
+      mainQuizLockAt: nextSettings.lockAt,
+      main_quiz_lock_at: nextSettings.lockAt,
+    };
+    const moduleIndex = courseDraft.contentModules.findIndex(
+      (module) => String(module.id) === String(moduleId)
+    );
+    const nextCourse = {
+      ...courseDraft,
+      contentModules: courseDraft.contentModules.map((module) =>
+        String(module.id) === String(moduleId) ? nextModule : module
+      ),
+    };
+
+    setModuleDraft(nextModule);
+    setCourseDraft(nextCourse);
+    writeCourseBuilderDraft(id, nextCourse);
+    writeMainQuizSettingsOverride(
+      nextCourse,
+      nextModule,
+      nextSettings,
+      id,
+      moduleIndex >= 0 ? moduleIndex : 0
+    );
+    if (id) {
+      try {
+        await saveCourse(nextCourse);
+      } catch (error) {
+        await Swal.fire({ icon: 'error', title: 'Quiz settings not saved',
+          text: error.message || 'Could not save quiz access. Please try again.' });
+      }
+    }
   };
 
   const updateLessonPage = (pageIndex, field, value) => {
@@ -309,6 +655,7 @@ export default function CourseModuleEditor() {
           ? {
               ...page,
               [field]: value,
+              ...(field === 'content' || field === 'title' ? { grounding: { ...page.grounding, model_review_passed: false, human_review_required: true } } : {}),
             }
           : page
       ),
@@ -509,20 +856,162 @@ export default function CourseModuleEditor() {
     });
   };
 
+  const autoGenerateQuiz = async () => {
+    if (!moduleDraft) {
+      return;
+    }
+
+    const lessonContent = moduleDraft.lessonPages
+      .map((page) =>
+        [
+          String(page.title || '').trim(),
+          String(page.content || '').trim(),
+        ]
+          .filter(Boolean)
+          .join('\n')
+      )
+      .filter(Boolean)
+      .join('\n\n');
+
+    if (!lessonContent && !moduleDraft.learningObjectives.trim()) {
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Module Content Required',
+        text: 'Add learning objectives or lesson pages to this module first.',
+        confirmButtonText: 'OK',
+      });
+
+      return;
+    }
+
+    const result = await requestQuizSettings();
+
+
+    if (!result.isConfirmed || !result.value) {
+      return;
+    }
+
+    try {
+      setGeneratingQuiz(true);
+
+      Swal.fire({
+        title: 'Generating Quiz',
+        text: 'Retrieving source passages and checking the questions and answers.',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+
+      const response = await fetch(`${API_BASE}/lessons/generate-quiz`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          ...lessonAuthHeaders(),
+        },
+        body: JSON.stringify({
+          ...quizSourceFields(id, moduleId, moduleDraft.lessonPages),
+          lesson_title: moduleDraft.title,
+          lesson_content: lessonContent,
+          learning_objectives: moduleDraft.learningObjectives,
+          question_count: result.value.questionCount,
+          identification_count: result.value.identificationCount,
+          difficulty: result.value.difficulty,
+        }),
+      });
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || 'Could not generate the quiz.');
+      }
+
+      const generatedQuestions = Array.isArray(data.quiz?.questions)
+        ? data.quiz.questions.map(normalizeQuizItem).filter((item) => item.question)
+        : [];
+
+      if (generatedQuestions.length === 0) {
+        throw new Error('No valid quiz questions were generated.');
+      }
+
+      setModuleDraft((current) => ({
+        ...current,
+        quizItems: generatedQuestions,
+      }));
+      setActiveQuizIndex(0);
+      setActiveAssessment((currentAssessment) => currentAssessment || 'practice');
+
+      notifyQuizGenerated(generatedQuestions.length);
+    } catch (error) {
+      await Swal.fire({
+        icon: 'error',
+        title: 'Quiz Generation Failed',
+        text: error.message || 'Could not generate the quiz.',
+        confirmButtonText: 'OK',
+      });
+    } finally {
+      setGeneratingQuiz(false);
+    }
+  };
+
   const openAssessmentEditor = (assessment) => {
-    setActiveAssessment(assessment);
+    const nextAssessment = normalizeAssessmentRoute(assessment);
+
+    if (!nextAssessment) {
+      return;
+    }
+
+    const updatedCourse = courseDraft && moduleDraft
+      ? buildUpdatedCourse()
+      : courseDraft;
+
+    if (updatedCourse) {
+      writeCourseBuilderDraft(id, updatedCourse);
+    }
+
+    setActiveAssessment(nextAssessment);
 
     if (quizCount === 0) {
       setActiveQuizIndex(0);
     }
+
+    navigate(
+      `${builderPath}/modules/${moduleId}/${getAssessmentRouteSegment(
+        nextAssessment
+      )}/edit`,
+      {
+        state: {
+          courseDraft: updatedCourse,
+        },
+      }
+    );
+  };
+
+  const returnToAssessments = () => {
+    const updatedCourse = courseDraft && moduleDraft
+      ? buildUpdatedCourse()
+      : courseDraft;
+
+    if (updatedCourse) {
+      writeCourseBuilderDraft(id, updatedCourse);
+    }
+
+    setActiveAssessment('');
+
+    navigate(moduleEditorPath, {
+      state: {
+        courseDraft: updatedCourse,
+      },
+    });
   };
 
   const handleGenerateModule = async () => {
-    if (!uploadedFile) {
+    if (!uploadedFile.length) {
       await Swal.fire({
         icon: 'warning',
         title: 'No File Selected',
-        text: 'Please choose a PDF, DOCX, or TXT lesson file first.',
+        text: 'Please choose PDF, PPT, PPTX, DOCX, or TXT lesson files first.',
         confirmButtonText: 'OK',
       });
 
@@ -530,21 +1019,22 @@ export default function CourseModuleEditor() {
     }
 
     const formData = new FormData();
-    formData.append('file', uploadedFile);
+    if (!Number.isInteger(Number(id)) || Number(id) < 1) {
+      await Swal.fire('Save the course first', 'Save this course before indexing source materials.', 'info');
+      return;
+    }
+    formData.append('course_id', id);
+    formData.append('client_module_key', moduleId);
+    if (Number.isInteger(Number(moduleId)) && Number(moduleId) > 0) formData.append('lesson_id', moduleId);
+    uploadedFile.forEach(file => formData.append('files', file));
 
     try {
       setProcessingFile(true);
       setGeneratedPageTitles([]);
 
-      const response = await fetch(`${API_BASE}/lessons/process-file`, {
-        method: 'POST',
-        credentials: 'include',
-        body: formData,
-      });
+      const data = await uploadLessonSource(formData, job => setGenerationProgress(`${job.progress}% — ${job.phase}`));
 
-      const data = await response.json();
-
-      if (!response.ok || !data.success) {
+      if (!data.success) {
         throw new Error(
           data.message || 'Could not process the uploaded lesson file.'
         );
@@ -553,6 +1043,7 @@ export default function CourseModuleEditor() {
       const generatedPages = Array.isArray(data.lesson_pages)
         ? data.lesson_pages
             .map((page) => ({
+              ...page,
               id: createId('page'),
               title: limit(page?.title || '', TITLE_LIMIT),
               content: limit(page?.content || '', LESSON_LIMIT),
@@ -563,7 +1054,7 @@ export default function CourseModuleEditor() {
       if (generatedPages.length === 0) {
         throw new Error(
           data.message ||
-            'The file uploaded, but no lesson pages were created. Try a searchable PDF, DOCX, or TXT file.'
+            'The materials uploaded, but no lesson pages were created. Use files containing selectable text.'
         );
       }
 
@@ -588,12 +1079,7 @@ export default function CourseModuleEditor() {
         generatedPages.map((page, index) => page.title || `Page ${index + 1}`)
       );
 
-      await Swal.fire({
-        icon: 'success',
-        title: 'Module Generated',
-        text: 'The material was organized into lesson pages.',
-        confirmButtonText: 'Continue',
-      });
+      notifyLessonGenerated(generatedPages.length);
     } catch (error) {
       await Swal.fire({
         icon: 'error',
@@ -627,6 +1113,23 @@ export default function CourseModuleEditor() {
 
     const updatedCourse = buildUpdatedCourse();
     writeCourseBuilderDraft(id, updatedCourse);
+
+    if (id) {
+      try {
+        await saveCourse(updatedCourse);
+      } catch (error) {
+        await Swal.fire({
+          icon: 'error',
+          title: 'Save Failed',
+          text:
+            error?.message ||
+            'Could not save the module changes to the course.',
+          confirmButtonText: 'OK',
+        });
+
+        return;
+      }
+    }
 
     await Swal.fire({
       icon: 'success',
@@ -665,46 +1168,62 @@ export default function CourseModuleEditor() {
   }
 
   return (
-    <div className={`${styles.addModulePage} ${styles.courseModuleEditorPage} course-module-editor-page`}>
+    <div className={`${styles.addModulePage} ${styles.courseModuleEditorPage} ${isAssessmentPage ? styles.assessmentPage : ''} course-module-editor-page`}>
+      {isAssessmentPage && <div className={styles.assessmentBreadcrumb}><button type="button" onClick={returnToAssessments}>← Go back lesson</button></div>}
       <div className={styles.pageHeader}>
-        <h1>Edit Module</h1>
+        <h1>
+          {isAssessmentPage
+            ? `${getAssessmentLabel(activeAssessment)} Editor`
+            : 'Edit Module'}
+        </h1>
         <p className={styles.pageHeaderText}>
-          Build the course using modules. Each module can contain lesson pages and its own quiz.
+          {isAssessmentPage
+            ? `Edit the ${getAssessmentLabel(
+                activeAssessment
+              ).toLowerCase()} for this module on its own page.`
+            : 'Build the course using modules. Each module can contain lesson pages and its own quiz.'}
         </p>
+        {activeAssessment === 'main' && <button className={styles.assessmentSettingsButton} type="button" onClick={() => mainQuizSettingsDialog.current?.showModal()}>Main Quiz Settings</button>}
+        {!isAssessmentPage && <button className={styles.assessmentSettingsButton} type="button" onClick={() => setGeneratorOpen(true)}>Generate Module</button>}
       </div>
 
       <main className={styles.moduleEditorForm}>
+        {!isAssessmentPage && (
+          <>
+        {generatorOpen && <div className={styles.generatorOverlay}
+          onClick={(event) => { if (event.target === event.currentTarget) setGeneratorOpen(false); }}
+          onKeyDown={(event) => { if (event.key === 'Escape') setGeneratorOpen(false); }}>
+        <div role="dialog" aria-modal="true" className={styles.generateModuleDialog} aria-labelledby="generate-module-title">
         <section className={styles.moduleMaterialBand}>
-          <h2>Generate Module from Material</h2>
+          <button type="button" className={styles.settingsDialogClose} aria-label="Close module generator" autoFocus onClick={() => setGeneratorOpen(false)}>×</button>
+          <h2 id="generate-module-title">Generate Module from Material</h2>
           <p>
             Upload your learning material and PuffyBrain will organize the content into lesson pages automatically.
           </p>
 
-          <label className={styles.customFileBtn}>
-            Upload File Here
-            <input
-              type="file"
-              accept=".pdf,.docx,.txt"
-              disabled={processingFile}
-              onChange={(event) => {
-                setUploadedFile(event.target.files?.[0] || null);
-                setGeneratedPageTitles([]);
-              }}
-            />
-          </label>
-
-          <span className={styles.fileName}>
-            {uploadedFile ? uploadedFile.name : 'No file chosen'}
-          </span>
+          <div className={styles.generatorFilePicker}>
+          <LessonFilePicker files={uploadedFile} disabled={processingFile} buttonClassName={styles.customFileBtn}
+            onChange={files => { setUploadedFile(files); setGeneratedPageTitles([]); }} />
+          </div>
 
           <button
             className={styles.popupAddBtn}
             type="button"
             onClick={handleGenerateModule}
-            disabled={processingFile || !uploadedFile}
+            disabled={processingFile || !uploadedFile.length}
           >
             {processingFile ? 'Generating...' : 'Generate Module'}
           </button>
+
+          {processingFile && <p role="status">{generationProgress || 'Queuing materials...'}</p>}
+          <LessonSourceManager courseId={id} jobScope={moduleId}
+            lessonId={Number.isInteger(Number(moduleId)) && Number(moduleId) > 0 ? Number(moduleId) : null}
+            onGenerated={result => {
+              setModuleDraft(current => ({ ...current, title: result.module_title, description: result.description,
+                learningObjectives: result.learning_objectives,
+                lessonPages: result.lesson_pages.map(page => ({ ...page, id: createId('page') })) }));
+              setCourseDraft(current => ({ ...current, subject: result.subject })); setActivePageIndex(0);
+            }} />
 
           {generatedPageTitles.length > 0 && (
             <div className={styles.generatedPageSummary}>
@@ -720,6 +1239,8 @@ export default function CourseModuleEditor() {
             </div>
           )}
         </section>
+        </div>
+        </div>}
 
         <section className={styles.moduleEditorDetails}>
           <div className={styles.popupField}>
@@ -767,7 +1288,10 @@ export default function CourseModuleEditor() {
             />
           </div>
         </section>
+          </>
+        )}
 
+        {!isAssessmentPage && (
         <section className={styles.moduleEditorBand}>
           <div className={styles.moduleEditorBandHeader}>
             <div>
@@ -796,18 +1320,53 @@ export default function CourseModuleEditor() {
               {lessonCount === 0 ? (
                 <span className={styles.moduleEditorEmptyTab}>No pages</span>
               ) : (
-                moduleDraft.lessonPages.map((page, index) => (
-                  <button
-                    key={page.id}
-                    type="button"
-                    className={`${styles.lessonPageTab} ${
-                      index === activePageIndex ? styles.lessonPageTabActive : ''
-                    }`}
-                    onClick={() => setActivePageIndex(index)}
-                  >
-                    Page {index + 1}
-                  </button>
-                ))
+                <>
+                  {visibleLessonPages.map((page, offset) => {
+                    const index = activeLessonTabPageStart + offset;
+
+                    return (
+                      <button
+                        key={page.id}
+                        type="button"
+                        className={`${styles.lessonPageTab} ${
+                          index === activePageIndex ? styles.lessonPageTabActive : ''
+                        }`}
+                        onClick={() => setActivePageIndex(index)}
+                      >
+                        Page {index + 1}
+                      </button>
+                    );
+                  })}
+
+                  {lessonTabPages.length > 1 && (
+                    <div className={styles.questionTabPager}>
+                      <div className={styles.questionTabPagerControls}>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            goToLessonTabPage(activeLessonTabPageIndex - 1)
+                          }
+                          disabled={activeLessonTabPageIndex === 0}
+                        >
+                          Previous
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            goToLessonTabPage(activeLessonTabPageIndex + 1)
+                          }
+                          disabled={
+                            activeLessonTabPageIndex >= lessonTabPages.length - 1
+                          }
+                        >
+                          Next
+                        </button>
+                      </div>
+
+                    </div>
+                  )}
+                </>
               )}
             </div>
 
@@ -874,6 +1433,7 @@ export default function CourseModuleEditor() {
                     }
                     placeholder="Enter page content"
                   />
+                  <LessonSourceEvidence page={activePage} />
 
                   <div className={styles.lessonPageNavigation}>
                     <button
@@ -885,9 +1445,39 @@ export default function CourseModuleEditor() {
                       Previous
                     </button>
 
-                    <span className={styles.lessonPageIndicator}>
-                      page {activePageIndex + 1} of {lessonCount}
-                    </span>
+                    <div className={styles.lessonPageCenterNavigation}>
+                      <span className={styles.lessonPageIndicator}>
+                        page {activePageIndex + 1} of {lessonCount}
+                      </span>
+
+                      {lessonTabPages.length > 1 && (
+                        <div
+                          className={styles.lessonBottomPageGroups}
+                          aria-label="Lesson page groups"
+                        >
+                          {lessonTabPages.map((pageIndex) => (
+                            <button
+                              key={pageIndex}
+                              type="button"
+                              className={
+                                pageIndex === activeLessonTabPageIndex
+                                  ? styles.lessonBottomPageGroupActive
+                                  : ''
+                              }
+                              onClick={() => goToLessonTabPage(pageIndex)}
+                              aria-label={`Show lesson pages ${
+                                pageIndex * LESSON_TAB_PAGE_SIZE + 1
+                              } to ${Math.min(
+                                (pageIndex + 1) * LESSON_TAB_PAGE_SIZE,
+                                lessonCount
+                              )}`}
+                            >
+                              {pageIndex + 1}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
 
                     <button
                       className={styles.lessonNavigationBtn}
@@ -909,64 +1499,205 @@ export default function CourseModuleEditor() {
             </div>
           </div>
         </section>
+        )}
 
         <section className={styles.moduleEditorBand}>
-          <div className={styles.moduleEditorBandHeader}>
+          {!activeAssessment && <div className={styles.moduleEditorBandHeader}>
             <div>
               <h2>Module Assessments</h2>
               <p>Practice and main quiz settings belonging only to this module.</p>
             </div>
-          </div>
+          </div>}
 
-          <div className={styles.moduleAssessmentGrid}>
-            <article className={styles.moduleAssessmentCard}>
-              <div>
-                <h3>Practice Quiz</h3>
-                <p>{quizCount} Questions</p>
-                <p>Unlimited Attempts</p>
-              </div>
-
-              <button
-                className={styles.assessmentEditButton}
-                type="button"
-                onClick={() => openAssessmentEditor('practice')}
-              >
-                Edit Practice Quiz
-              </button>
-            </article>
-
-            <article className={styles.moduleAssessmentCard}>
-              <div>
-                <h3>Main Quiz</h3>
-                <p>{quizCount} Questions</p>
-                <p>Passing Score: 60%</p>
-              </div>
-
-              <button
-                className={styles.assessmentEditButton}
-                type="button"
-                onClick={() => openAssessmentEditor('main')}
-              >
-                Edit Main Quiz
-              </button>
-            </article>
-          </div>
-
-          {activeAssessment && (
-            <div className={styles.moduleAssessmentEditor}>
-              <div className={styles.moduleAssessmentEditorHeader}>
+          {!activeAssessment ? (
+            <div className={styles.moduleAssessmentGrid}>
+              <article className={styles.moduleAssessmentCard}>
+                <span className={styles.assessmentFolderAccent} aria-hidden="true">+</span>
                 <div>
-                  <h3>
-                    {activeAssessment === 'main' ? 'Main Quiz' : 'Practice Quiz'} Editor
-                  </h3>
+                  <h3>Practice Quiz</h3>
+                  <p>{quizCount} Questions</p>
+                  <p>Unlimited Attempts</p>
+                </div>
+
+                <div className={styles.assessmentCardFooter}>
+                <button
+                  className={styles.assessmentEditButton}
+                  type="button"
+                  onClick={() => openAssessmentEditor('practice')}
+                >
+                  Edit Practice Quiz
+                </button>
+                </div>
+              </article>
+
+              <article className={styles.moduleAssessmentCard}>
+                <span className={styles.assessmentFolderAccent} aria-hidden="true">+</span>
+                <div>
+                  <h3>Main Quiz</h3>
+                  <p>{quizCount} Questions</p>
+                  <p>Passing Score: 60%</p>
                   <p>
-                    {activeAssessment === 'main'
-                      ? 'Edit the main quiz questions and correct answers.'
-                      : 'Edit practice questions students can retry while studying.'}
+                    Status:{' '}
+                    {mainQuizSettings.enabled
+                      ? mainQuizUnlockLabel
+                        ? `Opens ${mainQuizUnlockLabel}`
+                        : 'Available now'
+                      : 'Disabled'}
                   </p>
                 </div>
 
-                <div className={styles.moduleEditorBandActions}>
+                <div className={styles.assessmentCardFooter}>
+                <button
+                  className={styles.assessmentEditButton}
+                  type="button"
+                  onClick={() => openAssessmentEditor('main')}
+                >
+                  Edit Main Quiz
+                </button>
+                </div>
+              </article>
+            </div>
+          ) : (
+            <div className={styles.moduleAssessmentEditor}>
+              {activeAssessment === 'main' && (
+                <dialog ref={mainQuizSettingsDialog} className={styles.mainQuizSettingsDialog} aria-labelledby="main-quiz-access-title" onClick={(event) => { if (event.target === event.currentTarget) event.currentTarget.close(); }}>
+                <div className={styles.mainQuizSettingsPanel}>
+                  <button type="button" className={styles.settingsDialogClose} aria-label="Close main quiz settings" onClick={() => mainQuizSettingsDialog.current?.close()}>×</button>
+                  <div>
+                    <h4 id="main-quiz-access-title">Main Quiz Access</h4>
+                    <p>
+                      Lock or unlock the main quiz and set when student access opens and closes.
+                    </p>
+                  </div>
+
+                  <div className={styles.mainQuizSettingsControls}>
+                    <button
+                      className={`${styles.mainQuizToggle} ${
+                        mainQuizSettings.enabled
+                          ? styles.mainQuizToggleOn
+                          : styles.mainQuizToggleOff
+                      }`}
+                      type="button"
+                      aria-pressed={!mainQuizSettings.enabled}
+                      onClick={() =>
+                        updateMainQuizSettings('enabled', !mainQuizSettings.enabled)
+                      }
+                    >
+                      {mainQuizSettings.enabled ? 'Lock Main Quiz' : 'Unlock Main Quiz'}
+                    </button>
+
+                    <label className={styles.mainQuizTimerField}>
+                      Unlock date and time
+                      <input
+                        className={styles.popupInput}
+                        type="datetime-local"
+                        value={mainQuizSettings.unlockAt}
+                        onChange={(event) =>
+                          updateMainQuizSettings('unlockAt', event.target.value)
+                        }
+                      />
+                    </label>
+
+                    <button
+                      className={styles.assessmentBackButton}
+                      type="button"
+                      onClick={() => updateMainQuizSettings('unlockAt', '')}
+                      disabled={!mainQuizSettings.unlockAt}
+                    >
+                      Clear Unlock Date
+                    </button>
+                    <label className={styles.mainQuizTimerField}>
+                      Lock date and time
+                      <input
+                        className={styles.popupInput}
+                        type="datetime-local"
+                        value={mainQuizSettings.lockAt}
+                        min={mainQuizSettings.unlockAt || undefined}
+                        onChange={(event) =>
+                          updateMainQuizSettings('lockAt', event.target.value)
+                        }
+                      />
+                    </label>
+                    <button
+                      className={styles.assessmentBackButton}
+                      type="button"
+                      onClick={() => updateMainQuizSettings('lockAt', '')}
+                      disabled={!mainQuizSettings.lockAt}
+                    >
+                      Clear Lock Date
+                    </button>
+                  </div>
+
+                  <p className={styles.mainQuizAccessHint}>
+                    {mainQuizSettings.enabled
+                      ? mainQuizUnlockLabel
+                        ? `Students are locked out until ${mainQuizUnlockLabel}.`
+                        : 'Unlocked — students can access the main quiz after they finish the module.'
+                      : 'Locked — students cannot access the main quiz. Click Unlock Main Quiz to allow access.'}
+                  </p>
+                  {mainQuizSettings.lockAt && (
+                    <p className={styles.mainQuizAccessHint}>
+                      Student access closes on {formatDateTimeLabel(mainQuizSettings.lockAt)}.
+                    </p>
+                  )}
+                  <button type="button" className={styles.assessmentSettingsButton} onClick={() => mainQuizSettingsDialog.current?.close()}>Done</button>
+                </div>
+                </dialog>
+              )}
+
+              <div className={styles.moduleEditorWorkspace}>
+                <div className={styles.lessonPageTabs}>
+                  {quizCount === 0 ? (
+                    <span className={styles.moduleEditorEmptyTab}>No quiz</span>
+                  ) : (
+                    <>
+                      {visibleQuizItems.map((item, offset) => {
+                        const index = activeQuizPageStart + offset;
+
+                        return (
+                          <button
+                            key={item.id}
+                            type="button"
+                            className={`${styles.lessonPageTab} ${
+                              index === activeQuizIndex ? styles.lessonPageTabActive : ''
+                            }`}
+                            onClick={() => setActiveQuizIndex(index)}
+                          >
+                            Question {index + 1}
+                          </button>
+                        );
+                      })}
+
+                      {quizCount > QUIZ_TAB_PAGE_SIZE && (
+                        <div className={styles.questionTabPager}>
+                          <div className={styles.questionTabPagerControls}>
+                            <button
+                              type="button"
+                              onClick={goToPreviousQuizPage}
+                              disabled={!canShowPreviousQuizPage}
+                            >
+                              Previous
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={goToNextQuizPage}
+                              disabled={!canShowNextQuizPage}
+                            >
+                              Next
+                            </button>
+                          </div>
+
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+
+                <div className={`${styles.popupQuizCard} ${styles.moduleQuizEditorCard}`}>
+                  <div className={styles.quizEditorToolbar}>
+                    <h2>Question</h2>
+                    <div className={styles.moduleEditorBandActions}>
                   <button className={styles.popupAddBtn} type="button" onClick={addQuizItem}>
                     + Add Quiz
                   </button>
@@ -979,30 +1710,18 @@ export default function CourseModuleEditor() {
                   >
                     Remove Question
                   </button>
-                </div>
-              </div>
+                  <button
+                    className={styles.popupAddBtn}
+                    type="button"
+                    onClick={autoGenerateQuiz}
+                    disabled={generatingQuiz}
+                  >
+                    {generatingQuiz ? 'Generating...' : 'Auto Generate'}
+                  </button>
 
-              <div className={styles.moduleEditorWorkspace}>
-                <div className={styles.lessonPageTabs}>
-                  {quizCount === 0 ? (
-                    <span className={styles.moduleEditorEmptyTab}>No quiz</span>
-                  ) : (
-                    moduleDraft.quizItems.map((item, index) => (
-                      <button
-                        key={item.id}
-                        type="button"
-                        className={`${styles.lessonPageTab} ${
-                          index === activeQuizIndex ? styles.lessonPageTabActive : ''
-                        }`}
-                        onClick={() => setActiveQuizIndex(index)}
-                      >
-                        Question {index + 1}
-                      </button>
-                    ))
-                  )}
-                </div>
-
-                <div className={`${styles.popupQuizCard} ${styles.moduleQuizEditorCard}`}>
+                    </div>
+                  </div>
+                  <div className={styles.quizEditorFields}>
                   {activeQuiz ? (
                     <>
                       <label className={styles.popupLabel}>
@@ -1030,13 +1749,13 @@ export default function CourseModuleEditor() {
                           updateQuizItem(
                             activeQuizIndex,
                             'options',
-                            type === 'true_false' ? ['True', 'False'] : ['', '', '', '']
+                            type === 'identification' ? [] : ['', '', '', '']
                           );
                           updateQuizItem(activeQuizIndex, 'correct_answer', '');
                         }}
                       >
                         <option value="multiple_choice">Multiple Choice</option>
-                        <option value="true_false">True or False</option>
+                        <option value="identification">Identification</option>
                       </select>
 
                       <div className={styles.optionsGrid}>
@@ -1058,7 +1777,7 @@ export default function CourseModuleEditor() {
                         ))}
                       </div>
 
-                      <select
+                      {activeQuiz.type === 'identification' ? <input className={styles.popupInput} value={activeQuiz.correct_answer} onChange={event => updateQuizItem(activeQuizIndex, 'correct_answer', event.target.value)} placeholder="Correct identification answer" aria-label="Correct identification answer" maxLength={150} /> : (<select
                         className={styles.popupSelect}
                         value={activeQuiz.correct_answer}
                         onChange={(event) =>
@@ -1075,7 +1794,7 @@ export default function CourseModuleEditor() {
                             {option || `Option ${optionIndex + 1}`}
                           </option>
                         ))}
-                      </select>
+                      </select>)}
 
                       <textarea
                         className={`${styles.popupTextarea} ${styles.popupAnswerBox}`}
@@ -1089,10 +1808,12 @@ export default function CourseModuleEditor() {
                         }
                         placeholder="Explanation"
                       />
+                      <QuizSourceEvidence question={activeQuiz} />
                     </>
                   ) : (
                     <div className={styles.popupEmptyQuiz}>Add a quiz item to begin.</div>
                   )}
+                  </div>
                 </div>
               </div>
             </div>

@@ -666,6 +666,7 @@ export default function TimedQuiz() {
 
   return (
     <div className={styles.page}>
+
       <button
         type="button"
         className={styles.settingsBtn}

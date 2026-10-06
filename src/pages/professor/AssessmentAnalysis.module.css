@@ -79,44 +79,58 @@
 
 .courseGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 340px));
-  gap: 22px;
-  align-items: start;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 360px));
+  gap: 24px;
+  align-items: stretch;
 }
 
 .courseCard {
   position: relative;
-  width: 340px;
-  min-height: 166px;
-  padding: 17px 20px 15px;
-  border: 1px solid #d2d2d2;
-  border-radius: 5px;
-  background: #ffffff;
-  box-shadow: 8px 0 0 #c4c7cc;
-  color: #646464;
+  isolation: isolate;
+  width: 100%;
+  min-height: 270px;
+  display: flex;
+  flex-direction: column;
+  padding: 70px 26px 20px 20px;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: #4f6174;
   cursor: pointer;
   font: inherit;
   text-align: left;
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  box-sizing: border-box;
+  transition: transform 0.18s ease;
 }
 
 .courseCard:hover {
-  transform: translateY(-1px);
-  box-shadow: 8px 0 0 #bcc0c6, 0 8px 18px rgba(0, 0, 0, 0.08);
+  transform: translateY(-3px);
 }
 
-.folderTab {
+.courseCard:focus-visible {
+  outline: 3px solid #7fa8d6;
+  outline-offset: 4px;
+}
+
+.courseCard::before,
+.courseCard::after {
+  content: '';
   position: absolute;
-  top: -21px;
-  left: 0;
-  width: 110px;
-  height: 21px;
-  border-radius: 5px 16px 0 0;
-  border-top: 7px solid #c4c7cc;
-  border-left: 1px solid #d2d2d2;
-  background: #ffffff;
-  transform: skewX(28deg);
-  transform-origin: left bottom;
+  pointer-events: none;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+
+.courseCard::before {
+  inset: 5px 0 0 8px;
+  z-index: -2;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 377 250' preserveAspectRatio='none'%3E%3Cpath d='M12 1H122Q132 1 140 9L174 38Q182 45 192 45H364Q376 45 376 58V237Q376 249 364 249H12Q1 249 1 237V13Q1 1 12 1Z' fill='%23c4c9d1' stroke='%23aeb5bf' stroke-width='1.5'/%3E%3C/svg%3E");
+}
+
+.courseCard::after {
+  inset: 0 10px 3px 0;
+  z-index: -1;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 377 250' preserveAspectRatio='none'%3E%3Cpath d='M12 1H122Q132 1 140 9L174 38Q182 45 192 45H364Q376 45 376 58V237Q376 249 364 249H12Q1 249 1 237V13Q1 1 12 1Z' fill='white' stroke='%23b6bec9' stroke-width='2'/%3E%3C/svg%3E");
 }
 
 .dateText,
@@ -125,7 +139,7 @@
   display: block;
   margin: 0;
   color: #666666;
-  font-size: 9px;
+  font-size: 12px;
   line-height: 1.35;
 }
 
@@ -139,10 +153,11 @@
 
 .courseCard strong {
   display: block;
-  margin: 7px 0 5px;
+  margin: 10px 0 8px;
   color: #555f6c;
   font-size: 23px;
-  font-weight: 600;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-weight: 500;
   line-height: 1.22;
 }
 
@@ -155,8 +170,9 @@
 .divider {
   display: block;
   height: 1px;
-  margin: 7px 0 9px;
-  background: #eeeeee;
+  margin: auto 0 12px;
+  padding-top: 16px;
+  background: linear-gradient(#d8d8d8, #d8d8d8) bottom / 100% 1px no-repeat;
 }
 
 .stats {
@@ -171,8 +187,8 @@
   align-items: center;
   padding: 0 11px;
   border-radius: 999px;
-  background: #eeeeee;
-  color: #666666;
+  background: #edf4fc;
+  color: #4f6174;
   font-size: 11px;
   line-height: 1;
 }
@@ -709,6 +725,23 @@
   color: #303946;
   font-size: 13px;
   text-align: right;
+}
+
+.thinkingSkillMeaning {
+  width: min(100%, 840px);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px 24px;
+  margin: 12px auto 0;
+  color: #4b5563;
+  font-size: 13px;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.thinkingSkillMeaning strong {
+  color: #303946;
 }
 
 .questionResponses {
@@ -1669,4 +1702,54 @@
 
 .modalLevel {
   background: #7fa8d6;
+}
+
+.pieLegendLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.pieLegendSwatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  flex: 0 0 10px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.scoreDistributionChart {
+  width: min(100%, 840px);
+  margin: 0 auto;
+  overflow-x: auto;
+}
+
+.scoreDistributionChart svg {
+  display: block;
+  width: 100%;
+  min-width: 540px;
+  font-family: inherit;
+  font-size: 12px;
+  fill: #475569;
+}
+
+.scoreDistributionLabels {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px 20px;
+  padding: 0;
+  margin: 8px 0 0;
+  list-style: none;
+  color: #475569;
+  font-size: 13px;
+}
+
+.scoreDistributionLabels li {
+  display: flex;
+  align-items: center;
+  gap: 7px;
 }

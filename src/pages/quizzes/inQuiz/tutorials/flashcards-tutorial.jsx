@@ -1,3 +1,4 @@
+import TutorialBackButton from "../TutorialBackButton.jsx";
 import React, { useEffect, useState } from "react";
 import styles from "./flashcards-tutorial.module.css";
 import { useNavigate, useParams } from "react-router-dom";
@@ -60,6 +61,8 @@ export default function FlashcardsTutorial() {
 
   return (
     <div className={styles.flashcardsApp}>
+      <TutorialBackButton />
+
       {(showIntro || startLoading) && (
         <div className={styles.introScreen}>
           {showIntro && !showCircle && !startLoading && (
@@ -97,6 +100,7 @@ export default function FlashcardsTutorial() {
           </div>
 
           <div className={styles.flashcardWrapper}>
+            <div className={styles.demoHeader}>Quiz Tutorial</div>
             <div className={styles.tab}>
               <span className={styles.active}>{tabLabel}</span>
               <span onClick={handleFlip}>Flip</span>

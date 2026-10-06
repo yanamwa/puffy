@@ -4714,20 +4714,21 @@ a.course-folder:focus-visible {
 }
 
 .student-module-learn-button {
-  background: #76a43a !important;
+  background: #5f86b1 !important;
   color: #ffffff !important;
-  box-shadow: 0 3px 0 #5b7f2d;
+  box-shadow: 0 3px 0 #496b92;
 }
 
 .student-module-practice-button {
-  background: #08701b !important;
+  background: #6f98c7 !important;
   color: #ffffff !important;
+  box-shadow: 0 3px 0 #557da8;
 }
 
 .student-module-main-quiz-button {
-  background: #7fa8d6 !important;
+  background: #8ab3df !important;
   color: #ffffff !important;
-  box-shadow: 0 3px 0 #5f86b1;
+  box-shadow: 0 3px 0 #6f98c7;
 }
 
 .student-module-learn-button:hover:not(:disabled),

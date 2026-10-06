@@ -233,21 +233,11 @@ function normalizeStudent(user) {
 
     role: savedUser.role || "student",
 
-    course:
-
-      savedUser.course ||
-
-      savedUser.program ||
-
-      savedUser.courseName ||
-
-      savedUser.course_name ||
-
-      savedUser.programName ||
-
-      savedUser.program_name ||
-
-      "Program not set",
+    course:
+      savedUser.course ||
+      savedUser.courseName ||
+      savedUser.course_name ||
+      "Course not set",
 
     profileImage:
 
@@ -1162,6 +1152,7 @@ export default function StudentProfile() {
                         </strong>
 
                       </div>
+
 
                       <div className="student-info-item">
 

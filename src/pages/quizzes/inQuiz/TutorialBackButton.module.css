@@ -1,0 +1,21 @@
+.bar {
+  width: min(1750px, calc(100% - 32px));
+  margin: 20px auto 0;
+  box-sizing: border-box;
+  text-align: left;
+  left: 30px
+}
+
+.bar button {
+  padding: 10px 20px;
+  border: 1px solid #5f86b1;
+  border-radius: 999px;
+  background: #7fa8d6;
+  font: inherit;
+  cursor: pointer;
+  box-shadow: 0 3px 0 #4f6174;
+  color: white;
+  font-weight: 600;
+}
+.bar button:hover { background: #87a4c2; }
+.bar button:focus-visible { outline: 3px solid #4f6174; outline-offset: 4px; }

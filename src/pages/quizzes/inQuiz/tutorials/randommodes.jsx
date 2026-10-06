@@ -1,3 +1,4 @@
+import TutorialBackButton from "../TutorialBackButton.jsx";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import styles from "./randommodes.module.css";
@@ -66,6 +67,8 @@ export default function RandomModesTutorial() {
   return (
 
     <div className={styles.wrapper}>
+      <TutorialBackButton />
+
 
       {/* HEADER */}
 
@@ -97,6 +100,7 @@ export default function RandomModesTutorial() {
       {/* QUIZ */}
 
       <div className={styles.slideshowBox}>
+            <div className={styles.demoHeader}>Quiz Tutorial</div>
         {/* SLIDES */}
 
         {slides.map((slide, i) => (

@@ -833,6 +833,7 @@ export default function MixedMode() {
 
   return (
     <div className={styles.wrapper}>
+
       {notifOpen && (
         <div className={styles.slideNotif}>
           <img

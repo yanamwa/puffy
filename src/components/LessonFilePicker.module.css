@@ -1,0 +1,7 @@
+.picker { display: inline-flex; flex-direction: column; gap: 8px; max-width: 100%; vertical-align: top; margin: 0 12px 12px 0; }
+.picker small { color: #536274; line-height: 1.5; }
+.files { list-style: none; padding: 0; margin: 0; }
+.files li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 0; }
+.files span { overflow-wrap: anywhere; }
+.files button { padding: 4px 8px; border: 1px solid #bdc9d6; border-radius: 6px; background: white; color: #334155; cursor: pointer; }
+.error { color: #a62323; margin: 0; }

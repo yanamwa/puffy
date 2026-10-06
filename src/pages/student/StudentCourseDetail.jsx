@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
-import QuizModesModal from '../../components/QuizModesModal';
 import {
   getCourseContentModules,
   getCourseQuizItems,
@@ -11,6 +10,7 @@ import { Avatar } from './EnrolledCourses';
 import StudentSidebar from '../../components/students/StudentSidebar';
 import StudentHeader from '../../components/students/StudentHeader';
 import JoinCourseModal from './JoinCourseModal';
+import QuizModesModal from '../../components/QuizModesModal.jsx';
 
 import {
   enrollStudentInCourseAsync,
@@ -33,6 +33,9 @@ import './StudentCourseDetail.css';
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const MAIN_QUIZ_SETTINGS_STORAGE_KEY = 'puffy-main-quiz-settings';
+const COURSE_DRAFT_STORAGE_PREFIX = 'puffy-course-builder-draft';
+const PROFESSOR_COURSES_KEY = 'professor-courses';
 
 const notificationItems = [
   {
@@ -94,7 +97,430 @@ function getProfessorDepartment(course) {
   return course.professorDepartment || course.professor_department || 'Department not set';
 }
 
-function normalizeModule(module, index) {
+function parseSettingsObject(value) {
+  if (value && typeof value === 'object' && !Array.isArray(value)) {
+    return value;
+  }
+
+  try {
+    const parsed = JSON.parse(value || '{}');
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed)
+      ? parsed
+      : {};
+  } catch {
+    return {};
+  }
+}
+
+function normalizeBoolean(value, fallback = true) {
+  if (value === undefined || value === null || value === '') {
+    return fallback;
+  }
+
+  if (typeof value === 'boolean') {
+    return value;
+  }
+
+  return ['1', 'true', 'yes', 'on'].includes(String(value).toLowerCase());
+}
+
+function normalizeDateTimeLocal(value) {
+  const text = String(value || '').trim();
+
+  if (!text) {
+    return '';
+  }
+
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(text)) {
+    return text.slice(0, 16);
+  }
+
+  const date = new Date(text);
+
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+
+  const timezoneOffsetMs = date.getTimezoneOffset() * 60 * 1000;
+  return new Date(date.getTime() - timezoneOffsetMs).toISOString().slice(0, 16);
+}
+
+function readMainQuizSettingsMap() {
+  const mergedSettings = {};
+
+  try {
+    const saved = sessionStorage.getItem(MAIN_QUIZ_SETTINGS_STORAGE_KEY);
+    const parsed = saved ? JSON.parse(saved) : {};
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      Object.assign(mergedSettings, parsed);
+    }
+  } catch {
+    // Ignore malformed storage and keep checking other sources.
+  }
+
+  try {
+    const saved = localStorage.getItem(MAIN_QUIZ_SETTINGS_STORAGE_KEY);
+    const parsed = saved ? JSON.parse(saved) : {};
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      Object.assign(mergedSettings, parsed);
+    }
+  } catch {
+    // Ignore malformed storage.
+  }
+
+  return mergedSettings;
+}
+
+function readStorageJson(key, fallback = null) {
+  for (const storage of [sessionStorage, localStorage]) {
+    try {
+      const saved = storage.getItem(key);
+
+      if (saved) {
+        return JSON.parse(saved);
+      }
+    } catch {
+      // Try the next storage area.
+    }
+  }
+
+  return fallback;
+}
+
+function readStorageJsonValues(key) {
+  const values = [];
+
+  for (const storage of [sessionStorage, localStorage]) {
+    try {
+      const saved = storage.getItem(key);
+
+      if (!saved) {
+        continue;
+      }
+
+      const parsed = JSON.parse(saved);
+
+      if (parsed !== null && parsed !== undefined) {
+        values.push(parsed);
+      }
+    } catch {
+      // Try the next storage area.
+    }
+  }
+
+  return values;
+}
+
+function collectStorageJsonByPrefix(prefix) {
+  const values = [];
+
+  for (const storage of [sessionStorage, localStorage]) {
+    try {
+      for (let index = 0; index < storage.length; index += 1) {
+        const key = storage.key(index);
+
+        if (!key || !key.startsWith(prefix)) {
+          continue;
+        }
+
+        const parsed = JSON.parse(storage.getItem(key) || 'null');
+
+        if (parsed && typeof parsed === 'object') {
+          values.push(parsed);
+        }
+      }
+    } catch {
+      // Ignore inaccessible storage.
+    }
+  }
+
+  return values;
+}
+
+function readLocalStorageJson(key, fallback = null) {
+  try {
+    const saved = localStorage.getItem(key);
+    return saved ? JSON.parse(saved) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function getCourseSettingKeys(course = {}) {
+  const keys = [
+    course?.id,
+    course?.course_id,
+    course?.code,
+    course?.courseCode,
+    course?.course_code,
+    course?.title,
+    course?.courseTitle,
+    course?.course_title,
+    course?.courseName,
+    course?.course_name,
+    course?.subject,
+  ]
+    .map((value) => String(value || '').trim())
+    .filter(Boolean);
+
+  return [...new Set(keys.flatMap((key) => [key, key.toLowerCase()]))];
+}
+
+function getModuleSettingKeys(module = {}, moduleIndex = 0) {
+  const keys = [
+    module?.id,
+    module?.module_id,
+    module?.moduleId,
+    module?.lesson_id,
+    module?.title,
+    String(moduleIndex),
+    String(moduleIndex + 1),
+    `module-${moduleIndex + 1}`,
+    `module ${moduleIndex + 1}`,
+  ]
+    .map((value) => String(value || '').trim())
+    .filter(Boolean);
+
+  return [...new Set(keys.flatMap((key) => [key, key.toLowerCase()]))];
+}
+
+function readMainQuizSettingsOverride(course, module, moduleIndex) {
+  const settingsMap = readMainQuizSettingsMap();
+  const courseKeys = getCourseSettingKeys(course);
+  const moduleKeys = getModuleSettingKeys(module, moduleIndex);
+
+  for (const courseKey of courseKeys) {
+    for (const moduleKey of moduleKeys) {
+      const settings = settingsMap[`${courseKey}::${moduleKey}`];
+
+      if (settings && typeof settings === 'object') {
+        return settings;
+      }
+    }
+  }
+
+  return null;
+}
+
+function getCourseContentModuleList(course = {}) {
+  const modules = Array.isArray(course?.contentModules)
+    ? course.contentModules
+    : Array.isArray(course?.content_modules)
+      ? course.content_modules
+      : readStorageJsonValue(course?.content_modules);
+
+  return Array.isArray(modules) ? modules : [];
+}
+
+function readStorageJsonValue(value) {
+  if (Array.isArray(value)) {
+    return value;
+  }
+
+  try {
+    const parsed = JSON.parse(value || '[]');
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function keysOverlap(left = [], right = []) {
+  const rightSet = new Set(right);
+  return left.some((key) => rightSet.has(key));
+}
+
+function courseMatchesKeys(course = {}, courseKeys = []) {
+  return keysOverlap(getCourseSettingKeys(course), courseKeys);
+}
+
+function hasExplicitMainQuizSettings(module = {}) {
+  return (
+    module.mainQuizSettings ||
+    module.main_quiz_settings ||
+    module.mainQuizEnabled !== undefined ||
+    module.main_quiz_enabled !== undefined ||
+    module.mainQuizUnlockAt ||
+    module.main_quiz_unlock_at ||
+    module.mainQuizLockAt ||
+    module.main_quiz_lock_at
+  );
+}
+
+function readStoredMainQuizSettingsOverride(course, module, moduleIndex) {
+  const courseKeys = getCourseSettingKeys(course);
+  const moduleKeys = getModuleSettingKeys(module, moduleIndex);
+  const courseCandidates = [];
+  const seenCandidates = new Set();
+
+  const addCourseCandidate = (candidate) => {
+    if (!candidate || typeof candidate !== 'object') {
+      return;
+    }
+
+    const identity = JSON.stringify([
+      candidate.id,
+      candidate.course_id,
+      candidate.code,
+      candidate.title,
+    ]);
+
+    if (seenCandidates.has(identity)) {
+      return;
+    }
+
+    seenCandidates.add(identity);
+    courseCandidates.push(candidate);
+  };
+
+  courseKeys.forEach((courseKey) => {
+    const draft = readStorageJson(
+      `${COURSE_DRAFT_STORAGE_PREFIX}:${courseKey}`,
+      null
+    );
+
+    addCourseCandidate(draft);
+  });
+
+  collectStorageJsonByPrefix(`${COURSE_DRAFT_STORAGE_PREFIX}:`).forEach(
+    (draft) => {
+      if (courseMatchesKeys(draft, courseKeys)) {
+        addCourseCandidate(draft);
+      }
+    }
+  );
+
+  const savedCourseCollections = readStorageJsonValues(PROFESSOR_COURSES_KEY);
+
+  savedCourseCollections.forEach((savedCourses) => {
+    if (!Array.isArray(savedCourses)) {
+      return;
+    }
+
+    savedCourses.forEach((savedCourse) => {
+      if (courseMatchesKeys(savedCourse, courseKeys)) {
+        addCourseCandidate(savedCourse);
+      }
+    });
+  });
+
+  for (const candidateCourse of courseCandidates) {
+    const candidateModules = getCourseContentModuleList(candidateCourse);
+    const candidateModule = candidateModules.find((item, index) =>
+      keysOverlap(getModuleSettingKeys(item, index), moduleKeys)
+    );
+
+    if (candidateModule) {
+      const settings = coerceMainQuizSettings(candidateModule);
+
+      if (hasExplicitMainQuizSettings(candidateModule)) {
+        return settings;
+      }
+    }
+  }
+
+  return null;
+}
+
+function coerceMainQuizSettings(module = {}, override = null) {
+  const settings = parseSettingsObject(
+    override ||
+      module?.mainQuizSettings ||
+      module?.main_quiz_settings
+  );
+  const enabled = normalizeBoolean(
+    settings.enabled ??
+      settings.isEnabled ??
+      module?.mainQuizEnabled ??
+      module?.main_quiz_enabled,
+    true
+  );
+  const unlockAt = normalizeDateTimeLocal(
+    settings.unlockAt ||
+      settings.unlock_at ||
+      module?.mainQuizUnlockAt ||
+      module?.main_quiz_unlock_at
+  );
+
+  const lockAt = normalizeDateTimeLocal(
+    settings.lockAt || settings.lock_at || module?.mainQuizLockAt || module?.main_quiz_lock_at
+  );
+
+  return {
+    enabled,
+    unlockAt,
+    lockAt,
+  };
+}
+
+function normalizeMainQuizSettings(module = {}, course = null, moduleIndex = 0) {
+  if (hasExplicitMainQuizSettings(module)) {
+    return coerceMainQuizSettings(module);
+  }
+  const override = course
+    ? readMainQuizSettingsOverride(course, module, moduleIndex) ||
+      readStoredMainQuizSettingsOverride(course, module, moduleIndex)
+    : null;
+
+  return coerceMainQuizSettings(module, override);
+}
+
+function formatDateTimeLabel(value) {
+  const normalized = normalizeDateTimeLocal(value);
+
+  if (!normalized) {
+    return '';
+  }
+
+  const date = new Date(normalized);
+
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+
+  return date.toLocaleString([], {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  });
+}
+
+function getMainQuizAvailability(module = {}, course = null, moduleIndex = 0) {
+  const settings = normalizeMainQuizSettings(module, course, moduleIndex);
+  const unlockTime = settings.unlockAt ? new Date(settings.unlockAt).getTime() : 0;
+  const isTimeLocked =
+    settings.enabled &&
+    settings.unlockAt &&
+    !Number.isNaN(unlockTime) &&
+    Date.now() < unlockTime;
+
+  if (!settings.enabled) {
+    return {
+      available: false,
+      reason: 'Your professor has turned off the Main Quiz for this module.',
+    };
+  }
+
+  if (settings.lockAt && Date.now() >= new Date(settings.lockAt).getTime()) {
+    return {
+      available: false,
+      reason: `Main Quiz closed on ${formatDateTimeLabel(settings.lockAt)}.`,
+    };
+  }
+
+  if (isTimeLocked) {
+    return {
+      available: false,
+      reason: `Main Quiz opens on ${formatDateTimeLabel(settings.unlockAt)}.`,
+    };
+  }
+
+  return {
+    available: true,
+    reason: '',
+  };
+}
+
+function normalizeModule(module, index, course = null) {
   const lessonPages = Array.isArray(module?.lessonPages)
     ? module.lessonPages
     : Array.isArray(module?.lesson_pages)
@@ -128,6 +554,7 @@ function normalizeModule(module, index) {
     ),
     lessonPages,
     quizItems,
+    mainQuizSettings: normalizeMainQuizSettings(module, course, index),
   };
 }
 
@@ -135,10 +562,14 @@ function getNestedCourseModules(course) {
   const parsedModules = getCourseContentModules(course);
 
   if (parsedModules.length > 0) {
-    return parsedModules.map(normalizeModule);
+    return parsedModules.map((module, index) =>
+      normalizeModule(module, index, course)
+    );
   }
 
-  return getStudentCourseModules(course).map(normalizeModule);
+  return getStudentCourseModules(course).map((module, index) =>
+    normalizeModule(module, index, course)
+  );
 }
 
 export default function StudentCourseDetail() {
@@ -149,11 +580,8 @@ export default function StudentCourseDetail() {
   const [rawCourse, setRawCourse] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const [quizModesOpen, setQuizModesOpen] = useState(false);
-  const [selectedPracticeModule, setSelectedPracticeModule] =
-    useState(null);
-
   const [joinModalOpen, setJoinModalOpen] = useState(false);
+  const [practiceSession, setPracticeSession] = useState(null);
   const [joinCourseCode, setJoinCourseCode] = useState('');
   const [notificationMenuOpen, setNotificationMenuOpen] =
     useState(false);
@@ -161,6 +589,8 @@ export default function StudentCourseDetail() {
     useState(false);
   const [notifications, setNotifications] =
     useState(notificationItems);
+  const [mainQuizSettingsVersion, setMainQuizSettingsVersion] =
+    useState(0);
 
   const [enrolledCoursesOpen, setEnrolledCoursesOpen] =
     useState(false);
@@ -267,6 +697,9 @@ export default function StudentCourseDetail() {
     const refreshProgress = () => {
       setProgressVersion((version) => version + 1);
     };
+    const refreshMainQuizSettings = () => {
+      setMainQuizSettingsVersion((version) => version + 1);
+    };
 
     window.addEventListener(
       STUDENT_READING_PROGRESS_EVENT,
@@ -274,6 +707,11 @@ export default function StudentCourseDetail() {
     );
 
     window.addEventListener('storage', refreshProgress);
+    window.addEventListener('storage', refreshMainQuizSettings);
+    window.addEventListener(
+      'puffy-main-quiz-settings-updated',
+      refreshMainQuizSettings
+    );
 
     return () => {
       window.removeEventListener(
@@ -284,6 +722,11 @@ export default function StudentCourseDetail() {
       window.removeEventListener(
         'storage',
         refreshProgress
+      );
+      window.removeEventListener('storage', refreshMainQuizSettings);
+      window.removeEventListener(
+        'puffy-main-quiz-settings-updated',
+        refreshMainQuizSettings
       );
     };
   }, []);
@@ -321,7 +764,7 @@ export default function StudentCourseDetail() {
 
   const modules = useMemo(
     () => (course ? getNestedCourseModules(course) : []),
-    [course]
+    [course, mainQuizSettingsVersion]
   );
 
   const courseRouteId = course
@@ -488,6 +931,55 @@ export default function StudentCourseDetail() {
     );
   };
 
+  const prepareQuizSession = ({
+    scopeId,
+    scopeType,
+    source,
+    moduleIndex,
+    moduleTitle,
+    title,
+    detail,
+    quizzes,
+  }) => {
+    const practiceLessonId = `${courseRouteId}-${scopeId}`;
+
+    localStorage.setItem('practiceSource', source);
+    localStorage.setItem('practiceLessonId', practiceLessonId);
+    localStorage.setItem('practiceQuizzes', JSON.stringify(quizzes));
+    localStorage.removeItem('practiceDeckId');
+    localStorage.removeItem('practiceCards');
+    localStorage.setItem(
+      'practiceScope',
+      JSON.stringify({
+        courseId: courseRouteId,
+        courseCode: course.code,
+        courseTitle: course.title,
+        courseName: course.courseName || course.course_name || course.title,
+        scopeId,
+        scopeType,
+        moduleIndex,
+        moduleTitle,
+        moduleNumber: Number.isInteger(moduleIndex) && moduleIndex >= 0
+          ? moduleIndex + 1
+          : null,
+        moduleCount: modules.length,
+        scopeTitle: title,
+        scopeDetail: detail,
+      })
+    );
+
+    return practiceLessonId;
+  };
+
+  const openPracticeModes = (quizSession) => {
+    const lessonId = prepareQuizSession(quizSession);
+    setPracticeSession({
+      source: quizSession.source,
+      lessonId,
+      quizzes: quizSession.quizzes,
+    });
+  };
+
   const openModulePractice = async (module, index) => {
     if (!isModuleLearnUnlocked(index)) {
       await Swal.fire({
@@ -517,29 +1009,16 @@ export default function StudentCourseDetail() {
 
     const quizzes = getModulePracticeItems(module, index);
 
-    const practiceModule = {
-      id: module.id,
-      index,
+    openPracticeModes({
+      scopeId: module.id,
+      scopeType: 'module',
+      source: 'module',
+      moduleIndex: index,
+      moduleTitle: module.title,
       title: module.title,
       detail: `${module.lessonPages.length} lesson page(s)`,
       quizzes,
-    };
-
-    localStorage.setItem(
-      'practiceScope',
-      JSON.stringify({
-        courseId: courseRouteId,
-        courseCode: course.code,
-        scopeId: module.id,
-        scopeType: 'module',
-        moduleIndex: index,
-        scopeTitle: module.title,
-        scopeDetail: practiceModule.detail,
-      })
-    );
-
-    setSelectedPracticeModule(practiceModule);
-    setQuizModesOpen(true);
+    });
   };
 
   const openModuleMainQuiz = async (module, index) => {
@@ -569,6 +1048,19 @@ export default function StudentCourseDetail() {
       return;
     }
 
+    const mainQuizAvailability = getMainQuizAvailability(module, course, index);
+
+    if (!mainQuizAvailability.available) {
+      await Swal.fire({
+        icon: 'info',
+        title: 'Main Quiz Locked',
+        text: mainQuizAvailability.reason,
+        confirmButtonText: 'OK',
+      });
+
+      return;
+    }
+
     const quizzes = getModuleAuthoredQuizItems(module, index);
 
     if (!quizzes.length) {
@@ -582,29 +1074,28 @@ export default function StudentCourseDetail() {
       return;
     }
 
-    const mainQuizModule = {
-      id: module.id,
-      index,
+    const practiceLessonId = prepareQuizSession({
+      scopeId: module.id,
+      scopeType: 'main_quiz',
+      source: 'module',
+      moduleIndex: index,
+      moduleTitle: module.title,
       title: `${module.title} Main Quiz`,
       detail: `${quizzes.length} question(s)`,
       quizzes,
-    };
-
+    });
     localStorage.setItem(
-      'practiceScope',
+      'practiceMode',
       JSON.stringify({
-        courseId: courseRouteId,
-        courseCode: course.code,
-        scopeId: module.id,
-        scopeType: 'main_quiz',
-        moduleIndex: index,
-        scopeTitle: mainQuizModule.title,
-        scopeDetail: mainQuizModule.detail,
+        title: 'Matching Type',
+        mode_name: 'Matching Type',
+        quizMode: 'matching',
+        route: '/matching-type',
       })
     );
+    localStorage.removeItem('timedQuizSeconds');
 
-    setSelectedPracticeModule(mainQuizModule);
-    setQuizModesOpen(true);
+    navigate(`/matching-type/lesson/${encodeURIComponent(practiceLessonId)}`);
   };
 
   const startCourseLearning = () => {
@@ -639,27 +1130,15 @@ export default function StudentCourseDetail() {
       getModulePracticeItems(module, index)
     );
 
-    localStorage.setItem(
-      'practiceScope',
-      JSON.stringify({
-        courseId: courseRouteId,
-        courseCode: course.code,
-        scopeId: 'all-modules',
-        scopeType: 'course',
-        scopeTitle: `Everything in ${course.code}`,
-        scopeDetail: `${modules.length} module(s)`,
-      })
-    );
-
-    setSelectedPracticeModule({
-      id: 'all-modules',
-      index: -1,
+    openPracticeModes({
+      scopeId: 'all-modules',
+      scopeType: 'course',
+      source: 'course',
+      moduleIndex: -1,
       title: `Everything in ${course.code}`,
       detail: `${modules.length} module(s)`,
       quizzes,
     });
-
-    setQuizModesOpen(true);
   };
 
   const toggleSidebar = () => {
@@ -946,6 +1425,19 @@ export default function StudentCourseDetail() {
                               isModulePracticeUnlocked(index);
                             const hasMainQuiz =
                               getModuleAuthoredQuizItems(module, index).length > 0;
+                            const mainQuizAvailability =
+                              getMainQuizAvailability(module, course, index);
+                            const mainQuizDisabled =
+                              !practiceUnlocked ||
+                              !hasMainQuiz ||
+                              !mainQuizAvailability.available;
+                            const mainQuizTitle = !hasMainQuiz
+                              ? 'No Main Quiz questions have been added yet.'
+                              : !mainQuizAvailability.available
+                                ? mainQuizAvailability.reason
+                                : practiceUnlocked
+                                  ? `Take the Main Quiz for ${module.title}`
+                                  : 'Finish reading this module first.';
           
                             const moduleState = !learnUnlocked
                               ? 'locked'
@@ -1042,22 +1534,32 @@ export default function StudentCourseDetail() {
 
                                   <button
                                     type="button"
-                                    className="student-module-main-quiz-button"
-                                    onClick={() =>
-                                      openModuleMainQuiz(module, index)
-                                    }
-                                    disabled={!practiceUnlocked || !hasMainQuiz}
-                                    title={
-                                      !hasMainQuiz
-                                        ? 'No Main Quiz questions have been added yet.'
-                                        : practiceUnlocked
-                                          ? `Take the Main Quiz for ${module.title}`
-                                          : 'Finish reading this module first.'
-                                    }
+                                    className={`student-module-main-quiz-button ${
+                                      mainQuizDisabled ? 'is-disabled' : ''
+                                    }`}
+                                    onClick={(event) => {
+                                      if (mainQuizDisabled) {
+                                        event.preventDefault();
+                                        return;
+                                      }
+
+                                      openModuleMainQuiz(module, index);
+                                    }}
+                                    disabled={mainQuizDisabled}
+                                    aria-disabled={mainQuizDisabled}
+                                    title={mainQuizTitle}
                                   >
                                     Main Quiz
                                   </button>
                                 </div>
+
+                                {hasMainQuiz &&
+                                  practiceUnlocked &&
+                                  !mainQuizAvailability.available && (
+                                    <small className="student-module-main-quiz-lock-message">
+                                      {mainQuizAvailability.reason}
+                                    </small>
+                                  )}
                               </article>
                             );
                           })}
@@ -1067,15 +1569,15 @@ export default function StudentCourseDetail() {
                   </section>
         </main>
       </div>
-      <JoinCourseModal open={joinModalOpen} courseCode={joinCourseCode} onCourseCodeChange={setJoinCourseCode} onCancel={closeJoinModal} onJoin={joinByCourseCode} />
-      {quizModesOpen && selectedPracticeModule && (
+      {practiceSession && (
         <QuizModesModal
-          source={selectedPracticeModule.index === -1 ? 'course' : 'module'}
-          lessonId={`${courseRouteId}-${selectedPracticeModule.id}`}
-          quizzes={selectedPracticeModule.quizzes}
-          onClose={() => { setQuizModesOpen(false); setSelectedPracticeModule(null); }}
+          source={practiceSession.source}
+          lessonId={practiceSession.lessonId}
+          quizzes={practiceSession.quizzes}
+          onClose={() => setPracticeSession(null)}
         />
       )}
+      <JoinCourseModal open={joinModalOpen} courseCode={joinCourseCode} onCourseCodeChange={setJoinCourseCode} onCancel={closeJoinModal} onJoin={joinByCourseCode} />
     </div>
   );
 }

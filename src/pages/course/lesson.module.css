@@ -12,10 +12,12 @@
   --page-bg: #f7f7f7;
   --paper: #ffffff;
   --text: #202020;
-  --border: #c4c8cf;
+  --border: #a8c6e7;
   --progress-bg: #e9e9e9;
-  --progress-fill: #aaaaaa;
-  --folder-edge: #b9bec4;
+  --progress-fill: #7fa8d6;
+  --folder-edge: #7fa8d6;
+  --folder-fold-dark: #5f86b1;
+  --folder-fold-light: #a8c6e7;
 
   position: relative;
 
@@ -54,14 +56,14 @@
   z-index: 1000;
 
   width: auto;
-  min-width: 145px;
+  min-width: 190px;
 
-  height: 34px;
+  height: 46px;
 
   box-sizing: border-box;
 
   margin: 0;
-  padding: 0 16px;
+  padding: 0 22px;
 
   display: inline-flex;
   align-items: center;
@@ -77,7 +79,7 @@
   color: #222222;
 
   font-family: Georgia, "Times New Roman", serif;
-  font-size: 14px;
+  font-size: 20px;
   font-weight: 400;
 
   line-height: 1;
@@ -108,20 +110,21 @@
 .content {
   position: relative;
 
-  width: 802px;
+  width: 1000px;
   max-width: calc(100vw - 48px);
 
-  min-height: 444px;
+  min-height: 560px;
   height: auto;
 
   box-sizing: border-box;
 
   margin-top: 42px;
-  padding: 26px 30px 36px;
+  padding: 36px 42px 44px;
 
   background: var(--paper);
 
-  border: 1px solid var(--folder-edge);
+  border: 1px solid rgba(127, 168, 214, 0.7);
+  border-top: 0;
   border-radius: 7px;
 
   box-shadow: 0 18px 44px rgba(28, 34, 40, 0.05);
@@ -133,7 +136,7 @@
 
 
 /* =========================================================
-   FOLDER TOP - GRAY EDGE
+   FOLDER TOP
    ========================================================= */
 
 .content::before {
@@ -141,19 +144,24 @@
 
   position: absolute;
 
-  top: -70px;
+  top: -74px;
   left: 0;
 
   width: 100%;
-  height: 84px;
+  height: 88px;
 
-  background: #ffffff;
+  background: linear-gradient(
+    180deg,
+    var(--folder-fold-light) 0%,
+    var(--folder-edge) 38%,
+    var(--folder-edge) 100%
+  );
 
   clip-path: polygon(
-    0 14px,
-    32.5% 14px,
-    42% 82%,
-    100% 82%,
+    0 0,
+    32.5% 0,
+    42% 78%,
+    100% 78%,
     100% 100%,
     0 100%
   );
@@ -167,31 +175,34 @@
 
 
 /* =========================================================
-   FOLDER TOP - WHITE INTERIOR
+   FOLDED EDGE
    ========================================================= */
 
 .content::after {
   content: "";
 
+  display: none;
+
   position: absolute;
 
-  top: -70px;
-  left: 0;
+  top: -74px;
+  left: 32.5%;
 
-  width: 100%;
-  height: 84px;
+  width: 11%;
+  height: 88px;
 
-  background:
-    linear-gradient(var(--folder-edge), var(--folder-edge)) 0 13px / 32.5% 1px no-repeat,
-    linear-gradient(var(--folder-edge), var(--folder-edge)) 41.75% 81% / 58.25% 1px no-repeat;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.34) 0%,
+    rgba(255, 255, 255, 0.08) 42%,
+    rgba(79, 97, 116, 0.2) 100%
+  );
 
   clip-path: polygon(
     0 0,
-    32.5% 0,
-    42% 82%,
-    100% 82%,
-    100% 100%,
-    0 100%
+    100% 78%,
+    82% 78%,
+    0 18%
   );
 
   pointer-events: none;
@@ -209,27 +220,27 @@
 
 
 /* =========================================================
-   OLD RIBBON
+   FOLDER SHADOW
    ========================================================= */
 
 .ribbon {
   position: absolute;
 
-  top: -82px;
+  display: none;
+
+  top: -86px;
   left: -1px;
 
   width: calc(100% + 2px);
-  height: 96px;
+  height: 100px;
 
-  display: block;
-
-  background: var(--folder-edge);
+  background: var(--folder-fold-dark);
 
   clip-path: polygon(
     0 0,
     32.5% 0,
-    42% 82%,
-    100% 82%,
+    42% 78%,
+    100% 78%,
     100% 100%,
     0 100%
   );
@@ -250,14 +261,14 @@
   position: absolute;
 
   top: -37px;
-  right: 29px;
+  right: 42px;
 
   z-index: 5;
 
   display: flex;
   align-items: flex-end;
 
-  gap: 26px;
+  gap: 24px;
 }
 
 
@@ -273,9 +284,9 @@
 .aboutyou,
 .howitworks,
 .howitworksactive {
-  width: 112px;
-  min-width: 112px;
-  height: 38px;
+  width: 152px;
+  min-width: 152px;
+  height: 52px;
 
   box-sizing: border-box;
 
@@ -286,19 +297,19 @@
   align-items: center;
   justify-content: center;
 
-  background: #fbfbfb;
+  background: #ffffff;
 
-  border: 1px solid var(--folder-edge);
+  border: 1px solid rgba(127, 168, 214, 0.85);
   border-bottom-color: #ffffff;
 
-  border-radius: 13px 13px 0 0;
+  border-radius: 15px 15px 0 0;
 
-  box-shadow: none;
+  box-shadow: 0 -2px 10px rgba(79, 97, 116, 0.12);
 
-  color: #222222;
+  color: #4f6174;
 
   font-family: Georgia, "Times New Roman", serif;
-  font-size: 12px;
+  font-size: 17px;
   font-weight: 400;
 
   line-height: 1;
@@ -317,10 +328,12 @@
 
 .welcomeactive,
 .howitworksactive {
-  background: #ffffff;
+  background: var(--folder-edge);
 
   border-color: var(--folder-edge);
-  border-bottom-color: #ffffff;
+  border-bottom-color: var(--folder-edge);
+
+  color: #ffffff;
 }
 
 
@@ -329,7 +342,7 @@
 .aboutyou:hover:not(:disabled),
 .howitworks:hover:not(:disabled),
 .howitworksactive:hover:not(:disabled) {
-  background: #f4f4f4;
+  background: #eef4fb;
 }
 
 
@@ -339,8 +352,6 @@
 .howitworks:disabled,
 .howitworksactive:disabled {
   opacity: 1;
-
-  color: #252525;
 
   cursor: default;
 }
@@ -388,7 +399,7 @@
 
   font-family: Georgia, "Times New Roman", serif;
 
-  font-size: 18px;
+  font-size: 22px;
   font-weight: 400;
 
   line-height: 1.2;
@@ -407,7 +418,7 @@
 
   font-family: Georgia, "Times New Roman", serif;
 
-  font-size: 18px;
+  font-size: 22px;
   font-weight: 400;
 
   line-height: 1.2;
@@ -428,7 +439,7 @@
 
   font-family: Georgia, "Times New Roman", serif;
 
-  font-size: 18px;
+  font-size: 22px;
   font-weight: 400;
 
   line-height: 1.2;
@@ -449,7 +460,7 @@
 
   font-family: Georgia, "Times New Roman", serif;
 
-  font-size: 30px;
+  font-size: 38px;
   font-weight: 400;
 
   line-height: 1.2;
@@ -501,7 +512,7 @@
 
   font-family: Georgia, "Times New Roman", serif;
 
-  font-size: 18px;
+  font-size: 22px;
   font-weight: 400;
 
   line-height: 1.2;
@@ -556,7 +567,7 @@
 
   font-family: Georgia, "Times New Roman", serif;
 
-  font-size: 28px;
+  font-size: 34px;
   font-weight: 400;
 
   line-height: 1.2;
@@ -599,10 +610,10 @@
 
   font-family: Georgia, "Times New Roman", serif;
 
-  font-size: 18px;
+  font-size: 22px;
   font-weight: 400;
 
-  line-height: 1.18;
+  line-height: 1.28;
 
   overflow: visible;
 }
@@ -785,7 +796,7 @@
 
   font-family: Georgia, "Times New Roman", serif;
 
-  font-size: 20px;
+  font-size: 34px;
   font-weight: 400;
 
   line-height: 1.2;
@@ -800,7 +811,7 @@
 
   font-family: Georgia, "Times New Roman", serif;
 
-  font-size: 14px;
+  font-size: 24px;
   font-weight: 400;
 
   line-height: 1.35;
@@ -814,7 +825,7 @@
 
   font-family: Georgia, "Times New Roman", serif;
 
-  font-size: 14px;
+  font-size: 21px;
   font-style: italic;
 
   line-height: 1.35;
@@ -831,7 +842,7 @@
   display: flex;
   flex-direction: column;
 
-  gap: 8px;
+  gap: 12px;
 }
 
 
@@ -840,7 +851,7 @@
 
   box-sizing: border-box;
 
-  padding: 10px 12px;
+  padding: 14px 16px;
 
   background: #ffffff;
 
@@ -851,7 +862,7 @@
 
   font-family: Georgia, "Times New Roman", serif;
 
-  font-size: 13px;
+  font-size: 21px;
   font-weight: 400;
 
   line-height: 1.3;
@@ -910,13 +921,13 @@
 
 
 .button {
-  min-width: 92px;
-  height: 32px;
+  min-width: 112px;
+  height: 42px;
 
   box-sizing: border-box;
 
   margin: 0;
-  padding: 0 18px;
+  padding: 0 24px;
 
   display: inline-flex;
   align-items: center;
@@ -933,7 +944,7 @@
 
   font-family: Georgia, "Times New Roman", serif;
 
-  font-size: 13px;
+  font-size: 20px;
   font-weight: 400;
 
   line-height: 1;
@@ -1011,13 +1022,13 @@
    ========================================================= */
 
 :global(.quiz-popup) {
-  width: 430px !important;
+  width: 560px !important;
 
-  max-width: 88vw !important;
+  max-width: 92vw !important;
 
   box-sizing: border-box !important;
 
-  padding: 34px 34px 28px !important;
+  padding: 46px 46px 38px !important;
 
   background: #ffffff !important;
 
@@ -1044,7 +1055,7 @@
 
   margin: 0 !important;
 
-  padding: 0 18px !important;
+  padding: 0 28px !important;
 
   text-align: center !important;
 
@@ -1056,7 +1067,7 @@
 
 
 :global(.quiz-popup-title) {
-  margin: 8px 0 18px !important;
+  margin: 14px 0 24px !important;
 
   color: #222222 !important;
 
@@ -1065,7 +1076,7 @@
     "Times New Roman",
     serif !important;
 
-  font-size: 28px !important;
+  font-size: 38px !important;
   font-weight: 400 !important;
 
   text-align: center !important;
@@ -1077,7 +1088,7 @@
 
   box-sizing: border-box;
 
-  padding: 0 30px;
+  padding: 0 36px;
 
   color: #222222;
 
@@ -1086,16 +1097,16 @@
     "Times New Roman",
     serif;
 
-  line-height: 1.6;
+  line-height: 1.7;
 }
 
 
 :global(.quiz-popup-answer) {
-  margin-bottom: 18px !important;
+  margin-bottom: 24px !important;
 
   color: #222222 !important;
 
-  font-size: 16px !important;
+  font-size: 21px !important;
 
   line-height: 1.6 !important;
 }
@@ -1106,9 +1117,11 @@
 
   margin-top: 8px;
 
-  color: #198754;
+  color: #5f86b1;
 
   font-weight: 700;
+
+  font-size: 22px;
 
   line-height: 1.6;
 
@@ -1117,11 +1130,11 @@
 
 
 :global(.quiz-popup-explanation) {
-  margin-top: 10px !important;
+  margin-top: 14px !important;
 
   color: #555555 !important;
 
-  font-size: 15px !important;
+  font-size: 20px !important;
 
   line-height: 1.6 !important;
 
@@ -1130,15 +1143,16 @@
 
 
 :global(.quiz-popup-button) {
-  min-width: 100px !important;
+  min-width: 200px !important;
+  min-height: 58px !important;
 
-  margin-top: 24px !important;
+  margin-top: 38px !important;
 
-  padding: 9px 22px !important;
+  padding: 0 42px !important;
 
   background: #ffffff !important;
 
-  border: 1px solid #c4c7ca !important;
+  border: 2px solid #c4c7ca !important;
 
   border-radius: 999px !important;
 
@@ -1151,7 +1165,7 @@
     "Times New Roman",
     serif !important;
 
-  font-size: 14px !important;
+  font-size: 24px !important;
   font-weight: 400 !important;
 
   cursor: pointer !important;
@@ -1164,9 +1178,9 @@
 
 
 :global(.quiz-popup-icon) {
-  margin-bottom: 8px !important;
+  margin-bottom: 12px !important;
 
-  transform: scale(0.9);
+  transform: scale(1.2);
 }
 
 
@@ -1182,7 +1196,7 @@
 
 
   .content {
-    width: min(802px, calc(100vw - 40px));
+    width: min(1000px, calc(100vw - 40px));
   }
 
 
@@ -1212,26 +1226,26 @@
   .content {
     width: 100%;
 
-    min-height: 360px;
+    min-height: 430px;
 
     margin-top: 34px;
-    padding: 24px 18px 28px;
+    padding: 28px 22px 32px;
   }
 
 
   /* Folder top */
 
   .content::before {
-    top: -58px;
+    top: -62px;
 
     width: 100%;
-    height: 70px;
+    height: 76px;
 
     clip-path: polygon(
-      0 11px,
-      31% 11px,
-      44% 80%,
-      100% 80%,
+      0 0,
+      31% 0,
+      44% 76%,
+      100% 76%,
       100% 100%,
       0 100%
     );
@@ -1239,36 +1253,26 @@
 
 
   .content::after {
-    top: -58px;
+    top: -62px;
+    left: 31%;
 
-    width: 100%;
-    height: 70px;
+    width: 14%;
+    height: 76px;
 
-    clip-path: polygon(
-      0 0,
-      31% 0,
-      44% 80%,
-      100% 80%,
-      100% 100%,
-      0 100%
-    );
-
-    background:
-      linear-gradient(#c4c8cf, #c4c8cf) 0 10px / 31% 1px no-repeat,
-      linear-gradient(#c4c8cf, #c4c8cf) 43.75% 79% / 56.25% 1px no-repeat;
+    clip-path: polygon(0 0, 100% 76%, 82% 76%, 0 18%);
   }
 
 
   .ribbon {
-    top: -68px;
+    top: -72px;
 
-    height: 80px;
+    height: 86px;
 
     clip-path: polygon(
       0 0,
       31% 0,
-      44% 80%,
-      100% 80%,
+      44% 76%,
+      100% 76%,
       100% 100%,
       0 100%
     );
@@ -1278,7 +1282,7 @@
   /* Tabs */
 
   .tabs {
-    top: -32px;
+    top: -38px;
     right: 16px;
 
     gap: 8px;
@@ -1292,13 +1296,13 @@
   .howitworksactive {
     width: auto;
 
-    min-width: 86px;
+    min-width: 112px;
 
-    height: 33px;
+    height: 42px;
 
-    padding: 0 10px;
+    padding: 0 12px;
 
-    font-size: 10px;
+    font-size: 13px;
   }
 
 
@@ -1307,24 +1311,29 @@
   .slideCounter,
   .greets > h3,
   .moduleEyebrow {
-    font-size: 15px;
+    font-size: 17px;
   }
 
 
   .greets h2 {
-    font-size: 24px;
+    font-size: 28px;
   }
 
 
   .lessonSlideTitle,
   .quizTitle {
-    font-size: 22px;
+    font-size: 28px;
   }
 
 
   .lessonSlideContent,
   .quizQuestion {
-    font-size: 15px;
+    font-size: 19px;
+  }
+
+
+  .optionButton {
+    font-size: 18px;
   }
 
 
@@ -1334,13 +1343,13 @@
 
 
   .button {
-    min-width: 82px;
+    min-width: 104px;
 
-    height: 31px;
+    height: 40px;
 
-    padding: 0 14px;
+    padding: 0 20px;
 
-    font-size: 12px;
+    font-size: 18px;
   }
 }
 
@@ -1365,26 +1374,26 @@
 
 
   .content::before {
-    top: -53px;
-    height: 64px;
+    top: -56px;
+    height: 68px;
   }
 
 
   .content::after {
-    top: -53px;
-    height: 64px;
+    top: -56px;
+    height: 68px;
   }
 
 
   .ribbon {
-    top: -62px;
+    top: -65px;
 
-    height: 73px;
+    height: 77px;
   }
 
 
   .tabs {
-    top: -29px;
+    top: -34px;
     right: 10px;
 
     gap: 5px;
@@ -1396,16 +1405,18 @@
   .aboutyou,
   .howitworks,
   .howitworksactive {
-    min-width: 76px;
+    min-width: 96px;
 
-    padding: 0 7px;
+    height: 36px;
 
-    font-size: 9px;
+    padding: 0 8px;
+
+    font-size: 12px;
   }
 
 
   .greets h2 {
-    font-size: 21px;
+    font-size: 24px;
   }
 
 
@@ -1426,9 +1437,9 @@
 
 
   .button {
-    min-width: 75px;
+    min-width: 96px;
 
-    padding: 0 11px;
+    padding: 0 16px;
   }
 
 
@@ -1442,7 +1453,7 @@
    ========================================================= */
 
 .introductionPage {
-  min-height: 444px;
+  min-height: 560px;
 }
 
 
@@ -1452,7 +1463,7 @@
 
 .introductionContent {
   width: 100%;
-  min-height: 382px;
+  min-height: 490px;
 
   box-sizing: border-box;
 
@@ -1475,17 +1486,36 @@
    ========================================================= */
 
 .introGreeting {
-  margin: 0 0 32px;
+  margin: 0 0 24px;
   padding: 0;
 
   color: #191919;
 
   font-family: Georgia, "Times New Roman", serif;
 
-  font-size: 28px;
+  font-size: 36px;
   font-weight: 400;
 
   line-height: 1.16;
+}
+
+
+/* =========================================================
+   MODULE TITLE
+   ========================================================= */
+
+.introModuleTitle {
+  margin: 0 0 28px;
+  padding: 0;
+
+  color: #191919;
+
+  font-family: Georgia, "Times New Roman", serif;
+
+  font-size: 38px;
+  font-weight: 400;
+
+  line-height: 1.18;
 }
 
 
@@ -1501,7 +1531,7 @@
 
   font-family: Georgia, "Times New Roman", serif;
 
-  font-size: 24px;
+  font-size: 32px;
   font-weight: 400;
 
   line-height: 1.2;
@@ -1520,7 +1550,7 @@
 
   font-family: Georgia, "Times New Roman", serif;
 
-  font-size: 16px;
+  font-size: 21px;
   font-weight: 400;
 
   line-height: 1.4;
@@ -1544,7 +1574,7 @@
 
   font-family: Georgia, "Times New Roman", serif;
 
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 400;
 
   line-height: 1.42;
@@ -1592,25 +1622,32 @@
 @media (max-width: 700px) {
 
   .introductionPage {
-    min-height: 360px;
+    min-height: 430px;
   }
 
 
   .introGreeting {
-    margin-bottom: 28px;
+    margin-bottom: 20px;
 
-    font-size: 23px;
+    font-size: 28px;
+  }
+
+
+  .introModuleTitle {
+    margin-bottom: 22px;
+
+    font-size: 28px;
   }
 
 
   .introSectionTitle {
-    font-size: 20px;
+    font-size: 25px;
   }
 
 
   .introDescription,
   .introObjectivesList {
-    font-size: 14px;
+    font-size: 17px;
   }
 
 

@@ -153,6 +153,11 @@ function Introduction() {
   const activeModule =
     modules[moduleIndex] || null;
 
+  const moduleNumber = moduleIndex + 1;
+
+  const moduleTitle =
+    activeModule?.title || lesson?.title || "Untitled module";
+
 
   const moduleQuery =
     `?module=${moduleIndex}`;
@@ -262,22 +267,6 @@ function Introduction() {
 
           </Link>
 
-
-
-          <Link
-            to={`/review/${lessonId}`}
-          >
-
-            <button
-              type="button"
-              className={styles.aboutyou}
-            >
-              Overview
-            </button>
-
-          </Link>
-
-
         </div>
 
 
@@ -294,6 +283,13 @@ function Introduction() {
           <h1 className={styles.introGreeting}>
             Hi there, @{username}!
           </h1>
+
+
+          {/* MODULE TITLE */}
+
+          <h2 className={styles.introModuleTitle}>
+            Module {moduleNumber}: {moduleTitle}
+          </h2>
 
 
 
