@@ -1,9 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import { FiEye, FiTrash2 } from 'react-icons/fi';
+import { FiArchive, FiEye } from 'react-icons/fi';
 import {
   getProfessorCourseOwner,
 } from '../../professor/professorData';
-import { deleteCourseById, fetchCourses } from '../../../services/courseApi.js';
+import {
+  archiveCourseById,
+  fetchCourses,
+} from '../../../services/courseApi.js';
 import './Modules.css';
 
 function formatCourseId(course) {
@@ -44,7 +47,10 @@ export default function ModuleManagementPage() {
       try {
         setLoading(true);
         setErrorMessage('');
-        const loadedCourses = await fetchCourses();
+        const loadedCourses = await fetchCourses(
+            {},
+            { fallback: false }
+          );
 
         if (active) {
           setCourses(loadedCourses.filter((course) => !course.archived));
@@ -98,30 +104,46 @@ export default function ModuleManagementPage() {
     [selectedCourse]
   );
 
-  const deleteCourse = async (course) => {
-    const ok = window.confirm(`Delete "${course.title}" from professor courses?`);
-    if (!ok) return;
+  const archiveCourse = async (course) => {
+  const ok = window.confirm(
+    `Archive "${course.title}"? Students will no longer see this course in their active courses.`
+  );
 
-    try {
-      await deleteCourseById(course.id);
-      setCourses((current) =>
-        current.filter((item) => String(item.id) !== String(course.id))
-      );
+  if (!ok) return;
 
-      if (selectedCourse && String(selectedCourse.id) === String(course.id)) {
-        setSelectedCourse(null);
-      }
-    } catch (error) {
-      window.alert(error.message || 'Could not delete course.');
+  try {
+    await archiveCourseById(
+      course.id,
+      { fallback: false }
+    );
+
+    setCourses((current) =>
+      current.filter(
+        (item) => String(item.id) !== String(course.id)
+      )
+    );
+
+    if (
+      selectedCourse &&
+      String(selectedCourse.id) === String(course.id)
+    ) {
+      setSelectedCourse(null);
     }
-  };
+  } catch (error) {
+    window.alert(
+      error.message || 'Could not archive course.'
+    );
+  }
+};
 
   return (
     <div className="admin-page admin-modules-page">
       <div className="admin-modules-header">
         <div>
           <h1>Course Management</h1>
-          <p>Connected to professor Course Management. Admins can view details or delete courses only.</p>
+          <p>
+          Connected to professor Course Management. Admins can view details or archive courses.
+        </p>
         </div>
       </div>
 
@@ -195,10 +217,10 @@ export default function ModuleManagementPage() {
                       <button
                         type="button"
                         className="danger"
-                        onClick={() => deleteCourse(course)}
+                        onClick={() => archiveCourse(course)}
                       >
-                        <FiTrash2 />
-                        Delete
+                        <FiArchive />
+                        Archive
                       </button>
                     </div>
                   </td>

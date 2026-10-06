@@ -375,32 +375,54 @@ export async function saveCourse(course) {
   }
 }
 
-export async function deleteCourseById(id) {
+export async function deleteCourseById(id, options = {}) {
   try {
-    return await requestCourse(`${API_BASE}/courses/${encodeURIComponent(id)}`, {
-      method: "DELETE",
-      credentials: "include",
-    });
+    return await requestCourse(
+      `${API_BASE}/courses/${encodeURIComponent(id)}`,
+      {
+        method: "DELETE",
+        credentials: "include",
+      }
+    );
   } catch (error) {
-    if (!canUseLocalWriteFallback(error)) throw error;
+    if (options.fallback === false) {
+      throw error;
+    }
+
+    if (!canUseLocalWriteFallback(error)) {
+      throw error;
+    }
 
     console.warn("Deleting course locally:", error.message);
     return deleteLocalCourse(id);
   }
 }
 
-export async function archiveCourseById(id, archived = true) {
+export async function archiveCourseById(
+  id,
+  archived = true,
+  options = {}
+) {
   try {
-    return await requestCourse(`${API_BASE}/courses/${encodeURIComponent(id)}/archive`, {
-      method: "PATCH",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ archived }),
-    });
+    return await requestCourse(
+      `${API_BASE}/courses/${encodeURIComponent(id)}/archive`,
+      {
+        method: "PATCH",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ archived }),
+      }
+    );
   } catch (error) {
-    if (!canUseLocalWriteFallback(error)) throw error;
+    if (options.fallback === false) {
+      throw error;
+    }
+
+    if (!canUseLocalWriteFallback(error)) {
+      throw error;
+    }
 
     console.warn("Archiving course locally:", error.message);
     return archiveLocalCourse(id, archived);

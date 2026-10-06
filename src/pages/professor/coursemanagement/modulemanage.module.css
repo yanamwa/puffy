@@ -2126,3 +2126,152 @@
   border-color: var(--professor-theme-dewy-blue) !important;
   color: var(--professor-theme-ink) !important;
 }
+/* =====================================================
+   COURSE VIEW TOGGLE
+===================================================== */
+
+.courseViewToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 5px;
+
+  background: #f3f6fb;
+  border: 1px solid #d9e0ea;
+  border-radius: 12px;
+}
+
+.courseViewToggle button {
+  min-width: 100px;
+  height: 40px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 18px;
+
+  border: 1px solid transparent;
+  border-radius: 9px;
+
+  background: transparent;
+  color: #65758b;
+
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.courseViewToggle button:hover {
+  background: #eaf2fb;
+  color: #466b95;
+}
+
+.courseViewToggle button.courseViewActive {
+  background: #7fa9d6;
+  color: #ffffff;
+  border-color: #6e9aca;
+}
+/* =====================================================
+   COURSE VIEW TOGGLE
+===================================================== */
+
+.courseViewToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 5px;
+
+  background: #f3f6fb;
+  border: 1px solid #d9e0ea;
+  border-radius: 12px;
+}
+
+.courseViewToggle button {
+  min-width: 100px;
+  height: 40px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 18px;
+
+  border: 1px solid transparent;
+  border-radius: 9px;
+
+  background: transparent;
+  color: #65758b;
+
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.courseViewToggle button:hover {
+  background: #eaf2fb;
+  color: #466b95;
+}
+
+.courseViewToggle button.courseViewActive {
+  background: #7fa9d6;
+  color: #ffffff;
+  border-color: #6e9aca;
+}
+.actionEdit,
+.actionDelete,
+.actionRestore {
+  width: 100%;
+  height: 42px;
+  min-height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 16px;
+
+  border: none;
+  border-radius: 10px;
+
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.actionRestore {
+  margin-top: auto;
+
+  background: #7fa9d6;
+  color: #ffffff;
+}
+
+.actionRestore:hover {
+  background: #6c9bce;
+  box-shadow: 0 4px 10px rgba(80, 120, 165, 0.2);
+}
+
+.actionRestore:active {
+  transform: translateY(1px);
+}

@@ -21,6 +21,7 @@ import {
 } from 'react-icons/fi';
 import { API_BASE } from '../../../config';
 import './SuperAdminUserManagementPage.css';
+import Swal from 'sweetalert2';
 
 const USER_TABS = [
   { id: 'all', label: 'All Users' },
@@ -51,6 +52,7 @@ const initialStudentForm = {
   name: '',
   email: '',
   studentId: '',
+  gender: '',
   yearLevel: '',
   sectionName: '',
 };
@@ -335,6 +337,42 @@ function UserAvatar({ user, large = false }) {
   return <span className={large ? 'users-modal-avatar' : 'users-avatar'}>{initials}</span>;
 }
 
+function showSuccess(message, title = 'Success') {
+  return Swal.fire({
+    icon: 'success',
+    title,
+    text: message,
+    confirmButtonText: 'OK',
+  });
+}
+
+function showError(message, title = 'Error') {
+  return Swal.fire({
+    icon: 'error',
+    title,
+    text: message,
+    confirmButtonText: 'OK',
+  });
+}
+
+function showWarning(message, title = 'Warning') {
+  return Swal.fire({
+    icon: 'warning',
+    title,
+    text: message,
+    confirmButtonText: 'OK',
+  });
+}
+
+function showInfo(message, title = 'Information') {
+  return Swal.fire({
+    icon: 'info',
+    title,
+    text: message,
+    confirmButtonText: 'OK',
+  });
+}
+
 export default function SuperAdminUserManagementPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const fileInputRef = useRef(null);
@@ -345,7 +383,6 @@ export default function SuperAdminUserManagementPage() {
   });
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(true);
-  const [notice, setNotice] = useState('');
   const [selectedUser, setSelectedUser] = useState(null);
   const [adminModalOpen, setAdminModalOpen] = useState(false);
   const [adminForm, setAdminForm] = useState(initialAdminForm);
@@ -364,7 +401,11 @@ export default function SuperAdminUserManagementPage() {
   const loadUsers = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE}/users`);
+      const response = await fetch(`${API_BASE}/users`, {
+        method: 'GET',
+        headers: getAuthHeaders(),
+        credentials: 'include',
+      });
 
       if (!response.ok) {
         throw new Error('User API unavailable.');
@@ -374,10 +415,9 @@ export default function SuperAdminUserManagementPage() {
       const nextUsers = Array.isArray(data.users) ? data.users : [];
 
       setUsers(nextUsers.map(normalizeUser));
-      setNotice('');
     } catch (error) {
       setUsers([]);
-      setNotice(error.message || 'Could not load users from the database. Please make sure MySQL and the backend server are running.');
+      showError(error.message || 'Could not load users from the database. Please make sure MySQL and the backend server are running.', 'Could Not Load Users');
     } finally {
       setLoading(false);
     }
@@ -413,13 +453,7 @@ export default function SuperAdminUserManagementPage() {
     return () => window.clearTimeout(timeoutId);
   }, [studentImportStatus.state]);
 
-  useEffect(() => {
-    const requestedTab = searchParams.get('tab');
-
-    if (VALID_USER_TAB_IDS.includes(requestedTab) && requestedTab !== activeTab) {
-      setActiveTab(requestedTab);
-    }
-  }, [activeTab, searchParams]);
+  
 
   useEffect(() => {
     const requestedAction = searchParams.get('action');
@@ -455,32 +489,51 @@ export default function SuperAdminUserManagementPage() {
   }, [searchParams, setSearchParams]);
 
   const handleTabChange = (tabId) => {
-    const nextParams = new URLSearchParams(searchParams);
-    nextParams.delete('action');
-
-    if (tabId === 'all') {
-      nextParams.delete('tab');
-    } else {
-      nextParams.set('tab', tabId);
-    }
-
     setActiveTab(tabId);
-    setSearchParams(nextParams);
   };
+  
 
   const userGroups = useMemo(() => {
     const all = users;
-    const approvals = users.filter((user) => user.role === 'professor');
-    const students = users.filter((user) => user.role === 'student');
+
+    const approvals = users.filter(
+      (user) =>
+        user.role === 'professor' &&
+        String(user.verificationStatus).toLowerCase() === 'pending' &&
+        !user.isArchived
+    );
+
+    const students = users.filter(
+      (user) =>
+        user.role === 'student' &&
+        !user.isArchived
+    );
+
     const professors = users.filter(
       (user) =>
         user.role === 'professor' &&
-        String(user.verificationStatus).toLowerCase() === 'approved'
+        String(user.verificationStatus).toLowerCase() === 'approved' &&
+        !user.isArchived
     );
-    const admins = users.filter((user) => user.role === 'admin');
-    const archived = users.filter((user) => user.isArchived);
 
-    return { all, approvals, students, professors, admins, archived };
+    const admins = users.filter(
+      (user) =>
+        user.role === 'admin' &&
+        !user.isArchived
+    );
+
+    const archived = users.filter(
+      (user) => user.isArchived
+    );
+
+    return {
+      all,
+      approvals,
+      students,
+      professors,
+      admins,
+      archived,
+    };
   }, [users]);
 
   const visibleUsers = useMemo(() => {
@@ -569,7 +622,7 @@ export default function SuperAdminUserManagementPage() {
         employmentProof: null,
       }));
       setProfessorProofPreview('');
-      setNotice(fileError);
+      showWarning(fileError);
       return;
     }
 
@@ -578,7 +631,6 @@ export default function SuperAdminUserManagementPage() {
       employmentProof: file,
     }));
     setProfessorProofPreview(URL.createObjectURL(file));
-    setNotice('');
   };
 
   const removeProfessorProofImage = () => {
@@ -601,7 +653,8 @@ export default function SuperAdminUserManagementPage() {
               accountType: event.target.value,
             }))
           }
-        >
+          required  
+            >
           {ACCOUNT_TYPE_OPTIONS.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
@@ -648,9 +701,9 @@ export default function SuperAdminUserManagementPage() {
       }
 
       updateUserInList(data.user);
-      setNotice(data.message);
+      showSuccess(data.message);
     } catch (error) {
-      setNotice(error.message || 'Could not update registration.');
+      showError(error.message || 'Could not update registration.');
     } finally {
       setBusyUserId('');
     }
@@ -673,9 +726,11 @@ export default function SuperAdminUserManagementPage() {
       }
 
       updateUserInList(data.user);
-      setNotice(data.message);
+      showSuccess(data.message);
     } catch (error) {
-      setNotice(error.message || 'Could not update account.');
+      showError(
+          error.message || 'Could not update account.'
+        );
     } finally {
       setBusyUserId('');
     }
@@ -702,24 +757,36 @@ export default function SuperAdminUserManagementPage() {
           temporaryExpiresAt: user.temporaryExpiresAt,
         },
       ]);
-      setNotice('Temporary credentials generated.');
+      showSuccess('Temporary credentials generated.');
     } catch (error) {
-      setNotice(error.message || 'Could not generate credentials.');
+      showError(error.message || 'Could not generate credentials.');
     } finally {
       setBusyUserId('');
     }
   };
 
   const handlePermanentRemove = async (user) => {
-    const ok = window.confirm(`Permanently remove ${user.name}? This cannot be undone.`);
-    if (!ok) return;
+    const result = await Swal.fire({
+      icon: 'warning',
+      title: 'Permanently Delete Account?',
+      text: `${user.name} will be permanently removed. This action cannot be undone.`,
+      showCancelButton: true,
+      confirmButtonText: 'Delete',
+      cancelButtonText: 'Cancel',
+      reverseButtons: true,
+      focusCancel: true,
+    });
+
+    if (!result.isConfirmed) return;
 
     try {
       setBusyUserId(`${user.id}-delete`);
+
       const response = await fetch(`${API_BASE}/users/${user.id}/archived`, {
         method: 'DELETE',
         headers: getAuthHeaders(),
       });
+
       const data = await response.json();
 
       if (!response.ok || !data.success) {
@@ -727,9 +794,15 @@ export default function SuperAdminUserManagementPage() {
       }
 
       removeUserFromList(user.id);
-      setNotice(data.message);
+      showSuccess(
+        data.message || 'The account was permanently removed.',
+        'Account Deleted'
+      );
     } catch (error) {
-      setNotice(error.message || 'Could not remove account.');
+      showError(
+        error.message || 'Could not remove account.',
+        'Delete Failed'
+      );
     } finally {
       setBusyUserId('');
     }
@@ -766,9 +839,9 @@ export default function SuperAdminUserManagementPage() {
       ]);
       setStudentForm(initialStudentForm);
       setStudentModalOpen(false);
-      setNotice(data.credentialsEmailed ? 'Student account created and temporary password emailed.' : 'Student account created.');
+      showSuccess(data.message);
     } catch (error) {
-      setNotice(error.message || 'Could not create student account.');
+      showError(error.message || 'Could not create student account.');
     }
   };
 
@@ -798,9 +871,9 @@ export default function SuperAdminUserManagementPage() {
       ]);
       setAdminForm(initialAdminForm);
       setAdminModalOpen(false);
-      setNotice(data.user.isTemporary ? 'Temporary administrator account created.' : 'Administrator account created.');
+      showSuccess(data.message);
     } catch (error) {
-      setNotice(error.message || 'Could not create admin account.');
+      showError(error.message || 'Could not create admin account.');
     }
   };
 
@@ -816,32 +889,32 @@ export default function SuperAdminUserManagementPage() {
     const proofError = validateProfessorProofFile(professorForm.employmentProof);
 
     if (!cleanName) {
-      setNotice('Professor full name is required.');
+      showWarning('Professor full name is required.');
       return;
     }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
-      setNotice('Please enter a valid professor email address.');
+      showWarning('Please enter a valid professor email address.');
       return;
     }
 
     if (!cleanFacultyId) {
-      setNotice('Employee or faculty ID is required.');
+      showWarning('Employee or faculty ID is required.');
       return;
     }
 
     if (cleanFacultyId.length > 100) {
-      setNotice('Employee or faculty ID must be 100 characters or fewer.');
+      showWarning('Employee or faculty ID must be 100 characters or fewer.');
       return;
     }
 
     if (!cleanDepartment) {
-      setNotice('Department is required.');
+      showWarning('Department is required.');
       return;
     }
 
     if (proofError) {
-      setNotice(proofError);
+      showWarning(proofError);
       return;
     }
 
@@ -854,7 +927,6 @@ export default function SuperAdminUserManagementPage() {
 
     try {
       setCreatingProfessor(true);
-      setNotice('');
 
       const response = await fetch(`${API_BASE}/users/professor`, {
         method: 'POST',
@@ -878,13 +950,26 @@ export default function SuperAdminUserManagementPage() {
       ]);
       resetProfessorForm();
       setProfessorModalOpen(false);
-      setNotice('Professor account created.');
+      showSuccess('Professor account created.');
     } catch (error) {
-      setNotice(error.message || 'Could not create professor account.');
+      showError(error.message || 'Could not create professor account.');
     } finally {
       setCreatingProfessor(false);
     }
   };
+
+    /* =====================================================
+     STUDENT BULK IMPORT
+     Supports: CSV + XLSX
+
+     Required columns:
+     Name
+     Email
+     Student ID
+     Gender
+     Year Level
+     Section
+  ===================================================== */
 
   const normalizeImportHeader = (value) =>
     String(value || '')
@@ -893,8 +978,14 @@ export default function SuperAdminUserManagementPage() {
       .toLowerCase()
       .replace(/[^a-z0-9]/g, '');
 
+
+  /* =====================================================
+     CSV PARSER
+  ===================================================== */
+
   const parseCsvRows = (text) => {
     const rows = [];
+
     let row = [];
     let cell = '';
     let inQuotes = false;
@@ -910,6 +1001,7 @@ export default function SuperAdminUserManagementPage() {
         } else {
           inQuotes = !inQuotes;
         }
+
         continue;
       }
 
@@ -919,15 +1011,23 @@ export default function SuperAdminUserManagementPage() {
         continue;
       }
 
-      if ((character === '\n' || character === '\r') && !inQuotes) {
+      if (
+        (character === '\n' || character === '\r') &&
+        !inQuotes
+      ) {
         row.push(cell);
         rows.push(row);
+
         row = [];
         cell = '';
 
-        if (character === '\r' && nextCharacter === '\n') {
+        if (
+          character === '\r' &&
+          nextCharacter === '\n'
+        ) {
           index += 1;
         }
+
         continue;
       }
 
@@ -940,231 +1040,1089 @@ export default function SuperAdminUserManagementPage() {
     return rows;
   };
 
+
+  /* =====================================================
+     NORMALIZE GENDER
+  ===================================================== */
+
+  const normalizeImportedGender = (value) => {
+    const gender = String(value || '')
+      .trim()
+      .toLowerCase();
+
+    if (gender === 'male') {
+      return 'Male';
+    }
+
+    if (gender === 'female') {
+      return 'Female';
+    }
+
+    return '';
+  };
+
+
+  /* =====================================================
+     NORMALIZE YEAR LEVEL
+  ===================================================== */
+
+  const normalizeImportedYearLevel = (value) => {
+    const year = String(value || '')
+      .trim()
+      .toLowerCase();
+
+    const yearMap = {
+      '1': '1st Year',
+      '1st': '1st Year',
+      '1styear': '1st Year',
+      '1st year': '1st Year',
+      'first': '1st Year',
+      'firstyear': '1st Year',
+      'first year': '1st Year',
+
+      '2': '2nd Year',
+      '2nd': '2nd Year',
+      '2ndyear': '2nd Year',
+      '2nd year': '2nd Year',
+      'second': '2nd Year',
+      'secondyear': '2nd Year',
+      'second year': '2nd Year',
+
+      '3': '3rd Year',
+      '3rd': '3rd Year',
+      '3rdyear': '3rd Year',
+      '3rd year': '3rd Year',
+      'third': '3rd Year',
+      'thirdyear': '3rd Year',
+      'third year': '3rd Year',
+
+      '4': '4th Year',
+      '4th': '4th Year',
+      '4thyear': '4th Year',
+      '4th year': '4th Year',
+      'fourth': '4th Year',
+      'fourthyear': '4th Year',
+      'fourth year': '4th Year',
+    };
+
+    return yearMap[year] || '';
+  };
+
+
+  /* =====================================================
+     NORMALIZE SECTION
+  ===================================================== */
+
+  const normalizeImportedSection = (value) =>
+    String(value || '')
+      .trim()
+      .toUpperCase()
+      .replace(/\s+/g, '');
+
+
+  /* =====================================================
+     GET EXPECTED YEAR NUMBER
+
+     1st Year -> 1
+     2nd Year -> 2
+     etc.
+  ===================================================== */
+
+  const getImportedYearNumber = (yearLevel) => {
+    const match = String(yearLevel || '').match(/^([1-4])/);
+
+    return match ? match[1] : '';
+  };
+
+
+  /* =====================================================
+     NORMALIZE IMPORTED ROWS
+  ===================================================== */
+
   const normalizeStudentImportRows = (rows) => {
     const sourceRows = Array.isArray(rows) ? rows : [];
+
     const cleanedRows = sourceRows
       .map((row) => {
-        if (Array.isArray(row)) return row;
-        if (row && typeof row === 'object') return Object.values(row);
+        if (Array.isArray(row)) {
+          return row;
+        }
+
+        if (row && typeof row === 'object') {
+          return Object.values(row);
+        }
+
         return [row];
       })
-      .map((row) => row.map((cell) => String(cell ?? '').trim()))
+      .map((row) =>
+        row.map((cell) =>
+          String(cell ?? '').trim()
+        )
+      )
       .filter((row) => row.some(Boolean));
 
-    if (cleanedRows.length === 0) return [];
+    if (cleanedRows.length === 0) {
+      return [];
+    }
 
-    const header = cleanedRows[0].map(normalizeImportHeader);
+    const header =
+      cleanedRows[0].map(normalizeImportHeader);
+
     const headerAliases = [
       'email',
       'emailaddress',
       'studentemail',
+
       'name',
       'fullname',
       'studentname',
-    ];
-    const hasHeader = header.some((cell) => headerAliases.includes(cell));
-    const dataRows = hasHeader ? cleanedRows.slice(1) : cleanedRows;
-    const headerCells = hasHeader ? header : [];
 
-    const indexOf = (names, fallback) => {
-      const index = headerCells.findIndex((cell) => names.includes(cell));
-      return index >= 0 ? index : fallback;
-    };
+      'studentid',
+      'studentnumber',
+      'studentno',
+
+      'gender',
+      'sex',
+
+      'year',
+      'yearlevel',
+
+      'section',
+      'sectionname',
+    ];
+
+    const hasHeader = header.some((cell) =>
+      headerAliases.includes(cell)
+    );
+
+    const dataRows = hasHeader
+      ? cleanedRows.slice(1)
+      : cleanedRows;
+
+    const headerCells = hasHeader
+      ? header
+      : [];
+
+      const indexOf = (names, fallback) => {
+        if (!hasHeader) {
+          return fallback;
+        }
+
+        const normalizedNames = names.map((name) =>
+          normalizeImportHeader(name)
+        );
+
+        const index = headerCells.findIndex((cell) =>
+          normalizedNames.includes(
+            normalizeImportHeader(cell)
+          )
+        );
+
+        return index >= 0 ? index : fallback;
+      };
 
     return dataRows
-      .map((row, rowIndex) => ({
-        sourceRow: rowIndex + (hasHeader ? 2 : 1),
-        name: row[indexOf(['name', 'fullname', 'studentname'], 0)] || '',
-        email: row[indexOf(['email', 'emailaddress', 'studentemail'], 1)] || '',
-        studentId: row[indexOf(['studentid', 'studentnumber', 'studentno', 'id', 'idnumber', 'schoolid'], 2)] || '',
-        yearLevel: row[indexOf(['year', 'yearlevel', 'studentyear', 'grade', 'gradelevel'], 3)] || '',
-        sectionName: row[indexOf(['section', 'sectionname', 'studentsection', 'block'], 4)] || '',
-      }))
-      .filter((student) => student.name || student.email || student.studentId);
+      .map((row, rowIndex) => {
+        const rawGender =
+          row[
+            indexOf(
+              ['gender', 'sex'],
+              3
+            )
+          ] || '';
+
+        const rawYearLevel =
+          row[
+            indexOf(
+              [
+                'year',
+                'yearlevel',
+                'studentyear',
+                'grade',
+                'gradelevel',
+              ],
+              4
+            )
+          ] || '';
+
+        const rawSection =
+          row[
+            indexOf(
+              [
+                'section',
+                'sectionname',
+                'studentsection',
+                'block',
+              ],
+              5
+            )
+          ] || '';
+
+        return {
+          sourceRow:
+            rowIndex + (hasHeader ? 2 : 1),
+
+          name:
+            row[
+              indexOf(
+                [
+                  'name',
+                  'fullname',
+                  'studentname',
+                ],
+                0
+              )
+            ] || '',
+
+          email:
+            row[
+              indexOf(
+                [
+                  'email',
+                  'emailaddress',
+                  'studentemail',
+                ],
+                1
+              )
+            ] || '',
+
+          studentId: String(
+            row[
+              indexOf(
+                [
+                  'studentid',
+                  'student id',
+                  'student_id',
+                  'studentnumber',
+                  'student number',
+                  'studentno',
+                  'student no',
+                  'id',
+                  'idnumber',
+                  'id number',
+                  'schoolid',
+                  'school id',
+                ],
+                2
+              )
+            ] ?? ''
+          ).trim(),
+
+          gender: normalizeImportedGender(
+            rawGender
+          ),
+
+          rawGender,
+
+          yearLevel: normalizeImportedYearLevel(
+            rawYearLevel
+          ),
+
+          rawYearLevel,
+
+          sectionName: normalizeImportedSection(
+            rawSection
+          ),
+
+          rawSection,
+        };
+      })
+      .filter(
+        (student) =>
+          student.name ||
+          student.email ||
+          student.studentId ||
+          student.rawGender ||
+          student.rawYearLevel ||
+          student.rawSection
+      );
   };
+
+
+  /* =====================================================
+     PARSE CSV
+  ===================================================== */
 
   const parseStudentCsv = (text) => {
-    return normalizeStudentImportRows(parseCsvRows(text));
+    return normalizeStudentImportRows(
+      parseCsvRows(text)
+    );
   };
+
+
+  /* =====================================================
+     PARSE CSV / XLSX FILE
+  ===================================================== */
 
   const parseStudentImportFile = async (file) => {
-    const extension = file.name.split('.').pop()?.toLowerCase();
+    const extension = file.name
+      .split('.')
+      .pop()
+      ?.toLowerCase();
 
     if (extension === 'xlsx') {
-      const readXlsxFile = (await import('read-excel-file/browser')).default;
-      return normalizeStudentImportRows(await readXlsxFile(file));
+      const readXlsxFile = (
+        await import('read-excel-file/browser')
+      ).default;
+
+      const result = await readXlsxFile(file);
+
+      console.log(
+        '===== RAW EXCEL RESULT =====',
+        result
+      );
+
+      /*
+        Some versions/configurations return:
+
+        [
+          {
+            sheet: 'Students',
+            data: [...]
+          }
+        ]
+
+        while others return the rows directly.
+      */
+
+      let rows = result;
+
+      if (
+        Array.isArray(result) &&
+        result.length > 0 &&
+        result[0] &&
+        typeof result[0] === 'object' &&
+        !Array.isArray(result[0]) &&
+        Array.isArray(result[0].data)
+      ) {
+        rows = result[0].data;
+      }
+
+      console.log(
+        '===== EXTRACTED EXCEL ROWS =====',
+        rows
+      );
+
+      const normalizedStudents =
+        normalizeStudentImportRows(rows);
+
+      console.log(
+        '===== NORMALIZED STUDENTS =====',
+        normalizedStudents
+      );
+
+      return normalizedStudents;
     }
 
-    return parseStudentCsv(await file.text());
+    const text = await file.text();
+
+    return parseStudentCsv(text);
   };
+
+
+  /* =====================================================
+     SUPPORTED FILE CHECK
+  ===================================================== */
 
   const isSupportedStudentImportFile = (file) => {
-    const extension = file.name.split('.').pop()?.toLowerCase();
-    return extension === 'csv' || extension === 'xlsx';
+    const extension = file.name
+      .split('.')
+      .pop()
+      ?.toLowerCase();
+
+    return (
+      extension === 'csv' ||
+      extension === 'xlsx'
+    );
   };
 
-  const formatStudentImportFailure = (student, fallbackMessage) => {
-    const email = String(student.email || '').trim();
-    const normalizedMessage = String(fallbackMessage || '').toLowerCase();
 
-    if (normalizedMessage.includes('email is already registered')) {
-      return `- Email "${email}" has been registered.`;
+  /* =====================================================
+     FORMAT BACKEND FAILURE
+  ===================================================== */
+
+  const formatStudentImportFailure = (
+    student,
+    fallbackMessage
+  ) => {
+    const email = String(
+      student.email || ''
+    ).trim();
+
+    const message = String(
+      fallbackMessage || ''
+    ).trim();
+
+    const normalizedMessage =
+      message.toLowerCase();
+
+    if (
+      normalizedMessage.includes(
+        'email is already registered'
+      )
+    ) {
+      return `- Row ${student.sourceRow}: Email "${email}" is already registered.`;
     }
 
-    if (!student.name && email) {
-      return `- Email "${email}" is missing a student name.`;
+    if (
+      normalizedMessage.includes(
+        'student id is already registered'
+      )
+    ) {
+      return `- Row ${student.sourceRow}: Student ID "${student.studentId}" is already registered.`;
+    }
+
+    return (
+      `- Row ${student.sourceRow}: ` +
+      (message ||
+        'This student could not be imported.')
+    );
+  };
+
+
+  /* =====================================================
+     VALIDATE ONE IMPORTED STUDENT
+  ===================================================== */
+
+  const validateImportedStudent = (student) => {
+    const name = String(
+      student.name || ''
+    ).trim();
+
+    const email = String(
+      student.email || ''
+    )
+      .trim()
+      .toLowerCase();
+
+    const studentId = String(
+      student.studentId || ''
+    ).trim();
+
+    const rawGender = String(
+      student.rawGender || ''
+    ).trim();
+
+    const rawYearLevel = String(
+      student.rawYearLevel || ''
+    ).trim();
+
+    const rawSection = String(
+      student.rawSection || ''
+    ).trim();
+
+    const gender =
+      normalizeImportedGender(rawGender);
+
+    const yearLevel =
+      normalizeImportedYearLevel(
+        rawYearLevel
+      );
+
+    const sectionName =
+      normalizeImportedSection(rawSection);
+
+    /* -------------------------
+       REQUIRED FIELDS
+    ------------------------- */
+
+    if (!name) {
+      return {
+        valid: false,
+        message:
+          `Row ${student.sourceRow}: Student name is required.`,
+      };
     }
 
     if (!email) {
-      return '- Student email is required.';
+      return {
+        valid: false,
+        message:
+          `Row ${student.sourceRow}: Student email is required.`,
+      };
     }
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return `- Email "${email}" is not a valid email address.`;
+    if (!studentId) {
+      return {
+        valid: false,
+        message:
+          `Row ${student.sourceRow}: Student ID is required.`,
+      };
     }
 
-    return `- Email "${email}" could not be imported. ${fallbackMessage || 'Please check this student record.'}`;
+    if (!rawGender) {
+      return {
+        valid: false,
+        message:
+          `Row ${student.sourceRow}: Gender is required.`,
+      };
+    }
+
+    if (!rawYearLevel) {
+      return {
+        valid: false,
+        message:
+          `Row ${student.sourceRow}: Year level is required.`,
+      };
+    }
+
+    if (!rawSection) {
+      return {
+        valid: false,
+        message:
+          `Row ${student.sourceRow}: Section is required.`,
+      };
+    }
+
+
+    /* -------------------------
+       EMAIL
+    ------------------------- */
+
+    if (
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+        email
+      )
+    ) {
+      return {
+        valid: false,
+        message:
+          `Row ${student.sourceRow}: "${email}" is not a valid email address.`,
+      };
+    }
+
+
+    /* -------------------------
+       GENDER
+    ------------------------- */
+
+    if (!gender) {
+      return {
+        valid: false,
+        message:
+          `Row ${student.sourceRow}: Gender must be Male or Female.`,
+      };
+    }
+
+
+    /* -------------------------
+       YEAR LEVEL
+    ------------------------- */
+
+    if (!yearLevel) {
+      return {
+        valid: false,
+        message:
+          `Row ${student.sourceRow}: Year level must be 1st Year, 2nd Year, 3rd Year, or 4th Year.`,
+      };
+    }
+
+
+    /* -------------------------
+       SECTION
+    ------------------------- */
+
+    const yearNumber =
+      getImportedYearNumber(yearLevel);
+
+    const allowedSections = [
+      `${yearNumber}A`,
+      `${yearNumber}B`,
+      `${yearNumber}C`,
+      `${yearNumber}D`,
+      `${yearNumber}E`,
+      `${yearNumber}F`,
+    ];
+
+    if (
+      !allowedSections.includes(sectionName)
+    ) {
+      return {
+        valid: false,
+        message:
+          `Row ${student.sourceRow}: Section must be ${yearNumber}A-${yearNumber}F for ${yearLevel}.`,
+      };
+    }
+
+
+    /* -------------------------
+       NORMALIZED STUDENT
+    ------------------------- */
+
+    return {
+      valid: true,
+
+      student: {
+        name,
+        email,
+        studentId,
+        gender,
+        yearLevel,
+        sectionName,
+
+        /*
+          Bulk-created students use the
+          same account behavior as the
+          Add Student form.
+        */
+        accountType: 'permanent',
+        temporaryDurationDays: '',
+      },
+    };
   };
+
+
+  /* =====================================================
+     IMPORT BUTTON
+  ===================================================== */
 
   const handleImportStudentsClick = (event) => {
     event.preventDefault();
     event.stopPropagation();
-    if (studentImportBusy) return;
+
+    if (studentImportBusy) {
+      return;
+    }
+
     fileInputRef.current?.click();
   };
 
+
+  /* =====================================================
+     CLOSE STUDENT MODAL
+  ===================================================== */
+
   const closeStudentModal = () => {
-    if (studentImportBusy) return;
+    if (studentImportBusy) {
+      return;
+    }
+
     setStudentModalOpen(false);
   };
 
+
+  /* =====================================================
+     DISMISS IMPORT STATUS
+  ===================================================== */
+
   const dismissStudentImportPopup = () => {
-    if (studentImportBusy) return;
-    setStudentImportStatus(initialStudentImportStatus);
+    if (studentImportBusy) {
+      return;
+    }
+
+    setStudentImportStatus(
+      initialStudentImportStatus
+    );
   };
 
-  const handleBulkImport = async (event) => {
-    const file = event.target.files?.[0];
-    event.target.value = '';
-    if (!file) return;
 
-    if (!isSupportedStudentImportFile(file)) {
+  /* =====================================================
+     BULK IMPORT
+  ===================================================== */
+const logBulkStudentImport = async ({
+  fileName,
+  importedCount,
+  failedCount,
+  totalCount,
+}) => {
+  try {
+    const response = await fetch(
+      `${API_BASE}/users/student/bulk-import-audit`,
+      {
+        method: 'POST',
+        headers: getAuthHeaders({
+          'Content-Type': 'application/json',
+        }),
+        body: JSON.stringify({
+          fileName,
+          importedCount,
+          failedCount,
+          totalCount,
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(
+        data.message ||
+          'Could not record bulk import audit.'
+      );
+    }
+  } catch (error) {
+    /*
+      Audit failure should NOT make the actual
+      student import appear to have failed.
+    */
+    console.error(
+      'Bulk import audit error:',
+      error
+    );
+  }
+};
+  const handleBulkImport = async (event) => {
+    const file =
+      event.target.files?.[0];
+
+    /*
+      Allow selecting the same file again
+      after an import.
+    */
+    event.target.value = '';
+
+    if (!file) {
+      return;
+    }
+
+
+    /* -------------------------
+       FILE TYPE
+    ------------------------- */
+
+    if (
+      !isSupportedStudentImportFile(file)
+    ) {
       setStudentImportStatus({
         state: 'error',
         fileName: file.name,
         fileSize: file.size,
-        message: 'This file type is not supported.',
-        detail: '- Only .csv and .xlsx Excel files can be imported.',
+        message:
+          'This file type is not supported.',
+        detail:
+          '- Only .csv and .xlsx Excel files can be imported.',
       });
-      setNotice('Only CSV and XLSX files can be imported.');
+
+      showError(
+        'Only CSV and XLSX files can be imported.',
+        'Unsupported File'
+      );
+
       return;
     }
+
+
+    /* -------------------------
+       READING
+    ------------------------- */
 
     setStudentImportStatus({
       state: 'reading',
       fileName: file.name,
       fileSize: file.size,
-      message: 'Uploading student file...',
+      message:
+        'Reading student file...',
       detail: '',
     });
 
     try {
-      const students = await parseStudentImportFile(file);
+      const students =
+        await parseStudentImportFile(file);
+
+
+      /* -------------------------
+         EMPTY FILE
+      ------------------------- */
 
       if (students.length === 0) {
         setStudentImportStatus({
           state: 'error',
           fileName: file.name,
           fileSize: file.size,
-          message: 'No student records found in this file.',
-          detail: 'Use columns for name, email, student ID, year level, and section.',
+          message:
+            'No student records found in this file.',
+          detail:
+            'Required columns: Name, Email, Student ID, Gender, Year Level, Section.',
         });
-        setNotice('Import file has no student records.');
+
+        showError(
+          'Import file has no student records.',
+          'Import Failed'
+        );
+
         return;
       }
+
+
+      /* -------------------------
+         RESULTS
+      ------------------------- */
 
       const createdUsers = [];
       const credentials = [];
       const failures = [];
 
-      for (const student of students) {
+      /*
+        Used to catch duplicates inside
+        the uploaded file itself.
+      */
+      const seenEmails = new Set();
+      const seenStudentIds = new Set();
+
+
+      /* =================================================
+         PROCESS EACH STUDENT
+      ================================================= */
+
+      for (
+        let index = 0;
+        index < students.length;
+        index += 1
+      ) {
+        const student = students[index];
+
         setStudentImportStatus({
           state: 'importing',
           fileName: file.name,
           fileSize: file.size,
-          message: `Importing ${createdUsers.length + failures.length + 1} of ${students.length} student records...`,
-          detail: `${students.length} record${students.length === 1 ? '' : 's'} found in the file.`,
+
+          message:
+            `Importing ${index + 1} of ${students.length} student records...`,
+
+          detail:
+            `${createdUsers.length} imported, ` +
+            `${failures.length} failed so far.`,
         });
 
-        const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(student.email);
 
-        if (!student.name || !student.email) {
-          failures.push(formatStudentImportFailure(student, 'Student name and email are required.'));
+        /* -------------------------
+           VALIDATION
+        ------------------------- */
+
+        const validation =
+          validateImportedStudent(student);
+
+        if (!validation.valid) {
+          failures.push(
+            `- ${validation.message}`
+          );
+
           continue;
         }
 
-        if (!validEmail) {
-          failures.push(formatStudentImportFailure(student, 'Enter a valid email address.'));
+        const normalizedStudent =
+          validation.student;
+
+
+        /* -------------------------
+           DUPLICATE EMAIL IN FILE
+        ------------------------- */
+
+        const emailKey =
+          normalizedStudent.email
+            .toLowerCase();
+
+        if (seenEmails.has(emailKey)) {
+          failures.push(
+            `- Row ${student.sourceRow}: Email "${normalizedStudent.email}" appears more than once in the file.`
+          );
+
           continue;
         }
+
+
+        /* -------------------------
+           DUPLICATE STUDENT ID
+           IN FILE
+        ------------------------- */
+
+        const studentIdKey =
+          normalizedStudent.studentId
+            .toLowerCase();
+
+        if (
+          seenStudentIds.has(
+            studentIdKey
+          )
+        ) {
+          failures.push(
+            `- Row ${student.sourceRow}: Student ID "${normalizedStudent.studentId}" appears more than once in the file.`
+          );
+
+          continue;
+        }
+
+        seenEmails.add(emailKey);
+        seenStudentIds.add(studentIdKey);
+
+
+        /* -------------------------
+           CREATE ACCOUNT
+        ------------------------- */
 
         try {
-          const data = await createStudent(student);
-          createdUsers.push(normalizeUser(data.user));
+          const data =
+            await createStudent(
+              normalizedStudent
+            );
+
+          createdUsers.push(
+            normalizeUser(data.user)
+          );
+
           credentials.push({
             name: data.user.name,
             email: data.user.email,
-            temporaryPassword: data.temporaryPassword,
-            temporaryExpiresAt: data.user.temporaryExpiresAt,
+            temporaryPassword:
+              data.temporaryPassword,
+            temporaryExpiresAt:
+              data.user.temporaryExpiresAt,
           });
         } catch (error) {
-          failures.push(formatStudentImportFailure(student, error.message || 'Could not create student.'));
+          failures.push(
+            formatStudentImportFailure(
+              {
+                ...student,
+                ...normalizedStudent,
+              },
+              error.message ||
+                'Could not create student.'
+            )
+          );
         }
       }
 
+
+      /* =================================================
+         NOTHING IMPORTED
+      ================================================= */
+
       if (createdUsers.length === 0) {
-        const detail = failures.slice(0, 3).join('\n');
+        const detail = failures
+          .slice(0, 5)
+          .join('\n');
 
         setStudentImportStatus({
           state: 'error',
           fileName: file.name,
           fileSize: file.size,
-          message: 'No student accounts were imported.',
-          detail,
+          message:
+            'No student accounts were imported.',
+          detail:
+            detail ||
+            'Please check the student records and try again.',
         });
-        setNotice(detail || 'No student accounts were imported.');
+
+        showError(
+          detail ||
+            'No student accounts were imported.',
+          'Import Failed'
+        );
+
         return;
       }
+
+
+      /* =================================================
+         SUCCESS / PARTIAL SUCCESS
+      ================================================= */
 
       const importMessage =
         failures.length > 0
           ? `${createdUsers.length} imported, ${failures.length} failed.`
-          : `${createdUsers.length} student account${createdUsers.length === 1 ? '' : 's'} imported.`;
+          : `${createdUsers.length} student account${
+              createdUsers.length === 1
+                ? ''
+                : 's'
+            } imported successfully.`;
+
 
       setStudentImportStatus({
-        state: failures.length > 0 ? 'partial' : 'success',
+        state:
+          failures.length > 0
+            ? 'partial'
+            : 'success',
+
         fileName: file.name,
         fileSize: file.size,
         message: importMessage,
-        detail: failures.slice(0, 3).join('\n'),
+
+        detail:
+          failures.length > 0
+            ? failures
+                .slice(0, 5)
+                .join('\n')
+            : `${createdUsers.length} student account${
+                createdUsers.length === 1
+                  ? ''
+                  : 's'
+              } created.`,
       });
-      setUsers((currentUsers) => [...createdUsers, ...currentUsers]);
-      setCredentialResults(credentials);
-      setStudentModalOpen(false);
-      setNotice(
-        failures.length > 0
-          ? `${createdUsers.length} student account${createdUsers.length === 1 ? '' : 's'} imported. ${failures.length} account${failures.length === 1 ? '' : 's'} failed.`
-          : `${createdUsers.length} student account${createdUsers.length === 1 ? '' : 's'} imported and temporary password email${createdUsers.length === 1 ? '' : 's'} sent.`
+
+
+      /* -------------------------
+         UPDATE USER TABLE
+      ------------------------- */
+
+      setUsers((currentUsers) => [
+        ...createdUsers,
+        ...currentUsers,
+      ]);
+
+
+      /* -------------------------
+         TEMPORARY CREDENTIALS
+      ------------------------- */
+
+      setCredentialResults(
+        credentials
       );
+
+      /* -------------------------
+          BULK IMPORT AUDIT
+        ------------------------- */
+
+        await logBulkStudentImport({
+          fileName: file.name,
+          importedCount: createdUsers.length,
+          failedCount: failures.length,
+          totalCount: students.length,
+        });
+
+
+      /* -------------------------
+         CLOSE ADD STUDENT MODAL
+      ------------------------- */
+
+      setStudentModalOpen(false);
+
+
+      /* -------------------------
+         PAGE NOTICE
+      ------------------------- */
+
+      if (failures.length === 0) {
+        showSuccess(
+          `${createdUsers.length} student account${
+            createdUsers.length === 1
+              ? ''
+              : 's'
+          } successfully imported.`,
+          'Import Complete'
+        );
+      }
     } catch (error) {
+      console.error(
+        'Bulk student import error:',
+        error
+      );
+
       setStudentImportStatus({
         state: 'error',
         fileName: file.name,
         fileSize: file.size,
-        message: 'Could not import this file.',
-        detail: error.message || 'Please check the CSV or Excel file and try again.',
+        message:
+          'Could not import this file.',
+        detail:
+          error.message ||
+          'Please check the CSV or Excel file and try again.',
       });
-      setNotice(error.message || 'Could not import students.');
+
+      showError(
+        error.message ||
+          'Could not import students.',
+        'Import Failed'
+      );
     }
   };
 
@@ -1181,9 +2139,19 @@ export default function SuperAdminUserManagementPage() {
 
     try {
       await navigator.clipboard.writeText(text);
-      setNotice('Temporary credentials copied.');
+
+      await Swal.fire({
+        icon: 'success',
+        title: 'Credentials Copied',
+        text: 'Temporary credentials were copied to the clipboard.',
+        timer: 1800,
+        showConfirmButton: false,
+      });
     } catch {
-      setNotice('Temporary credentials are ready to copy.');
+      showError(
+        'Could not copy temporary credentials.',
+        'Copy Failed'
+      );
     }
   };
 
@@ -1233,50 +2201,73 @@ export default function SuperAdminUserManagementPage() {
 
   const renderApprovalActions = (user) => (
     <div className="users-action-group">
+  <button
+    className="users-icon-btn users-view-btn"
+    type="button"
+    onClick={() => setSelectedUser(user)}
+    title="Review account"
+  >
+    <FiEye />
+    <span>View</span>
+  </button>
+
+  {user.role !== 'super_admin' && (
+    <>
       <button
-        className="users-icon-btn users-view-btn"
+        className="users-icon-btn users-reset-btn"
         type="button"
-        onClick={() => setSelectedUser(user)}
-        title="Review professor"
+        onClick={() => handleResetCredentials(user)}
+        disabled={busyUserId === `${user.id}-credentials`}
+        title="Reset account credentials"
       >
-        <FiEye />
-        <span>View</span>
+        <FiRefreshCw />
+        <span>
+          {busyUserId === `${user.id}-credentials`
+            ? 'Resetting...'
+            : 'Reset'}
+        </span>
       </button>
+
       <button
-        className="users-icon-btn users-approve-btn"
+        className="users-icon-btn users-archive-btn"
         type="button"
-        onClick={() => handleProfessorDecision(user, 'approved')}
-        disabled={busyUserId === `${user.id}-approved`}
-        title="Approve professor"
+        onClick={() => handleArchiveToggle(user)}
+        disabled={busyUserId === `${user.id}-archive`}
+        title={user.isArchived ? 'Restore account' : 'Archive account'}
       >
-        <FiCheck />
-        <span>Approve</span>
+        <FiArchive />
+        <span>
+          {user.isArchived ? 'Restore' : 'Archive'}
+        </span>
       </button>
-      <button
-        className="users-icon-btn users-decline-btn"
-        type="button"
-        onClick={() => handleProfessorDecision(user, 'declined')}
-        disabled={busyUserId === `${user.id}-declined`}
-        title="Decline professor"
-      >
-        <FiX />
-        <span>Decline</span>
-      </button>
-    </div>
+    </>
+  )}
+</div>
   );
 
   const renderApprovalStatus = (user) => {
-    const status = String(user.status || '').toLowerCase();
-    const verificationStatus = String(user.verificationStatus || '').toLowerCase();
-    const isDeclined = status === 'declined' || verificationStatus === 'declined';
-    const label = isDeclined ? 'Declined' : 'Approving';
+      const verificationStatus = String(
+        user.verificationStatus || ''
+      ).toLowerCase();
 
-    return (
-      <span className={`users-status is-${label.toLowerCase()}`}>
-        {label}
-      </span>
-    );
-  };
+      let label = 'Pending';
+
+      if (verificationStatus === 'approved') {
+        label = 'Approved';
+      } else if (verificationStatus === 'declined') {
+        label = 'Declined';
+      } else if (verificationStatus === 'pending') {
+        label = 'Pending';
+      }
+
+      return (
+        <span
+          className={`users-status is-${label.toLowerCase()}`}
+        >
+          {label}
+        </span>
+      );
+    };
 
   const renderGenericRows = (rows) =>
     rows.map((user) => {
@@ -1569,7 +2560,6 @@ export default function SuperAdminUserManagementPage() {
           </label>
         </div>
 
-        {notice && <div className="users-notice">{notice}</div>}
 
         <div className="users-table-wrap">
           <table className="users-table">
@@ -1740,13 +2730,14 @@ export default function SuperAdminUserManagementPage() {
 
                 <div className="professor-proof-upload-area">
                   <input
-                    id="superadmin-professor-proof"
-                    type="file"
-                    accept={PROFESSOR_PROOF_ACCEPT}
-                    className="professor-proof-file-input"
-                    disabled={creatingProfessor}
-                    onChange={handleProfessorProofUpload}
-                  />
+                      id="superadmin-professor-proof"
+                      type="file"
+                      accept={PROFESSOR_PROOF_ACCEPT}
+                      className="professor-proof-file-input"
+                      disabled={creatingProfessor}
+                      onChange={handleProfessorProofUpload}
+                      required
+                    />
 
                   <label
                     className="users-secondary-btn professor-proof-upload-btn"
@@ -1843,19 +2834,79 @@ export default function SuperAdminUserManagementPage() {
             <form className="users-student-form" onSubmit={handleCreateStudent}>
               <label>
                 Student Name
-                <input type="text" value={studentForm.name} onChange={(event) => setStudentForm((form) => ({ ...form, name: event.target.value }))} required />
+                <input
+                  type="text"
+                  value={studentForm.name}
+                  onChange={(event) =>
+                    setStudentForm((form) => ({
+                      ...form,
+                      name: event.target.value,
+                    }))
+                  }
+                  required
+                />
               </label>
+
               <label>
                 Student Email
-                <input type="email" value={studentForm.email} onChange={(event) => setStudentForm((form) => ({ ...form, email: event.target.value }))} required />
+                <input
+                  type="email"
+                  value={studentForm.email}
+                  onChange={(event) =>
+                    setStudentForm((form) => ({
+                      ...form,
+                      email: event.target.value,
+                    }))
+                  }
+                  required
+                />
               </label>
+
               <label>
                 Student ID
-                <input type="text" value={studentForm.studentId} onChange={(event) => setStudentForm((form) => ({ ...form, studentId: event.target.value }))} />
+                <input
+                  type="text"
+                  value={studentForm.studentId}
+                  onChange={(event) =>
+                    setStudentForm((form) => ({
+                      ...form,
+                      studentId: event.target.value,
+                    }))
+                  }
+                  required
+                />
               </label>
+
+              <label>
+                Gender
+                <select
+                  value={studentForm.gender}
+                  onChange={(event) =>
+                    setStudentForm((form) => ({
+                      ...form,
+                      gender: event.target.value,
+                    }))
+                  }
+                  required
+                >
+                  <option value="">Select gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                </select>
+              </label>
+
               <label>
                 Year Level
-                <select value={studentForm.yearLevel} onChange={(event) => setStudentForm((form) => ({ ...form, yearLevel: event.target.value }))}>
+                <select
+                  value={studentForm.yearLevel}
+                  onChange={(event) =>
+                    setStudentForm((form) => ({
+                      ...form,
+                      yearLevel: event.target.value,
+                    }))
+                  }
+                  required
+                >
                   <option value="">Select year</option>
                   <option value="1st Year">1st Year</option>
                   <option value="2nd Year">2nd Year</option>
@@ -1863,11 +2914,26 @@ export default function SuperAdminUserManagementPage() {
                   <option value="4th Year">4th Year</option>
                 </select>
               </label>
+
               <label>
                 Section
-                <input type="text" value={studentForm.sectionName} onChange={(event) => setStudentForm((form) => ({ ...form, sectionName: event.target.value }))} placeholder="Example: 1A" />
+                <input
+                  type="text"
+                  value={studentForm.sectionName}
+                  onChange={(event) =>
+                    setStudentForm((form) => ({
+                      ...form,
+                      sectionName: event.target.value,
+                    }))
+                  }
+                  placeholder="Example: 1A"
+                  required
+                />
               </label>
-              <button className="users-submit-btn" type="submit">Create Student Account</button>
+
+              <button className="users-submit-btn" type="submit">
+                Create Student Account
+              </button>
             </form>
           </section>
         </div>
