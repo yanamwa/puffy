@@ -1,3 +1,6 @@
+import { useEffect, useMemo, useState } from 'react';
+import Swal from 'sweetalert2';
+
 import {
   FiActivity,
   FiBarChart2,
@@ -8,242 +11,52 @@ import {
   FiUsers,
 } from 'react-icons/fi';
 
+import { API_BASE } from '../../../config.js';
+
 import './SuperAdminSystemAnalytics.css';
 
 
 /* =====================================================
-   OVERVIEW CARDS
+   HELPERS
 ===================================================== */
 
-const systemAnalyticsOverview = [
-  {
-    label: 'Platform Performance',
-    value: '98%',
-    detail: 'Average uptime this month',
-    icon: FiActivity,
-  },
-  {
-    label: 'User Engagement',
-    value: '287',
-    detail: 'Active users this week',
-    icon: FiUsers,
-  },
-  {
-    label: 'Academic Activity',
-    value: '41',
-    detail: 'Courses with recent learning activity',
-    icon: FiBookOpen,
-  },
-  {
-    label: 'System Usage',
-    value: '5.6k',
-    detail: 'Quiz and module interactions',
-    icon: FiBarChart2,
-  },
-];
+function getAuthToken() {
+  return (
+    localStorage.getItem('token') ||
+    localStorage.getItem('authToken') ||
+    localStorage.getItem('puffy-token') ||
+    sessionStorage.getItem('token') ||
+    sessionStorage.getItem('authToken') ||
+    ''
+  );
+}
 
 
-/* =====================================================
-   ANALYTICS SECTIONS
-===================================================== */
+function numberValue(value) {
+  const number = Number(value);
 
-const systemAnalyticsSections = [
-  {
-    title: 'User Growth',
-    description:
-      'Track student, professor, and administrator registrations, active users, and account trends over time.',
-    icon: FiTrendingUp,
+  return Number.isFinite(number)
+    ? number
+    : 0;
+}
 
-    metrics: [
-      {
-        label: 'Student Registrations',
-        value: '342',
-        trend: '+18%',
-      },
-      {
-        label: 'Professor Registrations',
-        value: '28',
-        trend: '+6%',
-      },
-      {
-        label: 'Administrator Accounts',
-        value: '5',
-        trend: 'Stable',
-      },
-      {
-        label: 'Active Users',
-        value: '287',
-        trend: '+12%',
-      },
-    ],
 
-    bars: [
-      {
-        label: 'Students',
-        value: 86,
-      },
-      {
-        label: 'Professors',
-        value: 64,
-      },
-      {
-        label: 'Administrators',
-        value: 36,
-      },
-      {
-        label: 'Active accounts',
-        value: 78,
-      },
-    ],
-  },
+function formatNumber(value) {
+  return numberValue(value).toLocaleString();
+}
 
-  {
-    title: 'Course Activity',
-    description:
-      'Monitor course creation, enrollments, module distribution, and overall course engagement.',
-    icon: FiBookOpen,
 
-    metrics: [
-      {
-        label: 'Courses Created',
-        value: '41',
-        trend: '+9%',
-      },
-      {
-        label: 'Enrollments',
-        value: '1,248',
-        trend: '+21%',
-      },
-      {
-        label: 'Modules Published',
-        value: '176',
-        trend: '+14%',
-      },
-      {
-        label: 'Course Engagement',
-        value: '84%',
-        trend: '+7%',
-      },
-    ],
+function formatPercent(value) {
+  return `${Math.round(numberValue(value) * 10) / 10}%`;
+}
 
-    bars: [
-      {
-        label: 'Course creation',
-        value: 72,
-      },
-      {
-        label: 'Enrollments',
-        value: 92,
-      },
-      {
-        label: 'Module distribution',
-        value: 80,
-      },
-      {
-        label: 'Engagement',
-        value: 84,
-      },
-    ],
-  },
 
-  {
-    title: 'Quiz Usage',
-    description:
-      'Analyze quiz attempts, completion rates, average scores, adaptive quiz usage, and assessment trends.',
-    icon: FiFileText,
-
-    metrics: [
-      {
-        label: 'Quiz Attempts',
-        value: '5,680',
-        trend: '+25%',
-      },
-      {
-        label: 'Completion Rate',
-        value: '88%',
-        trend: '+8%',
-      },
-      {
-        label: 'Average Score',
-        value: '82%',
-        trend: '+5%',
-      },
-      {
-        label: 'Adaptive Quiz Usage',
-        value: '64%',
-        trend: '+16%',
-      },
-    ],
-
-    bars: [
-      {
-        label: 'Attempts',
-        value: 90,
-      },
-      {
-        label: 'Completions',
-        value: 88,
-      },
-      {
-        label: 'Average scores',
-        value: 82,
-      },
-      {
-        label: 'Adaptive usage',
-        value: 64,
-      },
-    ],
-  },
-
-  {
-    title: 'Learning Progress',
-    description:
-      'Monitor student achievement, module completion, learning performance, and adaptive learning outcomes.',
-    icon: FiTarget,
-
-    metrics: [
-      {
-        label: 'Students at Mastery',
-        value: '214',
-        trend: '+11%',
-      },
-      {
-        label: 'Module Completion',
-        value: '79%',
-        trend: '+10%',
-      },
-      {
-        label: 'Performance Growth',
-        value: '+12%',
-        trend: 'Improving',
-      },
-      {
-        label: 'Adaptive Outcomes',
-        value: '91%',
-        trend: '+9%',
-      },
-    ],
-
-    bars: [
-      {
-        label: 'Achievement',
-        value: 76,
-      },
-      {
-        label: 'Module completion',
-        value: 79,
-      },
-      {
-        label: 'Performance growth',
-        value: 68,
-      },
-      {
-        label: 'Adaptive outcomes',
-        value: 91,
-      },
-    ],
-  },
-];
+function clampPercent(value) {
+  return Math.min(
+    100,
+    Math.max(0, numberValue(value))
+  );
+}
 
 
 /* =====================================================
@@ -251,6 +64,801 @@ const systemAnalyticsSections = [
 ===================================================== */
 
 export default function SuperAdminSystemAnalytics() {
+  const [analytics, setAnalytics] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+
+
+  /* ===================================================
+     LOAD ANALYTICS
+  =================================================== */
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadAnalytics() {
+      try {
+        setLoading(true);
+        setLoadError(false);
+
+        const token = getAuthToken();
+
+        const response = await fetch(
+          `${API_BASE}/analytics/system`,
+          {
+            method: 'GET',
+
+            credentials: 'include',
+
+            headers: {
+              ...(token
+                ? {
+                    Authorization:
+                      `Bearer ${token}`,
+                  }
+                : {}),
+            },
+          }
+        );
+
+        const data = await response
+          .json()
+          .catch(() => ({
+            success: false,
+            message:
+              'Server returned an invalid response.',
+          }));
+
+        if (
+          !response.ok ||
+          data.success === false
+        ) {
+          throw new Error(
+            data.message ||
+              'Failed to load system analytics.'
+          );
+        }
+
+        if (active) {
+          setAnalytics(data);
+        }
+      } catch (error) {
+        console.error(
+          'System analytics load error:',
+          error
+        );
+
+        if (active) {
+          setAnalytics(null);
+          setLoadError(true);
+
+          await Swal.fire({
+            icon: 'error',
+            title: 'Analytics Unavailable',
+            text:
+              error.message ||
+              'System analytics could not be loaded.',
+            confirmButtonText: 'OK',
+          });
+        }
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadAnalytics();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+
+  /* ===================================================
+     REAL OVERVIEW DATA
+  =================================================== */
+
+  const systemAnalyticsOverview = useMemo(() => {
+    if (!analytics) {
+      return [];
+    }
+
+    return [
+      {
+        label: 'Total Users',
+
+        value:
+          formatNumber(
+            analytics.overview?.totalUsers
+          ),
+
+        detail:
+          'Registered PuffyBrain accounts',
+
+        icon: FiUsers,
+      },
+
+      {
+        label: 'Active Users',
+
+        value:
+          formatNumber(
+            analytics.overview?.activeUsers
+          ),
+
+        detail:
+          'Users active within the last 7 days',
+
+        icon: FiActivity,
+      },
+
+      {
+        label: 'Total Courses',
+
+        value:
+          formatNumber(
+            analytics.overview?.totalCourses
+          ),
+
+        detail:
+          'Courses created in PuffyBrain',
+
+        icon: FiBookOpen,
+      },
+
+      {
+        label: 'Quiz Attempts',
+
+        value:
+          formatNumber(
+            analytics.overview?.quizAttempts
+          ),
+
+        detail:
+          'Recorded quiz attempts',
+
+        icon: FiBarChart2,
+      },
+    ];
+  }, [analytics]);
+
+
+  /* ===================================================
+     REAL ANALYTICS SECTIONS
+  =================================================== */
+
+  const systemAnalyticsSections = useMemo(() => {
+    if (!analytics) {
+      return [];
+    }
+
+    const users =
+      analytics.users || {};
+
+    const courses =
+      analytics.courses || {};
+
+    const quizzes =
+      analytics.quizzes || {};
+
+    const learning =
+      analytics.learning || {};
+
+
+    /* -------------------------------------------------
+       USER BAR CALCULATIONS
+    ------------------------------------------------- */
+
+    const activeAccounts =
+      numberValue(
+        users.activeAccounts
+      );
+
+    const studentShare =
+      activeAccounts > 0
+        ? (
+            numberValue(
+              users.students
+            ) /
+            activeAccounts
+          ) * 100
+        : 0;
+
+    const professorShare =
+      activeAccounts > 0
+        ? (
+            numberValue(
+              users.professors
+            ) /
+            activeAccounts
+          ) * 100
+        : 0;
+
+    const administratorShare =
+      activeAccounts > 0
+        ? (
+            numberValue(
+              users.administrators
+            ) /
+            activeAccounts
+          ) * 100
+        : 0;
+
+
+    /* -------------------------------------------------
+       QUIZ BAR CALCULATIONS
+    ------------------------------------------------- */
+
+    const totalStudents =
+      numberValue(
+        users.students
+      );
+
+    const quizParticipation =
+      totalStudents > 0
+        ? (
+            numberValue(
+              quizzes.studentsWithAttempts
+            ) /
+            totalStudents
+          ) * 100
+        : 0;
+
+    const weeklyQuizParticipation =
+      totalStudents > 0
+        ? (
+            numberValue(
+              quizzes.studentsThisWeek
+            ) /
+            totalStudents
+          ) * 100
+        : 0;
+
+
+    /* -------------------------------------------------
+       LEARNING BAR CALCULATIONS
+    ------------------------------------------------- */
+
+    const learningParticipation =
+      totalStudents > 0
+        ? (
+            numberValue(
+              learning.studentsWithProgress
+            ) /
+            totalStudents
+          ) * 100
+        : 0;
+
+    const masteryRate =
+      totalStudents > 0
+        ? (
+            numberValue(
+              learning.studentsAtMastery
+            ) /
+            totalStudents
+          ) * 100
+        : 0;
+
+
+    return [
+
+      /* ===============================================
+         USER GROWTH
+      =============================================== */
+
+      {
+        title: 'User Growth',
+
+        description:
+          'Track student, professor, and administrator accounts and current platform activity.',
+
+        icon: FiTrendingUp,
+
+        metrics: [
+          {
+            label: 'Students',
+
+            value:
+              formatNumber(
+                users.students
+              ),
+
+            trend:
+              'Active accounts',
+          },
+
+          {
+            label: 'Professors',
+
+            value:
+              formatNumber(
+                users.professors
+              ),
+
+            trend:
+              'Active accounts',
+          },
+
+          {
+            label:
+              'Administrators',
+
+            value:
+              formatNumber(
+                users.administrators
+              ),
+
+            trend:
+              'Active accounts',
+          },
+
+          {
+            label:
+              'Active This Week',
+
+            value:
+              formatNumber(
+                users.activeThisWeek
+              ),
+
+            trend:
+              `${formatNumber(
+                users.registrationsThisMonth
+              )} registrations this month`,
+          },
+        ],
+
+        bars: [
+          {
+            label:
+              'Student accounts',
+
+            value:
+              clampPercent(
+                studentShare
+              ),
+          },
+
+          {
+            label:
+              'Professor accounts',
+
+            value:
+              clampPercent(
+                professorShare
+              ),
+          },
+
+          {
+            label:
+              'Administrator accounts',
+
+            value:
+              clampPercent(
+                administratorShare
+              ),
+          },
+
+          {
+            label:
+              'Active account rate',
+
+            value:
+              clampPercent(
+                users.activeAccountRate
+              ),
+          },
+        ],
+      },
+
+
+      /* ===============================================
+         COURSE ACTIVITY
+      =============================================== */
+
+      {
+        title:
+          'Course Activity',
+
+        description:
+          'Monitor courses, enrollment activity, and learning module publication across PuffyBrain.',
+
+        icon: FiBookOpen,
+
+        metrics: [
+          {
+            label:
+              'Courses Created',
+
+            value:
+              formatNumber(
+                courses.total
+              ),
+
+            trend:
+              `${formatNumber(
+                courses.active
+              )} active`,
+          },
+
+          {
+            label:
+              'Approved Enrollments',
+
+            value:
+              formatNumber(
+                courses.approvedEnrollments
+              ),
+
+            trend:
+              `${formatNumber(
+                courses.pendingEnrollments
+              )} pending`,
+          },
+
+          {
+            label:
+              'Published Modules',
+
+            value:
+              formatNumber(
+                courses.publishedModules
+              ),
+
+            trend:
+              `${formatNumber(
+                courses.totalModules
+              )} total`,
+          },
+
+          {
+            label:
+              'Published Courses',
+
+            value:
+              formatNumber(
+                courses.published
+              ),
+
+            trend:
+              `${formatNumber(
+                courses.archived
+              )} archived`,
+          },
+        ],
+
+        bars: [
+          {
+            label:
+              'Published courses',
+
+            value:
+              clampPercent(
+                courses.publishedRate
+              ),
+          },
+
+          {
+            label:
+              'Enrollment approval',
+
+            value:
+              clampPercent(
+                courses.enrollmentApprovalRate
+              ),
+          },
+
+          {
+            label:
+              'Published modules',
+
+            value:
+              clampPercent(
+                courses.modulePublishRate
+              ),
+          },
+
+          {
+            label:
+              'Active courses',
+
+            value:
+              numberValue(
+                courses.total
+              ) > 0
+                ? clampPercent(
+                    (
+                      numberValue(
+                        courses.active
+                      ) /
+                      numberValue(
+                        courses.total
+                      )
+                    ) * 100
+                  )
+                : 0,
+          },
+        ],
+      },
+
+
+      /* ===============================================
+         QUIZ USAGE
+      =============================================== */
+
+      {
+        title:
+          'Quiz Usage',
+
+        description:
+          'Analyze quiz attempts, student participation, average scores, and recent assessment activity.',
+
+        icon: FiFileText,
+
+        metrics: [
+          {
+            label:
+              'Quiz Attempts',
+
+            value:
+              formatNumber(
+                quizzes.totalAttempts
+              ),
+
+            trend:
+              `${formatNumber(
+                quizzes.attemptsThisWeek
+              )} this week`,
+          },
+
+          {
+            label:
+              'Students Taking Quizzes',
+
+            value:
+              formatNumber(
+                quizzes.studentsWithAttempts
+              ),
+
+            trend:
+              'Unique students',
+          },
+
+          {
+            label:
+              'Average Score',
+
+            value:
+              formatPercent(
+                quizzes.averageScore
+              ),
+
+            trend:
+              'Across recorded attempts',
+          },
+
+          {
+            label:
+              'Quiz Time',
+
+            value:
+              formatNumber(
+                quizzes.totalQuizTime
+              ),
+
+            trend:
+              'Recorded time spent',
+          },
+        ],
+
+        bars: [
+          {
+            label:
+              'Student participation',
+
+            value:
+              clampPercent(
+                quizParticipation
+              ),
+          },
+
+          {
+            label:
+              'Weekly participation',
+
+            value:
+              clampPercent(
+                weeklyQuizParticipation
+              ),
+          },
+
+          {
+            label:
+              'Average score',
+
+            value:
+              clampPercent(
+                quizzes.averageScore
+              ),
+          },
+        ],
+      },
+
+
+      /* ===============================================
+         LEARNING PROGRESS
+      =============================================== */
+
+      {
+        title:
+          'Learning Progress',
+
+        description:
+          'Monitor student lesson progress, module completion, and mastery across the learning system.',
+
+        icon: FiTarget,
+
+        metrics: [
+          {
+            label:
+              'Students at Mastery',
+
+            value:
+              formatNumber(
+                learning.studentsAtMastery
+              ),
+
+            trend:
+              `${formatNumber(
+                learning.masteryThreshold
+              )}% threshold`,
+          },
+
+          {
+            label:
+              'Completed Modules',
+
+            value:
+              formatNumber(
+                learning.completedModules
+              ),
+
+            trend:
+              '100% lesson progress',
+          },
+
+          {
+            label:
+              'Average Progress',
+
+            value:
+              formatPercent(
+                learning.averageProgress
+              ),
+
+            trend:
+              'Across progress records',
+          },
+
+          {
+            label:
+              'Students with Progress',
+
+            value:
+              formatNumber(
+                learning.studentsWithProgress
+              ),
+
+            trend:
+              'Unique students',
+          },
+        ],
+
+        bars: [
+          {
+            label:
+              'Learning participation',
+
+            value:
+              clampPercent(
+                learningParticipation
+              ),
+          },
+
+          {
+            label:
+              'Average progress',
+
+            value:
+              clampPercent(
+                learning.averageProgress
+              ),
+          },
+
+          {
+            label:
+              'Mastery rate',
+
+            value:
+              clampPercent(
+                masteryRate
+              ),
+          },
+        ],
+      },
+    ];
+  }, [analytics]);
+
+
+  /* ===================================================
+     LOADING
+  =================================================== */
+
+  if (loading) {
+    return (
+      <div className="admin-page system-analytics-page">
+
+        <section className="system-analytics-header">
+          <div>
+            <span className="system-analytics-kicker">
+              <FiBarChart2 aria-hidden="true" />
+              System overview
+            </span>
+
+            <h1>
+              System Analytics
+            </h1>
+
+            <p>
+              Loading system analytics...
+            </p>
+          </div>
+        </section>
+
+      </div>
+    );
+  }
+
+
+  /* ===================================================
+     LOAD ERROR
+  =================================================== */
+
+  if (
+    loadError ||
+    !analytics
+  ) {
+    return (
+      <div className="admin-page system-analytics-page">
+
+        <section className="system-analytics-header">
+          <div>
+            <span className="system-analytics-kicker">
+              <FiBarChart2 aria-hidden="true" />
+              System overview
+            </span>
+
+            <h1>
+              System Analytics
+            </h1>
+
+            <p>
+              Analytics data is currently unavailable.
+            </p>
+          </div>
+        </section>
+
+      </div>
+    );
+  }
+
+
+  /* ===================================================
+     PAGE
+  =================================================== */
+
   return (
     <div className="admin-page system-analytics-page">
 
@@ -260,17 +868,22 @@ export default function SuperAdminSystemAnalytics() {
 
       <section className="system-analytics-header">
         <div>
+
           <span className="system-analytics-kicker">
             <FiBarChart2 aria-hidden="true" />
             System overview
           </span>
 
-          <h1>System Analytics</h1>
+          <h1>
+            System Analytics
+          </h1>
 
           <p>
-            Monitor platform performance, user engagement,
-            academic activity, and overall system usage.
+            Monitor user activity, courses,
+            assessments, and learning progress
+            across PuffyBrain.
           </p>
+
         </div>
       </section>
 
@@ -283,26 +896,37 @@ export default function SuperAdminSystemAnalytics() {
         className="system-analytics-overview"
         aria-label="System analytics overview"
       >
-        {systemAnalyticsOverview.map((item) => {
-          const Icon = item.icon;
+        {systemAnalyticsOverview.map(
+          (item) => {
+            const Icon =
+              item.icon;
 
-          return (
-            <article
-              className="system-analytics-stat"
-              key={item.label}
-            >
-              <span aria-hidden="true">
-                <Icon />
-              </span>
+            return (
+              <article
+                className="system-analytics-stat"
+                key={item.label}
+              >
+                <span aria-hidden="true">
+                  <Icon />
+                </span>
 
-              <div>
-                <p>{item.label}</p>
-                <strong>{item.value}</strong>
-                <small>{item.detail}</small>
-              </div>
-            </article>
-          );
-        })}
+                <div>
+                  <p>
+                    {item.label}
+                  </p>
+
+                  <strong>
+                    {item.value}
+                  </strong>
+
+                  <small>
+                    {item.detail}
+                  </small>
+                </div>
+              </article>
+            );
+          }
+        )}
       </section>
 
 
@@ -314,64 +938,111 @@ export default function SuperAdminSystemAnalytics() {
         className="system-analytics-grid"
         aria-label="System analytics categories"
       >
-        {systemAnalyticsSections.map((section) => {
-          const Icon = section.icon;
+        {systemAnalyticsSections.map(
+          (section) => {
+            const Icon =
+              section.icon;
 
-          return (
-            <article
-              className="system-analytics-card"
-              key={section.title}
-            >
-              <div className="system-analytics-card-header">
-                <span aria-hidden="true">
-                  <Icon />
-                </span>
+            return (
+              <article
+                className="system-analytics-card"
+                key={section.title}
+              >
 
-                <div>
-                  <h2>{section.title}</h2>
-                  <p>{section.description}</p>
+                {/* HEADER */}
+
+                <div className="system-analytics-card-header">
+
+                  <span aria-hidden="true">
+                    <Icon />
+                  </span>
+
+                  <div>
+                    <h2>
+                      {section.title}
+                    </h2>
+
+                    <p>
+                      {section.description}
+                    </p>
+                  </div>
+
                 </div>
-              </div>
 
 
-              <div className="system-analytics-metrics">
-                {section.metrics.map((metric) => (
-                  <div
-                    className="system-analytics-metric"
-                    key={metric.label}
-                  >
-                    <span>{metric.label}</span>
-                    <strong>{metric.value}</strong>
-                    <small>{metric.trend}</small>
-                  </div>
-                ))}
-              </div>
+                {/* METRICS */}
+
+                <div className="system-analytics-metrics">
+
+                  {section.metrics.map(
+                    (metric) => (
+                      <div
+                        className="system-analytics-metric"
+                        key={metric.label}
+                      >
+                        <span>
+                          {metric.label}
+                        </span>
+
+                        <strong>
+                          {metric.value}
+                        </strong>
+
+                        <small>
+                          {metric.trend}
+                        </small>
+                      </div>
+                    )
+                  )}
+
+                </div>
 
 
-              <div className="system-analytics-bars">
-                {section.bars.map((bar) => (
-                  <div
-                    className="system-analytics-bar"
-                    key={bar.label}
-                  >
-                    <div>
-                      <span>{bar.label}</span>
-                      <strong>{bar.value}%</strong>
-                    </div>
+                {/* BARS */}
 
-                    <i>
-                      <b
-                        style={{
-                          width: `${bar.value}%`,
-                        }}
-                      />
-                    </i>
-                  </div>
-                ))}
-              </div>
-            </article>
-          );
-        })}
+                <div className="system-analytics-bars">
+
+                  {section.bars.map(
+                    (bar) => (
+                      <div
+                        className="system-analytics-bar"
+                        key={bar.label}
+                      >
+
+                        <div>
+                          <span>
+                            {bar.label}
+                          </span>
+
+                          <strong>
+                            {Math.round(
+                              bar.value
+                            )}
+                            %
+                          </strong>
+                        </div>
+
+                        <i>
+                          <b
+                            style={{
+                              width:
+                                `${clampPercent(
+                                  bar.value
+                                )}%`,
+                            }}
+                          />
+                        </i>
+
+                      </div>
+                    )
+                  )}
+
+                </div>
+
+              </article>
+            );
+          }
+        )}
       </section>
 
     </div>

@@ -37,75 +37,7 @@ const growthFilters = [
   { id: 'year', label: 'This year' },
 ];
 
-const demoUsers = [
-  {
-    id: 1,
-    name: 'Meiko Santos',
-    email: 'meiko@puffybrain.test',
-    role: 'student',
-    joined: '2026-07-01',
-    lastActive: '2026-07-14T08:15:00',
-    status: 'Active',
-  },
-  {
-    id: 2,
-    name: 'Ashborn Reyes',
-    email: 'ashborn@puffybrain.test',
-    role: 'professor',
-    joined: '2026-07-13',
-    verificationStatus: 'pending',
-    professorDepartment: 'Computer Science',
-    status: 'Pending',
-  },
-  {
-    id: 3,
-    name: 'Dr. Mina Cruz',
-    email: 'mina@puffybrain.test',
-    role: 'professor',
-    joined: '2026-06-20',
-    verificationStatus: 'approved',
-    professorDepartment: 'Information Technology',
-    lastActive: '2026-07-14T09:40:00',
-    status: 'Active',
-  },
-  {
-    id: 4,
-    name: 'Admin Meii',
-    email: 'admin@puffybrain.test',
-    role: 'admin',
-    joined: '2026-06-15',
-    lastActive: '2026-07-14T07:55:00',
-    status: 'Active',
-  },
-  {
-    id: 5,
-    name: 'Kei Navarro',
-    email: 'kei@puffybrain.test',
-    role: 'student',
-    joined: '2026-07-10',
-    lastActive: '2026-07-13T19:20:00',
-    status: 'Active',
-  },
-];
 
-const demoCourses = [
-  {
-    id: 1,
-    title: 'Adaptive Learning Foundations',
-    status: 'published',
-    archived: false,
-    professorName: 'Dr. Mina Cruz',
-    updatedAt: '2026-07-13',
-  },
-  {
-    id: 2,
-    title: 'Data Structures Review',
-    status: 'published',
-    archived: false,
-    professorName: 'Prof. Leon Tan',
-    updatedAt: '2026-07-11',
-  },
-];
 
 function normalizeRole(role) {
   const value = String(role || '').toLowerCase();
@@ -326,8 +258,8 @@ function isCourseActive(course) {
 }
 
 export default function SuperAdminHome() {
-  const [users, setUsers] = useState(demoUsers.map(normalizeUser));
-  const [courses, setCourses] = useState(demoCourses.map(normalizeCourse));
+  const [users, setUsers] = useState([]);
+  const [courses, setCourses] = useState([]);
   const [growthRange, setGrowthRange] = useState('30d');
   const [loading, setLoading] = useState(true);
   const [sourceNotice, setSourceNotice] = useState('');
@@ -338,51 +270,87 @@ export default function SuperAdminHome() {
     async function loadDashboardData() {
       try {
         setLoading(true);
-        const [userResult, courseResult] = await Promise.allSettled([
-          fetch(`${API_BASE}/users`),
-          fetch(`${API_BASE}/courses`),
-        ]);
+        const token =
+            localStorage.getItem('token') ||
+            localStorage.getItem('authToken') ||
+            localStorage.getItem('puffy-token') ||
+            sessionStorage.getItem('token') ||
+            sessionStorage.getItem('authToken');
 
-        let usedFallback = false;
+          const [userResult, courseResult] = await Promise.allSettled([
+            fetch(`${API_BASE}/users`, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }),
 
-        if (userResult.status === 'fulfilled' && userResult.value.ok) {
-          const data = await userResult.value.json();
-          const nextUsers = Array.isArray(data.users) ? data.users : [];
-          if (mounted) setUsers(nextUsers.map(normalizeUser));
-        } else {
-          usedFallback = true;
-          if (mounted) setUsers(demoUsers.map(normalizeUser));
-        }
+            fetch(`${API_BASE}/courses`, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            })
+          ]);
 
-        if (courseResult.status === 'fulfilled' && courseResult.value.ok) {
-          const data = await courseResult.value.json();
-          const nextCourses = Array.isArray(data.courses) ? data.courses : [];
-          if (mounted) setCourses(nextCourses.map(normalizeCourse));
-        } else {
-          usedFallback = true;
-          if (mounted) setCourses(demoCourses.map(normalizeCourse));
-        }
+          let hasLoadError = false;
 
-        if (mounted) {
-          setSourceNotice(usedFallback ? 'Showing sample dashboard data until every API is available.' : '');
-        }
-      } catch {
-        if (mounted) {
-          setUsers(demoUsers.map(normalizeUser));
-          setCourses(demoCourses.map(normalizeCourse));
-          setSourceNotice('Showing sample dashboard data until every API is available.');
-        }
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    }
+            if (userResult.status === 'fulfilled' && userResult.value.ok) {
+              const data = await userResult.value.json();
+              const nextUsers = Array.isArray(data.users) ? data.users : [];
 
-    loadDashboardData();
+              if (mounted) {
+                setUsers(nextUsers.map(normalizeUser));
+              }
+            } else {
+              hasLoadError = true;
 
-    return () => {
-      mounted = false;
-    };
-  }, []);
+              if (mounted) {
+                setUsers([]);
+              }
+            }
+
+            if (courseResult.status === 'fulfilled' && courseResult.value.ok) {
+              const data = await courseResult.value.json();
+              const nextCourses = Array.isArray(data.courses) ? data.courses : [];
+
+              if (mounted) {
+                setCourses(nextCourses.map(normalizeCourse));
+              }
+            } else {
+              hasLoadError = true;
+
+              if (mounted) {
+                setCourses([]);
+              }
+            }
+
+            if (mounted) {
+              setSourceNotice(
+                hasLoadError
+                  ? 'Some dashboard data could not be loaded.'
+                  : ''
+              );
+            }
+            } catch {
+              if (mounted) {
+                setUsers([]);
+                setCourses([]);
+                setSourceNotice(
+                  'Dashboard data could not be loaded.'
+                );
+              }
+            } finally {
+              if (mounted) {
+                setLoading(false);
+              }
+            }
+            } // <-- ADD THIS
+
+            loadDashboardData();
+
+            return () => {
+              mounted = false;
+            };
+            }, []);
 
   const activeUsers = useMemo(
     () => users.filter((user) => !user.isArchived && user.status !== 'Declined'),

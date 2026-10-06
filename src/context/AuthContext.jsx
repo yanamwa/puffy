@@ -233,10 +233,29 @@ export function AuthProvider({ children }) {
     return saveSession(data);
   };
 
-  const logout = () => {
-    clearStoredSession();
-    setUser(null);
-  };
+  const logout = async () => {
+      const token = readStoredToken();
+
+      try {
+        if (token) {
+          await fetch(`${API_BASE}/logout`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+        }
+      } catch (error) {
+        console.warn(
+          'Unable to record logout.',
+          error
+        );
+      } finally {
+        clearStoredSession();
+        setUser(null);
+      }
+    };
 
   const value = useMemo(
     () => ({ user, login, logout, saveSession, updateUser }),

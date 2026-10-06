@@ -6,6 +6,7 @@ import {
   fetchCourses,
 } from '../../../services/courseApi.js';
 import styles from './modulemanage.module.css';
+import Swal from 'sweetalert2';
 
 function formatCourseId(course) {
   return (
@@ -21,6 +22,7 @@ export default function ModuleManagement() {
 
   const [courses, setCourses] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [courseView, setCourseView] = useState('active');
   const [rowsToShow, setRowsToShow] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -38,7 +40,9 @@ export default function ModuleManagement() {
         setLoading(true);
         setErrorMessage('');
 
-        const loadedCourses = await fetchCourses();
+        const loadedCourses = await fetchCourses({
+          includeArchived: true,
+        });
 
         if (active) {
           setCourses(
@@ -73,8 +77,8 @@ export default function ModuleManagement() {
   ========================================= */
 
   useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery, rowsToShow]);
+  setCurrentPage(1);
+}, [searchQuery, rowsToShow, courseView]);
 
   /* =========================================
      FILTER COURSES
@@ -86,7 +90,13 @@ export default function ModuleManagement() {
       .toLowerCase();
 
     return courses
-      .filter((course) => !course.archived)
+      .filter((course) => {
+        if (courseView === 'archived') {
+          return Boolean(course.archived);
+        }
+
+        return !course.archived;
+      })
       .filter((course) => {
         if (!query) {
           return true;
@@ -104,7 +114,7 @@ export default function ModuleManagement() {
           .toLowerCase()
           .includes(query);
       });
-  }, [courses, searchQuery]);
+  }, [courses, searchQuery, courseView]);
 
   /* =========================================
      PAGINATION
@@ -137,11 +147,19 @@ export default function ModuleManagement() {
   ========================================= */
 
   const archiveCourse = async (course) => {
-    const ok = window.confirm(
-      `Archive "${course.title}" from course management?`
-    );
+    const result = await Swal.fire({
+      title: 'Archive Course?',
+      text: `"${course.title}" will be moved to Archived Courses.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Archive',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#dc3545',
+      cancelButtonColor: '#6c757d',
+      reverseButtons: true,
+    });
 
-    if (!ok) {
+    if (!result.isConfirmed) {
       return;
     }
 
@@ -153,8 +171,7 @@ export default function ModuleManagement() {
 
       setCourses((current) =>
         current.map((item) =>
-          String(item.id) ===
-          String(course.id)
+          String(item.id) === String(course.id)
             ? {
                 ...item,
                 archived: true,
@@ -162,13 +179,80 @@ export default function ModuleManagement() {
             : item
         )
       );
+
+      await Swal.fire({
+        title: 'Course Archived',
+        text: `"${course.title}" was archived successfully.`,
+        icon: 'success',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#7fa9d6',
+      });
     } catch (error) {
-      window.alert(
-        error.message ||
-          'Could not archive course.'
-      );
+      await Swal.fire({
+        title: 'Archive Failed',
+        text:
+          error.message ||
+          'Could not archive the course.',
+        icon: 'error',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#7fa9d6',
+      });
     }
   };
+
+    const restoreCourse = async (course) => {
+      const result = await Swal.fire({
+        title: 'Restore Course?',
+        text: `"${course.title}" will be moved back to Active Courses.`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Restore',
+        cancelButtonText: 'Cancel',
+        confirmButtonColor: '#7fa9d6',
+        cancelButtonColor: '#6c757d',
+        reverseButtons: true,
+      });
+
+      if (!result.isConfirmed) {
+        return;
+      }
+
+      try {
+        await archiveCourseById(
+          course.id,
+          false
+        );
+
+        setCourses((current) =>
+          current.map((item) =>
+            String(item.id) === String(course.id)
+              ? {
+                  ...item,
+                  archived: false,
+                }
+              : item
+          )
+        );
+
+        await Swal.fire({
+          title: 'Course Restored',
+          text: `"${course.title}" is now available under Active Courses.`,
+          icon: 'success',
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#7fa9d6',
+        });
+      } catch (error) {
+        await Swal.fire({
+          title: 'Restore Failed',
+          text:
+            error.message ||
+            'Could not restore the course.',
+          icon: 'error',
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#7fa9d6',
+        });
+      }
+    };
 
   /* =========================================
      PAGE
@@ -214,13 +298,37 @@ export default function ModuleManagement() {
           type="search"
           value={searchQuery}
           onChange={(event) =>
-            setSearchQuery(
-              event.target.value
-            )
+            setSearchQuery(event.target.value)
           }
           placeholder="Search courses..."
           aria-label="Search courses"
         />
+
+        <div className={styles.courseViewToggle}>
+          <button
+            type="button"
+            className={
+              courseView === 'active'
+                ? styles.courseViewActive
+                : ''
+            }
+            onClick={() => setCourseView('active')}
+          >
+            Active
+          </button>
+
+          <button
+            type="button"
+            className={
+              courseView === 'archived'
+                ? styles.courseViewActive
+                : ''
+            }
+            onClick={() => setCourseView('archived')}
+          >
+            Archived
+          </button>
+        </div>
       </div>
 
       {/* =====================================
@@ -416,33 +524,45 @@ export default function ModuleManagement() {
                     ACTION BUTTONS
                 ========================== */}
 
-                <div className={styles.actions}>
+                {courseView === 'active' ? (
+                  <>
+                    <button
+                      type="button"
+                      className={styles.actionEdit}
+                      onClick={(event) => {
+                        event.stopPropagation();
+
+                        navigate(
+                          `/professor/courses/edit/${course.id}`
+                        );
+                      }}
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      type="button"
+                      className={styles.actionDelete}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        archiveCourse(course);
+                      }}
+                    >
+                      Archive
+                    </button>
+                  </>
+                ) : (
                   <button
                     type="button"
-                    className={styles.actionEdit}
+                    className={styles.actionRestore}
                     onClick={(event) => {
                       event.stopPropagation();
-
-                      navigate(
-                        `/professor/courses/edit/${course.id}`
-                      );
+                      restoreCourse(course);
                     }}
                   >
-                    Edit
+                    Restore
                   </button>
-
-                  <button
-                    type="button"
-                    className={styles.actionDelete}
-                    onClick={(event) => {
-                      event.stopPropagation();
-
-                      archiveCourse(course);
-                    }}
-                  >
-                    Archive
-                  </button>
-                </div>
+                )}
               </article>
             ))}
           </div>

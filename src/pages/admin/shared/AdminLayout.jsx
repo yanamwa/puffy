@@ -502,16 +502,13 @@ export default function AdminLayout({
      LOGOUT
   =================================================== */
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+  await logout();
 
-    navigate(
-      '/login',
-      {
-        replace: true,
-      },
-    );
-  };
+  navigate('/login', {
+    replace: true,
+  });
+};
 
 
   /* ===================================================
