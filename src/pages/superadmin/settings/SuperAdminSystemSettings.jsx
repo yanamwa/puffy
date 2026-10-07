@@ -1,4 +1,10 @@
-import { useState } from 'react';
+import {
+  useEffect,
+  useState,
+} from 'react';
+
+import Swal from 'sweetalert2';
+import { API_BASE } from '../../../config.js';
 
 import {
   FiBookOpen,
@@ -116,19 +122,125 @@ function SettingsSection({
   );
 }
 
-
+function getAuthToken() {
+  return (
+    localStorage.getItem('puffy-token') ||
+    localStorage.getItem('token') ||
+    localStorage.getItem('authToken') ||
+    sessionStorage.getItem('puffy-token') ||
+    sessionStorage.getItem('token') ||
+    sessionStorage.getItem('authToken') ||
+    ''
+  );
+}
 /* =====================================================
    SYSTEM SETTINGS PAGE
 ===================================================== */
 
-export default function SuperAdminSystemSettings() {
-  const [settings, setSettings] = useState(defaultSettings);
+  export default function SuperAdminSystemSettings() {  
+    const [settings, setSettings] =
+      useState(defaultSettings);
 
-  const [savedSettings, setSavedSettings] =
-    useState(defaultSettings);
+    const [savedSettings, setSavedSettings] =
+      useState(defaultSettings);
 
-  const [notice, setNotice] = useState('');
+    const [notice, setNotice] =
+      useState('');
 
+    const [loading, setLoading] =
+      useState(true);
+
+    const [saving, setSaving] =
+      useState(false);
+
+      /* =====================================================
+        LOAD SETTINGS FROM DATABASE
+      ===================================================== */
+
+      useEffect(() => {
+        let cancelled = false;
+
+        async function loadSettings() {
+          const token = getAuthToken();
+
+          if (!token) {
+            setLoading(false);
+
+            Swal.fire({
+              icon: 'error',
+              title: 'Authentication Required',
+              text: 'Please log in again to access System Settings.',
+            });
+
+            return;
+          }
+
+          try {
+            const response = await fetch(
+              `${API_BASE}/system-settings`,
+              {
+                method: 'GET',
+                credentials: 'include',
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+
+            const data = await response
+              .json()
+              .catch(() => ({}));
+
+            if (
+              !response.ok ||
+              !data.success ||
+              !data.settings
+            ) {
+              throw new Error(
+                data.message ||
+                  'Failed to load system settings.'
+              );
+            }
+
+            if (cancelled) {
+              return;
+            }
+
+            const loadedSettings = {
+              ...defaultSettings,
+              ...data.settings,
+            };
+
+            setSettings(loadedSettings);
+            setSavedSettings(loadedSettings);
+          } catch (error) {
+            console.error(
+              'Load system settings error:',
+              error
+            );
+
+            if (!cancelled) {
+              Swal.fire({
+                icon: 'error',
+                title: 'Unable to Load Settings',
+                text:
+                  error?.message ||
+                  'System settings could not be loaded.',
+              });
+            }
+          } finally {
+            if (!cancelled) {
+              setLoading(false);
+            }
+          }
+        }
+
+        loadSettings();
+
+        return () => {
+          cancelled = true;
+        };
+      }, []);
 
   /* =====================================================
      UPDATE FIELD
@@ -157,12 +269,114 @@ export default function SuperAdminSystemSettings() {
      SAVE
   ===================================================== */
 
-  const handleSave = () => {
-    setSavedSettings(settings);
+  const handleSave = async () => {
+    if (!hasChanges || saving || loading) {
+      return;
+    }
 
-    setNotice(
-      'System settings were saved successfully.',
-    );
+    const token = getAuthToken();
+
+    if (!token) {
+      await Swal.fire({
+        icon: 'error',
+        title: 'Authentication Required',
+        text: 'Please log in again before saving System Settings.',
+      });
+
+      return;
+    }
+
+    const confirmation = await Swal.fire({
+      icon: 'question',
+      title: 'Save System Settings?',
+      text: 'These changes will update the PuffyBrain system configuration.',
+      showCancelButton: true,
+      confirmButtonText: 'Save Changes',
+      cancelButtonText: 'Cancel',
+      reverseButtons: true,
+    });
+
+    if (!confirmation.isConfirmed) {
+      return;
+    }
+
+    try {
+      setSaving(true);
+      setNotice('');
+
+      Swal.fire({
+        title: 'Saving Settings',
+        text: 'Updating PuffyBrain system settings...',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+
+      const response = await fetch(
+        `${API_BASE}/system-settings`,
+        {
+          method: 'PUT',
+          credentials: 'include',
+
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+
+          body: JSON.stringify(settings),
+        }
+      );
+
+      const data = await response
+        .json()
+        .catch(() => ({}));
+
+      if (!response.ok || !data.success) {
+        throw new Error(
+          data.message ||
+            'Failed to save system settings.'
+        );
+      }
+
+      const updatedSettings = {
+        ...defaultSettings,
+        ...(data.settings || settings),
+      };
+
+      setSettings(updatedSettings);
+      setSavedSettings(updatedSettings);
+
+      setNotice(
+        'System settings were saved successfully.'
+      );
+
+      await Swal.fire({
+        icon: 'success',
+        title: 'Settings Saved',
+        text:
+          data.message ||
+          'System settings were updated successfully.',
+        confirmButtonText: 'OK',
+      });
+    } catch (error) {
+      console.error(
+        'Save system settings error:',
+        error
+      );
+
+      await Swal.fire({
+        icon: 'error',
+        title: 'Save Failed',
+        text:
+          error?.message ||
+          'System settings could not be saved.',
+        confirmButtonText: 'OK',
+      });
+    } finally {
+      setSaving(false);
+    }
   };
 
 
@@ -170,7 +384,25 @@ export default function SuperAdminSystemSettings() {
      RESET
   ===================================================== */
 
-  const handleReset = () => {
+  const handleReset = async () => {
+    if (!hasChanges || saving || loading) {
+      return;
+    }
+
+    const result = await Swal.fire({
+      icon: 'question',
+      title: 'Reset Changes?',
+      text: 'Your unsaved changes will be returned to the last saved settings.',
+      showCancelButton: true,
+      confirmButtonText: 'Reset Changes',
+      cancelButtonText: 'Cancel',
+      reverseButtons: true,
+    });
+
+    if (!result.isConfirmed) {
+      return;
+    }
+
     setSettings(savedSettings);
     setNotice('');
   };
@@ -201,24 +433,35 @@ export default function SuperAdminSystemSettings() {
 
         <div className="super-system-settings-actions">
           <button
-            type="button"
-            className="super-settings-reset-button"
-            onClick={handleReset}
-            disabled={!hasChanges}
-          >
-            <FiRefreshCw aria-hidden="true" />
-            Reset
-          </button>
+              type="button"
+              className="super-settings-reset-button"
+              onClick={handleReset}
+              disabled={
+                !hasChanges ||
+                loading ||
+                saving
+              }
+            >
+              <FiRefreshCw aria-hidden="true" />
+              Reset
+            </button>
 
           <button
-            type="button"
-            className="super-settings-save-button"
-            onClick={handleSave}
-            disabled={!hasChanges}
-          >
-            <FiSave aria-hidden="true" />
-            Save Changes
-          </button>
+              type="button"
+              className="super-settings-save-button"
+              onClick={handleSave}
+              disabled={
+                !hasChanges ||
+                loading ||
+                saving
+              }
+            >
+              <FiSave aria-hidden="true" />
+
+              {saving
+                ? 'Saving...'
+                : 'Save Changes'}
+            </button>
         </div>
       </section>
 

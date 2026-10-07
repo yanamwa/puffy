@@ -4,14 +4,17 @@
 
 .super-system-settings-page {
   width: 100%;
+  max-width: none;
+  min-width: 0;
 
   display: grid;
+  gap: 20px;
 
-  gap: 22px;
+  margin: 0;
+  padding: 0;
 
   color: var(--admin-ink, #4f535a);
 }
-
 
 /* =====================================================
    PAGE HEADING
@@ -45,7 +48,7 @@
 
   margin-bottom: 6px;
 
-  color: #25714e;
+  color: #2563eb;
 
   font-family: system-ui, sans-serif;
   font-size: 10px;
@@ -141,9 +144,9 @@
 
 
 .super-settings-save-button {
-  border: 1px solid #25714e;
+  border: 1px solid #2563eb;
 
-  background: #25714e;
+  background: #2563eb;
 
   color: #ffffff;
 
@@ -189,7 +192,7 @@
 
   background: #edf8f1;
 
-  color: #25714e;
+  color: #2563eb;
 
   font-family: system-ui, sans-serif;
   font-size: 11px;
@@ -260,7 +263,7 @@
 
   background: #eaf4ee;
 
-  color: #25714e;
+  color: #2563eb;
 }
 
 
@@ -275,7 +278,7 @@
 
   margin-bottom: 3px;
 
-  color: #25714e;
+  color: #2563eb;
 
   font-family: system-ui, sans-serif;
   font-size: 9px;
@@ -483,7 +486,7 @@
 
 .super-settings-field input:focus,
 .super-settings-field select:focus {
-  border-color: #25714e;
+  border-color: #2563eb;
 
   box-shadow:
     0 0 0 3px rgba(37, 113, 78, 0.1);
