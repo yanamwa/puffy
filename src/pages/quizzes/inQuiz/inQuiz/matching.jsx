@@ -1,3 +1,4 @@
+import { saveAccountQuizResult } from "../../../../utils/quizStorage.js";
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { API_BASE } from "../../../../config.js";
@@ -278,10 +279,10 @@ export default function MatchingType() {
       answers,
     };
 
-    localStorage.setItem("lessonQuizResults", JSON.stringify(resultPayload));
+    saveAccountQuizResult("lessonQuizResults", JSON.stringify(resultPayload));
 
     if (isDeckMode) {
-      localStorage.setItem(
+      saveAccountQuizResult(
         `deckQuizResults_${deckId}`,
         JSON.stringify(resultPayload)
       );

@@ -1,9 +1,19 @@
-import { Outlet, useLocation } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { useAuth } from '../context/AuthContext';
+import { requiresStudentPasswordChange } from '../utils/passwordPolicy.js';
 
 export default function Layout() {
   const location = useLocation();
+  const { user } = useAuth();
+
+  if (requiresStudentPasswordChange(user) && location.pathname !== '/student/settings') {
+    return <Navigate to="/student/settings" replace />;
+  }
 
   const isAuthPage = [
+    "/about",
+    "/faq",
+    "/contact",
     "/login",
     "/signup",
     "/forgot",

@@ -419,21 +419,6 @@ export default function ModuleManagement() {
                         : 'Draft'}
                     </span>
 
-                    <span
-                      className={`${
-                        styles.accessBadge
-                      } ${
-                        course.visibility ===
-                        'public'
-                          ? styles.accessPublic
-                          : styles.accessPrivate
-                      }`}
-                    >
-                      {course.visibility ===
-                      'public'
-                        ? 'Public'
-                        : 'Private'}
-                    </span>
                   </div>
                 </div>
 

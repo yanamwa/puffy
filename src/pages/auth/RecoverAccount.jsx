@@ -3,8 +3,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import styles from "./login.module.css";
 import { API_BASE } from "../../config";
-import LandingNavbar from "../../components/LandingNavbar";
-import LandingFooter from "../../components/LandingFooter";
+import LandingNavbar from "../../components/landing/LandingNavbar";
+import LandingFooter from "../../components/landing/LandingFooter";
 
 function RecoverAccount() {
   const inputsRef = useRef([]);

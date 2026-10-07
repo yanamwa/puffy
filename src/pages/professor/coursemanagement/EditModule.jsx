@@ -1,13 +1,13 @@
-import QuizSourceEvidence from '../../../components/QuizSourceEvidence.jsx';
-import { requestQuizSettings, quizSourceFields, notifyQuizGenerated } from '../../../services/quizGenerationUi.js';
+import QuizSourceEvidence from '../../../components/quizmodes/QuizSourceEvidence.jsx';
+import { requestQuizSettings, quizSourceFields, quizGenerationFields, notifyQuizGenerated } from '../../../services/quizGenerationUi.js';
 import { notifyLessonGenerated } from '../../../services/lessonNotifications.js';
 import React, { useEffect, useState } from "react";
 import { NavLink, useNavigate, useParams } from "react-router-dom";
 import { lessonAuthHeaders } from '../../../services/lessonAuth.js';
 import { uploadLessonSource } from '../../../services/lessonRagApi.js';
-import LessonSourceEvidence from '../../../components/LessonSourceEvidence.jsx';
-import LessonSourceManager from '../../../components/LessonSourceManager.jsx';
-import LessonFilePicker from '../../../components/LessonFilePicker.jsx';
+import LessonSourceEvidence from '../../../components/lesson/LessonSourceEvidence.jsx';
+import LessonSourceManager from '../../../components/lesson/LessonSourceManager.jsx';
+import LessonFilePicker from '../../../components/lesson/LessonFilePicker.jsx';
 import {
   LayoutDashboard,
   Users,
@@ -225,6 +225,7 @@ function counterClass(current, limit) {
 
 function normalizeQuizItem(item) {
   if (item.type === 'identification') return { ...item, options: [], correct_answer: String(item.correct_answer || item.correctAnswer || '').trim() };
+  if (item.type === 'true_false') return { ...item, options: ['True', 'False'], correct_answer: String(item.correct_answer || item.correctAnswer || '').trim() };
 
   const correctAnswer = limitChars(
     String(item.correct_answer || item.correctAnswer || "").trim(),
@@ -602,11 +603,7 @@ export default function EditModule() {
       .join("\n\n");
   };
 
-  const generateQuizFromAI = async ({
-    questionCount = 5,
-    identificationCount = 0,
-    difficulty = "medium",
-  }) => {
+  const generateQuizFromAI = async (settings) => {
     const res = await fetch(AI_API_URL, {
       method: "POST",
       credentials: "include",
@@ -619,9 +616,7 @@ export default function EditModule() {
         lesson_title: editTitle,
         learning_objectives: editLearningObjectives,
         lesson_content: getLessonContentForAI(),
-        question_count: questionCount,
-        identification_count: identificationCount,
-        difficulty,
+        ...quizGenerationFields(settings),
       }),
     });
 
@@ -694,11 +689,7 @@ export default function EditModule() {
     setGeneratingEditQuiz(true);
 
     try {
-      const quizItems = await generateQuizFromAI({
-        questionCount: formValues.questionCount,
-        identificationCount: formValues.identificationCount,
-        difficulty: formValues.difficulty,
-      });
+      const quizItems = await generateQuizFromAI(formValues);
 
       setEditQuizItems(quizItems);
       localStorage.setItem(GENERATE_COOLDOWN_KEY, String(Date.now()));

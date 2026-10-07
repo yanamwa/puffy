@@ -3,8 +3,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { API_BASE } from "../../config.js";
 import styles from "./login.module.css";
-import LandingNavbar from "../../components/LandingNavbar";
-import LandingFooter from "../../components/LandingFooter";
+import LandingNavbar from "../../components/landing/LandingNavbar";
+import LandingFooter from "../../components/landing/LandingFooter";
 
 export default function Otp() {
   const inputsRef = useRef([]);

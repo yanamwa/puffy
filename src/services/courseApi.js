@@ -390,6 +390,19 @@ async function requestCourse(url, options = {}) {
   return parseResponse(response);
 }
 
+export async function fetchCourseEnrollmentCount(courseId) {
+  const data = await requestCourse(
+    `${API_BASE}/courses/${encodeURIComponent(courseId)}/enrollments`,
+    { credentials: "include", headers: { Accept: "application/json" } }
+  );
+
+  if (!Array.isArray(data.enrolled)) {
+    throw new Error("The enrollment API returned an invalid student list.");
+  }
+
+  return data.enrolled.length;
+}
+
 export async function fetchCourses(params = {}, options = {}) {
   const query = new URLSearchParams();
 

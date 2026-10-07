@@ -1,13 +1,13 @@
-import QuizSourceEvidence from '../../../components/QuizSourceEvidence.jsx';
-import { requestQuizSettings, quizSourceFields, notifyQuizGenerated } from '../../../services/quizGenerationUi.js';
+import QuizSourceEvidence from '../../../components/quizmodes/QuizSourceEvidence.jsx';
+import { requestQuizSettings, quizSourceFields, quizGenerationFields, notifyQuizGenerated } from '../../../services/quizGenerationUi.js';
 import { notifyLessonGenerated } from '../../../services/lessonNotifications.js';
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { lessonAuthHeaders } from '../../../services/lessonAuth.js';
 import { uploadLessonSource } from '../../../services/lessonRagApi.js';
-import LessonSourceEvidence from '../../../components/LessonSourceEvidence.jsx';
-import LessonSourceManager from '../../../components/LessonSourceManager.jsx';
-import LessonFilePicker from '../../../components/LessonFilePicker.jsx';
+import LessonSourceEvidence from '../../../components/lesson/LessonSourceEvidence.jsx';
+import LessonSourceManager from '../../../components/lesson/LessonSourceManager.jsx';
+import LessonFilePicker from '../../../components/lesson/LessonFilePicker.jsx';
 import Swal from 'sweetalert2';
 
 import { useAuth } from '../../../context/AuthContext.jsx';
@@ -1528,15 +1528,7 @@ export default function AddModule() {
                   selectedModule
                     .learningObjectives,
 
-                question_count:
-                  result.value
-                    .questionCount,
-
-                identification_count: result.value.identificationCount,
-
-                difficulty:
-                  result.value
-                    .difficulty,
+                ...quizGenerationFields(result.value),
               }),
             }
           );

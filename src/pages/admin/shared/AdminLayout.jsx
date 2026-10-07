@@ -24,7 +24,7 @@ import {
 } from 'react-icons/fi';
 
 import RoleNotificationMenu
-  from '../../../components/RoleNotificationMenu';
+  from '../../../components/rolenotif/RoleNotificationMenu';
 
 import HeaderProfileChip
   from '../../../components/HeaderProfileChip';

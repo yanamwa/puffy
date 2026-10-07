@@ -1,3 +1,6 @@
+import AboutUs from "../pages/unauth/about/Aboutus.jsx";
+import FAQ from "../pages/unauth/faq/faq.jsx";
+import ContactUs from "../pages/unauth/ContactUs/ContactUs.jsx";
 import { Navigate, Route, Routes, useParams } from 'react-router-dom';
 import Layout from '../components/Layout';
 import ProtectedRoute from '../components/ProtectedRoute';
@@ -30,29 +33,29 @@ import SuperAdminSecurityPermissions from '../pages/superadmin/security/SuperAdm
 import SuperAdminProfile from '../pages/superadmin/profile/SuperAdminProfile';
 import SuperAdminModesManagement from '../pages/superadmin/modes/SuperAdminModesManagement';
 
-import ProfessorHome from '../pages/professor/ProfessorHome';
-import ProfessorLayout from '../pages/professor/ProfessorLayout';
+import ProfessorHome from '../pages/professor/home/ProfessorHome.jsx';
+import ProfessorLayout from '../pages/professor/layout/ProfessorLayout.jsx';
 import ProfessorFeaturePage from '../pages/professor/ProfessorFeaturePage';
 import ModuleManagement from '../pages/professor/coursemanagement/modulemanagement';
 import AddModule from '../pages/professor/coursemanagement/AddModule';
 import CourseModuleEditor from '../pages/professor/coursemanagement/CourseModuleEditor';
-import ProfessorNotifications from '../pages/professor/ProfessorNotifications';
-import ProfessorProfile from '../pages/professor/ProfessorProfile';
-import ProfessorSetting from '../pages/professor/ProfessorSetting';
+import ProfessorNotifications from '../pages/professor/settings/ProfessorNotifications.jsx';
+import ProfessorProfile from '../pages/professor/settings/ProfessorProfile.jsx';
+import ProfessorSetting from '../pages/professor/settings/ProfessorSetting.jsx';
 import CourseView from '../pages/professor/coursemanagement/courseview';
-import AssessmentAnalysis from '../pages/professor/AssessmentAnalysis';
-import AssessmentDetail from '../pages/professor/AssessmentDetail';
+import AssessmentAnalysis from '../pages/professor/analysis/AssessmentAnalysis.jsx';
+import AssessmentDetail from '../pages/professor/analysis/AssessmentDetail.jsx';
 
-import StudentHome from '../pages/student/StudentHome';
-import EnrolledCourses from '../pages/student/EnrolledCourses';
-import PublicCourses from '../pages/student/PublicCourses';
-import ArchivedCourses from '../pages/student/ArchivedCourses';
-import StudentSettings from '../pages/student/StudentSettings';
-import StudentCourseDetail from '../pages/student/StudentCourseDetail';
-import StudentModuleQuizPage from '../pages/student/StudentModuleQuizPage';
-import StudentJoinCourse from '../pages/student/StudentJoinCourse';
-import StudentProfile from '../pages/student/StudentProfile';
-import StudentNotifications from "../pages/student/StudentNotifications";
+import StudentHome from '../pages/student/home/StudentHome.jsx';
+import EnrolledCourses from '../pages/student/enrolled/EnrolledCourses.jsx';
+import PublicCourses from '../pages/student/public/PublicCourses.jsx';
+import ArchivedCourses from '../pages/student/archived/ArchivedCourses.jsx';
+import StudentSettings from '../pages/student/settings/StudentSettings.jsx';
+import StudentCourseDetail from '../pages/student/courses/StudentCourseDetail.jsx';
+import StudentModuleQuizPage from '../pages/student/courses/StudentModuleQuizPage.jsx';
+import StudentJoinCourse from '../pages/student/courses/StudentJoinCourse.jsx';
+import StudentProfile from '../pages/student/settings/StudentProfile.jsx';
+import StudentNotifications from "../pages/student/home/StudentNotifications.jsx";
 
 import Introduction from '../pages/course/Introduction';
 import Lesson from '../pages/course/Lesson';
@@ -84,6 +87,9 @@ export default function AppRoutes() {
         {/* ==========================
             PUBLIC ROUTES (Guest)
         ========================== */}
+      <Route path="/about" element={<AboutUs />} />
+      <Route path="/faq" element={<FAQ />} />
+      <Route path="/contact" element={<ContactUs />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/forgot" element={<ForgotPasswordPage />} />

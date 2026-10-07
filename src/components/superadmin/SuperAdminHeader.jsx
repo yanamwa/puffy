@@ -1,7 +1,7 @@
 import { FiSearch } from 'react-icons/fi';
 
 import RoleNotificationMenu
-  from '../RoleNotificationMenu';
+  from '../rolenotif/RoleNotificationMenu';
 
 import HeaderProfileChip
   from '../HeaderProfileChip';

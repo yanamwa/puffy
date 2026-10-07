@@ -1,10 +1,11 @@
+import { readAccountQuizResult } from "../../utils/quizStorage.js";
 import { useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect, useMemo } from "react";
 import Swal from "sweetalert2";
 import styles from "./Learning_Module.module.css";
 import "../../index.css";
 import { API_BASE } from "../../config.js";
-import QuizModesModal from "../../components/QuizModesModal";
+import QuizModesModal from "../../components/quizmodes/QuizModesModal";
 import UserHeader from "../../components/UserHeader";
 import UserSidebar from "../../components/UserSidebar";
 import LoadingState from "../../components/LoadingState.jsx";
@@ -16,7 +17,7 @@ import {
 import {
   enrollStudentInCourseAsync,
   loadStudentEnrolledCourses,
-} from "../student/studentCourseData.js";
+} from "../student/courses/studentCourseData.js";
 import {
   markManagedNotificationsAsReadForRole,
   mergeManagedNotificationsForRole,
@@ -527,7 +528,7 @@ function LearningModule() {
   };
 
   const savedQuizResults =
-    JSON.parse(localStorage.getItem("lessonQuizResults")) || null;
+    JSON.parse(readAccountQuizResult("lessonQuizResults")) || null;
 
   const correctQuestions =
     savedQuizResults?.lessonId === Number(lessonId)

@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import styles from "./LandingPage.module.css";
-import LandingNavbar from "../components/LandingNavbar";
-import LandingFooter from "../components/LandingFooter";
+import LandingNavbar from "./components/landing/LandingNavbar";
+import LandingFooter from "./components/landing/LandingFooter";
 
 
 function LandingPage() {

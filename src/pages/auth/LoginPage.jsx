@@ -1,3 +1,4 @@
+import PublicNavbar from "../../components/landing/PublicNavbar.jsx";
 import styles from "./login.module.css";
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
@@ -8,7 +9,7 @@ import {
 } from "react-router-dom";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { API_BASE } from "../../config.js";
-import LandingNavbar from "../../components/LandingNavbar";
+import LandingNavbar from "../../components/landing/LandingNavbar";
 import { useAuth } from "../../context/AuthContext.jsx";
 import {
   APP_ROLES,
@@ -483,34 +484,7 @@ function Login() {
           className={styles.background}
         ></div>
 
-<header className={styles.loginNavbar}>
-  <nav className={styles.loginNavbarInner}>
-    <Link to="/" className={styles.loginNavLink}>
-      Home
-    </Link>
-
-    <Link to="/about" className={styles.loginNavLink}>
-      About
-    </Link>
-
-    <Link to="/" className={styles.loginBrand}>
-      <img
-        src="/images/logo_solo.png"
-        alt="PuffyBrain logo"
-      />
-
-      <span>PuffyBrain</span>
-    </Link>
-
-    <Link to="/faq" className={styles.loginNavLink}>
-      FAQ
-    </Link>
-
-    <Link to="/contact" className={styles.loginNavLink}>
-      Contact us
-    </Link>
-  </nav>
-</header>
+<PublicNavbar />
 
         <div
           className={
@@ -644,16 +618,6 @@ function Login() {
               account?{" "}
               <Link to="/signup">
                 Signup
-              </Link>
-            </p>
-
-            <p
-              className={
-                styles.signupText
-              }
-            >
-              <Link to="/cant-signin">
-                Can&apos;t sign in?
               </Link>
             </p>
           </form>

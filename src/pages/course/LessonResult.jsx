@@ -1,9 +1,10 @@
+import { readAccountQuizResult, saveAccountQuizResult } from "../../utils/quizStorage.js";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { API_BASE } from "../../config.js";
 import { syncDeckCardMemorizationFromAnswers } from "../../utils/cardMemorization.js";
 import styles from "./lessonresult.module.css";
-import QuizModesModal from "../../components/QuizModesModal";
+import QuizModesModal from "../../components/quizmodes/QuizModesModal";
 import { fetchCourseContent } from "./courseContent.js";
 
 function Sparkles(props) {
@@ -348,7 +349,7 @@ export default function LessonResult() {
 
     const parseStorage = (key) => {
       try {
-        return JSON.parse(localStorage.getItem(key));
+        return JSON.parse(readAccountQuizResult(key));
       } catch {
         return null;
       }
@@ -464,6 +465,16 @@ export default function LessonResult() {
               deck_id: detectedDeckId,
               course_id: detectedCourseId,
               quiz_mode: detectedQuizMode,
+              assessment_type: /main/i.test(String(savedResults.scopeType || savedResults.scope?.scopeType || detectedSource)) ? 'main' : 'practice',
+              module_index: detectedModuleIndex,
+              answers: savedAnswers.map(answer => {
+                let sourceItems = [];
+                try { sourceItems = JSON.parse(localStorage.getItem('practiceQuizzes') || '[]'); } catch {}
+                const original = Array.isArray(sourceItems) ? sourceItems.find(item => (item.question || item.q) === answer.question) : null;
+                return { ...answer, topic: answer.topic || original?.topic,
+                  cognitive_level: answer.cognitive_level || original?.cognitive_level,
+                  thinking_skill: answer.thinking_skill || original?.thinking_skill };
+              }),
               score: Number(savedResults.score || 0),
               total: attemptTotal,
               time_spent: Number(
@@ -478,7 +489,7 @@ export default function LessonResult() {
           }
 
           if (data.attemptId && storedResult?.key) {
-            localStorage.setItem(
+            saveAccountQuizResult(
               storedResult.key,
               JSON.stringify({
                 ...savedResults,

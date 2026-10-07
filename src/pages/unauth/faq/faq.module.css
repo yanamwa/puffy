@@ -1,0 +1,323 @@
+.pageWrapper{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+.header {
+    width: 100%;
+    height: 200px;
+    background-image: url('/images/background.png');
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+.headerOverlay {
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.019);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.title {
+    font-family: 'Jersey 15', sans-serif;
+    font-size: 60px;
+    color: white;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.subtitle {
+    font-family: 'Lato', sans-serif;
+    font-size: 20px;
+    color: white;
+}
+
+
+
+/* ===== NAVBAR ===== */
+.navbar {
+    width: 90%;
+    height: 90px;
+
+    background: rgba(54, 48, 138, 0.2);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+
+    display: flex;
+    align-items: center;
+    justify-content: center; 
+
+    gap: 80px; 
+    width: 140vh;
+    margin: 70px auto;
+
+    border-radius: 50px;
+
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 999;
+}
+
+/* ===== LOGO ===== */
+.logo img {
+    height: 100px;
+    width: auto;
+}
+
+/* ===== NAV LINKS ===== */
+.navLinks ul {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    padding: 0;
+    margin: 0; 
+    font-size: 25px;
+}
+
+
+.navLinks a {
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 500;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+
+    transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.navLinks a:hover {
+    transform: scale(1.06);
+    opacity: 0.75;
+}
+
+/* Click animation */
+.navLinks a:active {
+    transform: scale(0.92);
+}
+
+/* ===== ACTIONS  ===== */
+.navActions {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+
+    font-family: "Jersey 15", sans-serif;
+    font-size: 25px;
+}
+
+.navActions .login {
+    color: #ffffff;
+    text-decoration: none;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+    transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.navActions .login:hover {
+    transform: scale(1.06);
+    opacity: 0.75;
+}
+
+.navActions .login:active {
+    transform: scale(0.92);
+}
+
+/* ===== START BUTTON ===== */
+.startBtn {
+    padding: 10px 26px;
+    background: white;
+    color: var(--color-third);
+    border: none;
+    border-radius: 25px;
+
+    font-family: "Jersey 15", sans-serif;
+    font-size: 20px;
+
+    cursor: pointer;
+
+    box-shadow: 0 4px 0 var(--color-secondary);
+
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    text-decoration: none;
+}
+
+.startBtn:hover {
+    transform: scale(1.05);
+}
+
+.startBtn:active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 var(--color-secondary);
+}
+
+
+
+
+.faqSection {
+    padding: 50px 20px;
+    background-color: #fff;
+}
+
+.faqHeading {
+    text-align: center;
+    font-size: 40px;
+    font-weight: 700;
+    margin-bottom: 40px;
+    color: #333;
+    font-family: 'Jersey 15', sans-serif;
+}
+
+.faqBox {
+    width: 70%;
+    margin: 30px auto;
+    background: #f7f7f7;
+    border-radius: 30px;
+    padding: 30px 25px;
+    text-align: center;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+}
+
+.question {
+    font-family: 'Jersey 15', sans-serif;
+    font-size: 25px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    padding: 15px 20px;
+    border-bottom: 0.5px solid #747373;
+    text-align: left;
+}
+
+.answer {
+    font-family: 'Lato', sans-serif;
+    font-size: 20px;
+    color: #555;
+    line-height: 1.6;
+    text-align: left;
+}
+
+.questionsSection {
+    background-color: #f0f0f0;
+    padding: 60px 20px;
+    text-align: center;
+    font-family: 'Jersey 15';
+}
+
+.questionsSection h1 {
+    font-size: 36px;
+    margin-bottom: 20px;
+    font-family: 'Jersey 15';
+}
+
+.questionsSection {
+    font-size: 20px;
+    color: #555;
+}
+
+.footer {
+    background-color: #7fa8d6;
+    color: white;
+    text-align: center;
+    padding: 40px 20px;
+    font-size: 18px;
+    font-family: 'Lato', sans-serif;
+}
+
+.footerMenu {
+    margin-bottom: 15px;
+}
+
+.footerMenu a {
+    color: white;
+    text-decoration: none;
+    margin: 0 12px;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.footerMenu a:hover {
+    text-decoration: underline;
+}
+
+.socialIcons {
+    margin-top: 20px;
+}
+
+.socialIcons a {
+    background: white;
+    color: #7fa8d6;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    margin: 0 15px;
+    transition: 0.3s;
+}
+
+.socialIcons a:hover {
+    background: #edf4fc;
+    transform: scale(1.1);
+}
+
+.subFooter {
+    background-color: white;
+    color: black;
+    text-align: center;
+    padding: 10px 0;
+    font-size: 15px;
+    font-weight: 400;
+    font-family: 'Lato', sans-serif;
+    border-top: 1px solid #ddd;
+}
+
+.faqBox {
+    border: 1px solid #e5e5e5;
+    padding: 18px 22px;
+    margin-bottom: 15px;
+    border-radius: 15px;
+    cursor: pointer;
+    background: #fff;
+    transition: 0.2s;
+}
+
+.faqBox:hover {
+    background: #edf4fc;
+}
+
+.faqBox .question {
+    font-size: 20px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    padding-right: 30px;
+}
+
+
+.answer {
+    display: none;
+    margin-top: 12px;
+    font-size: 16px;
+    color: #444;
+    line-height: 1.5;
+    padding-left: 5px; 
+    font-family: 'Jersey 15';
+    font-size:20px;
+}
+
+.faqBox.active .answer {
+    display: block;
+}
+
+/* Shared blue and white public theme */
+.pageWrapper { --color-primary: #ffffff; --color-secondary: #a8c6e7; --color-third: #5f86b1; --color-fourth: #7fa8d6; --color-fifth: #7fa8d6; --font-color: #4f6174; background: #ffffff; color: #4f6174; min-height: 100vh; }
+
+@media (max-width: 600px) { .faqHeading { font-size: 28px; overflow-wrap: anywhere; } .faqBox { width: 100%; padding: 18px 14px; box-sizing: border-box; } .question { padding: 8px 0; font-size: 20px; } }

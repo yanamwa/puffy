@@ -172,7 +172,7 @@ export function AuthProvider({ children }) {
 
         const data = await response.json().catch(() => ({}));
 
-        if (!isMounted) {
+        if (!isMounted || readStoredToken() !== token) {
           return;
         }
 
@@ -235,6 +235,8 @@ export function AuthProvider({ children }) {
 
   const logout = async () => {
       const token = readStoredToken();
+      clearStoredSession();
+      setUser(null);
 
       try {
         if (token) {
@@ -251,9 +253,6 @@ export function AuthProvider({ children }) {
           'Unable to record logout.',
           error
         );
-      } finally {
-        clearStoredSession();
-        setUser(null);
       }
     };
 

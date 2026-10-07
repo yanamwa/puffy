@@ -2,7 +2,8 @@
    ROOT VARIABLES
    ========================================================= */
 
-:root {
+.wrapper,
+.loginNavbar {
   --color-primary: #ffffff;
   --color-secondary: #f3f4f6;
   --color-third: #e5e7eb;
@@ -13,10 +14,10 @@
   --border: #e6e6e6;
   --shadow: rgba(0, 0, 0, 0.06);
 
-  --page-green: #8caf84;
-  --accent-green: #82c994;
-  --accent-green-hover: #72b985;
-  --page-background: #f1f1f2;
+  --page-green: #7fa8d6;
+  --accent-green: #7fa8d6;
+  --accent-green-hover: #6f98c7;
+  --page-background: #ffffff;
 }
 
 
@@ -337,7 +338,7 @@
 .signupCard > input:focus,
 .passwordWrapper input:focus {
   border-color: var(--accent-green);
-  box-shadow: 0 0 0 3px rgba(130, 201, 148, 0.18);
+  box-shadow: 0 0 0 3px rgba(127, 168, 214, 0.18);
 }
 
 
@@ -386,13 +387,13 @@
 
 .toggleEye:hover:not(:disabled),
 .toggleEye:focus-visible {
-  background: rgba(130, 201, 148, 0.14);
-  color: #4f7659;
+  background: rgba(127, 168, 214, 0.14);
+  color: #4f6174;
   opacity: 1;
 }
 
 .toggleEye:focus-visible {
-  outline: 2px solid rgba(130, 201, 148, 0.55);
+  outline: 2px solid rgba(127, 168, 214, 0.55);
   outline-offset: 2px;
 }
 
@@ -486,7 +487,7 @@
 }
 
 .signupText a {
-  color: #5f8468;
+  color: #5f86b1;
   text-decoration: none;
 }
 
@@ -777,8 +778,8 @@
 }
 
 .validationMessage.warning {
-  background: #fff7d6;
-  color: #8a5a00;
+  background: #edf4fc;
+  color: #4f6174;
 }
 
 
@@ -1068,7 +1069,7 @@
 
 .forgotLoginLink {
   margin-left: 5px;
-  color: #5f8468;
+  color: #5f86b1;
   text-decoration: none;
 }
 
@@ -1090,7 +1091,7 @@
   border: none;
   border-radius: 7px;
 
-  background: #82c994;
+  background: #7fa8d6;
   color: #ffffff;
 
   font-family: "Jersey 15", sans-serif;
@@ -1106,7 +1107,7 @@
 
 .submitBtn:hover:not(:disabled) {
   transform: translateY(-1px);
-  background: #72b985;
+  background: #6f98c7;
 }
 
 .submitBtn:disabled {
@@ -1243,8 +1244,8 @@
 
 .professorFormGroup > input:focus,
 .professorPasswordWrapper input:focus {
-  border-color: #82c994;
-  box-shadow: 0 0 0 4px rgba(130, 201, 148, 0.16);
+  border-color: #7fa8d6;
+  box-shadow: 0 0 0 4px rgba(127, 168, 214, 0.16);
 }
 
 .professorFormGroup > input:disabled,
@@ -1311,8 +1312,8 @@
 }
 
 .professorFormGroup select:focus {
-  border-color: #82c994;
-  box-shadow: 0 0 0 4px rgba(130, 201, 148, 0.16);
+  border-color: #7fa8d6;
+  box-shadow: 0 0 0 4px rgba(127, 168, 214, 0.16);
 }
 
 .professorFormGroup select:disabled {
@@ -1361,7 +1362,7 @@
 }
 
 .professorUploadArea:hover {
-  border-color: #82c994;
+  border-color: #7fa8d6;
   background: #f1f8f3;
 }
 
@@ -1396,7 +1397,7 @@
   border: none;
   border-radius: 11px;
 
-  background: #82c994;
+  background: #7fa8d6;
   color: #ffffff;
 
   font-family: "Jersey 15", sans-serif;
@@ -1415,7 +1416,7 @@
 
 .professorUploadButton:hover {
   transform: translateY(-1px);
-  background: #72b985;
+  background: #6f98c7;
   box-shadow: 0 8px 18px rgba(71, 132, 87, 0.23);
 }
 
@@ -1550,12 +1551,12 @@
 }
 
 .professorToggleEye:hover {
-  color: #4f7659;
+  color: #4f6174;
   background: #eff7f1;
 }
 
 .professorToggleEye:focus-visible {
-  outline: 2px solid rgba(130, 201, 148, 0.55);
+  outline: 2px solid rgba(127, 168, 214, 0.55);
   outline-offset: 2px;
 }
 
@@ -1621,8 +1622,8 @@
 }
 
 .professorStrengthMessage.warning {
-  background: #fff5d9;
-  color: #8c6400;
+  background: #edf4fc;
+  color: #4f6174;
 }
 
 .professorStrengthMessage.success,
@@ -1653,7 +1654,7 @@
   border: none;
   border-radius: 12px;
 
-  background: #82c994;
+  background: #7fa8d6;
   color: #ffffff;
 
   font-family: "Jersey 15", sans-serif;
@@ -1671,7 +1672,7 @@
 
 .professorSignupButton:hover:not(:disabled) {
   transform: translateY(-1px);
-  background: #72b985;
+  background: #6f98c7;
   box-shadow: 0 9px 20px rgba(71, 132, 87, 0.25);
 }
 
@@ -1802,7 +1803,7 @@
   top: 5px;
   left: 18%;
 
-  background: rgba(130, 201, 148, 0.16);
+  background: rgba(127, 168, 214, 0.16);
 }
 
 .otpContainer::after {
@@ -1811,7 +1812,7 @@
   right: 20%;
   bottom: 45px;
 
-  background: rgba(140, 175, 132, 0.12);
+  background: rgba(127, 168, 214, 0.12);
 }
 
 .otpCard {
@@ -1853,9 +1854,9 @@
 
   background: linear-gradient(
     90deg,
-    #73b883,
-    #9bd5a8,
-    #73b883
+    #6f98c7,
+    #a8c6e7,
+    #6f98c7
   );
 }
 
@@ -1946,7 +1947,7 @@
   background: #ffffff;
 
   box-shadow:
-    0 0 0 4px rgba(130, 201, 148, 0.18),
+    0 0 0 4px rgba(127, 168, 214, 0.18),
     0 8px 17px rgba(72, 124, 84, 0.11);
 }
 .otpRow {
@@ -2026,8 +2027,8 @@
 
   background: linear-gradient(
     135deg,
-    #82c994,
-    #70b981
+    #7fa8d6,
+    #6f98c7
   );
 
   color: #ffffff;
@@ -2195,4 +2196,14 @@
 .passwordDivider span {
   font-size: 14px;
   font-weight: 600;
+}
+/* Public navigation states */
+.loginNavLink[aria-current="page"] { text-decoration: underline; text-underline-offset: 6px; }
+.loginNavLink:focus-visible, .loginBrand:focus-visible { outline: 2px solid white; outline-offset: 5px; }
+
+@media (max-width: 480px) {
+ .loginNavbar { padding: 24px 10px 0; }
+ .loginNavbarInner { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px 6px; padding: 16px 10px; border-radius: 28px; }
+ .loginNavLink { font-size: 12px; text-align: center; white-space: nowrap; }
+ .loginBrand { font-size: 24px; justify-content: center; }
 }

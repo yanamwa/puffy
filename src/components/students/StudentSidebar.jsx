@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { NavLink, Link, useNavigate } from "react-router-dom";
+import { NavLink, Link, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from '../../context/AuthContext';
 import { FiLogOut } from "react-icons/fi";
 
-import { Icon } from "../../pages/student/EnrolledCourses";
+import { Icon } from "../../pages/student/enrolled/EnrolledCourses";
 import "./StudentSidebar.css";
 
 const API_BASE_URL =
@@ -51,6 +52,8 @@ export default function StudentSidebar({
   onCollapsedChange,
 }) {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { logout } = useAuth();
 
   const [internalCollapsed, setInternalCollapsed] = useState(() => {
     return localStorage.getItem("sidebarCollapsed") === "true";
@@ -164,29 +167,7 @@ export default function StudentSidebar({
   };
 
   const handleLogout = () => {
-    [
-      "token",
-      "authToken",
-      "puffy-token",
-      "puffy-user",
-      "user",
-      "currentUser",
-      "user_email",
-      "user_role",
-      "username",
-      "year_level",
-      "section_name",
-      "school_name",
-    ].forEach((key) => localStorage.removeItem(key));
-
-    [
-      "token",
-      "authToken",
-      "puffy-token",
-      "user",
-      "currentUser",
-    ].forEach((key) => sessionStorage.removeItem(key));
-
+    void logout();
     navigate("/login", {
       replace: true,
     });

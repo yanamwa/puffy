@@ -1,6 +1,6 @@
-import QuizSourceEvidence from '../../../components/QuizSourceEvidence.jsx';
+import QuizSourceEvidence from '../../../components/quizmodes/QuizSourceEvidence.jsx';
 import { lessonAuthHeaders } from '../../../services/lessonAuth.js';
-import { requestQuizSettings, quizSourceFields, notifyQuizGenerated } from '../../../services/quizGenerationUi.js';
+import { requestQuizSettings, quizSourceFields, quizGenerationFields, notifyQuizGenerated } from '../../../services/quizGenerationUi.js';
 import { notifyLessonGenerated } from '../../../services/lessonNotifications.js';
 ﻿import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -9,9 +9,9 @@ import Swal from 'sweetalert2';
 import { API_BASE } from '../../../config.js';
 import { fetchCourse, saveCourse } from '../../../services/courseApi.js';
 import { uploadLessonSource } from '../../../services/lessonRagApi.js';
-import LessonFilePicker from '../../../components/LessonFilePicker.jsx';
-import LessonSourceEvidence from '../../../components/LessonSourceEvidence.jsx';
-import LessonSourceManager from '../../../components/LessonSourceManager.jsx';
+import LessonFilePicker from '../../../components/lesson/LessonFilePicker.jsx';
+import LessonSourceEvidence from '../../../components/lesson/LessonSourceEvidence.jsx';
+import LessonSourceManager from '../../../components/lesson/LessonSourceManager.jsx';
 import LoadingState from '../../../components/LoadingState.jsx';
 
 import styles from './Addmodule.module.css';
@@ -884,7 +884,7 @@ export default function CourseModuleEditor() {
       return;
     }
 
-    const result = await requestQuizSettings();
+    const result = await requestQuizSettings({ assessment: activeAssessment || 'practice' });
 
 
     if (!result.isConfirmed || !result.value) {
@@ -916,9 +916,7 @@ export default function CourseModuleEditor() {
           lesson_title: moduleDraft.title,
           lesson_content: lessonContent,
           learning_objectives: moduleDraft.learningObjectives,
-          question_count: result.value.questionCount,
-          identification_count: result.value.identificationCount,
-          difficulty: result.value.difficulty,
+          ...quizGenerationFields(result.value),
         }),
       });
       const data = await response.json();

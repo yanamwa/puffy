@@ -1,10 +1,10 @@
+import PublicNavbar from "../../components/landing/PublicNavbar.jsx";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 
 import { API_BASE } from "../../config.js";
-import LandingNavbar from "../../components/LandingNavbar";
-import LandingFooter from "../../components/LandingFooter";
+import LandingFooter from "../../components/landing/LandingFooter";
 
 import styles from "./login.module.css";
 
@@ -96,9 +96,7 @@ function ForgotPassword() {
           aria-hidden="true"
         />
 
-        <header className={styles.pageHeader}>
-          <LandingNavbar />
-        </header>
+        <PublicNavbar />
 
         <main className={styles.signupContainer}>
           <form

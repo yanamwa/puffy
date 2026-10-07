@@ -1,18 +1,24 @@
+import { readAccountQuizResult, saveAccountQuizResult } from "../../utils/quizStorage.js";
 import styles from "./lesson.module.css";
-import LessonSourceEvidence from '../../components/LessonSourceEvidence.jsx';
+import LessonSourceEvidence from '../../components/lesson/LessonSourceEvidence.jsx';
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useState, useEffect, useMemo } from "react";
 import Swal from "sweetalert2";
 import { API_BASE } from "../../config.js";
 import LoadingState from "../../components/LoadingState.jsx";
-import QuizModesModal from "../../components/QuizModesModal.jsx";
+import QuizModesModal from "../../components/quizmodes/QuizModesModal.jsx";
 import {
   fetchCourseContent,
   getCourseContentModules,
   getCourseLessonPages,
   getCourseQuizItems,
 } from "./courseContent.js";
-import { saveStudentReadingProgress } from "../student/studentCourseData.js";
+import { getStudentProgressStorageKey, saveStudentReadingProgress } from "../student/courses/studentCourseData.js";
+
+const saveAccountLessonProgress = (baseKey, record) => {
+  const key = getStudentProgressStorageKey(baseKey);
+  if (key) localStorage.setItem(key, record);
+};
 
 const LESSON_QUIZ_LIMIT = 5;
 
@@ -141,8 +147,8 @@ function Lesson() {
     if (allSlides.length === 0) return;
 
     const savedResults =
-      localStorage.getItem(quizResultKey) ||
-      localStorage.getItem("lessonQuizResults");
+      readAccountQuizResult(quizResultKey) ||
+      readAccountQuizResult("lessonQuizResults");
 
     if (!savedResults) {
       setHasTakenQuiz(false);
@@ -247,11 +253,11 @@ function Lesson() {
       last_viewed_card: studiedSlides,
     };
 
-    localStorage.setItem(
+    saveAccountLessonProgress(
       `lessonProgress_${lessonId}_module_${moduleIndex}`,
       JSON.stringify(progressRecord)
     );
-    localStorage.setItem(
+    saveAccountLessonProgress(
       `lessonProgress_${lessonId}`,
       JSON.stringify({
         ...progressRecord,
@@ -299,8 +305,8 @@ function Lesson() {
       contentTitle: moduleTitle,
     };
 
-    localStorage.setItem(quizResultKey, JSON.stringify(finalResult));
-    localStorage.setItem("lessonQuizResults", JSON.stringify(finalResult));
+    saveAccountQuizResult(quizResultKey, JSON.stringify(finalResult));
+    saveAccountQuizResult("lessonQuizResults", JSON.stringify(finalResult));
 
     const completedCourseProgress = Math.min(
       100,
@@ -316,11 +322,11 @@ function Lesson() {
       last_viewed_card: totalSlides,
     };
 
-    localStorage.setItem(
+    saveAccountLessonProgress(
       `lessonProgress_${lessonId}_module_${moduleIndex}`,
       JSON.stringify(completedRecord)
     );
-    localStorage.setItem(
+    saveAccountLessonProgress(
       `lessonProgress_${lessonId}`,
       JSON.stringify({
         ...completedRecord,

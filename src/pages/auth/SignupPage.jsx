@@ -1,3 +1,4 @@
+import PublicNavbar from "../../components/landing/PublicNavbar.jsx";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FiEye, FiEyeOff } from "react-icons/fi";
@@ -331,49 +332,7 @@ function Signup() {
           aria-hidden="true"
         />
 
-        <header className={styles.loginNavbar}>
-          <nav className={styles.loginNavbarInner}>
-            <Link
-              to="/"
-              className={styles.loginNavLink}
-            >
-              Home
-            </Link>
-
-            <Link
-              to="/about"
-              className={styles.loginNavLink}
-            >
-              About
-            </Link>
-
-            <Link
-              to="/"
-              className={styles.loginBrand}
-            >
-              <img
-                src="/images/logo_solo.png"
-                alt="PuffyBrain logo"
-              />
-
-              <span>PuffyBrain</span>
-            </Link>
-
-            <Link
-              to="/faq"
-              className={styles.loginNavLink}
-            >
-              FAQ
-            </Link>
-
-            <Link
-              to="/contact"
-              className={styles.loginNavLink}
-            >
-              Contact us
-            </Link>
-          </nav>
-        </header>
+        <PublicNavbar />
 
         <main
           className={

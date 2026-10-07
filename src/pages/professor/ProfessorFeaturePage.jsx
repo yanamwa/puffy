@@ -12,7 +12,7 @@ import {
 } from './professorData';
 import { fetchCourses } from '../../services/courseApi.js';
 import { fetchCourseMonitoring } from '../../services/monitoringApi.js';
-import './ProfessorLayout.css';
+import './layout/ProfessorLayout.css';
 
 const courseMonitoringSeed = {};
 

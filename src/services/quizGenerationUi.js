@@ -1,7 +1,8 @@
 import Swal from 'sweetalert2';
 import './quizGenerationUi.css';
 
-export function requestQuizSettings() {
+export function requestQuizSettings({ assessment = 'practice' } = {}) {
+  if (assessment !== 'main') return requestPracticeQuizSettings();
   return Swal.fire({ title: 'Generate module quiz',
     customClass: { popup: 'quizGeneratorPopup', confirmButton: 'quizGeneratorConfirm', cancelButton: 'quizGeneratorCancel' },
     html: `<p class="quizGeneratorIntro">Create questions grounded in your saved source material.</p>
@@ -36,6 +37,58 @@ export function requestQuizSettings() {
       return { questionCount, identificationCount, difficulty: popup.querySelector('#quiz-difficulty').value };
     },
   });
+}
+
+function requestPracticeQuizSettings() {
+  const fields = [
+    ['question-count', 'Total Questions', 20],
+    ['multiple-choice-count', 'Multiple Choice', 10],
+    ['identification-count', 'Identification', 5],
+    ['true-false-count', 'True or False', 5],
+    ['lots-count', 'LOTS Questions', 12],
+    ['hots-count', 'HOTS Questions', 8],
+  ];
+  const input = ([id, label, value]) => `<label for="quiz-${id}">${label}</label><input id="quiz-${id}" type="number" min="${id === 'question-count' ? 1 : 0}" max="50" step="1" value="${value}" required />`;
+  return Swal.fire({
+    title: 'Generate Practice Quiz',
+    customClass: { popup: 'quizGeneratorPopup', confirmButton: 'quizGeneratorConfirm', cancelButton: 'quizGeneratorCancel' },
+    html: `<p class="quizGeneratorIntro">Create questions grounded in your saved source material.</p>
+      <div class="quizGeneratorFields">${input(fields[0])}
+      <h3>Question Distribution</h3>${fields.slice(1, 4).map(input).join('')}
+      <p id="quiz-type-summary" class="quizGeneratorHint" aria-live="polite"></p>
+      <hr /><h3>Cognitive Distribution</h3>${input(fields[4])}
+      <p class="quizGeneratorLevels">Remember • Understand • Apply</p>${input(fields[5])}
+      <p class="quizGeneratorLevels">Analyze • Evaluate • Create</p>
+      <p id="quiz-cognitive-summary" class="quizGeneratorHint" aria-live="polite"></p></div>`,
+    showCancelButton: true, confirmButtonText: 'Generate Quiz', cancelButtonText: 'Cancel',
+    buttonsStyling: false, focusConfirm: false,
+    didOpen: popup => {
+      popup.parentElement.style.zIndex = '1000000';
+      const update = () => {
+        const [total, mc, ids, tf, lots, hots] = fields.map(([id]) => Number(popup.querySelector(`#quiz-${id}`).value));
+        popup.querySelector('#quiz-type-summary').textContent = `${mc} Multiple Choice • ${ids} Identification • ${tf} True/False${mc + ids + tf === total ? '' : ' — must equal total questions'}`;
+        popup.querySelector('#quiz-cognitive-summary').textContent = `${lots} LOTS • ${hots} HOTS${lots + hots === total ? '' : ' — must equal total questions'}`;
+      };
+      fields.forEach(([id]) => popup.querySelector(`#quiz-${id}`).addEventListener('input', update));
+      update();
+    },
+    preConfirm: () => {
+      const inputs = fields.map(([id]) => Swal.getPopup().querySelector(`#quiz-${id}`));
+      const [questionCount, multipleChoiceCount, identificationCount, trueFalseCount, lotsCount, hotsCount] = inputs.map(input => Number(input.value));
+      if (inputs.some(input => !input.checkValidity())) { Swal.showValidationMessage('Enter whole question counts from 0 to 50, with at least one total question.'); return false; }
+      if (multipleChoiceCount + identificationCount + trueFalseCount !== questionCount) { Swal.showValidationMessage('Question type counts must add up to Total Questions.'); return false; }
+      if (lotsCount + hotsCount !== questionCount) { Swal.showValidationMessage('LOTS and HOTS counts must add up to Total Questions.'); return false; }
+      return { assessmentType: 'practice', questionCount, multipleChoiceCount, identificationCount, trueFalseCount, lotsCount, hotsCount };
+    },
+  });
+}
+
+export function quizGenerationFields(settings) {
+  return settings.assessmentType === 'practice' ? {
+    assessment_type: 'practice', question_count: settings.questionCount,
+    multiple_choice_count: settings.multipleChoiceCount, identification_count: settings.identificationCount,
+    true_false_count: settings.trueFalseCount, lots_count: settings.lotsCount, hots_count: settings.hotsCount,
+  } : { question_count: settings.questionCount, identification_count: settings.identificationCount, difficulty: settings.difficulty };
 }
 
 export function quizSourceFields(courseId, lessonId, pages = []) {

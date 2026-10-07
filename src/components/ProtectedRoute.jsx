@@ -1,5 +1,6 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { requiresStudentPasswordChange } from '../utils/passwordPolicy.js';
 import {
   APP_ROLES,
   getHomePathForRole,
@@ -134,6 +135,10 @@ export default function ProtectedRoute() {
   if (!role) {
     clearStoredAuth();
     return <Navigate to="/login" replace state={{ from: location }} />;
+  }
+
+  if (requiresStudentPasswordChange(currentUser) && pathname !== '/student/settings') {
+    return <Navigate to="/student/settings" replace />;
   }
 
   if (role === APP_ROLES.PROFESSOR) {
