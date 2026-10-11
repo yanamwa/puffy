@@ -10,7 +10,7 @@
   content: "";
   position: fixed;
   inset: 0;
-  background-image: url('/images/background_notebook.png');
+  background-image: url("/images/background_notebook.png");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -36,8 +36,7 @@
 
   font-size: 15px;
   font-weight: 800;
-  font-family: 'Jersey 15', sans-serif;
-
+  font-family: "Jersey 15", sans-serif;
 
   cursor: pointer;
 
@@ -46,7 +45,7 @@
   justify-content: center;
   gap: 6px;
 
-  box-shadow: 0 3px 0px rgba(0,0,0,0.12);
+  box-shadow: 0 3px 0px rgba(0, 0, 0, 0.12);
 }
 
 .settingsBtn i {
@@ -64,7 +63,7 @@
   min-height: 100vh;
   position: relative;
   padding-top: 0;
-  background-image: url('/images/background_notebook.png');
+  background-image: url("/images/background_notebook.png");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -79,7 +78,7 @@
 }
 
 .title {
-  font-family: 'Jersey 15', sans-serif;
+  font-family: "Jersey 15", sans-serif;
   font-size: 55px;
   margin: 0 0 8px;
   font-style: normal;
@@ -108,7 +107,7 @@
 .subtitle {
   font-size: 25px;
   margin: 15px 0;
-  font-family: 'Jersey 15', sans-serif;
+  font-family: "Jersey 15", sans-serif;
   font-weight: normal;
   font-style: normal;
   color: #303030;
@@ -145,7 +144,7 @@
   border: none;
   background: transparent;
   text-align: center;
-  font-family: 'Jersey 15', sans-serif;
+  font-family: "Jersey 15", sans-serif;
   color: var(--font-color);
 }
 
@@ -208,9 +207,9 @@
   border-radius: 15px;
   cursor: pointer;
   transition: 0.25s;
-  box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
   user-select: none;
-  font-family: 'Jersey 15', sans-serif;
+  font-family: "Jersey 15", sans-serif;
   display: flex;
   align-items: center;
   gap: 14px;
@@ -257,7 +256,7 @@
   border-radius: 24px;
   padding: 0;
   overflow: hidden;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
 }
 
 .settingsHeader {
@@ -275,12 +274,11 @@
   font-weight: 900;
   color: #2b2b2b;
   color: var(--font-color);
-  font-family: 'Jersey 15', sans-serif;
+  font-family: "Jersey 15", sans-serif;
   font-weight: normal;
   font-style: normal;
   align-items: center;
 }
-  
 
 .closeSettings {
   width: 36px;
@@ -291,7 +289,7 @@
   color: #4f6174;
   font-size: 24px;
   cursor: pointer;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
 }
 
 .settingsBody {
@@ -331,16 +329,15 @@
   display: block;
   font-size: 20px;
   color: var(--font-color);
-  font-family: 'Jersey 15', sans-serif;
+  font-family: "Jersey 15", sans-serif;
   font-weight: normal;
   font-style: normal;
-
 }
 
 .settingText span {
   font-size: 16px;
   color: #3f3f3f;
-  font-family: 'Jersey 15', sans-serif;
+  font-family: "Jersey 15", sans-serif;
   font-weight: normal;
   font-style: normal;
 }
@@ -354,7 +351,7 @@
   color: #171717;
   cursor: pointer;
 
-  font-family: 'Jersey 15', sans-serif;
+  font-family: "Jersey 15", sans-serif;
   font-weight: normal;
   font-style: normal;
   font-size: 20px;
@@ -365,7 +362,7 @@
 .switchOn {
   background: #7fa8d6;
   color: #ffffff;
-  font-family: 'Jersey 15', sans-serif;
+  font-family: "Jersey 15", sans-serif;
   font-weight: normal;
   font-style: normal;
   font-size: 20px;
@@ -379,7 +376,7 @@
   border-radius: 16px;
   padding: 18px;
   margin-top: 4px;
-  font-family: 'Jersey 15', sans-serif;
+  font-family: "Jersey 15", sans-serif;
   font-weight: normal;
   color: var(--font-color);
   font-style: normal;
@@ -394,7 +391,7 @@
 }
 
 .speedHeader label {
-  font-family: 'Jersey 15', sans-serif;
+  font-family: "Jersey 15", sans-serif;
   font-weight: normal;
   color: var(--font-color);
   font-style: normal;
@@ -406,7 +403,7 @@
   color: #6d6d6d;
   padding: 5px 12px;
   border-radius: 999px;
-  font-family: 'Jersey 15', sans-serif;
+  font-family: "Jersey 15", sans-serif;
   font-weight: normal;
   color: var(--font-color);
   font-style: normal;
@@ -870,5 +867,17 @@
   }
 }
 
-.identificationInput { width: 100%; box-sizing: border-box; padding: 14px 16px; border: 1px solid #c8d9eb; border-radius: 10px; background: #fff; color: #294765; font: inherit; }
-.identificationInput:focus { outline: 3px solid #b9d5f344; border-color: #7fa6d2; }
+.identificationInput {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 14px 16px;
+  border: 1px solid #c8d9eb;
+  border-radius: 10px;
+  background: #fff;
+  color: #294765;
+  font: inherit;
+}
+.identificationInput:focus {
+  outline: 3px solid #b9d5f344;
+  border-color: #7fa6d2;
+}

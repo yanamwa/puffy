@@ -1,97 +1,101 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Navigate, useNavigate, useParams } from 'react-router-dom';
+import Swal from "sweetalert2";
+import { API_BASE } from "../../../config.js";
+import { lessonAuthHeaders } from "../../../services/lessonAuth.js";
+import { mainQuizScheduleState } from "../../../utils/mainQuizSchedule.js";
+import { useEffect, useMemo, useState } from "react";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 
-import ModeCard from '../../../components/quizmodes/ModeCard';
-import StudentHeader from '../../../components/students/StudentHeader';
-import StudentSidebar from '../../../components/students/StudentSidebar';
-import { fetchQuizModes } from '../../../services/quizModeApi';
-import { fetchCourse } from '../../../services/courseApi';
-import { getCourseContentModules } from '../../course/courseContent';
-import { readStorageJson } from '../../quizzes/inQuiz/practiceSession';
+import ModeCard from "../../../components/quizmodes/ModeCard";
+import StudentHeader from "../../../components/students/StudentHeader";
+import StudentSidebar from "../../../components/students/StudentSidebar";
+import { fetchQuizModes } from "../../../services/quizModeApi";
+import { fetchCourse } from "../../../services/courseApi";
+import { getCourseContentModules } from "../../course/courseContent";
+import { readStorageJson } from "../../quizzes/inQuiz/practiceSession";
 
-import '../home/StudentModuleQuizPage.css';
+import "../home/StudentModuleQuizPage.css";
 
-const MAIN_QUIZ_SETTINGS_STORAGE_KEY = 'puffy-main-quiz-settings';
-const COURSE_DRAFT_STORAGE_PREFIX = 'puffy-course-builder-draft';
-const PROFESSOR_COURSES_KEY = 'professor-courses';
+const MAIN_QUIZ_SETTINGS_STORAGE_KEY = "puffy-main-quiz-settings";
+const COURSE_DRAFT_STORAGE_PREFIX = "puffy-course-builder-draft";
+const PROFESSOR_COURSES_KEY = "professor-courses";
 
 function resolveModeImage(mode) {
-  const image = String(mode.image || '').trim();
+  const image = String(mode.image || "").trim();
 
-  if (!image) return '/images/flashcard.png';
+  if (!image) return "/images/flashcard.png";
   if (/^https?:\/\//i.test(image)) return image;
-  if (image.startsWith('/')) return image;
+  if (image.startsWith("/")) return image;
 
   return `/images/${image}`;
 }
 
 function getModeKind(mode) {
-  const text = `${mode.kind || ''} ${mode.quizMode || ''} ${
-    mode.title || ''
-  } ${mode.mode_name || ''} ${mode.route || ''}`.toLowerCase();
+  const text = `${mode.kind || ""} ${mode.quizMode || ""} ${
+    mode.title || ""
+  } ${mode.mode_name || ""} ${mode.route || ""}`.toLowerCase();
 
   if (
-    text.includes('mixed') ||
-    text.includes('random') ||
-    text.includes('survival')
+    text.includes("mixed") ||
+    text.includes("random") ||
+    text.includes("survival")
   ) {
-    return 'mixed';
+    return "mixed";
   }
 
-  if (text.includes('timed')) return 'timed';
-  if (text.includes('multiple')) return 'multiple';
-  if (text.includes('matching')) return 'matching';
-  if (text.includes('q')) return 'qna';
+  if (text.includes("timed")) return "timed";
+  if (text.includes("multiple")) return "multiple";
+  if (text.includes("matching")) return "matching";
+  if (text.includes("q")) return "qna";
 
-  return 'flashcard';
+  return "flashcard";
 }
 
 const modeRouteFallbacks = {
-  flashcard: '/flashcards-tutorial',
-  qna: '/QandA-tutorial',
-  multiple: '/multipleChoice-tutorial',
-  matching: '/Matching-tutorial',
-  timed: '/timedquiz-tutorial',
-  mixed: '/random-modes-tutorial',
-  survival: '/random-modes-tutorial',
+  flashcard: "/flashcards-tutorial",
+  qna: "/QandA-tutorial",
+  multiple: "/multipleChoice-tutorial",
+  matching: "/Matching-tutorial",
+  timed: "/timedquiz-tutorial",
+  mixed: "/random-modes-tutorial",
+  survival: "/random-modes-tutorial",
 };
 
 function getModeRoute(mode, modeKind) {
-  const route = String(mode.route || '').trim();
+  const route = String(mode.route || "").trim();
   return route || modeRouteFallbacks[modeKind] || modeRouteFallbacks.flashcard;
 }
 
 function buildPracticeRoute(route, source, id) {
-  const cleanRoute = String(route || '').replace(/\/+$/, '');
+  const cleanRoute = String(route || "").replace(/\/+$/, "");
 
-  if (!cleanRoute) return '';
+  if (!cleanRoute) return "";
   if (!id) return cleanRoute;
 
-  if (cleanRoute.includes(':lessonId')) {
-    return cleanRoute.replace(':lessonId', encodeURIComponent(id));
+  if (cleanRoute.includes(":lessonId")) {
+    return cleanRoute.replace(":lessonId", encodeURIComponent(id));
   }
 
-  if (cleanRoute.includes(':deckId')) {
-    return cleanRoute.replace(':deckId', encodeURIComponent(id));
+  if (cleanRoute.includes(":deckId")) {
+    return cleanRoute.replace(":deckId", encodeURIComponent(id));
   }
 
-  return `${cleanRoute}/${source === 'deck' ? 'deck' : 'lesson'}/${encodeURIComponent(
-    id
+  return `${cleanRoute}/${source === "deck" ? "deck" : "lesson"}/${encodeURIComponent(
+    id,
   )}`;
 }
 
 function normalizeDateTimeLocal(value) {
-  const text = String(value || '').trim();
+  const text = String(value || "").trim();
 
-  if (!text) return '';
+  if (!text) return "";
 
-  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(text)) {
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?$/.test(text)) {
     return text.slice(0, 16);
   }
 
   const date = new Date(text);
 
-  if (Number.isNaN(date.getTime())) return '';
+  if (Number.isNaN(date.getTime())) return "";
 
   const timezoneOffsetMs = date.getTimezoneOffset() * 60 * 1000;
   return new Date(date.getTime() - timezoneOffsetMs).toISOString().slice(0, 16);
@@ -100,15 +104,15 @@ function normalizeDateTimeLocal(value) {
 function formatDateTimeLabel(value) {
   const normalized = normalizeDateTimeLocal(value);
 
-  if (!normalized) return '';
+  if (!normalized) return "";
 
   const date = new Date(normalized);
 
-  if (Number.isNaN(date.getTime())) return '';
+  if (Number.isNaN(date.getTime())) return "";
 
   return date.toLocaleString([], {
-    dateStyle: 'medium',
-    timeStyle: 'short',
+    dateStyle: "medium",
+    timeStyle: "short",
   });
 }
 
@@ -120,7 +124,7 @@ function readMainQuizSettingsMap() {
       const saved = storage.getItem(MAIN_QUIZ_SETTINGS_STORAGE_KEY);
       const parsed = saved ? JSON.parse(saved) : {};
 
-      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
         Object.assign(mergedSettings, parsed);
       }
     } catch {
@@ -165,9 +169,9 @@ function collectStorageJsonByPrefix(prefix) {
           continue;
         }
 
-        const parsed = JSON.parse(storage.getItem(key) || 'null');
+        const parsed = JSON.parse(storage.getItem(key) || "null");
 
-        if (parsed && typeof parsed === 'object') {
+        if (parsed && typeof parsed === "object") {
           values.push(parsed);
         }
       }
@@ -180,13 +184,13 @@ function collectStorageJsonByPrefix(prefix) {
 }
 
 function parseSettingsObject(value) {
-  if (value && typeof value === 'object' && !Array.isArray(value)) {
+  if (value && typeof value === "object" && !Array.isArray(value)) {
     return value;
   }
 
   try {
-    const parsed = JSON.parse(value || '{}');
-    return parsed && typeof parsed === 'object' && !Array.isArray(parsed)
+    const parsed = JSON.parse(value || "{}");
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed)
       ? parsed
       : {};
   } catch {
@@ -195,22 +199,22 @@ function parseSettingsObject(value) {
 }
 
 function normalizeBoolean(value, fallback = true) {
-  if (value === undefined || value === null || value === '') {
+  if (value === undefined || value === null || value === "") {
     return fallback;
   }
 
-  if (typeof value === 'boolean') {
+  if (typeof value === "boolean") {
     return value;
   }
 
-  return ['1', 'true', 'yes', 'on'].includes(String(value).toLowerCase());
+  return ["1", "true", "yes", "on"].includes(String(value).toLowerCase());
 }
 
 function parseList(value) {
   if (Array.isArray(value)) return value;
 
   try {
-    const parsed = JSON.parse(value || '[]');
+    const parsed = JSON.parse(value || "[]");
     return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
@@ -221,16 +225,16 @@ function makeLookupKeys(values) {
   return [
     ...new Set(
       values
-        .map((value) => String(value || '').trim())
+        .map((value) => String(value || "").trim())
         .filter(Boolean)
-        .flatMap((key) => [key, key.toLowerCase()])
+        .flatMap((key) => [key, key.toLowerCase()]),
     ),
   ];
 }
 
 function stripMainQuizSuffix(value) {
-  return String(value || '')
-    .replace(/\s+main\s+quiz$/i, '')
+  return String(value || "")
+    .replace(/\s+main\s+quiz$/i, "")
     .trim();
 }
 
@@ -247,11 +251,11 @@ function getCourseLookupKeys(courseId, scope = {}) {
   ]);
 }
 
-function getModuleLookupKeys(scope = {}, routeModuleId = '') {
+function getModuleLookupKeys(scope = {}, routeModuleId = "") {
   const moduleIndex = Number(scope.moduleIndex);
   const hasModuleIndex = Number.isInteger(moduleIndex) && moduleIndex >= 0;
   const cleanModuleTitle = stripMainQuizSuffix(
-    scope.moduleTitle || scope.scopeTitle
+    scope.moduleTitle || scope.scopeTitle,
   );
 
   return makeLookupKeys([
@@ -262,10 +266,10 @@ function getModuleLookupKeys(scope = {}, routeModuleId = '') {
     scope.moduleTitle,
     cleanModuleTitle,
     scope.scopeTitle,
-    hasModuleIndex ? String(moduleIndex) : '',
-    hasModuleIndex ? String(moduleIndex + 1) : '',
-    hasModuleIndex ? `module-${moduleIndex + 1}` : '',
-    hasModuleIndex ? `module ${moduleIndex + 1}` : '',
+    hasModuleIndex ? String(moduleIndex) : "",
+    hasModuleIndex ? String(moduleIndex + 1) : "",
+    hasModuleIndex ? `module-${moduleIndex + 1}` : "",
+    hasModuleIndex ? `module ${moduleIndex + 1}` : "",
   ]);
 }
 
@@ -334,7 +338,7 @@ function hasExplicitMainQuizSettings(module = {}) {
 
 function coerceMainQuizSettings(module = {}, override = null) {
   const settings = parseSettingsObject(
-    override || module?.mainQuizSettings || module?.main_quiz_settings
+    override || module?.mainQuizSettings || module?.main_quiz_settings,
   );
 
   return {
@@ -343,21 +347,28 @@ function coerceMainQuizSettings(module = {}, override = null) {
         settings.isEnabled ??
         module?.mainQuizEnabled ??
         module?.main_quiz_enabled,
-      true
+      true,
     ),
     lockAt: normalizeDateTimeLocal(
-      settings.lockAt || settings.lock_at || module?.mainQuizLockAt || module?.main_quiz_lock_at
+      settings.lockAt ||
+        settings.lock_at ||
+        module?.mainQuizLockAt ||
+        module?.main_quiz_lock_at,
     ),
     unlockAt: normalizeDateTimeLocal(
       settings.unlockAt ||
         settings.unlock_at ||
         module?.mainQuizUnlockAt ||
-        module?.main_quiz_unlock_at
+        module?.main_quiz_unlock_at,
     ),
   };
 }
 
-function readMainQuizSettingsOverride(courseId, scope = {}, routeModuleId = '') {
+function readMainQuizSettingsOverride(
+  courseId,
+  scope = {},
+  routeModuleId = "",
+) {
   const settingsMap = readMainQuizSettingsMap();
   const courseLookupKeys = getCourseLookupKeys(courseId, scope);
   const moduleLookupKeys = getModuleLookupKeys(scope, routeModuleId);
@@ -366,7 +377,7 @@ function readMainQuizSettingsOverride(courseId, scope = {}, routeModuleId = '') 
     for (const moduleKey of moduleLookupKeys) {
       const settings = settingsMap[`${courseKey}::${moduleKey}`];
 
-      if (settings && typeof settings === 'object') {
+      if (settings && typeof settings === "object") {
         return settings;
       }
     }
@@ -375,14 +386,18 @@ function readMainQuizSettingsOverride(courseId, scope = {}, routeModuleId = '') 
   return null;
 }
 
-function readStoredMainQuizSettingsOverride(courseId, scope = {}, routeModuleId = '') {
+function readStoredMainQuizSettingsOverride(
+  courseId,
+  scope = {},
+  routeModuleId = "",
+) {
   const courseKeys = getCourseLookupKeys(courseId, scope);
   const moduleKeys = getModuleLookupKeys(scope, routeModuleId);
   const courseCandidates = [];
   const seenCandidates = new Set();
 
   const addCourseCandidate = (candidate) => {
-    if (!candidate || typeof candidate !== 'object') {
+    if (!candidate || typeof candidate !== "object") {
       return;
     }
 
@@ -402,16 +417,18 @@ function readStoredMainQuizSettingsOverride(courseId, scope = {}, routeModuleId 
   };
 
   courseKeys.forEach((courseKey) => {
-    readStorageJsonValues(`${COURSE_DRAFT_STORAGE_PREFIX}:${courseKey}`).forEach(
-      addCourseCandidate
-    );
+    readStorageJsonValues(
+      `${COURSE_DRAFT_STORAGE_PREFIX}:${courseKey}`,
+    ).forEach(addCourseCandidate);
   });
 
-  collectStorageJsonByPrefix(`${COURSE_DRAFT_STORAGE_PREFIX}:`).forEach((draft) => {
-    if (courseMatchesKeys(draft, courseKeys)) {
-      addCourseCandidate(draft);
-    }
-  });
+  collectStorageJsonByPrefix(`${COURSE_DRAFT_STORAGE_PREFIX}:`).forEach(
+    (draft) => {
+      if (courseMatchesKeys(draft, courseKeys)) {
+        addCourseCandidate(draft);
+      }
+    },
+  );
 
   readStorageJsonValues(PROFESSOR_COURSES_KEY).forEach((savedCourses) => {
     if (!Array.isArray(savedCourses)) {
@@ -427,7 +444,8 @@ function readStoredMainQuizSettingsOverride(courseId, scope = {}, routeModuleId 
 
   for (const candidateCourse of courseCandidates) {
     const candidateModule = getCourseContentModuleList(candidateCourse).find(
-      (item, index) => keysOverlap(getModuleSettingKeys(item, index), moduleKeys)
+      (item, index) =>
+        keysOverlap(getModuleSettingKeys(item, index), moduleKeys),
     );
 
     if (candidateModule && hasExplicitMainQuizSettings(candidateModule)) {
@@ -438,9 +456,14 @@ function readStoredMainQuizSettingsOverride(courseId, scope = {}, routeModuleId 
   return null;
 }
 
-function getMainQuizLockReason(courseId, scope, routeModuleId, savedSettings = null) {
-  if (scope?.scopeType !== 'main_quiz') {
-    return '';
+function getMainQuizLockReason(
+  courseId,
+  scope,
+  routeModuleId,
+  savedSettings = null,
+) {
+  if (scope?.scopeType !== "main_quiz") {
+    return "";
   }
 
   const settings =
@@ -449,26 +472,31 @@ function getMainQuizLockReason(courseId, scope, routeModuleId, savedSettings = n
     readStoredMainQuizSettingsOverride(courseId, scope, routeModuleId);
 
   if (!settings) {
-    return '';
+    return "";
   }
 
-  if (!normalizeBoolean(settings.enabled ?? settings.isEnabled, true)) {
-    return 'Your professor has turned off the Main Quiz for this module.';
+  const scheduleState = mainQuizScheduleState({
+    enabled: normalizeBoolean(settings.enabled ?? settings.isEnabled, true),
+    lockAt: normalizeDateTimeLocal(settings.lockAt || settings.lock_at),
+    unlockAt: normalizeDateTimeLocal(settings.unlockAt || settings.unlock_at),
+  });
+  if (scheduleState === "disabled") {
+    return "Your professor has turned off the Main Quiz for this module.";
   }
 
   const lockAt = normalizeDateTimeLocal(settings.lockAt || settings.lock_at);
-  if (lockAt && Date.now() >= new Date(lockAt).getTime()) {
+  if (scheduleState === "closed") {
     return `Main Quiz closed on ${formatDateTimeLabel(lockAt)}.`;
   }
 
-  const unlockAt = normalizeDateTimeLocal(settings.unlockAt || settings.unlock_at);
-  const unlockTime = unlockAt ? new Date(unlockAt).getTime() : 0;
-
-  if (unlockAt && !Number.isNaN(unlockTime) && Date.now() < unlockTime) {
+  const unlockAt = normalizeDateTimeLocal(
+    settings.unlockAt || settings.unlock_at,
+  );
+  if (scheduleState === "scheduled") {
     return `Main Quiz opens on ${formatDateTimeLabel(unlockAt)}.`;
   }
 
-  return '';
+  return "";
 }
 
 export default function StudentModuleQuizPage() {
@@ -478,37 +506,97 @@ export default function StudentModuleQuizPage() {
   const [loadingModes, setLoadingModes] = useState(true);
   const [savedQuizAccess, setSavedQuizAccess] = useState(null);
   const [checkingQuizAccess, setCheckingQuizAccess] = useState(true);
-  const [quizAccessError, setQuizAccessError] = useState('');
+  const [quizAccessError, setQuizAccessError] = useState("");
 
-  const scope = useMemo(() => readStorageJson('practiceScope', {}), []);
-  const quizzes = useMemo(() => readStorageJson('practiceQuizzes', []), []);
-  const source = localStorage.getItem('practiceSource') || 'module';
+  const scope = useMemo(() => readStorageJson("practiceScope", {}), []);
+  const quizzes = useMemo(() => readStorageJson("practiceQuizzes", []), []);
+  const source = localStorage.getItem("practiceSource") || "module";
   const lessonId =
-    localStorage.getItem('practiceLessonId') ||
-    `${courseId}-${scope.scopeId || 'module'}`;
-  const isMainQuiz = quizType === 'main';
+    localStorage.getItem("practiceLessonId") ||
+    `${courseId}-${scope.scopeId || "module"}`;
+  const isMainQuiz = quizType === "main";
+  const [, setAccessClock] = useState(0);
+  useEffect(() => {
+    if (!isMainQuiz) return;
+    const timer = window.setInterval(
+      () => setAccessClock((value) => value + 1),
+      1000,
+    );
+    return () => window.clearInterval(timer);
+  }, [isMainQuiz]);
   const pageTitle =
-    scope.scopeTitle || (isMainQuiz ? 'Main Quiz' : 'Practice Quiz');
-  const pageKicker = isMainQuiz ? 'Main Quiz' : 'Practice Quiz';
+    scope.scopeTitle || (isMainQuiz ? "Main Quiz" : "Practice Quiz");
+  const pageKicker = isMainQuiz ? "Main Quiz" : "Practice Quiz";
   const backPath = `/student/enrolled-courses/${scope.courseId || courseId}`;
-  const mainQuizLockReason = isMainQuiz && checkingQuizAccess
-    ? 'Checking Main Quiz access…'
-    : quizAccessError || getMainQuizLockReason(courseId, scope, moduleId, savedQuizAccess);
+  const mainQuizLockReason =
+    isMainQuiz && checkingQuizAccess
+      ? "Checking Main Quiz access…"
+      : quizAccessError ||
+        getMainQuizLockReason(courseId, scope, moduleId, savedQuizAccess);
 
   useEffect(() => {
-    if (!isMainQuiz) { setCheckingQuizAccess(false); return; }
+    if (!isMainQuiz) return;
+    const controller = new AbortController();
     let active = true;
-    fetchCourse(courseId).then(course => {
-      const modules = getCourseContentModules(course);
-      const module = modules.find(item => String(item.id) === String(moduleId) || String(item.id) === String(scope.scopeId))
-        || modules[Number(scope.moduleIndex)];
-      if (!module) throw new Error('This module is no longer available.');
-      if (active) setSavedQuizAccess(coerceMainQuizSettings(module));
-    }).catch(() => {
-      if (active) setQuizAccessError('Could not verify Main Quiz access. Return to the course and try again.');
-    }).finally(() => { if (active) setCheckingQuizAccess(false); });
-    return () => { active = false; };
-  }, [courseId, moduleId, isMainQuiz, scope]);
+    Swal.fire({
+      title: "Checking Main Quiz",
+      allowOutsideClick: false,
+      showConfirmButton: false,
+      didOpen: () => Swal.showLoading(),
+    });
+    const timeout = window.setTimeout(() => controller.abort(), 15000);
+    async function checkAccess() {
+      try {
+        const response = await fetch(
+          `${API_BASE}/lessons/main-quiz/status/${encodeURIComponent(courseId)}/${encodeURIComponent(moduleId || scope.scopeId)}`,
+          {
+            credentials: "include",
+            headers: lessonAuthHeaders(),
+            signal: controller.signal,
+          },
+        );
+        const data = await response.json();
+        if (!response.ok || !data.success)
+          throw new Error(data.message || "Could not verify Main Quiz access.");
+        if (controller.signal.aborted) return;
+        if (data.status.taken) {
+          await Swal.fire({
+            icon: "info",
+            title: "Main Quiz already taken",
+            text: "You have already taken this Main Quiz.",
+            confirmButtonText: "OK",
+          });
+          navigate(backPath, { replace: true });
+        } else {
+          Swal.close();
+          navigate(
+            `/random-modes-tutorial/lesson/${encodeURIComponent(lessonId)}`,
+            { replace: true },
+          );
+        }
+      } catch (error) {
+        if (!active) return;
+        await Swal.fire({
+          icon: "info",
+          title: "Main Quiz unavailable",
+          text:
+            error.name === "AbortError"
+              ? "The access check timed out. Please try again."
+              : error.message,
+          confirmButtonText: "OK",
+        });
+        navigate(backPath, { replace: true });
+      } finally {
+        window.clearTimeout(timeout);
+      }
+    }
+    void checkAccess();
+    return () => {
+      active = false;
+      window.clearTimeout(timeout);
+      controller.abort();
+    };
+  }, [courseId, moduleId, isMainQuiz]);
 
   useEffect(() => {
     let active = true;
@@ -536,35 +624,15 @@ export default function StudentModuleQuizPage() {
       });
     };
 
-    window.addEventListener('admin-modes-updated', refreshModes);
-    window.addEventListener('storage', refreshModes);
+    window.addEventListener("admin-modes-updated", refreshModes);
+    window.addEventListener("storage", refreshModes);
 
     return () => {
       active = false;
-      window.removeEventListener('admin-modes-updated', refreshModes);
-      window.removeEventListener('storage', refreshModes);
+      window.removeEventListener("admin-modes-updated", refreshModes);
+      window.removeEventListener("storage", refreshModes);
     };
   }, []);
-
-  useEffect(() => {
-    if (!isMainQuiz || mainQuizLockReason || quizzes.length === 0 || !lessonId) {
-      return;
-    }
-
-    localStorage.setItem(
-      'practiceMode',
-      JSON.stringify({
-        title: 'Matching Type',
-        mode_name: 'Matching Type',
-        quizMode: 'matching',
-        route: '/matching-type',
-      })
-    );
-    localStorage.removeItem('timedQuizSeconds');
-    navigate(`/matching-type/lesson/${encodeURIComponent(lessonId)}`, {
-      replace: true,
-    });
-  }, [isMainQuiz, lessonId, mainQuizLockReason, navigate, quizzes.length]);
 
   const calculateTimedQuizSeconds = () => {
     const totalSeconds = quizzes.length * 90;
@@ -580,13 +648,16 @@ export default function StudentModuleQuizPage() {
       route,
     };
 
-    if (modeKind === 'timed') {
-      localStorage.setItem('timedQuizSeconds', String(calculateTimedQuizSeconds()));
+    if (modeKind === "timed") {
+      localStorage.setItem(
+        "timedQuizSeconds",
+        String(calculateTimedQuizSeconds()),
+      );
     } else {
-      localStorage.removeItem('timedQuizSeconds');
+      localStorage.removeItem("timedQuizSeconds");
     }
 
-    localStorage.setItem('practiceMode', JSON.stringify(selectedMode));
+    localStorage.setItem("practiceMode", JSON.stringify(selectedMode));
 
     const nextRoute = buildPracticeRoute(route, source, lessonId);
 
@@ -598,6 +669,8 @@ export default function StudentModuleQuizPage() {
   if (!isMainQuiz) {
     return <Navigate to={backPath} replace />;
   }
+
+  if (isMainQuiz) return null;
 
   return (
     <div className="student-module-quiz-page">
@@ -626,7 +699,7 @@ export default function StudentModuleQuizPage() {
               <p>
                 {scope.scopeDetail
                   ? `${scope.scopeDetail}. Choose how you want to answer this quiz.`
-                  : 'Choose how you want to answer this quiz.'}
+                  : "Choose how you want to answer this quiz."}
               </p>
             </div>
 
@@ -640,9 +713,13 @@ export default function StudentModuleQuizPage() {
                   No quiz questions were found for this page.
                 </p>
               ) : loadingModes ? (
-                <p className="student-module-quiz-empty">Loading quiz modes...</p>
+                <p className="student-module-quiz-empty">
+                  Loading quiz modes...
+                </p>
               ) : modes.length === 0 ? (
-                <p className="student-module-quiz-empty">No quiz modes available.</p>
+                <p className="student-module-quiz-empty">
+                  No quiz modes available.
+                </p>
               ) : (
                 modes.map((mode) => (
                   <ModeCard

@@ -1,16 +1,17 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import Swal from 'sweetalert2';
+import { mainQuizScheduleState } from "../../../utils/mainQuizSchedule.js";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import Swal from "sweetalert2";
 
 import {
   getCourseContentModules,
   getCourseQuizItems,
-} from '../../course/courseContent.js';
-import { Avatar } from '../enrolled/EnrolledCourses.jsx';
-import StudentSidebar from '../../../components/students/StudentSidebar.jsx';
-import StudentHeader from '../../../components/students/StudentHeader.jsx';
-import JoinCourseModal from './JoinCourseModal.jsx';
-import QuizModesModal from '../../../components/quizmodes/QuizModesModal.jsx';
+} from "../../course/courseContent.js";
+import { Avatar } from "../enrolled/EnrolledCourses.jsx";
+import StudentSidebar from "../../../components/students/StudentSidebar.jsx";
+import StudentHeader from "../../../components/students/StudentHeader.jsx";
+import JoinCourseModal from "./JoinCourseModal.jsx";
+import QuizModesModal from "../../../components/quizmodes/QuizModesModal.jsx";
 
 import {
   enrollStudentInCourseAsync,
@@ -21,49 +22,49 @@ import {
   getStudentCourseModules,
   normalizeStudentCourse,
   STUDENT_READING_PROGRESS_EVENT,
-} from './studentCourseData';
+} from "./studentCourseData";
 import {
   clearStudentSession,
   getStudentAccountLabel,
   getStudentProfileHandle,
   useStudentProfile,
-} from '../settings/studentProfileData.js';
+} from "../settings/studentProfileData.js";
 
-import './StudentCourseDetail.css';
+import "./StudentCourseDetail.css";
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-const MAIN_QUIZ_SETTINGS_STORAGE_KEY = 'puffy-main-quiz-settings';
-const COURSE_DRAFT_STORAGE_PREFIX = 'puffy-course-builder-draft';
-const PROFESSOR_COURSES_KEY = 'professor-courses';
+  import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const MAIN_QUIZ_SETTINGS_STORAGE_KEY = "puffy-main-quiz-settings";
+const COURSE_DRAFT_STORAGE_PREFIX = "puffy-course-builder-draft";
+const PROFESSOR_COURSES_KEY = "professor-courses";
 
 const notificationItems = [
   {
     id: 1,
-    title: 'Welcome to PuffyBrain!',
+    title: "Welcome to PuffyBrain!",
     message:
-      'Your student account is ready. Start exploring your enrolled courses.',
-    time: 'Just now',
+      "Your student account is ready. Start exploring your enrolled courses.",
+    time: "Just now",
     unread: true,
-    icon: 'sparkle',
+    icon: "sparkle",
   },
   {
     id: 2,
-    title: 'New learning material',
+    title: "New learning material",
     message:
-      'A new module was added to ITEC 106 - Web Systems and Technologies 2.',
-    time: '12 minutes ago',
+      "A new module was added to ITEC 106 - Web Systems and Technologies 2.",
+    time: "12 minutes ago",
     unread: true,
-    icon: 'course',
+    icon: "course",
   },
   {
     id: 3,
-    title: 'Course announcement',
+    title: "Course announcement",
     message:
-      'Your professor posted an announcement for Introduction to Computing.',
-    time: 'Yesterday',
+      "Your professor posted an announcement for Introduction to Computing.",
+    time: "Yesterday",
     unread: false,
-    icon: 'announcement',
+    icon: "announcement",
   },
 ];
 
@@ -71,40 +72,44 @@ function resolveProfileImage(imagePath) {
   if (!imagePath) return undefined;
 
   if (
-    imagePath.startsWith('http://') ||
-    imagePath.startsWith('https://') ||
-    imagePath.startsWith('blob:') ||
-    imagePath.startsWith('data:')
+    imagePath.startsWith("http://") ||
+    imagePath.startsWith("https://") ||
+    imagePath.startsWith("blob:") ||
+    imagePath.startsWith("data:")
   ) {
     return imagePath;
   }
 
-  const serverOrigin = API_BASE_URL.replace(/\/api\/?$/, '');
-  return `${serverOrigin}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
+  const serverOrigin = API_BASE_URL.replace(/\/api\/?$/, "");
+  return `${serverOrigin}${imagePath.startsWith("/") ? "" : "/"}${imagePath}`;
 }
 
 function getStoredToken() {
   return (
-    localStorage.getItem('token') ||
-    localStorage.getItem('authToken') ||
-    localStorage.getItem('puffy-token') ||
-    sessionStorage.getItem('token') ||
-    sessionStorage.getItem('authToken')
+    localStorage.getItem("token") ||
+    localStorage.getItem("authToken") ||
+    localStorage.getItem("puffy-token") ||
+    sessionStorage.getItem("token") ||
+    sessionStorage.getItem("authToken")
   );
 }
 
 function getProfessorDepartment(course) {
-  return course.professorDepartment || course.professor_department || 'Department not set';
+  return (
+    course.professorDepartment ||
+    course.professor_department ||
+    "Department not set"
+  );
 }
 
 function parseSettingsObject(value) {
-  if (value && typeof value === 'object' && !Array.isArray(value)) {
+  if (value && typeof value === "object" && !Array.isArray(value)) {
     return value;
   }
 
   try {
-    const parsed = JSON.parse(value || '{}');
-    return parsed && typeof parsed === 'object' && !Array.isArray(parsed)
+    const parsed = JSON.parse(value || "{}");
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed)
       ? parsed
       : {};
   } catch {
@@ -113,32 +118,32 @@ function parseSettingsObject(value) {
 }
 
 function normalizeBoolean(value, fallback = true) {
-  if (value === undefined || value === null || value === '') {
+  if (value === undefined || value === null || value === "") {
     return fallback;
   }
 
-  if (typeof value === 'boolean') {
+  if (typeof value === "boolean") {
     return value;
   }
 
-  return ['1', 'true', 'yes', 'on'].includes(String(value).toLowerCase());
+  return ["1", "true", "yes", "on"].includes(String(value).toLowerCase());
 }
 
 function normalizeDateTimeLocal(value) {
-  const text = String(value || '').trim();
+  const text = String(value || "").trim();
 
   if (!text) {
-    return '';
+    return "";
   }
 
-  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(text)) {
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?$/.test(text)) {
     return text.slice(0, 16);
   }
 
   const date = new Date(text);
 
   if (Number.isNaN(date.getTime())) {
-    return '';
+    return "";
   }
 
   const timezoneOffsetMs = date.getTimezoneOffset() * 60 * 1000;
@@ -151,7 +156,7 @@ function readMainQuizSettingsMap() {
   try {
     const saved = sessionStorage.getItem(MAIN_QUIZ_SETTINGS_STORAGE_KEY);
     const parsed = saved ? JSON.parse(saved) : {};
-    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
       Object.assign(mergedSettings, parsed);
     }
   } catch {
@@ -161,7 +166,7 @@ function readMainQuizSettingsMap() {
   try {
     const saved = localStorage.getItem(MAIN_QUIZ_SETTINGS_STORAGE_KEY);
     const parsed = saved ? JSON.parse(saved) : {};
-    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
       Object.assign(mergedSettings, parsed);
     }
   } catch {
@@ -223,9 +228,9 @@ function collectStorageJsonByPrefix(prefix) {
           continue;
         }
 
-        const parsed = JSON.parse(storage.getItem(key) || 'null');
+        const parsed = JSON.parse(storage.getItem(key) || "null");
 
-        if (parsed && typeof parsed === 'object') {
+        if (parsed && typeof parsed === "object") {
           values.push(parsed);
         }
       }
@@ -260,7 +265,7 @@ function getCourseSettingKeys(course = {}) {
     course?.course_name,
     course?.subject,
   ]
-    .map((value) => String(value || '').trim())
+    .map((value) => String(value || "").trim())
     .filter(Boolean);
 
   return [...new Set(keys.flatMap((key) => [key, key.toLowerCase()]))];
@@ -278,7 +283,7 @@ function getModuleSettingKeys(module = {}, moduleIndex = 0) {
     `module-${moduleIndex + 1}`,
     `module ${moduleIndex + 1}`,
   ]
-    .map((value) => String(value || '').trim())
+    .map((value) => String(value || "").trim())
     .filter(Boolean);
 
   return [...new Set(keys.flatMap((key) => [key, key.toLowerCase()]))];
@@ -293,7 +298,7 @@ function readMainQuizSettingsOverride(course, module, moduleIndex) {
     for (const moduleKey of moduleKeys) {
       const settings = settingsMap[`${courseKey}::${moduleKey}`];
 
-      if (settings && typeof settings === 'object') {
+      if (settings && typeof settings === "object") {
         return settings;
       }
     }
@@ -318,7 +323,7 @@ function readStorageJsonValue(value) {
   }
 
   try {
-    const parsed = JSON.parse(value || '[]');
+    const parsed = JSON.parse(value || "[]");
     return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
@@ -354,7 +359,7 @@ function readStoredMainQuizSettingsOverride(course, module, moduleIndex) {
   const seenCandidates = new Set();
 
   const addCourseCandidate = (candidate) => {
-    if (!candidate || typeof candidate !== 'object') {
+    if (!candidate || typeof candidate !== "object") {
       return;
     }
 
@@ -376,7 +381,7 @@ function readStoredMainQuizSettingsOverride(course, module, moduleIndex) {
   courseKeys.forEach((courseKey) => {
     const draft = readStorageJson(
       `${COURSE_DRAFT_STORAGE_PREFIX}:${courseKey}`,
-      null
+      null,
     );
 
     addCourseCandidate(draft);
@@ -387,7 +392,7 @@ function readStoredMainQuizSettingsOverride(course, module, moduleIndex) {
       if (courseMatchesKeys(draft, courseKeys)) {
         addCourseCandidate(draft);
       }
-    }
+    },
   );
 
   const savedCourseCollections = readStorageJsonValues(PROFESSOR_COURSES_KEY);
@@ -407,7 +412,7 @@ function readStoredMainQuizSettingsOverride(course, module, moduleIndex) {
   for (const candidateCourse of courseCandidates) {
     const candidateModules = getCourseContentModuleList(candidateCourse);
     const candidateModule = candidateModules.find((item, index) =>
-      keysOverlap(getModuleSettingKeys(item, index), moduleKeys)
+      keysOverlap(getModuleSettingKeys(item, index), moduleKeys),
     );
 
     if (candidateModule) {
@@ -424,26 +429,27 @@ function readStoredMainQuizSettingsOverride(course, module, moduleIndex) {
 
 function coerceMainQuizSettings(module = {}, override = null) {
   const settings = parseSettingsObject(
-    override ||
-      module?.mainQuizSettings ||
-      module?.main_quiz_settings
+    override || module?.mainQuizSettings || module?.main_quiz_settings,
   );
   const enabled = normalizeBoolean(
     settings.enabled ??
       settings.isEnabled ??
       module?.mainQuizEnabled ??
       module?.main_quiz_enabled,
-    true
+    true,
   );
   const unlockAt = normalizeDateTimeLocal(
     settings.unlockAt ||
       settings.unlock_at ||
       module?.mainQuizUnlockAt ||
-      module?.main_quiz_unlock_at
+      module?.main_quiz_unlock_at,
   );
 
   const lockAt = normalizeDateTimeLocal(
-    settings.lockAt || settings.lock_at || module?.mainQuizLockAt || module?.main_quiz_lock_at
+    settings.lockAt ||
+      settings.lock_at ||
+      module?.mainQuizLockAt ||
+      module?.main_quiz_lock_at,
   );
 
   return {
@@ -453,7 +459,11 @@ function coerceMainQuizSettings(module = {}, override = null) {
   };
 }
 
-function normalizeMainQuizSettings(module = {}, course = null, moduleIndex = 0) {
+function normalizeMainQuizSettings(
+  module = {},
+  course = null,
+  moduleIndex = 0,
+) {
   if (hasExplicitMainQuizSettings(module)) {
     return coerceMainQuizSettings(module);
   }
@@ -469,45 +479,40 @@ function formatDateTimeLabel(value) {
   const normalized = normalizeDateTimeLocal(value);
 
   if (!normalized) {
-    return '';
+    return "";
   }
 
   const date = new Date(normalized);
 
   if (Number.isNaN(date.getTime())) {
-    return '';
+    return "";
   }
 
   return date.toLocaleString([], {
-    dateStyle: 'medium',
-    timeStyle: 'short',
+    dateStyle: "medium",
+    timeStyle: "short",
   });
 }
 
 function getMainQuizAvailability(module = {}, course = null, moduleIndex = 0) {
   const settings = normalizeMainQuizSettings(module, course, moduleIndex);
-  const unlockTime = settings.unlockAt ? new Date(settings.unlockAt).getTime() : 0;
-  const isTimeLocked =
-    settings.enabled &&
-    settings.unlockAt &&
-    !Number.isNaN(unlockTime) &&
-    Date.now() < unlockTime;
+  const scheduleState = mainQuizScheduleState(settings);
 
-  if (!settings.enabled) {
+  if (scheduleState === "disabled") {
     return {
       available: false,
-      reason: 'Your professor has turned off the Main Quiz for this module.',
+      reason: "Your professor has turned off the Main Quiz for this module.",
     };
   }
 
-  if (settings.lockAt && Date.now() >= new Date(settings.lockAt).getTime()) {
+  if (scheduleState === "closed") {
     return {
       available: false,
       reason: `Main Quiz closed on ${formatDateTimeLabel(settings.lockAt)}.`,
     };
   }
 
-  if (isTimeLocked) {
+  if (scheduleState === "scheduled") {
     return {
       available: false,
       reason: `Main Quiz opens on ${formatDateTimeLabel(settings.unlockAt)}.`,
@@ -516,7 +521,7 @@ function getMainQuizAvailability(module = {}, course = null, moduleIndex = 0) {
 
   return {
     available: true,
-    reason: '',
+    reason: "",
   };
 }
 
@@ -535,22 +540,11 @@ function normalizeModule(module, index, course = null) {
 
   return {
     ...module,
-    id:
-      module?.id ||
-      module?.module_id ||
-      `module-${index + 1}`,
-    title:
-      String(module?.title || '').trim() ||
-      `Module ${index + 1}`,
-    description: String(
-      module?.description ||
-        module?.summary ||
-        ''
-    ),
+    id: module?.id || module?.module_id || `module-${index + 1}`,
+    title: String(module?.title || "").trim() || `Module ${index + 1}`,
+    description: String(module?.description || module?.summary || ""),
     learningObjectives: String(
-      module?.learningObjectives ||
-        module?.learning_objectives ||
-        ''
+      module?.learningObjectives || module?.learning_objectives || "",
     ),
     lessonPages,
     quizItems,
@@ -563,12 +557,12 @@ function getNestedCourseModules(course) {
 
   if (parsedModules.length > 0) {
     return parsedModules.map((module, index) =>
-      normalizeModule(module, index, course)
+      normalizeModule(module, index, course),
     );
   }
 
   return getStudentCourseModules(course).map((module, index) =>
-    normalizeModule(module, index, course)
+    normalizeModule(module, index, course),
   );
 }
 
@@ -582,21 +576,24 @@ export default function StudentCourseDetail() {
 
   const [joinModalOpen, setJoinModalOpen] = useState(false);
   const [practiceSession, setPracticeSession] = useState(null);
-  const [joinCourseCode, setJoinCourseCode] = useState('');
-  const [notificationMenuOpen, setNotificationMenuOpen] =
-    useState(false);
-  const [profileMenuOpen, setProfileMenuOpen] =
-    useState(false);
-  const [notifications, setNotifications] =
-    useState(notificationItems);
-  const [mainQuizSettingsVersion, setMainQuizSettingsVersion] =
-    useState(0);
+  const [joinCourseCode, setJoinCourseCode] = useState("");
+  const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [notifications, setNotifications] = useState(notificationItems);
+  const [mainQuizSettingsVersion, setMainQuizSettingsVersion] = useState(0);
 
-  const [enrolledCoursesOpen, setEnrolledCoursesOpen] =
-    useState(false);
+  useEffect(() => {
+    const timer = window.setInterval(
+      () => setMainQuizSettingsVersion((version) => version + 1),
+      1000,
+    );
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const [enrolledCoursesOpen, setEnrolledCoursesOpen] = useState(false);
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
-    return localStorage.getItem('sidebarCollapsed') === 'true';
+    return localStorage.getItem("sidebarCollapsed") === "true";
   });
 
   const [courses, setCourses] = useState([]);
@@ -615,26 +612,18 @@ export default function StudentCourseDetail() {
         return;
       }
 
-      const response = await fetch(
-        `${API_BASE_URL}/courses/enrolled`,
-        {
-          method: 'GET',
-          headers: {
-            Accept: 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/courses/enrolled`, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-      const data = await response
-        .json()
-        .catch(() => ({}));
+      const data = await response.json().catch(() => ({}));
 
       if (!response.ok) {
-        throw new Error(
-          data.message ||
-            'Could not load enrolled courses.'
-        );
+        throw new Error(data.message || "Could not load enrolled courses.");
       }
 
       const loadedCourses = Array.isArray(data.courses)
@@ -645,10 +634,7 @@ export default function StudentCourseDetail() {
 
       setCourses(loadedCourses);
     } catch (error) {
-      console.error(
-        'Sidebar enrolled courses loading error:',
-        error
-      );
+      console.error("Sidebar enrolled courses loading error:", error);
 
       setCourses([]);
     } finally {
@@ -667,14 +653,13 @@ export default function StudentCourseDetail() {
       try {
         setLoading(true);
 
-        const selectedCourse =
-          await findCourseByIdOrCodeAsync(courseId);
+        const selectedCourse = await findCourseByIdOrCodeAsync(courseId);
 
         if (active) {
           setRawCourse(selectedCourse);
         }
       } catch (error) {
-        console.error('Could not load course:', error);
+        console.error("Could not load course:", error);
 
         if (active) {
           setRawCourse(null);
@@ -701,100 +686,77 @@ export default function StudentCourseDetail() {
       setMainQuizSettingsVersion((version) => version + 1);
     };
 
-    window.addEventListener(
-      STUDENT_READING_PROGRESS_EVENT,
-      refreshProgress
-    );
+    window.addEventListener(STUDENT_READING_PROGRESS_EVENT, refreshProgress);
 
-    window.addEventListener('storage', refreshProgress);
-    window.addEventListener('storage', refreshMainQuizSettings);
+    window.addEventListener("storage", refreshProgress);
+    window.addEventListener("storage", refreshMainQuizSettings);
     window.addEventListener(
-      'puffy-main-quiz-settings-updated',
-      refreshMainQuizSettings
+      "puffy-main-quiz-settings-updated",
+      refreshMainQuizSettings,
     );
 
     return () => {
       window.removeEventListener(
         STUDENT_READING_PROGRESS_EVENT,
-        refreshProgress
+        refreshProgress,
       );
 
+      window.removeEventListener("storage", refreshProgress);
+      window.removeEventListener("storage", refreshMainQuizSettings);
       window.removeEventListener(
-        'storage',
-        refreshProgress
-      );
-      window.removeEventListener('storage', refreshMainQuizSettings);
-      window.removeEventListener(
-        'puffy-main-quiz-settings-updated',
-        refreshMainQuizSettings
+        "puffy-main-quiz-settings-updated",
+        refreshMainQuizSettings,
       );
     };
   }, []);
 
   useEffect(() => {
     const closeOpenMenus = (event) => {
-      if (!event.target.closest('.profile-menu-wrapper')) {
+      if (!event.target.closest(".profile-menu-wrapper")) {
         setProfileMenuOpen(false);
       }
 
-      if (!event.target.closest('.notification-menu-wrapper')) {
+      if (!event.target.closest(".notification-menu-wrapper")) {
         setNotificationMenuOpen(false);
       }
     };
 
     const closeMenusWithEscape = (event) => {
-      if (event.key === 'Escape') {
+      if (event.key === "Escape") {
         setProfileMenuOpen(false);
         setNotificationMenuOpen(false);
       }
     };
 
-    document.addEventListener('mousedown', closeOpenMenus);
-    document.addEventListener('keydown', closeMenusWithEscape);
+    document.addEventListener("mousedown", closeOpenMenus);
+    document.addEventListener("keydown", closeMenusWithEscape);
 
     return () => {
-      document.removeEventListener('mousedown', closeOpenMenus);
-      document.removeEventListener('keydown', closeMenusWithEscape);
+      document.removeEventListener("mousedown", closeOpenMenus);
+      document.removeEventListener("keydown", closeMenusWithEscape);
     };
   }, []);
 
-  const course = rawCourse
-    ? normalizeStudentCourse(rawCourse)
-    : null;
+  const course = rawCourse ? normalizeStudentCourse(rawCourse) : null;
 
   const modules = useMemo(
     () => (course ? getNestedCourseModules(course) : []),
-    [course, mainQuizSettingsVersion]
+    [course, mainQuizSettingsVersion],
   );
 
   const courseRouteId = course
-    ? String(
-        course.id ||
-          course.course_id ||
-          course.code ||
-          ''
-      )
-    : '';
+    ? String(course.id || course.course_id || course.code || "")
+    : "";
 
-  const allQuizItems = course
-    ? getCourseQuizItems(course)
-    : [];
+  const allQuizItems = course ? getCourseQuizItems(course) : [];
 
-  const courseProgress = course
-    ? getStudentReadingProgress(courseRouteId)
-    : 0;
+  const courseProgress = course ? getStudentReadingProgress(courseRouteId) : 0;
 
-  const moduleProgressValues = modules.map(
-    (_, index) =>
-      getStudentModuleReadingProgress(
-        courseRouteId,
-        index,
-        modules.length
-      )
+  const moduleProgressValues = modules.map((_, index) =>
+    getStudentModuleReadingProgress(courseRouteId, index, modules.length),
   );
 
-  const getModuleProgress = (index) =>
-    moduleProgressValues[index] ?? 0;
+  const getModuleProgress = (index) => moduleProgressValues[index] ?? 0;
 
   const isModuleLearnUnlocked = (index) => {
     if (index === 0) {
@@ -805,8 +767,7 @@ export default function StudentCourseDetail() {
   };
 
   const isModulePracticeUnlocked = (index) =>
-    isModuleLearnUnlocked(index) &&
-    getModuleProgress(index) >= 100;
+    isModuleLearnUnlocked(index) && getModuleProgress(index) >= 100;
 
   const areAllModulesCompleted =
     modules.length > 0 &&
@@ -814,28 +775,22 @@ export default function StudentCourseDetail() {
 
   const createFallbackQuiz = (module, index) => ({
     id: `${module.id || courseRouteId}-practice-${index + 1}`,
-    type: 'multiple_choice',
+    type: "multiple_choice",
     question: `What should you remember from ${module.title}?`,
     options: [
-      module.description ||
-        course?.summary ||
-        'Review the module content.',
-      'Skip the module content.',
-      'Ignore the main idea.',
-      'Only memorize the title.',
+      module.description || course?.summary || "Review the module content.",
+      "Skip the module content.",
+      "Ignore the main idea.",
+      "Only memorize the title.",
     ],
     correct_answer:
-      module.description ||
-      course?.summary ||
-      'Review the module content.',
+      module.description || course?.summary || "Review the module content.",
     answer:
-      module.description ||
-      course?.summary ||
-      'Review the module content.',
+      module.description || course?.summary || "Review the module content.",
     explanation:
       module.description ||
       course?.summary ||
-      'Review this module before answering.',
+      "Review this module before answering.",
     moduleId: module.id,
     moduleIndex: index,
     moduleTitle: module.title,
@@ -846,26 +801,22 @@ export default function StudentCourseDetail() {
       return module.quizItems;
     }
 
-    const moduleId = String(module.id || '');
-    const moduleTitle = String(module.title || '')
+    const moduleId = String(module.id || "");
+    const moduleTitle = String(module.title || "")
       .trim()
       .toLowerCase();
 
     const matchingItems = allQuizItems.filter((item) => {
-      const itemModuleId = String(
-        item.moduleId || item.module_id || ''
-      );
+      const itemModuleId = String(item.moduleId || item.module_id || "");
 
-      const itemModuleIndex = Number(
-        item.moduleIndex ?? item.module_index
-      );
+      const itemModuleIndex = Number(item.moduleIndex ?? item.module_index);
 
       const itemModuleTitle = String(
         item.moduleTitle ||
           item.module_title ||
           item.lessonTitle ||
           item.lesson_title ||
-          ''
+          "",
       )
         .trim()
         .toLowerCase();
@@ -901,12 +852,10 @@ export default function StudentCourseDetail() {
   const startModuleLearning = async (module, index) => {
     if (!isModuleLearnUnlocked(index)) {
       await Swal.fire({
-        icon: 'info',
-        title: 'Module Locked',
-        text: `Complete Module ${index} before opening Module ${
-          index + 1
-        }.`,
-        confirmButtonText: 'OK',
+        icon: "info",
+        title: "Module Locked",
+        text: `Complete Module ${index} before opening Module ${index + 1}.`,
+        confirmButtonText: "OK",
       });
 
       return;
@@ -922,13 +871,11 @@ export default function StudentCourseDetail() {
     };
 
     localStorage.setItem(
-      'selectedCourseModule',
-      JSON.stringify(selectedModule)
+      "selectedCourseModule",
+      JSON.stringify(selectedModule),
     );
 
-    navigate(
-      `/introduction/${courseRouteId}?module=${index}`
-    );
+    navigate(`/introduction/${courseRouteId}?module=${index}`);
   };
 
   const prepareQuizSession = ({
@@ -943,13 +890,13 @@ export default function StudentCourseDetail() {
   }) => {
     const practiceLessonId = `${courseRouteId}-${scopeId}`;
 
-    localStorage.setItem('practiceSource', source);
-    localStorage.setItem('practiceLessonId', practiceLessonId);
-    localStorage.setItem('practiceQuizzes', JSON.stringify(quizzes));
-    localStorage.removeItem('practiceDeckId');
-    localStorage.removeItem('practiceCards');
+    localStorage.setItem("practiceSource", source);
+    localStorage.setItem("practiceLessonId", practiceLessonId);
+    localStorage.setItem("practiceQuizzes", JSON.stringify(quizzes));
+    localStorage.removeItem("practiceDeckId");
+    localStorage.removeItem("practiceCards");
     localStorage.setItem(
-      'practiceScope',
+      "practiceScope",
       JSON.stringify({
         courseId: courseRouteId,
         courseCode: course.code,
@@ -959,13 +906,14 @@ export default function StudentCourseDetail() {
         scopeType,
         moduleIndex,
         moduleTitle,
-        moduleNumber: Number.isInteger(moduleIndex) && moduleIndex >= 0
-          ? moduleIndex + 1
-          : null,
+        moduleNumber:
+          Number.isInteger(moduleIndex) && moduleIndex >= 0
+            ? moduleIndex + 1
+            : null,
         moduleCount: modules.length,
         scopeTitle: title,
         scopeDetail: detail,
-      })
+      }),
     );
 
     return practiceLessonId;
@@ -983,12 +931,10 @@ export default function StudentCourseDetail() {
   const openModulePractice = async (module, index) => {
     if (!isModuleLearnUnlocked(index)) {
       await Swal.fire({
-        icon: 'info',
-        title: 'Module Locked',
-        text: `Complete Module ${index} before practicing Module ${
-          index + 1
-        }.`,
-        confirmButtonText: 'OK',
+        icon: "info",
+        title: "Module Locked",
+        text: `Complete Module ${index} before practicing Module ${index + 1}.`,
+        confirmButtonText: "OK",
       });
 
       return;
@@ -996,12 +942,12 @@ export default function StudentCourseDetail() {
 
     if (!isModulePracticeUnlocked(index)) {
       await Swal.fire({
-        icon: 'info',
-        title: 'Finish Reading First',
+        icon: "info",
+        title: "Finish Reading First",
         text: `Read all lesson pages in Module ${
           index + 1
         } before starting its practice quiz.`,
-        confirmButtonText: 'OK',
+        confirmButtonText: "OK",
       });
 
       return;
@@ -1011,8 +957,8 @@ export default function StudentCourseDetail() {
 
     openPracticeModes({
       scopeId: module.id,
-      scopeType: 'module',
-      source: 'module',
+      scopeType: "module",
+      source: "module",
       moduleIndex: index,
       moduleTitle: module.title,
       title: module.title,
@@ -1024,25 +970,12 @@ export default function StudentCourseDetail() {
   const openModuleMainQuiz = async (module, index) => {
     if (!isModuleLearnUnlocked(index)) {
       await Swal.fire({
-        icon: 'info',
-        title: 'Module Locked',
+        icon: "info",
+        title: "Module Locked",
         text: `Complete Module ${index} before taking the Main Quiz for Module ${
           index + 1
         }.`,
-        confirmButtonText: 'OK',
-      });
-
-      return;
-    }
-
-    if (!isModulePracticeUnlocked(index)) {
-      await Swal.fire({
-        icon: 'info',
-        title: 'Finish Reading First',
-        text: `Read all lesson pages in Module ${
-          index + 1
-        } before taking its Main Quiz.`,
-        confirmButtonText: 'OK',
+        confirmButtonText: "OK",
       });
 
       return;
@@ -1052,59 +985,77 @@ export default function StudentCourseDetail() {
 
     if (!mainQuizAvailability.available) {
       await Swal.fire({
-        icon: 'info',
-        title: 'Main Quiz Locked',
+        icon: "info",
+        title: "Main Quiz Locked",
         text: mainQuizAvailability.reason,
-        confirmButtonText: 'OK',
+        confirmButtonText: "OK",
       });
 
       return;
     }
 
-    const quizzes = getModuleAuthoredQuizItems(module, index);
-
-    if (!quizzes.length) {
+    Swal.fire({
+      title: "Checking Main Quiz",
+      allowOutsideClick: false,
+      showConfirmButton: false,
+      didOpen: () => Swal.showLoading(),
+    });
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/lessons/main-quiz/status/${encodeURIComponent(courseRouteId)}/${encodeURIComponent(module.id)}`,
+        {
+          credentials: "include",
+          headers: {
+            Authorization: `Bearer ${getStoredToken()}`,
+          },
+          signal: AbortSignal.timeout(15000),
+        },
+      );
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Could not check Main Quiz access.");
+      }
+      if (data.status.taken) {
+        await Swal.fire({
+          icon: "info",
+          title: "Main Quiz already taken",
+          text: "You have already taken this Main Quiz.",
+          confirmButtonText: "OK",
+        });
+        return;
+      }
+      Swal.close();
+    } catch (error) {
       await Swal.fire({
-        icon: 'info',
-        title: 'No Main Quiz Yet',
-        text: 'Your professor has not added Main Quiz questions for this module yet.',
-        confirmButtonText: 'OK',
+        icon: "info",
+        title: "Main Quiz unavailable",
+        text: error.message,
+        confirmButtonText: "OK",
       });
-
       return;
     }
 
-    const practiceLessonId = prepareQuizSession({
+    const mainQuizLessonId = prepareQuizSession({
       scopeId: module.id,
-      scopeType: 'main_quiz',
-      source: 'module',
+      scopeType: "main_quiz",
+      source: "module",
       moduleIndex: index,
       moduleTitle: module.title,
       title: `${module.title} Main Quiz`,
-      detail: `${quizzes.length} question(s)`,
-      quizzes,
+      detail: "Adaptive assessment",
+      quizzes: [],
     });
-    localStorage.setItem(
-      'practiceMode',
-      JSON.stringify({
-        title: 'Matching Type',
-        mode_name: 'Matching Type',
-        quizMode: 'matching',
-        route: '/matching-type',
-      })
+    navigate(
+      `/random-modes-tutorial/lesson/${encodeURIComponent(mainQuizLessonId)}`,
     );
-    localStorage.removeItem('timedQuizSeconds');
-
-    navigate(`/matching-type/lesson/${encodeURIComponent(practiceLessonId)}`);
   };
 
   const startCourseLearning = () => {
     const firstIncompleteIndex = moduleProgressValues.findIndex(
-      (progress) => progress < 100
+      (progress) => progress < 100,
     );
 
-    const targetIndex =
-      firstIncompleteIndex === -1 ? 0 : firstIncompleteIndex;
+    const targetIndex = firstIncompleteIndex === -1 ? 0 : firstIncompleteIndex;
 
     const targetModule = modules[targetIndex];
 
@@ -1116,24 +1067,23 @@ export default function StudentCourseDetail() {
   const openCoursePractice = async () => {
     if (!areAllModulesCompleted) {
       await Swal.fire({
-        icon: 'info',
-        title: 'Complete All Modules',
-        text:
-          'Finish reading every module before practicing the complete course.',
-        confirmButtonText: 'OK',
+        icon: "info",
+        title: "Complete All Modules",
+        text: "Finish reading every module before practicing the complete course.",
+        confirmButtonText: "OK",
       });
 
       return;
     }
 
     const quizzes = modules.flatMap((module, index) =>
-      getModulePracticeItems(module, index)
+      getModulePracticeItems(module, index),
     );
 
     openPracticeModes({
-      scopeId: 'all-modules',
-      scopeType: 'course',
-      source: 'course',
+      scopeId: "all-modules",
+      scopeType: "course",
+      source: "course",
       moduleIndex: -1,
       title: `Everything in ${course.code}`,
       detail: `${modules.length} module(s)`,
@@ -1145,10 +1095,7 @@ export default function StudentCourseDetail() {
     setSidebarCollapsed((currentValue) => {
       const nextValue = !currentValue;
 
-      localStorage.setItem(
-        'sidebarCollapsed',
-        String(nextValue)
-      );
+      localStorage.setItem("sidebarCollapsed", String(nextValue));
 
       return nextValue;
     });
@@ -1156,90 +1103,79 @@ export default function StudentCourseDetail() {
 
   const closeJoinModal = () => {
     setJoinModalOpen(false);
-    setJoinCourseCode('');
+    setJoinCourseCode("");
   };
 
- const joinByCourseCode = async () => {
-  try {
-    const trimmedCode = joinCourseCode.trim();
+  const joinByCourseCode = async () => {
+    try {
+      const trimmedCode = joinCourseCode.trim();
 
-    if (!trimmedCode) {
+      if (!trimmedCode) {
+        await Swal.fire({
+          icon: "warning",
+          title: "Enter Course Code",
+          text: "Please enter the course code provided by your professor.",
+          confirmButtonText: "OK",
+          confirmButtonColor: "#7FA8D6",
+        });
+
+        return;
+      }
+
+      const course = await findJoinableCourseByCodeAsync(trimmedCode);
+
+      if (!course) {
+        await Swal.fire({
+          icon: "error",
+          title: "Course Not Found",
+          text: "Course code not found. Please check the code from your professor.",
+          confirmButtonText: "OK",
+          confirmButtonColor: "#7FA8D6",
+        });
+
+        return;
+      }
+
+      await enrollStudentInCourseAsync(course);
+
+      closeJoinModal();
+
+      await loadEnrolledCourses();
+
       await Swal.fire({
-        icon: 'warning',
-        title: 'Enter Course Code',
-        text: 'Please enter the course code provided by your professor.',
-        confirmButtonText: 'OK',
-        confirmButtonColor: '#7FA8D6',
+        icon: "success",
+        title: "Course Joined!",
+        text: `You have successfully joined ${
+          course.title || course.course_name || course.name || "the course"
+        }.`,
+        confirmButtonText: "Continue",
+        confirmButtonColor: "#7FA8D6",
       });
 
-      return;
-    }
+      const courseId =
+        course.id ||
+        course.courseId ||
+        course.course_id ||
+        course.code ||
+        course.courseCode ||
+        course.course_code;
 
-    const course =
-      await findJoinableCourseByCodeAsync(trimmedCode);
+      navigate(`/student/enrolled-courses/${courseId}`);
+    } catch (error) {
+      console.error("Join course error:", error);
 
-    if (!course) {
       await Swal.fire({
-        icon: 'error',
-        title: 'Course Not Found',
-        text: 'Course code not found. Please check the code from your professor.',
-        confirmButtonText: 'OK',
-        confirmButtonColor: '#7FA8D6',
+        icon: "error",
+        title: "Unable to Join Course",
+        text: error?.message || "Unable to join the course.",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#7FA8D6",
       });
-
-      return;
     }
-
-    await enrollStudentInCourseAsync(course);
-
-    closeJoinModal();
-
-    await loadEnrolledCourses();
-
-    await Swal.fire({
-      icon: 'success',
-      title: 'Course Joined!',
-      text: `You have successfully joined ${
-        course.title ||
-        course.course_name ||
-        course.name ||
-        'the course'
-      }.`,
-      confirmButtonText: 'Continue',
-      confirmButtonColor: '#7FA8D6',
-    });
-
-    const courseId =
-      course.id ||
-      course.courseId ||
-      course.course_id ||
-      course.code ||
-      course.courseCode ||
-      course.course_code;
-
-    navigate(
-      `/student/enrolled-courses/${courseId}`
-    );
-  } catch (error) {
-    console.error(
-      'Join course error:',
-      error
-    );
-
-    await Swal.fire({
-      icon: 'error',
-      title: 'Unable to Join Course',
-      text:
-        error?.message ||
-        'Unable to join the course.',
-      confirmButtonText: 'OK',
-      confirmButtonColor: '#7FA8D6',
-    });
-  }
-};
+  };
 
   const unreadNotificationCount = notifications.filter(
-    (notification) => notification.unread
+    (notification) => notification.unread,
   ).length;
 
   const markAllNotificationsAsRead = () => {
@@ -1247,7 +1183,7 @@ export default function StudentCourseDetail() {
       currentNotifications.map((notification) => ({
         ...notification,
         unread: false,
-      }))
+      })),
     );
   };
 
@@ -1256,8 +1192,8 @@ export default function StudentCourseDetail() {
       currentNotifications.map((notification) =>
         notification.id === notificationId
           ? { ...notification, unread: false }
-          : notification
-      )
+          : notification,
+      ),
     );
   };
 
@@ -1268,7 +1204,7 @@ export default function StudentCourseDetail() {
     setProfileMenuOpen(false);
     setNotificationMenuOpen(false);
     clearStudentSession();
-    navigate('/login');
+    navigate("/login");
   };
 
   if (loading) {
@@ -1276,9 +1212,14 @@ export default function StudentCourseDetail() {
       <div className="student-course-detail-page">
         <StudentSidebar />
         <div className="student-course-detail-main-area">
-          <StudentHeader searchPlaceholder="Search your course" onJoinCourse={() => setJoinModalOpen(true)} />
+          <StudentHeader
+            searchPlaceholder="Search your course"
+            onJoinCourse={() => setJoinModalOpen(true)}
+          />
           <main className="student-course-detail-content">
-            <section className="student-course-shell"><div className="student-empty-state">Loading course...</div></section>
+            <section className="student-course-shell">
+              <div className="student-empty-state">Loading course...</div>
+            </section>
           </main>
         </div>
       </div>
@@ -1290,9 +1231,14 @@ export default function StudentCourseDetail() {
       <div className="student-course-detail-page">
         <StudentSidebar />
         <div className="student-course-detail-main-area">
-          <StudentHeader searchPlaceholder="Search your course" onJoinCourse={() => setJoinModalOpen(true)} />
+          <StudentHeader
+            searchPlaceholder="Search your course"
+            onJoinCourse={() => setJoinModalOpen(true)}
+          />
           <main className="student-course-detail-content">
-            <section className="student-course-shell"><div className="student-empty-state">Course not found.</div></section>
+            <section className="student-course-shell">
+              <div className="student-empty-state">Course not found.</div>
+            </section>
           </main>
         </div>
       </div>
@@ -1303,270 +1249,254 @@ export default function StudentCourseDetail() {
     <div className="student-course-detail-page">
       <StudentSidebar />
       <div className="student-course-detail-main-area">
-        <StudentHeader searchPlaceholder="Search your course" onJoinCourse={() => setJoinModalOpen(true)} />
+        <StudentHeader
+          searchPlaceholder="Search your course"
+          onJoinCourse={() => setJoinModalOpen(true)}
+        />
         <main className="student-course-detail-content">
           <section className="student-course-shell">
-                    <div className="student-course-hero">
-                      <div className="student-course-copy">
-                        <div className="student-course-meta-row">
-                          <span>{course.code}</span>
-          
-                          <span>
-                            {course.visibility === 'private'
-                              ? 'Private course'
-                              : 'Public course'}
-                          </span>
-                        </div>
-          
-                        <h1>{course.title}</h1>
-          
-                        <p>
-                          {course.summary ||
-                            'Continue learning and practicing this course.'}
-                        </p>
-          
-                        <div
-                          className="student-course-progress"
-                          aria-label={`Course reading progress ${courseProgress}%`}
-                        >
-                          <span className="student-course-progress-track">
-                            <i style={{ width: `${courseProgress}%` }} />
-                          </span>
-          
-                          <div>
-                            <span>Reading progress</span>
-                            <strong>{courseProgress}%</strong>
-                          </div>
-                        </div>
-          
-                        <div className="student-course-bottom-row">
-                          <div className="student-course-creator">
-                            <Avatar
-                              src={resolveProfileImage(
-                                course.professorProfileImage ||
-                                  course.professor_profile_image,
-                              )}
-                              alt={`${
-                                course.instructor ||
-                                course.professorName ||
-                                'Professor'
-                              }'s profile`}
-                            />
-          
-                            <div className="enrolled-course-meta">
-                              <span>
-                                {course.instructor ||
-                                  course.professorName ||
-                                  'Professor'}
-                              </span>
-          
-                              <small>
-                                {getProfessorDepartment(
-                                  course,
-                                )}
-                              </small>
-                            </div>
-                          </div>
-          
-                          <div className="student-course-actions">
-                            <button
-                              type="button"
-                              className="student-start-button"
-                              onClick={startCourseLearning}
-                              disabled={modules.length === 0}
-                            >
-                              Start Learning
-                            </button>
-          
-                            <button
-                              type="button"
-                              className="student-practice-button"
-                              onClick={openCoursePractice}
-                              disabled={!areAllModulesCompleted}
-                              title={
-                                areAllModulesCompleted
-                                  ? 'Practice the complete course'
-                                  : 'Complete all modules before practicing the complete course.'
-                              }
-                            >
-                              Practice All
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-          
-                    <section
-                      className="student-course-modules"
-                      aria-labelledby="course-modules-title"
-                    >
-                      <div className="student-course-section-title">
-                        <div>
-                          <h2 id="course-modules-title">Modules</h2>
-                          <p className="student-module-section-description">
-                            Complete each module to unlock the next one.
-                          </p>
-                        </div>
-          
-                        <span>{modules.length} module(s)</span>
-                      </div>
-          
-                      {modules.length === 0 ? (
-                        <div className="student-empty-state">
-                          No modules have been added to this course yet.
-                        </div>
-                      ) : (
-                        <div className="student-module-list">
-                          {modules.map((module, index) => {
-                            const moduleProgress = getModuleProgress(index);
-                            const learnUnlocked =
-                              isModuleLearnUnlocked(index);
-                            const practiceUnlocked =
-                              isModulePracticeUnlocked(index);
-                            const hasMainQuiz =
-                              getModuleAuthoredQuizItems(module, index).length > 0;
-                            const mainQuizAvailability =
-                              getMainQuizAvailability(module, course, index);
-                            const mainQuizDisabled =
-                              !practiceUnlocked ||
-                              !hasMainQuiz ||
-                              !mainQuizAvailability.available;
-                            const mainQuizTitle = !hasMainQuiz
-                              ? 'No Main Quiz questions have been added yet.'
-                              : !mainQuizAvailability.available
-                                ? mainQuizAvailability.reason
-                                : practiceUnlocked
-                                  ? `Take the Main Quiz for ${module.title}`
-                                  : 'Finish reading this module first.';
-          
-                            const moduleState = !learnUnlocked
-                              ? 'locked'
-                              : moduleProgress >= 100
-                                ? 'complete'
-                                : moduleProgress > 0
-                                  ? 'current'
-                                  : 'available';
-          
-                            return (
-                              <article
-                                className={`student-module-row ${moduleState}`}
-                                key={module.id}
-                              >
-                                <span className="student-module-number">
-                                  {learnUnlocked ? index + 1 : '🔒'}
-                                </span>
-          
-                                <div className="student-module-main">
-                                  <div className="student-module-title-row">
-                                    <div>
-                                      <span className="student-module-eyebrow">
-                                        Module {index + 1}
-                                      </span>
-          
-                                      <h3>{module.title}</h3>
-                                    </div>
-          
-                                    <span
-                                      className={`student-module-status ${moduleState}`}
-                                    >
-                                      {!learnUnlocked
-                                        ? 'Locked'
-                                        : moduleProgress >= 100
-                                          ? 'Completed'
-                                          : moduleProgress > 0
-                                            ? 'In progress'
-                                            : 'Available'}
-                                    </span>
-                                  </div>
-          
-                                  <p>
-                                    {module.description ||
-                                      `${module.lessonPages.length} lesson page(s)`}
-                                  </p>
-          
-                                  {!learnUnlocked && (
-                                    <small className="student-module-lock-message">
-                                      Complete Module {index} to unlock this module.
-                                    </small>
-                                  )}
-          
-                                  <div
-                                    className="student-module-progress"
-                                    aria-label={`${module.title} reading progress ${moduleProgress}%`}
-                                  >
-                                    <span>
-                                      <i style={{ width: `${moduleProgress}%` }} />
-                                    </span>
-          
-                                    <strong>{moduleProgress}%</strong>
-                                  </div>
-                                </div>
-          
-                                <div className="student-module-actions">
-                                  <button
-                                    type="button"
-                                    className="student-module-learn-button"
-                                    onClick={() =>
-                                      startModuleLearning(module, index)
-                                    }
-                                    disabled={!learnUnlocked}
-                                  >
-                                    {moduleProgress > 0
-                                      ? 'Continue'
-                                      : 'Learn'}
-                                  </button>
-          
-                                  <button
-                                    type="button"
-                                    className="student-module-practice-button"
-                                    onClick={() =>
-                                      openModulePractice(module, index)
-                                    }
-                                    disabled={!practiceUnlocked}
-                                    title={
-                                      practiceUnlocked
-                                        ? `Practice ${module.title}`
-                                        : 'Finish reading this module first.'
-                                    }
-                                  >
-                                    Practice
-                                  </button>
+            <div className="student-course-hero">
+              <div className="student-course-copy">
+                <div className="student-course-meta-row">
+                  <span>{course.code}</span>
 
-                                  <button
-                                    type="button"
-                                    className={`student-module-main-quiz-button ${
-                                      mainQuizDisabled ? 'is-disabled' : ''
-                                    }`}
-                                    onClick={(event) => {
-                                      if (mainQuizDisabled) {
-                                        event.preventDefault();
-                                        return;
-                                      }
+                  <span>
+                    {course.visibility === "private"
+                      ? "Private course"
+                      : "Public course"}
+                  </span>
+                </div>
 
-                                      openModuleMainQuiz(module, index);
-                                    }}
-                                    disabled={mainQuizDisabled}
-                                    aria-disabled={mainQuizDisabled}
-                                    title={mainQuizTitle}
-                                  >
-                                    Main Quiz
-                                  </button>
-                                </div>
+                <h1>{course.title}</h1>
 
-                                {hasMainQuiz &&
-                                  practiceUnlocked &&
-                                  !mainQuizAvailability.available && (
-                                    <small className="student-module-main-quiz-lock-message">
-                                      {mainQuizAvailability.reason}
-                                    </small>
-                                  )}
-                              </article>
-                            );
-                          })}
-                        </div>
+                <p>
+                  {course.summary ||
+                    "Continue learning and practicing this course."}
+                </p>
+
+                <div
+                  className="student-course-progress"
+                  aria-label={`Course reading progress ${courseProgress}%`}
+                >
+                  <span className="student-course-progress-track">
+                    <i style={{ width: `${courseProgress}%` }} />
+                  </span>
+
+                  <div>
+                    <span>Reading progress</span>
+                    <strong>{courseProgress}%</strong>
+                  </div>
+                </div>
+
+                <div className="student-course-bottom-row">
+                  <div className="student-course-creator">
+                    <Avatar
+                      src={resolveProfileImage(
+                        course.professorProfileImage ||
+                          course.professor_profile_image,
                       )}
-                    </section>
-                  </section>
+                      alt={`${
+                        course.instructor || course.professorName || "Professor"
+                      }'s profile`}
+                    />
+
+                    <div className="enrolled-course-meta">
+                      <span>
+                        {course.instructor ||
+                          course.professorName ||
+                          "Professor"}
+                      </span>
+
+                      <small>{getProfessorDepartment(course)}</small>
+                    </div>
+                  </div>
+
+                  <div className="student-course-actions">
+                    <button
+                      type="button"
+                      className="student-start-button"
+                      onClick={startCourseLearning}
+                      disabled={modules.length === 0}
+                    >
+                      Start Learning
+                    </button>
+
+                    <button
+                      type="button"
+                      className="student-practice-button"
+                      onClick={openCoursePractice}
+                      disabled={!areAllModulesCompleted}
+                      title={
+                        areAllModulesCompleted
+                          ? "Practice the complete course"
+                          : "Complete all modules before practicing the complete course."
+                      }
+                    >
+                      Practice All
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <section
+              className="student-course-modules"
+              aria-labelledby="course-modules-title"
+            >
+              <div className="student-course-section-title">
+                <div>
+                  <h2 id="course-modules-title">Modules</h2>
+                  <p className="student-module-section-description">
+                    Complete each module to unlock the next one.
+                  </p>
+                </div>
+
+                <span>{modules.length} module(s)</span>
+              </div>
+
+              {modules.length === 0 ? (
+                <div className="student-empty-state">
+                  No modules have been added to this course yet.
+                </div>
+              ) : (
+                <div className="student-module-list">
+                  {modules.map((module, index) => {
+                    const moduleProgress = getModuleProgress(index);
+                    const learnUnlocked = isModuleLearnUnlocked(index);
+                    const practiceUnlocked = isModulePracticeUnlocked(index);
+                    const mainQuizAvailability = getMainQuizAvailability(
+                      module,
+                      course,
+                      index,
+                    );
+                    const mainQuizDisabled =
+                      !learnUnlocked || !mainQuizAvailability.available;
+                    const mainQuizTitle = !learnUnlocked
+                      ? "Complete the previous module first."
+                      : !mainQuizAvailability.available
+                        ? mainQuizAvailability.reason
+                        : `Take the Main Quiz for ${module.title}`;
+
+                    const moduleState = !learnUnlocked
+                      ? "locked"
+                      : moduleProgress >= 100
+                        ? "complete"
+                        : moduleProgress > 0
+                          ? "current"
+                          : "available";
+
+                    return (
+                      <article
+                        className={`student-module-row ${moduleState}`}
+                        key={module.id}
+                      >
+                        <span className="student-module-number">
+                          {learnUnlocked ? index + 1 : "🔒"}
+                        </span>
+
+                        <div className="student-module-main">
+                          <div className="student-module-title-row">
+                            <div>
+                              <span className="student-module-eyebrow">
+                                Module {index + 1}
+                              </span>
+
+                              <h3>{module.title}</h3>
+                            </div>
+
+                            <span
+                              className={`student-module-status ${moduleState}`}
+                            >
+                              {!learnUnlocked
+                                ? "Locked"
+                                : moduleProgress >= 100
+                                  ? "Completed"
+                                  : moduleProgress > 0
+                                    ? "In progress"
+                                    : "Available"}
+                            </span>
+                          </div>
+
+                          <p>
+                            {module.description ||
+                              `${module.lessonPages.length} lesson page(s)`}
+                          </p>
+
+                          {!learnUnlocked && (
+                            <small className="student-module-lock-message">
+                              Complete Module {index} to unlock this module.
+                            </small>
+                          )}
+
+                          <div
+                            className="student-module-progress"
+                            aria-label={`${module.title} reading progress ${moduleProgress}%`}
+                          >
+                            <span>
+                              <i style={{ width: `${moduleProgress}%` }} />
+                            </span>
+
+                            <strong>{moduleProgress}%</strong>
+                          </div>
+                        </div>
+
+                        <div className="student-module-actions">
+                          <button
+                            type="button"
+                            className="student-module-learn-button"
+                            onClick={() => startModuleLearning(module, index)}
+                            disabled={!learnUnlocked}
+                          >
+                            {moduleProgress > 0 ? "Continue" : "Learn"}
+                          </button>
+
+                          <button
+                            type="button"
+                            className="student-module-practice-button"
+                            onClick={() => openModulePractice(module, index)}
+                            disabled={!practiceUnlocked}
+                            title={
+                              practiceUnlocked
+                                ? `Practice ${module.title}`
+                                : "Finish reading this module first."
+                            }
+                          >
+                            Practice
+                          </button>
+
+                          <button
+                            type="button"
+                            className={`student-module-main-quiz-button ${
+                              mainQuizDisabled ? "is-disabled" : ""
+                            }`}
+                            onClick={(event) => {
+                              if (mainQuizDisabled) {
+                                event.preventDefault();
+                                return;
+                              }
+
+                              openModuleMainQuiz(module, index);
+                            }}
+                            disabled={mainQuizDisabled}
+                            aria-disabled={mainQuizDisabled}
+                            title={mainQuizTitle}
+                          >
+                            Main Quiz
+                          </button>
+                        </div>
+
+                        {mainQuizDisabled && (
+                          <small className="student-module-main-quiz-lock-message">
+                            {mainQuizTitle}
+                          </small>
+                        )}
+                      </article>
+                    );
+                  })}
+                </div>
+              )}
+            </section>
+          </section>
         </main>
       </div>
       {practiceSession && (
@@ -1577,7 +1507,13 @@ export default function StudentCourseDetail() {
           onClose={() => setPracticeSession(null)}
         />
       )}
-      <JoinCourseModal open={joinModalOpen} courseCode={joinCourseCode} onCourseCodeChange={setJoinCourseCode} onCancel={closeJoinModal} onJoin={joinByCourseCode} />
+      <JoinCourseModal
+        open={joinModalOpen}
+        courseCode={joinCourseCode}
+        onCourseCodeChange={setJoinCourseCode}
+        onCancel={closeJoinModal}
+        onJoin={joinByCourseCode}
+      />
     </div>
   );
 }

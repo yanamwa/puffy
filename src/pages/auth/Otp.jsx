@@ -18,9 +18,7 @@ export default function Otp() {
     const stateDeadline = Number(location.state?.otpExpiresAt);
     const storedDeadline = Number(sessionStorage.getItem("otp_expires_at"));
     const deadline =
-      stateDeadline ||
-      storedDeadline ||
-      Date.now() + OTP_DURATION * 1000;
+      stateDeadline || storedDeadline || Date.now() + OTP_DURATION * 1000;
 
     sessionStorage.setItem("otp_expires_at", String(deadline));
     return deadline;
@@ -29,7 +27,7 @@ export default function Otp() {
   const initialOtpDeadline = getInitialOtpDeadline();
   const [otpDeadline, setOtpDeadline] = useState(initialOtpDeadline);
   const [timeLeft, setTimeLeft] = useState(() =>
-    Math.max(0, Math.ceil((initialOtpDeadline - Date.now()) / 1000))
+    Math.max(0, Math.ceil((initialOtpDeadline - Date.now()) / 1000)),
   );
   const [resending, setResending] = useState(false);
   const [inlineError, setInlineError] = useState("");
@@ -76,9 +74,7 @@ export default function Otp() {
 
   useEffect(() => {
     const updateTimeLeft = () => {
-      setTimeLeft(
-        Math.max(0, Math.ceil((otpDeadline - Date.now()) / 1000))
-      );
+      setTimeLeft(Math.max(0, Math.ceil((otpDeadline - Date.now()) / 1000)));
     };
 
     updateTimeLeft();
@@ -145,7 +141,7 @@ export default function Otp() {
           setInlineError("");
           showSuccessAlert(
             "Verified!",
-            "Your email is verified. The Super Admin will review your professor registration."
+            "Your email is verified. The Super Admin will review your professor registration.",
           ).then(() => {
             sessionStorage.removeItem("otp_email");
             sessionStorage.removeItem("otp_expires_at");
@@ -162,7 +158,7 @@ export default function Otp() {
 
           showThinkAlert(
             getAlertTitle(data.message),
-            data.message || "Wrong verification details."
+            data.message || "Wrong verification details.",
           );
         }
       })
@@ -191,7 +187,7 @@ export default function Otp() {
         if (data.success) {
           showSuccessAlert("Sent!", "New verification code sent.");
           const secondsRemaining = Number(
-            data.otpSecondsRemaining || OTP_DURATION
+            data.otpSecondsRemaining || OTP_DURATION,
           );
           const nextDeadline =
             Date.now() + Math.max(0, secondsRemaining) * 1000;
@@ -204,7 +200,10 @@ export default function Otp() {
             if (input) input.value = "";
           });
         } else {
-          showThinkAlert("Resend Failed", data.message || "Could not resend code.");
+          showThinkAlert(
+            "Resend Failed",
+            data.message || "Could not resend code.",
+          );
         }
       })
       .catch(() => {
@@ -219,8 +218,8 @@ export default function Otp() {
         <div className={styles.background}></div>
         <LandingNavbar />
 
-    <div className={`${styles.signupContainer} ${styles.otpContainer}`}>
-  <div className={`${styles.signupCard} ${styles.otpCard}`}>
+        <div className={`${styles.signupContainer} ${styles.otpContainer}`}>
+          <div className={`${styles.signupCard} ${styles.otpCard}`}>
             <h2>Email Verification</h2>
 
             <p className={styles.verifySubtext}>

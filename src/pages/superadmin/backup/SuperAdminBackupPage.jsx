@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import Swal from 'sweetalert2';
+import { useState } from "react";
+import Swal from "sweetalert2";
 
-import { API_BASE } from '../../../config.js';
-import '../../admin/Features/AdminFeaturePages.css';
+import { API_BASE } from "../../../config.js";
+import "../../admin/Features/AdminFeaturePages.css";
 
 /* =====================================================
    HELPERS
@@ -10,19 +10,19 @@ import '../../admin/Features/AdminFeaturePages.css';
 
 function getAuthToken() {
   return (
-    localStorage.getItem('puffy-token') ||
-    localStorage.getItem('token') ||
-    localStorage.getItem('authToken') ||
-    sessionStorage.getItem('puffy-token') ||
-    sessionStorage.getItem('token') ||
-    sessionStorage.getItem('authToken') ||
-    ''
+    localStorage.getItem("puffy-token") ||
+    localStorage.getItem("token") ||
+    localStorage.getItem("authToken") ||
+    sessionStorage.getItem("puffy-token") ||
+    sessionStorage.getItem("token") ||
+    sessionStorage.getItem("authToken") ||
+    ""
   );
 }
 
 function downloadBlob(filename, blob) {
   const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
+  const link = document.createElement("a");
 
   link.href = url;
   link.download = filename;
@@ -35,19 +35,15 @@ function downloadBlob(filename, blob) {
 }
 
 function getBackupFilename(response) {
-  const disposition =
-    response.headers.get('content-disposition') || '';
+  const disposition = response.headers.get("content-disposition") || "";
 
-  const match = disposition.match(
-    /filename="?([^"]+)"?/i
-  );
+  const match = disposition.match(/filename="?([^"]+)"?/i);
 
   if (match?.[1]) {
     return match[1];
   }
 
-  const today =
-    new Date().toISOString().slice(0, 10);
+  const today = new Date().toISOString().slice(0, 10);
 
   return `puffybrain-database-backup-${today}.json`;
 }
@@ -57,14 +53,11 @@ function getBackupFilename(response) {
 ===================================================== */
 
 export default function BackupPage() {
-  const [restoreFile, setRestoreFile] =
-    useState(null);
+  const [restoreFile, setRestoreFile] = useState(null);
 
-  const [backingUp, setBackingUp] =
-    useState(false);
+  const [backingUp, setBackingUp] = useState(false);
 
-  const [restoring, setRestoring] =
-    useState(false);
+  const [restoring, setRestoring] = useState(false);
 
   /* ===================================================
      DOWNLOAD DATABASE BACKUP
@@ -79,26 +72,24 @@ export default function BackupPage() {
 
     if (!token) {
       await Swal.fire({
-        icon: 'error',
-        title: 'Authentication Required',
-        text: 'Please log in again before creating a database backup.',
-        confirmButtonText: 'OK',
+        icon: "error",
+        title: "Authentication Required",
+        text: "Please log in again before creating a database backup.",
+        confirmButtonText: "OK",
       });
 
       return;
     }
 
-    const confirmation =
-      await Swal.fire({
-        icon: 'question',
-        title: 'Download Database Backup?',
-        text:
-          'A backup of the current PuffyBrain database will be downloaded.',
-        showCancelButton: true,
-        confirmButtonText: 'Download Backup',
-        cancelButtonText: 'Cancel',
-        reverseButtons: true,
-      });
+    const confirmation = await Swal.fire({
+      icon: "question",
+      title: "Download Database Backup?",
+      text: "A backup of the current PuffyBrain database will be downloaded.",
+      showCancelButton: true,
+      confirmButtonText: "Download Backup",
+      cancelButtonText: "Cancel",
+      reverseButtons: true,
+    });
 
     if (!confirmation.isConfirmed) {
       return;
@@ -108,9 +99,8 @@ export default function BackupPage() {
       setBackingUp(true);
 
       Swal.fire({
-        title: 'Creating Backup',
-        text:
-          'Preparing the PuffyBrain database backup...',
+        title: "Creating Backup",
+        text: "Preparing the PuffyBrain database backup...",
         allowOutsideClick: false,
         allowEscapeKey: false,
         didOpen: () => {
@@ -118,59 +108,42 @@ export default function BackupPage() {
         },
       });
 
-      const response = await fetch(
-        `${API_BASE}/backup`,
-        {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          credentials: 'include',
-        }
-      );
+      const response = await fetch(`${API_BASE}/backup`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        credentials: "include",
+      });
 
       if (!response.ok) {
-        const errorData =
-          await response
-            .json()
-            .catch(() => ({}));
+        const errorData = await response.json().catch(() => ({}));
 
         throw new Error(
-          errorData.message ||
-            'Failed to create database backup.'
+          errorData.message || "Failed to create database backup.",
         );
       }
 
       const blob = await response.blob();
 
-      const filename =
-        getBackupFilename(response);
+      const filename = getBackupFilename(response);
 
-      downloadBlob(
-        filename,
-        blob
-      );
+      downloadBlob(filename, blob);
 
       await Swal.fire({
-        icon: 'success',
-        title: 'Backup Created',
-        text:
-          'The PuffyBrain database backup was downloaded successfully.',
-        confirmButtonText: 'OK',
+        icon: "success",
+        title: "Backup Created",
+        text: "The PuffyBrain database backup was downloaded successfully.",
+        confirmButtonText: "OK",
       });
     } catch (error) {
-      console.error(
-        'Database backup error:',
-        error
-      );
+      console.error("Database backup error:", error);
 
       await Swal.fire({
-        icon: 'error',
-        title: 'Backup Failed',
-        text:
-          error?.message ||
-          'Could not create the database backup.',
-        confirmButtonText: 'OK',
+        icon: "error",
+        title: "Backup Failed",
+        text: error?.message || "Could not create the database backup.",
+        confirmButtonText: "OK",
       });
     } finally {
       setBackingUp(false);
@@ -181,12 +154,8 @@ export default function BackupPage() {
      SELECT RESTORE FILE
   =================================================== */
 
-  const handleRestoreFileChange = (
-    event
-  ) => {
-    const file =
-      event.target.files?.[0] ||
-      null;
+  const handleRestoreFileChange = (event) => {
+    const file = event.target.files?.[0] || null;
 
     setRestoreFile(file);
   };
@@ -202,27 +171,21 @@ export default function BackupPage() {
 
     if (!restoreFile) {
       await Swal.fire({
-        icon: 'warning',
-        title: 'No Backup Selected',
-        text:
-          'Please choose a PuffyBrain JSON backup file first.',
-        confirmButtonText: 'OK',
+        icon: "warning",
+        title: "No Backup Selected",
+        text: "Please choose a PuffyBrain JSON backup file first.",
+        confirmButtonText: "OK",
       });
 
       return;
     }
 
-    if (
-      !restoreFile.name
-        .toLowerCase()
-        .endsWith('.json')
-    ) {
+    if (!restoreFile.name.toLowerCase().endsWith(".json")) {
       await Swal.fire({
-        icon: 'error',
-        title: 'Invalid File',
-        text:
-          'Please select a valid PuffyBrain JSON backup file.',
-        confirmButtonText: 'OK',
+        icon: "error",
+        title: "Invalid File",
+        text: "Please select a valid PuffyBrain JSON backup file.",
+        confirmButtonText: "OK",
       });
 
       return;
@@ -232,21 +195,19 @@ export default function BackupPage() {
 
     if (!token) {
       await Swal.fire({
-        icon: 'error',
-        title: 'Authentication Required',
-        text:
-          'Please log in again before restoring a database backup.',
-        confirmButtonText: 'OK',
+        icon: "error",
+        title: "Authentication Required",
+        text: "Please log in again before restoring a database backup.",
+        confirmButtonText: "OK",
       });
 
       return;
     }
 
-    const confirmation =
-      await Swal.fire({
-        icon: 'warning',
-        title: 'Restore Database?',
-        html: `
+    const confirmation = await Swal.fire({
+      icon: "warning",
+      title: "Restore Database?",
+      html: `
           <p>
             You are about to restore the PuffyBrain database using:
           </p>
@@ -261,13 +222,12 @@ export default function BackupPage() {
             This action should only be performed with a trusted PuffyBrain backup.
           </p>
         `,
-        showCancelButton: true,
-        confirmButtonText:
-          'Yes, Restore Database',
-        cancelButtonText: 'Cancel',
-        reverseButtons: true,
-        focusCancel: true,
-      });
+      showCancelButton: true,
+      confirmButtonText: "Yes, Restore Database",
+      cancelButtonText: "Cancel",
+      reverseButtons: true,
+      focusCancel: true,
+    });
 
     if (!confirmation.isConfirmed) {
       return;
@@ -276,18 +236,14 @@ export default function BackupPage() {
     try {
       setRestoring(true);
 
-      const text =
-        await restoreFile.text();
+      const text = await restoreFile.text();
 
       let payload;
 
       try {
-        payload =
-          JSON.parse(text);
+        payload = JSON.parse(text);
       } catch {
-        throw new Error(
-          'The selected file does not contain valid JSON.'
-        );
+        throw new Error("The selected file does not contain valid JSON.");
       }
 
       /*
@@ -296,22 +252,18 @@ export default function BackupPage() {
        */
       if (
         !payload ||
-        payload.app !== 'PuffyBrain' ||
-        payload.format !==
-          'puffybrain-database-backup' ||
+        payload.app !== "PuffyBrain" ||
+        payload.format !== "puffybrain-database-backup" ||
         !payload.tables ||
-        typeof payload.tables !== 'object' ||
+        typeof payload.tables !== "object" ||
         Array.isArray(payload.tables)
       ) {
-        throw new Error(
-          'This is not a valid PuffyBrain database backup file.'
-        );
+        throw new Error("This is not a valid PuffyBrain database backup file.");
       }
 
       Swal.fire({
-        title: 'Restoring Database',
-        text:
-          'Please do not close or refresh this page while the database is being restored.',
+        title: "Restoring Database",
+        text: "Please do not close or refresh this page while the database is being restored.",
         allowOutsideClick: false,
         allowEscapeKey: false,
         didOpen: () => {
@@ -319,38 +271,23 @@ export default function BackupPage() {
         },
       });
 
-      const response = await fetch(
-        `${API_BASE}/backup/restore`,
-        {
-          method: 'POST',
-          credentials: 'include',
+      const response = await fetch(`${API_BASE}/backup/restore`, {
+        method: "POST",
+        credentials: "include",
 
-          headers: {
-            'Content-Type':
-              'application/json',
+        headers: {
+          "Content-Type": "application/json",
 
-            Authorization:
-              `Bearer ${token}`,
-          },
+          Authorization: `Bearer ${token}`,
+        },
 
-          body:
-            JSON.stringify(payload),
-        }
-      );
+        body: JSON.stringify(payload),
+      });
 
-      const data =
-        await response
-          .json()
-          .catch(() => ({}));
+      const data = await response.json().catch(() => ({}));
 
-      if (
-        !response.ok ||
-        !data.success
-      ) {
-        throw new Error(
-          data.message ||
-            'Failed to restore database backup.'
-        );
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Failed to restore database backup.");
       }
 
       setRestoreFile(null);
@@ -359,18 +296,15 @@ export default function BackupPage() {
        * Reset the file input so the same
        * backup can be selected again later.
        */
-      const fileInput =
-        document.getElementById(
-          'puffybrain-restore-file'
-        );
+      const fileInput = document.getElementById("puffybrain-restore-file");
 
       if (fileInput) {
-        fileInput.value = '';
+        fileInput.value = "";
       }
 
       await Swal.fire({
-        icon: 'success',
-        title: 'Database Restored',
+        icon: "success",
+        title: "Database Restored",
         html: `
           <p>
             The PuffyBrain database was restored successfully.
@@ -379,32 +313,26 @@ export default function BackupPage() {
           ${
             data.restoredTables
               ? `<p><strong>${data.restoredTables}</strong> database tables were restored.</p>`
-              : ''
+              : ""
           }
 
           <p>
             Refresh the application to load the restored data.
           </p>
         `,
-        confirmButtonText:
-          'Refresh Application',
+        confirmButtonText: "Refresh Application",
         allowOutsideClick: false,
       });
 
       window.location.reload();
     } catch (error) {
-      console.error(
-        'Database restore error:',
-        error
-      );
+      console.error("Database restore error:", error);
 
       await Swal.fire({
-        icon: 'error',
-        title: 'Restore Failed',
-        text:
-          error?.message ||
-          'Could not restore this database backup.',
-        confirmButtonText: 'OK',
+        icon: "error",
+        title: "Restore Failed",
+        text: error?.message || "Could not restore this database backup.",
+        confirmButtonText: "OK",
       });
     } finally {
       setRestoring(false);
@@ -419,10 +347,7 @@ export default function BackupPage() {
     <div className="admin-page feature-page">
       <h1>Backup & Restore</h1>
 
-      <p>
-        Create and restore backups of the
-        PuffyBrain database.
-      </p>
+      <p>Create and restore backups of the PuffyBrain database.</p>
 
       <div className="backup-grid">
         {/* BACKUP */}
@@ -433,23 +358,15 @@ export default function BackupPage() {
           <div className="feature-card-body">
             <h2>Backup Database</h2>
 
-            <p>
-              Download a JSON backup of the
-              current PuffyBrain database.
-            </p>
+            <p>Download a JSON backup of the current PuffyBrain database.</p>
 
             <button
               className="primary-feature-btn"
               type="button"
               onClick={handleBackup}
-              disabled={
-                backingUp ||
-                restoring
-              }
+              disabled={backingUp || restoring}
             >
-              {backingUp
-                ? 'Creating Backup...'
-                : 'Download Backup'}
+              {backingUp ? "Creating Backup..." : "Download Backup"}
             </button>
           </div>
         </section>
@@ -463,8 +380,8 @@ export default function BackupPage() {
             <h2>Restore Database</h2>
 
             <p>
-              Upload a PuffyBrain JSON database
-              backup to restore saved system data.
+              Upload a PuffyBrain JSON database backup to restore saved system
+              data.
             </p>
 
             <input
@@ -472,21 +389,13 @@ export default function BackupPage() {
               type="file"
               accept=".json,application/json"
               className="restore-file-input"
-              onChange={
-                handleRestoreFileChange
-              }
-              disabled={
-                restoring ||
-                backingUp
-              }
+              onChange={handleRestoreFileChange}
+              disabled={restoring || backingUp}
             />
 
             {restoreFile && (
               <p className="restore-file-name">
-                Selected:{' '}
-                <strong>
-                  {restoreFile.name}
-                </strong>
+                Selected: <strong>{restoreFile.name}</strong>
               </p>
             )}
 
@@ -494,14 +403,9 @@ export default function BackupPage() {
               className="restore-feature-btn"
               type="button"
               onClick={handleRestore}
-              disabled={
-                restoring ||
-                backingUp
-              }
+              disabled={restoring || backingUp}
             >
-              {restoring
-                ? 'Restoring...'
-                : 'Restore Database'}
+              {restoring ? "Restoring..." : "Restore Database"}
             </button>
           </div>
         </section>

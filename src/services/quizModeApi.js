@@ -1,6 +1,5 @@
 import { API_BASE } from "../config.js";
 
-
 /* =====================================================
    LOCAL MODE CONSTANTS
 
@@ -11,18 +10,13 @@ import { API_BASE } from "../config.js";
    silently fall back to localStorage.
 ===================================================== */
 
-export const ADMIN_MODES_KEY =
-  "admin-modes";
+export const ADMIN_MODES_KEY = "admin-modes";
 
-export const ADMIN_MODES_EVENT =
-  "admin-modes-updated";
+export const ADMIN_MODES_EVENT = "admin-modes-updated";
 
-export const ADMIN_MODES_SEED_VERSION_KEY =
-  "admin-modes-seed-version";
+export const ADMIN_MODES_SEED_VERSION_KEY = "admin-modes-seed-version";
 
-export const ADMIN_MODES_SEED_VERSION =
-  "3";
-
+export const ADMIN_MODES_SEED_VERSION = "3";
 
 /* =====================================================
    DEFAULT QUIZ MODES
@@ -37,11 +31,9 @@ export const quizModeSeeds = [
     description:
       "Review facts and test your memory in a fun and quick way. Perfect for learning on the go!",
 
-    route:
-      "/flashcards-tutorial",
+    route: "/flashcards-tutorial",
 
-    image:
-      "/images/flashcard.png",
+    image: "/images/flashcard.png",
   },
 
   {
@@ -52,11 +44,9 @@ export const quizModeSeeds = [
     description:
       "Challenge your brain with interesting questions and discover something new every time you play!",
 
-    route:
-      "/QandA-tutorial",
+    route: "/QandA-tutorial",
 
-    image:
-      "/images/qna.png",
+    image: "/images/qna.png",
   },
 
   {
@@ -67,11 +57,9 @@ export const quizModeSeeds = [
     description:
       "Only one answer is correct. Trust your instincts, think carefully, and aim for that perfect score!",
 
-    route:
-      "/multipleChoice-tutorial",
+    route: "/multipleChoice-tutorial",
 
-    image:
-      "/images/multiplechoice.png",
+    image: "/images/multiplechoice.png",
   },
 
   {
@@ -82,11 +70,9 @@ export const quizModeSeeds = [
     description:
       "Pair the terms, ideas, or clues correctly. It's a fun way to test your memory and logic!",
 
-    route:
-      "/Matching-tutorial",
+    route: "/Matching-tutorial",
 
-    image:
-      "/images/matching.png",
+    image: "/images/matching.png",
   },
 
   {
@@ -97,11 +83,9 @@ export const quizModeSeeds = [
     description:
       "Answer questions within a time limit and build speed while reviewing the lesson.",
 
-    route:
-      "/timedquiz-tutorial",
+    route: "/timedquiz-tutorial",
 
-    image:
-      "/images/timedquiz.png",
+    image: "/images/timedquiz.png",
   },
 
   {
@@ -112,14 +96,11 @@ export const quizModeSeeds = [
     description:
       "Practice with matching type, multiple choice, and Q&A all at once.",
 
-    route:
-      "/random-modes-tutorial",
+    route: "/random-modes-tutorial",
 
-    image:
-      "/images/needpractice.png",
+    image: "/images/needpractice.png",
   },
 ];
-
 
 /* =====================================================
    GET AUTH TOKEN
@@ -136,14 +117,11 @@ function getAuthToken() {
   );
 }
 
-
 /* =====================================================
    AUTH HEADERS
 ===================================================== */
 
-function getAuthHeaders(
-  extraHeaders = {}
-) {
+function getAuthHeaders(extraHeaders = {}) {
   const token = getAuthToken();
 
   return {
@@ -151,13 +129,11 @@ function getAuthHeaders(
 
     ...(token
       ? {
-          Authorization:
-            `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         }
       : {}),
   };
 }
-
 
 /* =====================================================
    DISPATCH LOCAL UPDATE EVENT
@@ -165,109 +141,69 @@ function getAuthHeaders(
 
 function dispatchModesUpdate(modes) {
   window.dispatchEvent(
-    new CustomEvent(
-      ADMIN_MODES_EVENT,
-      {
-        detail: {
-          modes,
-        },
-      }
-    )
+    new CustomEvent(ADMIN_MODES_EVENT, {
+      detail: {
+        modes,
+      },
+    }),
   );
 }
-
 
 /* =====================================================
    NORMALIZE IMAGE
 ===================================================== */
 
-function normalizeImagePath(
-  value,
-  title = ""
-) {
-  const image =
-    String(value || "").trim();
+function normalizeImagePath(value, title = "") {
+  const image = String(value || "").trim();
 
   if (image) {
     return image;
   }
 
-  const lowerTitle =
-    String(title).toLowerCase();
+  const lowerTitle = String(title).toLowerCase();
 
-  if (
-    lowerTitle.includes(
-      "multiple"
-    )
-  ) {
+  if (lowerTitle.includes("multiple")) {
     return "/images/multiplechoice.png";
   }
 
-  if (
-    lowerTitle.includes(
-      "matching"
-    )
-  ) {
+  if (lowerTitle.includes("matching")) {
     return "/images/matching.png";
   }
 
-  if (
-    lowerTitle.includes(
-      "mixed"
-    )
-  ) {
+  if (lowerTitle.includes("mixed")) {
     return "/images/needpractice.png";
   }
 
-  if (
-    lowerTitle.includes(
-      "random"
-    )
-  ) {
+  if (lowerTitle.includes("random")) {
     return "/images/needpractice.png";
   }
 
-  if (
-    lowerTitle.includes(
-      "survival"
-    )
-  ) {
+  if (lowerTitle.includes("survival")) {
     return "/images/needpractice.png";
   }
 
-  if (
-    lowerTitle.includes(
-      "timed"
-    )
-  ) {
+  if (lowerTitle.includes("timed")) {
     return "/images/timedquiz.png";
   }
 
-  if (
-    lowerTitle.includes("q")
-  ) {
+  if (lowerTitle.includes("q")) {
     return "/images/qna.png";
   }
 
   return "/images/flashcard.png";
 }
 
-
 /* =====================================================
    INFER MODE KIND
 ===================================================== */
 
-function inferModeKind(
-  mode,
-  title
-) {
+function inferModeKind(mode, title) {
   const text =
     `${mode?.kind || ""} ` +
     `${mode?.quizMode || ""} ` +
     `${title || ""} ` +
     `${mode?.mode_name || ""} ` +
-    `${mode?.route || ""}`
-      .toLowerCase();
+    `${mode?.route || ""}`.toLowerCase();
 
   if (
     text.includes("mixed") ||
@@ -281,15 +217,11 @@ function inferModeKind(
     return "timed";
   }
 
-  if (
-    text.includes("multiple")
-  ) {
+  if (text.includes("multiple")) {
     return "multiple";
   }
 
-  if (
-    text.includes("matching")
-  ) {
+  if (text.includes("matching")) {
     return "matching";
   }
 
@@ -300,50 +232,26 @@ function inferModeKind(
   return "flashcard";
 }
 
-
 /* =====================================================
    NORMALIZE QUIZ MODE
 ===================================================== */
 
-export function normalizeQuizMode(
-  mode
-) {
-  const id =
-    mode?.id ||
-    mode?.mode_id ||
-    mode?.quiz_id ||
-    Date.now();
+export function normalizeQuizMode(mode) {
+  const id = mode?.id || mode?.mode_id || mode?.quiz_id || Date.now();
 
-  const title =
-    mode?.title ||
-    mode?.mode_name ||
-    "Untitled Mode";
+  const title = mode?.title || mode?.mode_name || "Untitled Mode";
 
-  const kind =
-    inferModeKind(
-      mode,
-      title
-    );
+  const kind = inferModeKind(mode, title);
 
-  const description =
-    String(
-      mode?.description || ""
-    );
+  const description = String(mode?.description || "");
 
-  const route =
-    String(
-      mode?.route || ""
-    );
+  const route = String(mode?.route || "");
 
   const isLegacyMixedMode =
     kind === "mixed" &&
-    (
-      String(id) === "7291703" ||
+    (String(id) === "7291703" ||
       /survival/i.test(title) ||
-      /three lives|lives|life/i.test(
-        description
-      )
-    );
+      /three lives|lives|life/i.test(description));
 
   return {
     ...mode,
@@ -352,51 +260,28 @@ export function normalizeQuizMode(
 
     kind,
 
-    mode_id:
-      mode?.mode_id || id,
+    mode_id: mode?.mode_id || id,
 
-    quiz_id:
-      mode?.quiz_id || id,
+    quiz_id: mode?.quiz_id || id,
 
-    title:
-      isLegacyMixedMode
-        ? "Mixed Mode"
-        : title,
+    title: isLegacyMixedMode ? "Mixed Mode" : title,
 
-    mode_name:
-      isLegacyMixedMode
-        ? "Mixed Mode"
-        : mode?.mode_name ||
-          title,
+    mode_name: isLegacyMixedMode ? "Mixed Mode" : mode?.mode_name || title,
 
     description:
-      isLegacyMixedMode ||
-      !description
+      isLegacyMixedMode || !description
         ? "Practice with matching type, multiple choice, and Q&A all at once."
         : description,
 
     route:
       kind === "mixed" &&
-      (
-        !route ||
-        route.includes(
-          "survival"
-        ) ||
-        route.includes(
-          "mixed-mode"
-        )
-      )
+      (!route || route.includes("survival") || route.includes("mixed-mode"))
         ? "/random-modes-tutorial"
         : route,
 
-    image:
-      normalizeImagePath(
-        mode?.image,
-        title
-      ),
+    image: normalizeImagePath(mode?.image, title),
   };
 }
-
 
 /* =====================================================
    MERGE SEEDS
@@ -405,67 +290,36 @@ export function normalizeQuizMode(
 ===================================================== */
 
 function mergeSeedModes(modes) {
-  const normalized =
-    modes.map(
-      normalizeQuizMode
-    );
+  const normalized = modes.map(normalizeQuizMode);
 
-  const existingKeys =
-    new Set(
-      normalized.flatMap(
-        (mode) => [
-          String(mode.id),
+  const existingKeys = new Set(
+    normalized.flatMap((mode) => [
+      String(mode.id),
 
-          String(
-            mode.kind || ""
-          ).toLowerCase(),
+      String(mode.kind || "").toLowerCase(),
 
-          String(
-            mode.route || ""
-          ).toLowerCase(),
+      String(mode.route || "").toLowerCase(),
 
-          String(
-            mode.title || ""
-          ).toLowerCase(),
-        ]
-      )
-    );
+      String(mode.title || "").toLowerCase(),
+    ]),
+  );
 
-  const missingSeeds =
-    quizModeSeeds
-      .map(normalizeQuizMode)
-      .filter((seed) => {
-        const seedKeys = [
-          String(seed.id),
+  const missingSeeds = quizModeSeeds.map(normalizeQuizMode).filter((seed) => {
+    const seedKeys = [
+      String(seed.id),
 
-          String(
-            seed.kind || ""
-          ).toLowerCase(),
+      String(seed.kind || "").toLowerCase(),
 
-          String(
-            seed.route || ""
-          ).toLowerCase(),
+      String(seed.route || "").toLowerCase(),
 
-          String(
-            seed.title || ""
-          ).toLowerCase(),
-        ];
+      String(seed.title || "").toLowerCase(),
+    ];
 
-        return !seedKeys.some(
-          (key) =>
-            key &&
-            existingKeys.has(
-              key
-            )
-        );
-      });
+    return !seedKeys.some((key) => key && existingKeys.has(key));
+  });
 
-  return [
-    ...normalized,
-    ...missingSeeds,
-  ];
+  return [...normalized, ...missingSeeds];
 }
-
 
 /* =====================================================
    READ LOCAL MODES
@@ -475,49 +329,24 @@ function mergeSeedModes(modes) {
 
 export function readLocalQuizModes() {
   try {
-    const saved =
-      localStorage.getItem(
-        ADMIN_MODES_KEY
-      );
+    const saved = localStorage.getItem(ADMIN_MODES_KEY);
 
-    const parsed = saved
-      ? JSON.parse(saved)
-      : quizModeSeeds;
+    const parsed = saved ? JSON.parse(saved) : quizModeSeeds;
 
-    const normalized =
-      Array.isArray(parsed)
-        ? parsed.map(
-            normalizeQuizMode
-          )
-        : quizModeSeeds.map(
-            normalizeQuizMode
-          );
+    const normalized = Array.isArray(parsed)
+      ? parsed.map(normalizeQuizMode)
+      : quizModeSeeds.map(normalizeQuizMode);
 
-    const seedVersion =
-      localStorage.getItem(
-        ADMIN_MODES_SEED_VERSION_KEY
-      );
+    const seedVersion = localStorage.getItem(ADMIN_MODES_SEED_VERSION_KEY);
 
-    if (
-      saved &&
-      seedVersion !==
-        ADMIN_MODES_SEED_VERSION
-    ) {
-      const merged =
-        mergeSeedModes(
-          normalized
-        );
+    if (saved && seedVersion !== ADMIN_MODES_SEED_VERSION) {
+      const merged = mergeSeedModes(normalized);
 
-      localStorage.setItem(
-        ADMIN_MODES_KEY,
-        JSON.stringify(
-          merged
-        )
-      );
+      localStorage.setItem(ADMIN_MODES_KEY, JSON.stringify(merged));
 
       localStorage.setItem(
         ADMIN_MODES_SEED_VERSION_KEY,
-        ADMIN_MODES_SEED_VERSION
+        ADMIN_MODES_SEED_VERSION,
       );
 
       return merged;
@@ -526,23 +355,17 @@ export function readLocalQuizModes() {
     if (!saved) {
       localStorage.setItem(
         ADMIN_MODES_SEED_VERSION_KEY,
-        ADMIN_MODES_SEED_VERSION
+        ADMIN_MODES_SEED_VERSION,
       );
     }
 
     return normalized;
   } catch (error) {
-    console.error(
-      "Could not read local quiz modes:",
-      error
-    );
+    console.error("Could not read local quiz modes:", error);
 
-    return quizModeSeeds.map(
-      normalizeQuizMode
-    );
+    return quizModeSeeds.map(normalizeQuizMode);
   }
 }
-
 
 /* =====================================================
    SAVE LOCAL MODES
@@ -550,90 +373,49 @@ export function readLocalQuizModes() {
    Kept for pages that listen for mode updates.
 ===================================================== */
 
-export function saveLocalQuizModes(
-  modes
-) {
-  const normalized =
-    modes.map(
-      normalizeQuizMode
-    );
+export function saveLocalQuizModes(modes) {
+  const normalized = modes.map(normalizeQuizMode);
 
-  localStorage.setItem(
-    ADMIN_MODES_KEY,
-    JSON.stringify(
-      normalized
-    )
-  );
+  localStorage.setItem(ADMIN_MODES_KEY, JSON.stringify(normalized));
 
-  localStorage.setItem(
-    ADMIN_MODES_SEED_VERSION_KEY,
-    ADMIN_MODES_SEED_VERSION
-  );
+  localStorage.setItem(ADMIN_MODES_SEED_VERSION_KEY, ADMIN_MODES_SEED_VERSION);
 
-  dispatchModesUpdate(
-    normalized
-  );
+  dispatchModesUpdate(normalized);
 
   return normalized;
 }
-
 
 /* =====================================================
    API REQUEST
 ===================================================== */
 
-async function requestMode(
-  url,
-  options = {}
-) {
+async function requestMode(url, options = {}) {
   let response;
 
   try {
-    response = await fetch(
-      url,
-      {
-        ...options,
+    response = await fetch(url, {
+      ...options,
 
-        credentials:
-          "include",
+      credentials: "include",
 
-        headers:
-          getAuthHeaders(
-            options.headers || {}
-          ),
-      }
-    );
+      headers: getAuthHeaders(options.headers || {}),
+    });
   } catch {
-    throw new Error(
-      "Could not connect to the PuffyBrain server."
-    );
+    throw new Error("Could not connect to the PuffyBrain server.");
   }
 
+  const data = await response.json().catch(() => ({
+    success: false,
 
-  const data =
-    await response
-      .json()
-      .catch(() => ({
-        success: false,
+    message: "Server returned an invalid response.",
+  }));
 
-        message:
-          "Server returned an invalid response.",
-      }));
-
-
-  if (
-    !response.ok ||
-    data.success === false
-  ) {
-    throw new Error(
-      data.message ||
-        "Mode request failed."
-    );
+  if (!response.ok || data.success === false) {
+    throw new Error(data.message || "Mode request failed.");
   }
 
   return data;
 }
-
 
 /* =====================================================
    FETCH MODES
@@ -645,23 +427,13 @@ async function requestMode(
 ===================================================== */
 
 export async function fetchQuizModes() {
-  const data =
-    await requestMode(
-      `${API_BASE}/modes`,
-      {
-        method: "GET",
-      }
-    );
+  const data = await requestMode(`${API_BASE}/modes`, {
+    method: "GET",
+  });
 
-  const modes =
-    Array.isArray(
-      data.modes
-    )
-      ? data.modes.map(
-          normalizeQuizMode
-        )
-      : [];
-
+  const modes = Array.isArray(data.modes)
+    ? data.modes.map(normalizeQuizMode)
+    : [];
 
   /*
     Keep the successful server result
@@ -672,13 +444,10 @@ export async function fetchQuizModes() {
     pretend a failed API call worked.
   */
 
-  saveLocalQuizModes(
-    modes
-  );
+  saveLocalQuizModes(modes);
 
   return modes;
 }
-
 
 /* =====================================================
    CREATE / UPDATE MODE
@@ -690,102 +459,56 @@ export async function fetchQuizModes() {
    when MySQL/API fails.
 ===================================================== */
 
-export async function saveQuizMode(
-  mode
-) {
-  const hasId =
-    Boolean(
-      mode?.id ||
-      mode?.mode_id ||
-      mode?.quiz_id
-    );
+export async function saveQuizMode(mode) {
+  const hasId = Boolean(mode?.id || mode?.mode_id || mode?.quiz_id);
 
-  const normalized =
-    normalizeQuizMode(
-      mode
-    );
+  const normalized = normalizeQuizMode(mode);
 
+  const data = await requestMode(
+    hasId
+      ? `${API_BASE}/modes/${encodeURIComponent(normalized.id)}`
+      : `${API_BASE}/modes`,
 
-  const data =
-    await requestMode(
-      hasId
-        ? `${API_BASE}/modes/${encodeURIComponent(
-            normalized.id
-          )}`
-        : `${API_BASE}/modes`,
+    {
+      method: hasId ? "PUT" : "POST",
 
-      {
-        method:
-          hasId
-            ? "PUT"
-            : "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
 
-        headers: {
-          "Content-Type":
-            "application/json",
-        },
+      body: JSON.stringify({
+        title: normalized.title,
 
-        body:
-          JSON.stringify({
-            title:
-              normalized.title,
+        description: normalized.description,
 
-            description:
-              normalized.description,
+        route: normalized.route,
 
-            route:
-              normalized.route,
+        image: normalized.image,
 
-            image:
-              normalized.image,
+        kind: normalized.kind,
+      }),
+    },
+  );
 
-            kind:
-              normalized.kind,
-          }),
-      }
-    );
-
-
-  const savedMode =
-    normalizeQuizMode(
-      data.mode
-    );
-
+  const savedMode = normalizeQuizMode(data.mode);
 
   /*
     Synchronize the successful
     database result to localStorage.
   */
 
-  const currentModes =
-    readLocalQuizModes();
+  const currentModes = readLocalQuizModes();
 
+  const nextModes = hasId
+    ? currentModes.map((item) =>
+        String(item.id) === String(savedMode.id) ? savedMode : item,
+      )
+    : [savedMode, ...currentModes];
 
-  const nextModes =
-    hasId
-      ? currentModes.map(
-          (item) =>
-            String(item.id) ===
-            String(
-              savedMode.id
-            )
-              ? savedMode
-              : item
-        )
-      : [
-          savedMode,
-          ...currentModes,
-        ];
-
-
-  saveLocalQuizModes(
-    nextModes
-  );
-
+  saveLocalQuizModes(nextModes);
 
   return savedMode;
 }
-
 
 /* =====================================================
    DELETE MODE
@@ -795,32 +518,16 @@ export async function saveQuizMode(
    server confirms successful deletion.
 ===================================================== */
 
-export async function deleteQuizModeById(
-  id
-) {
-  await requestMode(
-    `${API_BASE}/modes/${encodeURIComponent(
-      id
-    )}`,
-    {
-      method: "DELETE",
-    }
+export async function deleteQuizModeById(id) {
+  await requestMode(`${API_BASE}/modes/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+  });
+
+  const nextModes = readLocalQuizModes().filter(
+    (mode) => String(mode.id) !== String(id),
   );
 
-
-  const nextModes =
-    readLocalQuizModes()
-      .filter(
-        (mode) =>
-          String(mode.id) !==
-          String(id)
-      );
-
-
-  saveLocalQuizModes(
-    nextModes
-  );
-
+  saveLocalQuizModes(nextModes);
 
   return true;
 }

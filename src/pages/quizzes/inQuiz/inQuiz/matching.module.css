@@ -1,4 +1,4 @@
-:root{
+:root {
   --purple-light: #edf4fc;
   --purple-main: #7fa8d6;
   --green-match: #c8f7c5;
@@ -16,10 +16,10 @@
 .paperBackground {
   width: 100%;
   min-height: 100vh;
-  background-image: url("/images/background_notebook.png"); 
-  background-size: cover;      
-  background-position: center;  
-  background-repeat: no-repeat; 
+  background-image: url("/images/background_notebook.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   padding: 28px;
   display: flex;
   flex-direction: column;
@@ -92,14 +92,14 @@ td {
   font-size: 20px;
   line-height: 1.35;
   cursor: pointer;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
   border: 1.5px solid #11111143;
   transition: all 0.25s ease;
 }
 
 .card:hover:not(.matched) {
   transform: translateY(-4px) scale(1.02);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 }
 
 .matched {
@@ -731,35 +731,82 @@ td {
 }
 
 .roundOverlay {
-  position: fixed; inset: 0; z-index: 10000;
-  display: flex; align-items: center; justify-content: center;
-  padding: 20px; background: rgba(23, 44, 67, .45);
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(23, 44, 67, 0.45);
 }
 .roundModal {
-  width: min(520px, 100%); padding: 28px; box-sizing: border-box;
-  border: 2px solid #a8c6e7; border-radius: 26px;
-  background: white; color: #314b68; text-align: center;
-  box-shadow: 0 12px 32px rgba(23, 44, 67, .2);
+  width: min(520px, 100%);
+  padding: 28px;
+  box-sizing: border-box;
+  border: 2px solid #a8c6e7;
+  border-radius: 26px;
+  background: white;
+  color: #314b68;
+  text-align: center;
+  box-shadow: 0 12px 32px rgba(23, 44, 67, 0.2);
 }
-.roundModal h2 { margin: 0 0 16px; }
+.roundModal h2 {
+  margin: 0 0 16px;
+}
 
-.roundModal .checkpointActions { flex-wrap: wrap; }
+.roundModal .checkpointActions {
+  flex-wrap: wrap;
+}
 
-.roundStats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.roundStats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
 .roundStats > div {
-  display: grid; grid-template-columns: 1fr auto; gap: 10px;
-  padding: 18px; border-radius: 18px; text-align: left;
-  background: #f3f5f7; border: 1px solid #d6dce4;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  padding: 18px;
+  border-radius: 18px;
+  text-align: left;
+  background: #f3f5f7;
+  border: 1px solid #d6dce4;
 }
-.roundStats strong { font-size: 28px; line-height: 1; }
-.roundStats > div > span:last-child { grid-column: 1 / -1; }
-.statIcon { font-size: 28px; line-height: 1; }
-.correctStat .statIcon { color: #198754; }
-.incorrectStat .statIcon { color: #d64545; }
-.remainingCards { margin: 20px 0 8px; }
-.scoringNote { font-size: 14px; margin: 0 0 20px; color: #606b78; }
+.roundStats strong {
+  font-size: 28px;
+  line-height: 1;
+}
+.roundStats > div > span:last-child {
+  grid-column: 1 / -1;
+}
+.statIcon {
+  font-size: 28px;
+  line-height: 1;
+}
+.correctStat .statIcon {
+  color: #198754;
+}
+.incorrectStat .statIcon {
+  color: #d64545;
+}
+.remainingCards {
+  margin: 20px 0 8px;
+}
+.scoringNote {
+  font-size: 14px;
+  margin: 0 0 20px;
+  color: #606b78;
+}
 @media (max-width: 420px) {
-  .roundModal { padding: 20px 14px; }
-  .roundStats { gap: 10px; }
-  .roundStats > div { padding: 14px 10px; }
+  .roundModal {
+    padding: 20px 14px;
+  }
+  .roundStats {
+    gap: 10px;
+  }
+  .roundStats > div {
+    padding: 14px 10px;
+  }
 }

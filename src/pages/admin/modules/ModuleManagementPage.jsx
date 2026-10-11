@@ -1,32 +1,35 @@
-import { useEffect, useMemo, useState } from 'react';
-import { FiArchive, FiEye } from 'react-icons/fi';
-import {
-  getProfessorCourseOwner,
-} from '../../professor/professorData';
+import { useEffect, useMemo, useState } from "react";
+import { FiArchive, FiEye } from "react-icons/fi";
+import { getProfessorCourseOwner } from "../../professor/professorData";
 import {
   archiveCourseById,
   fetchCourses,
-} from '../../../services/courseApi.js';
-import './Modules.css';
+} from "../../../services/courseApi.js";
+import "./Modules.css";
 
 function formatCourseId(course) {
-  const cleanDate = String(course.updatedAt || '')
-    .replaceAll('-', '')
+  const cleanDate = String(course.updatedAt || "")
+    .replaceAll("-", "")
     .slice(2);
 
-  return course.code || `CRS${cleanDate || '000000'}${String(course.id).slice(-3).padStart(3, '0')}`;
+  return (
+    course.code ||
+    `CRS${cleanDate || "000000"}${String(course.id).slice(-3).padStart(3, "0")}`
+  );
 }
 
 function getStatusLabel(status) {
-  const normalized = String(status || '').toLowerCase();
-  return normalized === 'published' || normalized === 'publish' ? 'Publish' : 'Draft';
+  const normalized = String(status || "").toLowerCase();
+  return normalized === "published" || normalized === "publish"
+    ? "Publish"
+    : "Draft";
 }
 
 function parseList(value) {
   if (Array.isArray(value)) return value;
 
   try {
-    const parsed = JSON.parse(value || '[]');
+    const parsed = JSON.parse(value || "[]");
     return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
@@ -35,10 +38,10 @@ function parseList(value) {
 
 export default function ModuleManagementPage() {
   const [courses, setCourses] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -46,18 +49,15 @@ export default function ModuleManagementPage() {
     const refreshCourses = async () => {
       try {
         setLoading(true);
-        setErrorMessage('');
-        const loadedCourses = await fetchCourses(
-            {},
-            { fallback: false }
-          );
+        setErrorMessage("");
+        const loadedCourses = await fetchCourses({}, { fallback: false });
 
         if (active) {
           setCourses(loadedCourses.filter((course) => !course.archived));
         }
       } catch (error) {
         if (active) {
-          setErrorMessage(error.message || 'Could not load courses.');
+          setErrorMessage(error.message || "Could not load courses.");
         }
       } finally {
         if (active) {
@@ -67,11 +67,11 @@ export default function ModuleManagementPage() {
     };
 
     refreshCourses();
-    window.addEventListener('focus', refreshCourses);
+    window.addEventListener("focus", refreshCourses);
 
     return () => {
       active = false;
-      window.removeEventListener('focus', refreshCourses);
+      window.removeEventListener("focus", refreshCourses);
     };
   }, []);
 
@@ -88,53 +88,44 @@ export default function ModuleManagementPage() {
         course.summary,
         getProfessorCourseOwner(course),
       ]
-        .join(' ')
+        .join(" ")
         .toLowerCase()
-        .includes(query)
+        .includes(query),
     );
   }, [courses, searchQuery]);
 
   const selectedLessons = useMemo(
-    () => parseList(selectedCourse?.lessonPages || selectedCourse?.lessonContent),
-    [selectedCourse]
+    () =>
+      parseList(selectedCourse?.lessonPages || selectedCourse?.lessonContent),
+    [selectedCourse],
   );
 
   const selectedQuizItems = useMemo(
     () => parseList(selectedCourse?.quizItems || selectedCourse?.quizModule),
-    [selectedCourse]
+    [selectedCourse],
   );
 
   const archiveCourse = async (course) => {
-  const ok = window.confirm(
-    `Archive "${course.title}"? Students will no longer see this course in their active courses.`
-  );
-
-  if (!ok) return;
-
-  try {
-    await archiveCourseById(
-      course.id,
-      { fallback: false }
+    const ok = window.confirm(
+      `Archive "${course.title}"? Students will no longer see this course in their active courses.`,
     );
 
-    setCourses((current) =>
-      current.filter(
-        (item) => String(item.id) !== String(course.id)
-      )
-    );
+    if (!ok) return;
 
-    if (
-      selectedCourse &&
-      String(selectedCourse.id) === String(course.id)
-    ) {
-      setSelectedCourse(null);
+    try {
+      await archiveCourseById(course.id, { fallback: false });
+
+      setCourses((current) =>
+        current.filter((item) => String(item.id) !== String(course.id)),
+      );
+
+      if (selectedCourse && String(selectedCourse.id) === String(course.id)) {
+        setSelectedCourse(null);
+      }
+    } catch (error) {
+      window.alert(error.message || "Could not archive course.");
     }
-  } catch (error) {
-    window.alert(
-      error.message || 'Could not archive course.'
-    );
-  }
-};
+  };
 
   return (
     <div className="admin-page admin-modules-page">
@@ -142,8 +133,9 @@ export default function ModuleManagementPage() {
         <div>
           <h1>Course Management</h1>
           <p>
-          Connected to professor Course Management. Admins can view details or archive courses.
-        </p>
+            Connected to professor Course Management. Admins can view details or
+            archive courses.
+          </p>
         </div>
       </div>
 
@@ -193,16 +185,16 @@ export default function ModuleManagementPage() {
               filteredCourses.map((course) => (
                 <tr key={course.id}>
                   <td>{formatCourseId(course)}</td>
-                  <td>{course.title || 'Untitled course'}</td>
+                  <td>{course.title || "Untitled course"}</td>
                   <td>{getProfessorCourseOwner(course)}</td>
-                  <td>{course.subject || course.code || 'Not set'}</td>
-                  <td>{course.updatedAt || 'Not set'}</td>
+                  <td>{course.subject || course.code || "Not set"}</td>
+                  <td>{course.updatedAt || "Not set"}</td>
                   <td>
                     <span
                       className={
-                        getStatusLabel(course.status) === 'Publish'
-                          ? 'admin-module-status publish'
-                          : 'admin-module-status draft'
+                        getStatusLabel(course.status) === "Publish"
+                          ? "admin-module-status publish"
+                          : "admin-module-status draft"
                       }
                     >
                       {getStatusLabel(course.status)}
@@ -210,7 +202,10 @@ export default function ModuleManagementPage() {
                   </td>
                   <td>
                     <div className="admin-module-actions">
-                      <button type="button" onClick={() => setSelectedCourse(course)}>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedCourse(course)}
+                      >
                         <FiEye />
                         View
                       </button>
@@ -232,7 +227,10 @@ export default function ModuleManagementPage() {
       </div>
 
       {selectedCourse && (
-        <div className="admin-module-modal-backdrop" onClick={() => setSelectedCourse(null)}>
+        <div
+          className="admin-module-modal-backdrop"
+          onClick={() => setSelectedCourse(null)}
+        >
           <section
             className="admin-module-modal"
             aria-modal="true"
@@ -243,7 +241,9 @@ export default function ModuleManagementPage() {
             <header>
               <div>
                 <span>{formatCourseId(selectedCourse)}</span>
-                <h2 id="admin-module-title">{selectedCourse.title || 'Untitled course'}</h2>
+                <h2 id="admin-module-title">
+                  {selectedCourse.title || "Untitled course"}
+                </h2>
               </div>
               <button
                 type="button"
@@ -262,7 +262,9 @@ export default function ModuleManagementPage() {
               </div>
               <div>
                 <span>Subject</span>
-                <strong>{selectedCourse.subject || selectedCourse.code || 'Not set'}</strong>
+                <strong>
+                  {selectedCourse.subject || selectedCourse.code || "Not set"}
+                </strong>
               </div>
               <div>
                 <span>Status</span>
@@ -270,22 +272,27 @@ export default function ModuleManagementPage() {
               </div>
               <div>
                 <span>Date Created</span>
-                <strong>{selectedCourse.updatedAt || 'Not set'}</strong>
+                <strong>{selectedCourse.updatedAt || "Not set"}</strong>
               </div>
               <div>
                 <span>Quiz Items</span>
-                <strong>{selectedQuizItems.length || selectedCourse.quizzes || 0}</strong>
+                <strong>
+                  {selectedQuizItems.length || selectedCourse.quizzes || 0}
+                </strong>
               </div>
             </div>
 
             <div className="admin-module-section">
               <h3>Description</h3>
-              <p>{selectedCourse.summary || 'No course description yet.'}</p>
+              <p>{selectedCourse.summary || "No course description yet."}</p>
             </div>
 
             <div className="admin-module-section">
               <h3>Learning Objectives</h3>
-              <p>{selectedCourse.learningObjectives || 'No learning objectives yet.'}</p>
+              <p>
+                {selectedCourse.learningObjectives ||
+                  "No learning objectives yet."}
+              </p>
             </div>
 
             <div className="admin-module-section">
@@ -295,9 +302,9 @@ export default function ModuleManagementPage() {
               ) : (
                 <div className="admin-module-list">
                   {selectedLessons.map((page, index) => (
-                    <article key={`${page.title || 'lesson'}-${index}`}>
+                    <article key={`${page.title || "lesson"}-${index}`}>
                       <h4>{page.title || `Page ${index + 1}`}</h4>
-                      <p>{page.content || 'No lesson content.'}</p>
+                      <p>{page.content || "No lesson content."}</p>
                     </article>
                   ))}
                 </div>
@@ -311,9 +318,12 @@ export default function ModuleManagementPage() {
               ) : (
                 <div className="admin-module-list">
                   {selectedQuizItems.map((item, index) => (
-                    <article key={`${item.question || 'quiz'}-${index}`}>
+                    <article key={`${item.question || "quiz"}-${index}`}>
                       <h4>{item.question || `Question ${index + 1}`}</h4>
-                      <p>Answer: {item.correct_answer || item.answer || 'Not set'}</p>
+                      <p>
+                        Answer:{" "}
+                        {item.correct_answer || item.answer || "Not set"}
+                      </p>
                     </article>
                   ))}
                 </div>

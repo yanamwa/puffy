@@ -1,28 +1,21 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   FiBell,
   FiBookOpen,
   FiCheckCircle,
   FiMessageSquare,
-} from 'react-icons/fi';
+} from "react-icons/fi";
 
-import './RoleNotificationMenu.css';
-import Swal from 'sweetalert2';
+import "./RoleNotificationMenu.css";
+import Swal from "sweetalert2";
 
 /* =====================================================
    API CONFIG
 ===================================================== */
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_URL ||
-  'http://localhost:5000/api';
+  import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 /* =====================================================
    ROLE CONFIG
@@ -30,19 +23,19 @@ const API_BASE_URL =
 
 const notificationSets = {
   admin: {
-    viewAllPath: '/admin/notification',
+    viewAllPath: "/admin/notification",
   },
 
   superAdmin: {
-    viewAllPath: '/super-admin/announcements',
+    viewAllPath: "/super-admin/announcements",
   },
 
   professor: {
-    viewAllPath: '/professor/notifications',
+    viewAllPath: "/professor/notifications",
   },
 
   student: {
-    viewAllPath: '/student/notifications',
+    viewAllPath: "/student/notifications",
   },
 };
 
@@ -50,30 +43,30 @@ const notificationSets = {
    NORMALIZE ROLE
 ===================================================== */
 
-function normalizeRole(role = '') {
-  const normalized = String(role || '')
+function normalizeRole(role = "") {
+  const normalized = String(role || "")
     .trim()
     .toLowerCase()
-    .replace(/[\s-]+/g, '_');
+    .replace(/[\s-]+/g, "_");
 
-  if (normalized === 'superadmin') {
-    return 'superAdmin';
+  if (normalized === "superadmin") {
+    return "superAdmin";
   }
 
-  if (normalized === 'super_admin') {
-    return 'superAdmin';
+  if (normalized === "super_admin") {
+    return "superAdmin";
   }
 
-  if (normalized === 'administrator') {
-    return 'admin';
+  if (normalized === "administrator") {
+    return "admin";
   }
 
-  if (normalized === 'instructor') {
-    return 'professor';
+  if (normalized === "instructor") {
+    return "professor";
   }
 
-  if (normalized === 'learner') {
-    return 'student';
+  if (normalized === "learner") {
+    return "student";
   }
 
   return normalized;
@@ -85,13 +78,13 @@ function normalizeRole(role = '') {
 
 function getStoredToken() {
   return (
-    localStorage.getItem('token') ||
-    localStorage.getItem('authToken') ||
-    localStorage.getItem('puffy-token') ||
-    sessionStorage.getItem('token') ||
-    sessionStorage.getItem('authToken') ||
-    sessionStorage.getItem('puffy-token') ||
-    ''
+    localStorage.getItem("token") ||
+    localStorage.getItem("authToken") ||
+    localStorage.getItem("puffy-token") ||
+    sessionStorage.getItem("token") ||
+    sessionStorage.getItem("authToken") ||
+    sessionStorage.getItem("puffy-token") ||
+    ""
   );
 }
 
@@ -101,101 +94,70 @@ function getStoredToken() {
 
 function formatNotificationTime(value) {
   if (!value) {
-    return '';
+    return "";
   }
 
   const date = new Date(value);
 
   if (Number.isNaN(date.getTime())) {
-    return '';
+    return "";
   }
 
-  const difference =
-    Date.now() - date.getTime();
+  const difference = Date.now() - date.getTime();
 
-  const minutes = Math.floor(
-    difference / 60000
-  );
+  const minutes = Math.floor(difference / 60000);
 
   if (minutes < 1) {
-    return 'Just now';
+    return "Just now";
   }
 
   if (minutes < 60) {
-    return `${minutes} ${
-      minutes === 1
-        ? 'minute'
-        : 'minutes'
-    } ago`;
+    return `${minutes} ${minutes === 1 ? "minute" : "minutes"} ago`;
   }
 
-  const hours = Math.floor(
-    minutes / 60
-  );
+  const hours = Math.floor(minutes / 60);
 
   if (hours < 24) {
-    return `${hours} ${
-      hours === 1
-        ? 'hour'
-        : 'hours'
-    } ago`;
+    return `${hours} ${hours === 1 ? "hour" : "hours"} ago`;
   }
 
-  const days = Math.floor(
-    hours / 24
-  );
+  const days = Math.floor(hours / 24);
 
   if (days < 7) {
-    return `${days} ${
-      days === 1
-        ? 'day'
-        : 'days'
-    } ago`;
+    return `${days} ${days === 1 ? "day" : "days"} ago`;
   }
 
-  return date.toLocaleDateString(
-    undefined,
-    {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    }
-  );
+  return date.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
 /* =====================================================
    GET NOTIFICATION ICON
 ===================================================== */
 
-function getNotificationIcon(type = '') {
-  const normalizedType =
-    String(type || '')
-      .trim()
-      .toLowerCase();
+function getNotificationIcon(type = "") {
+  const normalizedType = String(type || "")
+    .trim()
+    .toLowerCase();
 
   if (
-    normalizedType ===
-      'enrollment_request' ||
-    normalizedType ===
-      'enrollment_approved' ||
-    normalizedType ===
-      'enrollment_declined' ||
-    normalizedType ===
-      'student_unenrolled' ||
-    normalizedType ===
-      'course_unenrollment'
+    normalizedType === "enrollment_request" ||
+    normalizedType === "enrollment_approved" ||
+    normalizedType === "enrollment_declined" ||
+    normalizedType === "student_unenrolled" ||
+    normalizedType === "course_unenrollment"
   ) {
-    return 'course';
+    return "course";
   }
 
-  if (
-    normalizedType ===
-      'announcement'
-  ) {
-    return 'announcement';
+  if (normalizedType === "announcement") {
+    return "announcement";
   }
 
-  return 'sparkle';
+  return "sparkle";
 }
 
 /* =====================================================
@@ -203,10 +165,7 @@ function getNotificationIcon(type = '') {
 ===================================================== */
 
 function normalizeNotification(notification) {
-  const isRead =
-    notification.isRead ??
-    notification.is_read ??
-    false;
+  const isRead = notification.isRead ?? notification.is_read ?? false;
 
   return {
     ...notification,
@@ -221,43 +180,27 @@ function normalizeNotification(notification) {
       notification.notification_id ??
       notification.id,
 
-    title:
-      notification.title ||
-      'Notification',
+    title: notification.title || "Notification",
 
-    message:
-      notification.message ||
-      '',
+    message: notification.message || "",
 
-    type:
-      notification.type ||
-      'notification',
+    type: notification.type || "notification",
 
-    icon:
-      notification.icon ||
-      getNotificationIcon(
-        notification.type
-      ),
+    icon: notification.icon || getNotificationIcon(notification.type),
 
-    unread:
-      notification.unread ??
-      !Boolean(isRead),
+    unread: notification.unread ?? !Boolean(isRead),
 
-    isRead:
-      Boolean(isRead),
+    isRead: Boolean(isRead),
 
-    source:
-      notification.source ||
-      'user',
+    source: notification.source || "user",
 
-    createdByRole:
-      normalizeRole(
-        notification.createdByRole ??
+    createdByRole: normalizeRole(
+      notification.createdByRole ??
         notification.created_by_role ??
         notification.creatorRole ??
         notification.creator_role ??
-        ''
-      ),
+        "",
+    ),
 
     createdByUserId:
       notification.createdByUserId ??
@@ -268,10 +211,7 @@ function normalizeNotification(notification) {
 
     time:
       notification.time ||
-      formatNotificationTime(
-        notification.createdAt ||
-        notification.created_at
-      ),
+      formatNotificationTime(notification.createdAt || notification.created_at),
   };
 }
 
@@ -280,11 +220,11 @@ function normalizeNotification(notification) {
 ===================================================== */
 
 function NotificationIcon({ type }) {
-  if (type === 'course') {
+  if (type === "course") {
     return <FiBookOpen />;
   }
 
-  if (type === 'announcement') {
+  if (type === "announcement") {
     return <FiMessageSquare />;
   }
 
@@ -294,138 +234,96 @@ function NotificationIcon({ type }) {
 /* =====================================================
    COMPONENT
 ===================================================== */
-function escapeNotificationHtml(value = '') {
+function escapeNotificationHtml(value = "") {
   return String(value)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
-function getSweetAlertIcon(type = '') {
-  const normalizedType = String(type || '').toLowerCase();
+function getSweetAlertIcon(type = "") {
+  const normalizedType = String(type || "").toLowerCase();
 
   if (
-    normalizedType === 'enrollment_declined' ||
-    normalizedType === 'student_unenrolled' ||
-    normalizedType === 'course_unenrollment'
+    normalizedType === "enrollment_declined" ||
+    normalizedType === "student_unenrolled" ||
+    normalizedType === "course_unenrollment"
   ) {
-    return 'warning';
+    return "warning";
   }
 
   if (
-    normalizedType === 'enrollment_approved' ||
-    normalizedType === 'enrollment_request'
+    normalizedType === "enrollment_approved" ||
+    normalizedType === "enrollment_request"
   ) {
-    return 'success';
+    return "success";
   }
 
-  return 'info';
+  return "info";
 }
 
-export default function RoleNotificationMenu({
-  role = 'admin',
-}) {
+export default function RoleNotificationMenu({ role = "admin" }) {
   const navigate = useNavigate();
   const menuRef = useRef(null);
 
-  const normalizedRole =
-    normalizeRole(role) || 'admin';
+  const normalizedRole = normalizeRole(role) || "admin";
 
-  const config =
-    notificationSets[normalizedRole] ||
-    notificationSets.admin;
+  const config = notificationSets[normalizedRole] || notificationSets.admin;
 
-  const [
-    isOpen,
-    setIsOpen,
-  ] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
-  const [
-    activeTab,
-    setActiveTab,
-  ] = useState('all');
+  const [activeTab, setActiveTab] = useState("all");
 
-  const [
-    notifications,
-    setNotifications,
-  ] = useState([]);
+  const [notifications, setNotifications] = useState([]);
 
-  const [
-    isLoading,
-    setIsLoading,
-  ] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   /* ===================================================
      LOAD NOTIFICATIONS
   =================================================== */
 
-  const loadNotifications =
-    useCallback(async () => {
-      const token =
-        getStoredToken();
+  const loadNotifications = useCallback(async () => {
+    const token = getStoredToken();
 
-      if (!token) {
-        setNotifications([]);
-        return;
+    if (!token) {
+      setNotifications([]);
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+
+      const response = await fetch(`${API_BASE_URL}/notifications`, {
+        method: "GET",
+
+        headers: {
+          Accept: "application/json",
+
+          Authorization: `Bearer ${token}`,
+        },
+
+        credentials: "include",
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(data?.message || "Failed to fetch notifications.");
       }
 
-      try {
-        setIsLoading(true);
+      const incoming = Array.isArray(data?.notifications)
+        ? data.notifications
+        : [];
 
-        const response =
-          await fetch(
-            `${API_BASE_URL}/notifications`,
-            {
-              method: 'GET',
-
-              headers: {
-                Accept:
-                  'application/json',
-
-                Authorization:
-                  `Bearer ${token}`,
-              },
-
-              credentials:
-                'include',
-            }
-          );
-
-        const data =
-          await response
-            .json()
-            .catch(() => ({}));
-
-        if (!response.ok) {
-          throw new Error(
-            data?.message ||
-              'Failed to fetch notifications.'
-          );
-        }
-
-        const incoming =
-          Array.isArray(
-            data?.notifications
-          )
-            ? data.notifications
-            : [];
-
-        setNotifications(
-          incoming.map(
-            normalizeNotification
-          )
-        );
-      } catch (error) {
-        console.error(
-          'Unable to load notifications:',
-          error
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    }, []);
+      setNotifications(incoming.map(normalizeNotification));
+    } catch (error) {
+      console.error("Unable to load notifications:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   /* ===================================================
      INITIAL LOAD + AUTO REFRESH
@@ -434,16 +332,10 @@ export default function RoleNotificationMenu({
   useEffect(() => {
     loadNotifications();
 
-    const intervalId =
-      window.setInterval(
-        loadNotifications,
-        30000
-      );
+    const intervalId = window.setInterval(loadNotifications, 30000);
 
     return () => {
-      window.clearInterval(
-        intervalId
-      );
+      window.clearInterval(intervalId);
     };
   }, [loadNotifications]);
 
@@ -452,41 +344,27 @@ export default function RoleNotificationMenu({
   =================================================== */
 
   useEffect(() => {
-    setActiveTab('all');
+    setActiveTab("all");
     setIsOpen(false);
 
     loadNotifications();
-  }, [
-    normalizedRole,
-    loadNotifications,
-  ]);
+  }, [normalizedRole, loadNotifications]);
 
   /* ===================================================
      CLOSE ON OUTSIDE CLICK
   =================================================== */
 
   useEffect(() => {
-    const closeOnOutsideClick =
-      (event) => {
-        if (
-          !menuRef.current?.contains(
-            event.target
-          )
-        ) {
-          setIsOpen(false);
-        }
-      };
+    const closeOnOutsideClick = (event) => {
+      if (!menuRef.current?.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
 
-    document.addEventListener(
-      'mousedown',
-      closeOnOutsideClick
-    );
+    document.addEventListener("mousedown", closeOnOutsideClick);
 
     return () => {
-      document.removeEventListener(
-        'mousedown',
-        closeOnOutsideClick
-      );
+      document.removeEventListener("mousedown", closeOnOutsideClick);
     };
   }, []);
 
@@ -494,198 +372,154 @@ export default function RoleNotificationMenu({
      UNREAD COUNT
   =================================================== */
 
-  const unreadCount =
-    notifications.filter(
-      (notification) =>
-        notification.unread
-    ).length;
+  const unreadCount = notifications.filter(
+    (notification) => notification.unread,
+  ).length;
 
   /* ===================================================
      FILTER
   =================================================== */
 
-  const visibleNotifications =
-    useMemo(() => {
-      if (
-        activeTab === 'unread'
-      ) {
-        return notifications.filter(
-          (notification) =>
-            notification.unread
-        );
-      }
+  const visibleNotifications = useMemo(() => {
+    if (activeTab === "unread") {
+      return notifications.filter((notification) => notification.unread);
+    }
 
-      return notifications;
-    }, [
-      activeTab,
-      notifications,
-    ]);
+    return notifications;
+  }, [activeTab, notifications]);
 
   /* ===================================================
      MARK ALL AS READ
   =================================================== */
 
-  const markAllRead =
-    async () => {
-      const token =
-        getStoredToken();
+  const markAllRead = async () => {
+    const token = getStoredToken();
 
-      if (!token) {
-        return;
-      }
+    if (!token) {
+      return;
+    }
 
-      try {
-        const response =
-          await fetch(
-            `${API_BASE_URL}/notifications/read-all`,
-            {
-              method: 'PATCH',
+    try {
+      const response = await fetch(`${API_BASE_URL}/notifications/read-all`, {
+        method: "PATCH",
 
-              headers: {
-                Accept:
-                  'application/json',
+        headers: {
+          Accept: "application/json",
 
-                Authorization:
-                  `Bearer ${token}`,
-              },
+          Authorization: `Bearer ${token}`,
+        },
 
-              credentials:
-                'include',
-            }
-          );
+        credentials: "include",
+      });
 
-        const data =
-          await response
-            .json()
-            .catch(() => ({}));
+      const data = await response.json().catch(() => ({}));
 
-        if (!response.ok) {
-          throw new Error(
-            data?.message ||
-              'Failed to mark notifications as read.'
-          );
-        }
-
-        setNotifications(
-          (current) =>
-            current.map(
-              (notification) => ({
-                ...notification,
-                unread: false,
-                isRead: true,
-                is_read: true,
-              })
-            )
-        );
-      } catch (error) {
-        console.error(
-          'Unable to mark all notifications as read:',
-          error
+      if (!response.ok) {
+        throw new Error(
+          data?.message || "Failed to mark notifications as read.",
         );
       }
-    };
+
+      setNotifications((current) =>
+        current.map((notification) => ({
+          ...notification,
+          unread: false,
+          isRead: true,
+          is_read: true,
+        })),
+      );
+    } catch (error) {
+      console.error("Unable to mark all notifications as read:", error);
+    }
+  };
 
   /* ===================================================
      OPEN / MARK ONE AS READ
   =================================================== */
 
   const openNotification = async (notification) => {
-  if (!notification) return;
+    if (!notification) return;
 
-  /* =========================================
+    /* =========================================
      MARK NOTIFICATION AS READ
   ========================================= */
 
-  if (notification.unread) {
-    const token = getStoredToken();
+    if (notification.unread) {
+      const token = getStoredToken();
 
-    if (token) {
-      try {
-        const notificationId =
-          notification.notificationId ||
-          notification.id;
+      if (token) {
+        try {
+          const notificationId = notification.notificationId || notification.id;
 
-        const response = await fetch(
-          `${API_BASE_URL}/notifications/${notificationId}/read`,
-          {
-            method: 'PATCH',
-            headers: {
-              Authorization: `Bearer ${token}`,
-              Accept: 'application/json',
+          const response = await fetch(
+            `${API_BASE_URL}/notifications/${notificationId}/read`,
+            {
+              method: "PATCH",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                Accept: "application/json",
+              },
+              credentials: "include",
             },
-            credentials: 'include',
-          }
-        );
-
-        const data = await response
-          .json()
-          .catch(() => ({}));
-
-        if (!response.ok) {
-          throw new Error(
-            data?.message ||
-              'Failed to mark notification as read.'
           );
-        }
 
-        setNotifications((current) =>
-          current.map((item) =>
-            item.id === notification.id
-              ? {
-                  ...item,
-                  unread: false,
-                  isRead: true,
-                  is_read: true,
-                }
-              : item
-          )
-        );
-      } catch (error) {
-        console.error(
-          'Unable to mark notification as read:',
-          error
-        );
+          const data = await response.json().catch(() => ({}));
+
+          if (!response.ok) {
+            throw new Error(
+              data?.message || "Failed to mark notification as read.",
+            );
+          }
+
+          setNotifications((current) =>
+            current.map((item) =>
+              item.id === notification.id
+                ? {
+                    ...item,
+                    unread: false,
+                    isRead: true,
+                    is_read: true,
+                  }
+                : item,
+            ),
+          );
+        } catch (error) {
+          console.error("Unable to mark notification as read:", error);
+        }
       }
     }
-  }
 
-  /* =========================================
+    /* =========================================
      CLOSE DROPDOWN
   ========================================= */
 
-  setIsOpen(false);
+    setIsOpen(false);
 
-  /* =========================================
+    /* =========================================
      SEPARATE MESSAGE AND REASON
   ========================================= */
 
-  const fullMessage = String(
-    notification.message || ''
-  ).trim();
+    const fullMessage = String(notification.message || "").trim();
 
-  let mainMessage = fullMessage;
-  let reason = '';
+    let mainMessage = fullMessage;
+    let reason = "";
 
-  const reasonMatch = fullMessage.match(
-    /(?:^|\s)Reason:\s*(.*)$/i
-  );
+    const reasonMatch = fullMessage.match(/(?:^|\s)Reason:\s*(.*)$/i);
 
-  if (reasonMatch) {
-    reason = reasonMatch[1].trim();
+    if (reasonMatch) {
+      reason = reasonMatch[1].trim();
 
-    mainMessage = fullMessage
-      .replace(/(?:^|\s)Reason:\s*.*$/i, '')
-      .trim();
-  }
+      mainMessage = fullMessage.replace(/(?:^|\s)Reason:\s*.*$/i, "").trim();
+    }
 
-  /* =========================================
+    /* =========================================
      SHOW SWEETALERT
   ========================================= */
 
-  await Swal.fire({
-    title: notification.title || 'Notification',
+    await Swal.fire({
+      title: notification.title || "Notification",
 
-    html: `
+      html: `
       <div style="
         text-align: left;
         padding: 4px 6px;
@@ -730,7 +564,7 @@ export default function RoleNotificationMenu({
                 </div>
               </div>
             `
-            : ''
+            : ""
         }
 
         ${
@@ -746,64 +580,48 @@ export default function RoleNotificationMenu({
                 ${escapeNotificationHtml(notification.time)}
               </div>
             `
-            : ''
+            : ""
         }
       </div>
     `,
 
-    icon: getSweetAlertIcon(notification.type),
-    confirmButtonText: 'Okay',
-    confirmButtonColor: '#2563eb',
-    width: 480,
-    showCloseButton: true,
-  });
-};
+      icon: getSweetAlertIcon(notification.type),
+      confirmButtonText: "Okay",
+      confirmButtonColor: "#2563eb",
+      width: 480,
+      showCloseButton: true,
+    });
+  };
 
   /* ===================================================
      PAGE
   =================================================== */
 
   return (
-    <div
-      className="role-notification-menu"
-      ref={menuRef}
-    >
+    <div className="role-notification-menu" ref={menuRef}>
       <button
         type="button"
-        className={`role-notification-button ${
-          isOpen
-            ? 'active'
-            : ''
-        }`}
+        className={`role-notification-button ${isOpen ? "active" : ""}`}
         aria-label={`Notifications${
-          unreadCount > 0
-            ? `, ${unreadCount} unread`
-            : ''
+          unreadCount > 0 ? `, ${unreadCount} unread` : ""
         }`}
         aria-expanded={isOpen}
         aria-haspopup="dialog"
         onClick={() => {
-          const nextIsOpen =
-            !isOpen;
+          const nextIsOpen = !isOpen;
 
-          setIsOpen(
-            nextIsOpen
-          );
+          setIsOpen(nextIsOpen);
 
           if (nextIsOpen) {
             loadNotifications();
           }
         }}
       >
-        <FiBell
-          aria-hidden="true"
-        />
+        <FiBell aria-hidden="true" />
 
         {unreadCount > 0 && (
           <span className="role-notification-badge">
-            {unreadCount > 9
-              ? '9+'
-              : unreadCount}
+            {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
       </button>
@@ -816,24 +634,17 @@ export default function RoleNotificationMenu({
         >
           <div className="role-notification-header">
             <div>
-              <h2>
-                Notifications
-              </h2>
+              <h2>Notifications</h2>
 
               <span>
                 {unreadCount > 0
                   ? `${unreadCount} unread`
-                  : 'You are all caught up'}
+                  : "You are all caught up"}
               </span>
             </div>
 
             {unreadCount > 0 && (
-              <button
-                type="button"
-                onClick={
-                  markAllRead
-                }
-              >
+              <button type="button" onClick={markAllRead}>
                 Mark all as read
               </button>
             )}
@@ -842,134 +653,75 @@ export default function RoleNotificationMenu({
           <div className="role-notification-tabs">
             <button
               type="button"
-              className={
-                activeTab === 'all'
-                  ? 'active'
-                  : ''
-              }
-              onClick={() =>
-                setActiveTab(
-                  'all'
-                )
-              }
+              className={activeTab === "all" ? "active" : ""}
+              onClick={() => setActiveTab("all")}
             >
               All
             </button>
 
             <button
               type="button"
-              className={
-                activeTab ===
-                'unread'
-                  ? 'active'
-                  : ''
-              }
-              onClick={() =>
-                setActiveTab(
-                  'unread'
-                )
-              }
+              className={activeTab === "unread" ? "active" : ""}
+              onClick={() => setActiveTab("unread")}
             >
               Unread
             </button>
           </div>
 
           <div className="role-notification-list">
-            {isLoading &&
-            notifications.length ===
-              0 ? (
+            {isLoading && notifications.length === 0 ? (
               <div className="role-notification-empty">
                 <span>
-                  <FiBell
-                    aria-hidden="true"
-                  />
+                  <FiBell aria-hidden="true" />
                 </span>
 
-                <strong>
-                  Loading notifications...
-                </strong>
+                <strong>Loading notifications...</strong>
 
-                <p>
-                  Please wait.
-                </p>
+                <p>Please wait.</p>
               </div>
-            ) : visibleNotifications.length ===
-              0 ? (
+            ) : visibleNotifications.length === 0 ? (
               <div className="role-notification-empty">
                 <span>
-                  <FiBell
-                    aria-hidden="true"
-                  />
+                  <FiBell aria-hidden="true" />
                 </span>
 
-                <strong>
-                  No notifications yet
-                </strong>
+                <strong>No notifications yet</strong>
 
-                <p>
-                  New updates will
-                  appear here.
-                </p>
+                <p>New updates will appear here.</p>
               </div>
             ) : (
-              visibleNotifications.map(
-                (notification) => (
-                  <button
-                    key={
-                      notification.id
-                    }
-                    type="button"
-                    className={`role-notification-item ${
-                      notification.unread
-                        ? 'unread'
-                        : ''
-                    }`}
-                    onClick={() =>
-                      openNotification(
-                        notification
-                      )
-                    }
+              visibleNotifications.map((notification) => (
+                <button
+                  key={notification.id}
+                  type="button"
+                  className={`role-notification-item ${
+                    notification.unread ? "unread" : ""
+                  }`}
+                  onClick={() => openNotification(notification)}
+                >
+                  <span
+                    className={`role-notification-icon ${notification.icon}`}
+                    aria-hidden="true"
                   >
+                    <NotificationIcon type={notification.icon} />
+                  </span>
+
+                  <span className="role-notification-copy">
+                    <strong>{notification.title}</strong>
+
+                    <span>{notification.message}</span>
+
+                    <small>{notification.time}</small>
+                  </span>
+
+                  {notification.unread && (
                     <span
-                      className={`role-notification-icon ${notification.icon}`}
-                      aria-hidden="true"
-                    >
-                      <NotificationIcon
-                        type={
-                          notification.icon
-                        }
-                      />
-                    </span>
-
-                    <span className="role-notification-copy">
-                      <strong>
-                        {
-                          notification.title
-                        }
-                      </strong>
-
-                      <span>
-                        {
-                          notification.message
-                        }
-                      </span>
-
-                      <small>
-                        {
-                          notification.time
-                        }
-                      </small>
-                    </span>
-
-                    {notification.unread && (
-                      <span
-                        className="role-notification-unread-dot"
-                        aria-label="Unread"
-                      />
-                    )}
-                  </button>
-                )
-              )
+                      className="role-notification-unread-dot"
+                      aria-label="Unread"
+                    />
+                  )}
+                </button>
+              ))
             )}
           </div>
 
@@ -979,9 +731,7 @@ export default function RoleNotificationMenu({
             onClick={() => {
               setIsOpen(false);
 
-              navigate(
-                config.viewAllPath
-              );
+              navigate(config.viewAllPath);
             }}
           >
             See all notifications

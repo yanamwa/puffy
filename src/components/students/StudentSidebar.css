@@ -22,7 +22,6 @@
   transition: width 220ms ease;
 }
 
-
 /* =====================================================
    BRAND
 ===================================================== */
@@ -89,7 +88,6 @@
     opacity 140ms ease,
     width 220ms ease;
 }
-
 
 /* =====================================================
    NAVIGATION
@@ -161,7 +159,6 @@
   fill: currentColor;
 }
 
-
 /* =====================================================
    NAV HOVER
 ===================================================== */
@@ -171,7 +168,6 @@
   border-color: transparent;
   color: #171927;
 }
-
 
 /* =====================================================
    ACTIVE NAVIGATION
@@ -207,7 +203,6 @@
   padding-left: 10px;
 }
 
-
 /* =====================================================
    ENROLLED COURSES
 ===================================================== */
@@ -229,7 +224,6 @@
   font-family: inherit;
   text-align: left;
 }
-
 
 /* =====================================================
    ENROLLED DROPDOWN ARROW
@@ -256,7 +250,6 @@
 .sidebar-dropdown-arrow.open {
   transform: rotate(180deg);
 }
-
 
 /* =====================================================
    ENROLLED COURSE LIST
@@ -398,7 +391,6 @@
   }
 }
 
-
 /* =====================================================
    LOGOUT
 ===================================================== */
@@ -464,7 +456,6 @@
   white-space: nowrap;
 }
 
-
 /* =====================================================
    COLLAPSED SIDEBAR
 ===================================================== */
@@ -500,7 +491,6 @@
   pointer-events: none;
 }
 
-
 /* =====================================================
    COLLAPSED NAVIGATION
 ===================================================== */
@@ -516,10 +506,8 @@
 }
 
 .enrolled-sidebar.sidebar-collapsed .side-nav-item,
-.enrolled-sidebar.sidebar-collapsed
-  .side-nav-item.plain-nav-item,
-.enrolled-sidebar.sidebar-collapsed
-  .side-nav-item.plain-nav-item.active {
+.enrolled-sidebar.sidebar-collapsed .side-nav-item.plain-nav-item,
+.enrolled-sidebar.sidebar-collapsed .side-nav-item.plain-nav-item.active {
   position: relative;
 
   width: 100%;
@@ -577,8 +565,7 @@
   border-radius: 999px 0 0 999px;
 }
 
-.enrolled-sidebar.sidebar-collapsed
-  .side-nav-item.active::after {
+.enrolled-sidebar.sidebar-collapsed .side-nav-item.active::after {
   content: "";
 
   position: absolute;
@@ -592,13 +579,10 @@
   background: #ffffff;
 }
 
-.enrolled-sidebar.sidebar-collapsed
-  .sidebar-enrolled-list,
-.enrolled-sidebar.sidebar-collapsed
-  .sidebar-dropdown-arrow {
+.enrolled-sidebar.sidebar-collapsed .sidebar-enrolled-list,
+.enrolled-sidebar.sidebar-collapsed .sidebar-dropdown-arrow {
   display: none;
 }
-
 
 /* =====================================================
    COLLAPSED LOGOUT
@@ -621,7 +605,6 @@
 
   margin: 0;
 }
-
 
 /* =====================================================
    RESPONSIVE

@@ -3,7 +3,6 @@ import styles from "./LandingPage.module.css";
 import LandingNavbar from "./components/landing/LandingNavbar";
 import LandingFooter from "./components/landing/LandingFooter";
 
-
 function LandingPage() {
   useEffect(() => {
     const elements = document.querySelectorAll(`.${styles.fadeIn}`);
@@ -12,13 +11,13 @@ function LandingPage() {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-           entry.target.classList.add(styles.show);
+            entry.target.classList.add(styles.show);
           } else {
             entry.target.classList.remove(styles.show);
           }
         });
       },
-      { threshold: 0.15 }
+      { threshold: 0.15 },
     );
 
     elements.forEach((el) => observer.observe(el));
@@ -34,9 +33,7 @@ function LandingPage() {
           <LandingNavbar />
           <section className={styles.heroBg}>
             <div className={styles.heroContent}>
-              <p className={styles.studySecret}>
-                shhh... a study secret
-              </p>
+              <p className={styles.studySecret}>shhh... a study secret</p>
 
               <h1>
                 Your quizzes are waiting
@@ -44,14 +41,10 @@ function LandingPage() {
                 let's make your brain giggle!
               </h1>
 
-              <p className={styles.sub}>
-                Let's Puff Up Those Brain Cells!
-              </p>
+              <p className={styles.sub}>Let's Puff Up Those Brain Cells!</p>
 
               <a href="/login">
-                <button className={styles.pressStart}>
-                  Press to Start
-                </button>
+                <button className={styles.pressStart}>Press to Start</button>
               </a>
             </div>
           </section>
@@ -80,16 +73,13 @@ function LandingPage() {
             <h2>Create your own study tools</h2>
 
             <p>
-              No more one-fits-all learning. PuffyBrain lets you
-              design quizzes and flashcards for any subject, any
-              topic, any time.
+              No more one-fits-all learning. PuffyBrain lets you design quizzes
+              and flashcards for any subject, any topic, any time.
             </p>
           </div>
         </div>
 
-        <div
-          className={`${styles.feature} ${styles.reverse} ${styles.fadeIn}`}
-        >
+        <div className={`${styles.feature} ${styles.reverse} ${styles.fadeIn}`}>
           <img
             src="/images/card2.png"
             className={styles.frame}
@@ -100,10 +90,9 @@ function LandingPage() {
             <h2>Master through practice</h2>
 
             <p>
-              Test yourself with the tools you create. Whether
-              it's quick flashcards for memorization or full
-              quizzes for deeper review, PuffyBrain helps you
-              practice smarter and retain more.
+              Test yourself with the tools you create. Whether it's quick
+              flashcards for memorization or full quizzes for deeper review,
+              PuffyBrain helps you practice smarter and retain more.
             </p>
           </div>
         </div>
@@ -119,10 +108,9 @@ function LandingPage() {
             <h2>Stay organized with decks</h2>
 
             <p>
-              Keep your study materials neatly grouped into
-              decks. Review them anytime, anywhere, perfect for
-              exam prep, daily practice, or brushing up on
-              specific topics.
+              Keep your study materials neatly grouped into decks. Review them
+              anytime, anywhere, perfect for exam prep, daily practice, or
+              brushing up on specific topics.
             </p>
           </div>
         </div>
@@ -139,13 +127,11 @@ function LandingPage() {
           <h2>Ready to learn?</h2>
 
           <a href="/login">
-            <button className={styles.startNow}>
-              Start Now!
-            </button>
+            <button className={styles.startNow}>Start Now!</button>
           </a>
         </div>
       </section>
-<LandingFooter />
+      <LandingFooter />
     </>
   );
 }

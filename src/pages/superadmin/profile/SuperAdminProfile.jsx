@@ -1,32 +1,19 @@
-import {
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import { useEffect, useMemo, useState } from "react";
 
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
-import {
-  FiCamera,
-  FiLayers,
-  FiMail,
-  FiShield,
-  FiUser,
-} from 'react-icons/fi';
+import { FiCamera, FiLayers, FiMail, FiShield, FiUser } from "react-icons/fi";
 
-import { API_BASE } from '../../../config.js';
-import { useAuth } from '../../../context/AuthContext';
+import { API_BASE } from "../../../config.js";
+import { useAuth } from "../../../context/AuthContext";
 
-import './SuperAdminProfile.css';
-
+import "./SuperAdminProfile.css";
 
 /* =====================================================
    DEFAULT PROFILE IMAGE
 ===================================================== */
 
-const DEFAULT_SUPER_ADMIN_PROFILE_IMAGE =
-  '/images/temporaryimg.png';
-
+const DEFAULT_SUPER_ADMIN_PROFILE_IMAGE = "/images/temporaryimg.png";
 
 /* =====================================================
    AUTH HELPERS
@@ -34,62 +21,49 @@ const DEFAULT_SUPER_ADMIN_PROFILE_IMAGE =
 
 function getStoredToken() {
   return (
-    localStorage.getItem('puffy-token') ||
-    localStorage.getItem('token') ||
-    localStorage.getItem('authToken') ||
-    sessionStorage.getItem('puffy-token') ||
-    sessionStorage.getItem('token') ||
-    sessionStorage.getItem('authToken') ||
-    ''
+    localStorage.getItem("puffy-token") ||
+    localStorage.getItem("token") ||
+    localStorage.getItem("authToken") ||
+    sessionStorage.getItem("puffy-token") ||
+    sessionStorage.getItem("token") ||
+    sessionStorage.getItem("authToken") ||
+    ""
   );
 }
-
 
 function getUserRole(user) {
-  return (
-    user?.role ||
-    user?.userRole ||
-    user?.user_role ||
-    ''
-  );
+  return user?.role || user?.userRole || user?.user_role || "";
 }
-
 
 function isSuperAdminUser(user) {
-  return getUserRole(user) === 'super_admin';
+  return getUserRole(user) === "super_admin";
 }
-
 
 function getHomePath(role) {
-  if (role === 'admin') {
-    return '/admin';
+  if (role === "admin") {
+    return "/admin";
   }
 
-  if (role === 'professor') {
-    return '/professor';
+  if (role === "professor") {
+    return "/professor";
   }
 
-  if (role === 'student') {
-    return '/student';
+  if (role === "student") {
+    return "/student";
   }
 
-  return '/super-admin';
+  return "/super-admin";
 }
-
 
 function formatRole(role) {
   if (!role) {
-    return 'Super Admin';
+    return "Super Admin";
   }
 
   return String(role)
-    .replace(/_/g, ' ')
-    .replace(
-      /\b\w/g,
-      (letter) => letter.toUpperCase(),
-    );
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
-
 
 /* =====================================================
    PROFILE IMAGE
@@ -101,49 +75,37 @@ function resolveSuperAdminProfileImage(imagePath) {
   }
 
   if (
-    imagePath.startsWith('http://') ||
-    imagePath.startsWith('https://') ||
-    imagePath.startsWith('blob:') ||
-    imagePath.startsWith('data:')
+    imagePath.startsWith("http://") ||
+    imagePath.startsWith("https://") ||
+    imagePath.startsWith("blob:") ||
+    imagePath.startsWith("data:")
   ) {
     return imagePath;
   }
 
   let fixedPath = imagePath;
 
-  if (
-    fixedPath.startsWith(
-      '/api/uploads/profile-images/',
-    )
-  ) {
+  if (fixedPath.startsWith("/api/uploads/profile-images/")) {
     fixedPath = fixedPath.replace(
-      '/api/uploads/profile-images/',
-      '/uploads/profile-images/',
+      "/api/uploads/profile-images/",
+      "/uploads/profile-images/",
     );
   }
 
-  if (!fixedPath.startsWith('/')) {
+  if (!fixedPath.startsWith("/")) {
     fixedPath = `/${fixedPath}`;
   }
 
-  const serverOrigin = API_BASE.replace(
-    /\/api\/?$/,
-    '',
-  );
+  const serverOrigin = API_BASE.replace(/\/api\/?$/, "");
 
   return `${serverOrigin}${fixedPath}`;
 }
 
-
 function getSuperAdminProfileImage(user) {
   return resolveSuperAdminProfileImage(
-    user?.profileImage ||
-      user?.profile_image ||
-      user?.avatar ||
-      '',
+    user?.profileImage || user?.profile_image || user?.avatar || "",
   );
 }
-
 
 /* =====================================================
    PROFILE DATA
@@ -157,15 +119,11 @@ function getSuperAdminProfileData(user) {
       user?.fullName ||
       user?.full_name ||
       user?.name ||
-      'Super Admin',
+      "Super Admin",
 
-    email:
-      user?.email ||
-      'Not available',
+    email: user?.email || "Not available",
 
-    role: formatRole(
-      getUserRole(user) || 'super_admin',
-    ),
+    role: formatRole(getUserRole(user) || "super_admin"),
 
     accountId:
       user?.superAdminId ||
@@ -174,81 +132,55 @@ function getSuperAdminProfileData(user) {
       user?.admin_id ||
       user?.verificationId ||
       user?.verification_id ||
-      (
-        user?.userId ||
-        user?.id
-          ? `SA-${user.userId || user.id}`
-          : ''
-      ) ||
-      'Not assigned',
+      (user?.userId || user?.id ? `SA-${user.userId || user.id}` : "") ||
+      "Not assigned",
 
     department:
       user?.department ||
       user?.assignedDepartment ||
       user?.assigned_department ||
-      'System Administration',
+      "System Administration",
 
     accessLevel:
       user?.accessLevel ||
       user?.access_level ||
       user?.permissionLevel ||
       user?.permission_level ||
-      'Full System Access',
+      "Full System Access",
   };
 }
-
 
 /* =====================================================
    LOCAL USER STORAGE FALLBACK
 ===================================================== */
 
 function storeUpdatedUser(updatedUser) {
-  const serializedUser =
-    JSON.stringify(updatedUser);
+  const serializedUser = JSON.stringify(updatedUser);
+
+  localStorage.setItem("puffy-user", serializedUser);
+
+  localStorage.setItem("user", serializedUser);
+
+  localStorage.setItem("currentUser", serializedUser);
+
+  localStorage.setItem("user_role", updatedUser.role || "super_admin");
+
+  localStorage.setItem("user_email", updatedUser.email || "");
 
   localStorage.setItem(
-    'puffy-user',
-    serializedUser,
-  );
-
-  localStorage.setItem(
-    'user',
-    serializedUser,
-  );
-
-  localStorage.setItem(
-    'currentUser',
-    serializedUser,
-  );
-
-  localStorage.setItem(
-    'user_role',
-    updatedUser.role || 'super_admin',
-  );
-
-  localStorage.setItem(
-    'user_email',
-    updatedUser.email || '',
-  );
-
-  localStorage.setItem(
-    'username',
+    "username",
     updatedUser.displayName ||
       updatedUser.display_name ||
       updatedUser.name ||
-      '',
+      "",
   );
 
   window.dispatchEvent(
-    new CustomEvent(
-      'puffy-user-updated',
-      {
-        detail: updatedUser,
-      },
-    ),
+    new CustomEvent("puffy-user-updated", {
+      detail: updatedUser,
+    }),
   );
 }
-
 
 /* =====================================================
    SUPER ADMIN PROFILE
@@ -257,64 +189,34 @@ function storeUpdatedUser(updatedUser) {
 export default function SuperAdminProfile() {
   const navigate = useNavigate();
 
-  const {
-    user,
-    updateUser,
-  } = useAuth();
-
+  const { user, updateUser } = useAuth();
 
   /* ===================================================
      STATE
   =================================================== */
 
-  const [
-    profileUser,
-    setProfileUser,
-  ] = useState(() =>
-    isSuperAdminUser(user)
-      ? user
-      : null,
+  const [profileUser, setProfileUser] = useState(() =>
+    isSuperAdminUser(user) ? user : null,
   );
 
-  const [
-    profileLoading,
-    setProfileLoading,
-  ] = useState(true);
+  const [profileLoading, setProfileLoading] = useState(true);
 
-  const [
-    profileError,
-    setProfileError,
-  ] = useState('');
+  const [profileError, setProfileError] = useState("");
 
-  const [
-    profileImageUploading,
-    setProfileImageUploading,
-  ] = useState(false);
+  const [profileImageUploading, setProfileImageUploading] = useState(false);
 
-  const [
-    profileImage,
-    setProfileImage,
-  ] = useState(() =>
-    getSuperAdminProfileImage(
-      isSuperAdminUser(user)
-        ? user
-        : null,
-    ),
+  const [profileImage, setProfileImage] = useState(() =>
+    getSuperAdminProfileImage(isSuperAdminUser(user) ? user : null),
   );
-
 
   /* ===================================================
      PROFILE
   =================================================== */
 
   const profile = useMemo(
-    () =>
-      getSuperAdminProfileData(
-        profileUser,
-      ),
+    () => getSuperAdminProfileData(profileUser),
     [profileUser],
   );
-
 
   /* ===================================================
      SYNC AUTH USER
@@ -324,12 +226,9 @@ export default function SuperAdminProfile() {
     if (isSuperAdminUser(user)) {
       setProfileUser(user);
 
-      setProfileImage(
-        getSuperAdminProfileImage(user),
-      );
+      setProfileImage(getSuperAdminProfileImage(user));
     }
   }, [user]);
-
 
   /* ===================================================
      LOAD CURRENT USER
@@ -338,118 +237,76 @@ export default function SuperAdminProfile() {
   useEffect(() => {
     let active = true;
 
-
     async function loadSuperAdminProfile() {
       try {
         setProfileLoading(true);
-        setProfileError('');
+        setProfileError("");
 
         const token = getStoredToken();
 
         if (!token) {
           throw new Error(
-            'Your login session was not found. Please log in again.',
+            "Your login session was not found. Please log in again.",
           );
         }
 
+        const response = await fetch(`${API_BASE}/users/me`, {
+          method: "GET",
 
-        const response = await fetch(
-          `${API_BASE}/users/me`,
-          {
-            method: 'GET',
+          headers: {
+            Accept: "application/json",
 
-            headers: {
-              Accept: 'application/json',
-
-              Authorization:
-                `Bearer ${token}`,
-            },
+            Authorization: `Bearer ${token}`,
           },
-        );
+        });
 
-
-        const data =
-          await response
-            .json()
-            .catch(() => ({}));
-
+        const data = await response.json().catch(() => ({}));
 
         if (!response.ok) {
           throw new Error(
-            data.message ||
-              'Unable to load super administrator information.',
+            data.message || "Unable to load super administrator information.",
           );
         }
 
-
-        const loggedInUser =
-          data.user ||
-          data.data?.user ||
-          data.data ||
-          data;
-
+        const loggedInUser = data.user || data.data?.user || data.data || data;
 
         if (!loggedInUser) {
           throw new Error(
-            'Super administrator account information was not found.',
+            "Super administrator account information was not found.",
           );
         }
 
+        const loggedInRole = getUserRole(loggedInUser);
 
-        const loggedInRole =
-          getUserRole(loggedInUser);
-
-
-        if (
-          loggedInRole &&
-          loggedInRole !== 'super_admin'
-        ) {
+        if (loggedInRole && loggedInRole !== "super_admin") {
           if (active) {
-            navigate(
-              getHomePath(loggedInRole),
-              {
-                replace: true,
-              },
-            );
+            navigate(getHomePath(loggedInRole), {
+              replace: true,
+            });
           }
 
           return;
         }
 
-
         if (!active) {
           return;
         }
 
+        setProfileUser(loggedInUser);
 
-        setProfileUser(
-          loggedInUser,
-        );
-
-        setProfileImage(
-          getSuperAdminProfileImage(
-            loggedInUser,
-          ),
-        );
-
+        setProfileImage(getSuperAdminProfileImage(loggedInUser));
 
         if (updateUser) {
           updateUser(loggedInUser);
         } else {
-          storeUpdatedUser(
-            loggedInUser,
-          );
+          storeUpdatedUser(loggedInUser);
         }
       } catch (error) {
-        console.error(
-          'Super admin profile loading error:',
-          error,
-        );
+        console.error("Super admin profile loading error:", error);
 
         if (active) {
           setProfileError(
-            error.message ||
-              'Unable to load super administrator profile.',
+            error.message || "Unable to load super administrator profile.",
           );
         }
       } finally {
@@ -459,15 +316,12 @@ export default function SuperAdminProfile() {
       }
     }
 
-
     loadSuperAdminProfile();
-
 
     return () => {
       active = false;
     };
   }, [navigate]);
-
 
   /* ===================================================
      CLEAN BLOB URL
@@ -475,260 +329,141 @@ export default function SuperAdminProfile() {
 
   useEffect(() => {
     return () => {
-      if (
-        profileImage?.startsWith(
-          'blob:',
-        )
-      ) {
-        URL.revokeObjectURL(
-          profileImage,
-        );
+      if (profileImage?.startsWith("blob:")) {
+        URL.revokeObjectURL(profileImage);
       }
     };
   }, [profileImage]);
-
 
   /* ===================================================
      CHANGE PROFILE PICTURE
   =================================================== */
 
-  const changeProfilePicture =
-    async (event) => {
+  const changeProfilePicture = async (event) => {
+    const selectedFile = event.target.files?.[0];
 
-      const selectedFile =
-        event.target.files?.[0];
+    event.target.value = "";
 
-      event.target.value = '';
+    if (!selectedFile) {
+      return;
+    }
 
+    if (!selectedFile.type.startsWith("image/")) {
+      window.alert("Please select a valid image file.");
 
-      if (!selectedFile) {
-        return;
+      return;
+    }
+
+    const maximumFileSize = 5 * 1024 * 1024;
+
+    if (selectedFile.size > maximumFileSize) {
+      window.alert(
+        "The selected image is too large. Please choose an image smaller than 5 MB.",
+      );
+
+      return;
+    }
+
+    const token = getStoredToken();
+
+    if (!token) {
+      window.alert("Your login session was not found. Please log in again.");
+
+      return;
+    }
+
+    const previousImage = profileImage;
+
+    const previewUrl = URL.createObjectURL(selectedFile);
+
+    setProfileImage((currentImage) => {
+      if (currentImage?.startsWith("blob:")) {
+        URL.revokeObjectURL(currentImage);
       }
 
+      return previewUrl;
+    });
 
-      if (
-        !selectedFile.type.startsWith(
-          'image/',
-        )
-      ) {
-        window.alert(
-          'Please select a valid image file.',
-        );
+    setProfileImageUploading(true);
 
-        return;
-      }
+    try {
+      const formData = new FormData();
 
+      formData.append("profileImage", selectedFile);
 
-      const maximumFileSize =
-        5 * 1024 * 1024;
+      const response = await fetch(`${API_BASE}/users/me/profile-image`, {
+        method: "PUT",
 
-
-      if (
-        selectedFile.size >
-        maximumFileSize
-      ) {
-        window.alert(
-          'The selected image is too large. Please choose an image smaller than 5 MB.',
-        );
-
-        return;
-      }
-
-
-      const token =
-        getStoredToken();
-
-
-      if (!token) {
-        window.alert(
-          'Your login session was not found. Please log in again.',
-        );
-
-        return;
-      }
-
-
-      const previousImage =
-        profileImage;
-
-      const previewUrl =
-        URL.createObjectURL(
-          selectedFile,
-        );
-
-
-      setProfileImage(
-        (currentImage) => {
-
-          if (
-            currentImage?.startsWith(
-              'blob:',
-            )
-          ) {
-            URL.revokeObjectURL(
-              currentImage,
-            );
-          }
-
-          return previewUrl;
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-      );
 
+        body: formData,
+      });
 
-      setProfileImageUploading(
-        true,
-      );
+      const data = await response.json().catch(() => ({}));
 
-
-      try {
-        const formData =
-          new FormData();
-
-        formData.append(
-          'profileImage',
-          selectedFile,
-        );
-
-
-        const response =
-          await fetch(
-            `${API_BASE}/users/me/profile-image`,
-            {
-              method: 'PUT',
-
-              headers: {
-                Authorization:
-                  `Bearer ${token}`,
-              },
-
-              body: formData,
-            },
-          );
-
-
-        const data =
-          await response
-            .json()
-            .catch(() => ({}));
-
-
-        if (!response.ok) {
-          throw new Error(
-            data.message ||
-              'Unable to update your profile picture.',
-          );
-        }
-
-
-        const returnedUser =
-          data.user ||
-          data.data?.user ||
-          data.data ||
-          {};
-
-
-        const returnedRole =
-          getUserRole(
-            returnedUser,
-          ) ||
-          getUserRole(
-            profileUser,
-          );
-
-
-        if (
-          returnedRole &&
-          returnedRole !==
-            'super_admin'
-        ) {
-          throw new Error(
-            'The logged-in account is not a super administrator.',
-          );
-        }
-
-
-        const returnedImage =
-          returnedUser.profileImage ||
-          returnedUser.profile_image ||
-          data.profileImage ||
-          data.profile_image;
-
-
-        if (!returnedImage) {
-          throw new Error(
-            'The server updated the photo but did not return its saved path.',
-          );
-        }
-
-
-        const updatedUser = {
-          ...(profileUser || {}),
-          ...returnedUser,
-
-          role:
-            returnedRole ||
-            'super_admin',
-
-          profileImage:
-            returnedImage,
-
-          profile_image:
-            returnedImage,
-        };
-
-
-        URL.revokeObjectURL(
-          previewUrl,
-        );
-
-
-        setProfileImage(
-          resolveSuperAdminProfileImage(
-            returnedImage,
-          ),
-        );
-
-        setProfileUser(
-          updatedUser,
-        );
-
-
-        if (updateUser) {
-          updateUser(
-            updatedUser,
-          );
-        } else {
-          storeUpdatedUser(
-            updatedUser,
-          );
-        }
-      } catch (error) {
-        console.error(
-          'Super admin profile picture update error:',
-          error,
-        );
-
-
-        URL.revokeObjectURL(
-          previewUrl,
-        );
-
-        setProfileImage(
-          previousImage,
-        );
-
-
-        window.alert(
-          error.message ||
-            'Unable to update your profile picture.',
-        );
-      } finally {
-        setProfileImageUploading(
-          false,
+      if (!response.ok) {
+        throw new Error(
+          data.message || "Unable to update your profile picture.",
         );
       }
-    };
 
+      const returnedUser = data.user || data.data?.user || data.data || {};
+
+      const returnedRole =
+        getUserRole(returnedUser) || getUserRole(profileUser);
+
+      if (returnedRole && returnedRole !== "super_admin") {
+        throw new Error("The logged-in account is not a super administrator.");
+      }
+
+      const returnedImage =
+        returnedUser.profileImage ||
+        returnedUser.profile_image ||
+        data.profileImage ||
+        data.profile_image;
+
+      if (!returnedImage) {
+        throw new Error(
+          "The server updated the photo but did not return its saved path.",
+        );
+      }
+
+      const updatedUser = {
+        ...(profileUser || {}),
+        ...returnedUser,
+
+        role: returnedRole || "super_admin",
+
+        profileImage: returnedImage,
+
+        profile_image: returnedImage,
+      };
+
+      URL.revokeObjectURL(previewUrl);
+
+      setProfileImage(resolveSuperAdminProfileImage(returnedImage));
+
+      setProfileUser(updatedUser);
+
+      if (updateUser) {
+        updateUser(updatedUser);
+      } else {
+        storeUpdatedUser(updatedUser);
+      }
+    } catch (error) {
+      console.error("Super admin profile picture update error:", error);
+
+      URL.revokeObjectURL(previewUrl);
+
+      setProfileImage(previousImage);
+
+      window.alert(error.message || "Unable to update your profile picture.");
+    } finally {
+      setProfileImageUploading(false);
+    }
+  };
 
   /* ===================================================
      PAGE
@@ -736,7 +471,6 @@ export default function SuperAdminProfile() {
 
   return (
     <div className="admin-page superadmin-profile-page">
-
       {/* =============================================
           PAGE HEADER
       ============================================== */}
@@ -751,13 +485,11 @@ export default function SuperAdminProfile() {
           <h1>Super Admin Profile</h1>
 
           <p>
-            Review super administrator identity,
-            access level, and account ownership
-            details.
+            Review super administrator identity, access level, and account
+            ownership details.
           </p>
         </div>
       </section>
-
 
       {/* =============================================
           LOADING
@@ -765,174 +497,114 @@ export default function SuperAdminProfile() {
 
       {profileLoading && (
         <section className="superadmin-profile-status">
-          Loading super administrator
-          information...
+          Loading super administrator information...
         </section>
       )}
-
 
       {/* =============================================
           ERROR
       ============================================== */}
 
-      {!profileLoading &&
-        profileError && (
-          <section className="superadmin-profile-status superadmin-profile-error">
-            {profileError}
-          </section>
-        )}
-
+      {!profileLoading && profileError && (
+        <section className="superadmin-profile-status superadmin-profile-error">
+          {profileError}
+        </section>
+      )}
 
       {/* =============================================
           PROFILE
       ============================================== */}
 
-      {!profileLoading &&
-        !profileError && (
-          <section className="superadmin-profile-card">
+      {!profileLoading && !profileError && (
+        <section className="superadmin-profile-card">
+          <div className="superadmin-profile-card-body">
+            {/* PHOTO */}
 
-            <div className="superadmin-profile-card-body">
+            <div className="superadmin-profile-photo-column">
+              <div className="superadmin-profile-photo-frame">
+                <img
+                  src={profileImage}
+                  alt={`${profile.name}'s profile`}
+                  onError={(event) => {
+                    event.currentTarget.onerror = null;
 
-              {/* PHOTO */}
+                    event.currentTarget.src = DEFAULT_SUPER_ADMIN_PROFILE_IMAGE;
+                  }}
+                />
 
-              <div className="superadmin-profile-photo-column">
+                <label
+                  className="superadmin-profile-photo-button"
+                  title="Change profile picture"
+                  aria-label="Change profile picture"
+                >
+                  {profileImageUploading ? (
+                    <span>...</span>
+                  ) : (
+                    <FiCamera aria-hidden="true" />
+                  )}
 
-                <div className="superadmin-profile-photo-frame">
-
-                  <img
-                    src={profileImage}
-                    alt={`${profile.name}'s profile`}
-                    onError={(event) => {
-                      event.currentTarget.onerror =
-                        null;
-
-                      event.currentTarget.src =
-                        DEFAULT_SUPER_ADMIN_PROFILE_IMAGE;
-                    }}
+                  <input
+                    type="file"
+                    accept="image/png, image/jpeg, image/jpg, image/webp"
+                    onChange={changeProfilePicture}
+                    disabled={profileImageUploading}
                   />
-
-
-                  <label
-                    className="superadmin-profile-photo-button"
-                    title="Change profile picture"
-                    aria-label="Change profile picture"
-                  >
-
-                    {profileImageUploading ? (
-                      <span>...</span>
-                    ) : (
-                      <FiCamera
-                        aria-hidden="true"
-                      />
-                    )}
-
-
-                    <input
-                      type="file"
-                      accept="image/png, image/jpeg, image/jpg, image/webp"
-                      onChange={
-                        changeProfilePicture
-                      }
-                      disabled={
-                        profileImageUploading
-                      }
-                    />
-
-                  </label>
-
-                </div>
-
-
-                <strong>
-                  {profile.accountId}
-                </strong>
-
-                <span>
-                  {profile.accessLevel}
-                </span>
-
+                </label>
               </div>
 
+              <strong>{profile.accountId}</strong>
 
-              {/* INFORMATION */}
-
-              <div className="superadmin-profile-info">
-
-                <span className="superadmin-profile-kicker">
-                  <FiShield
-                    aria-hidden="true"
-                  />
-
-                  Current database account
-                </span>
-
-
-                <h2>
-                  {profile.name}
-                </h2>
-
-
-                <p className="superadmin-profile-email">
-                  <FiMail
-                    aria-hidden="true"
-                  />
-
-                  {profile.email}
-                </p>
-
-
-                <dl className="superadmin-profile-details-grid">
-
-                  <div>
-                    <dt>
-                      <FiUser
-                        aria-hidden="true"
-                      />
-                      Role
-                    </dt>
-
-                    <dd>
-                      {profile.role}
-                    </dd>
-                  </div>
-
-
-                  <div>
-                    <dt>
-                      <FiLayers
-                        aria-hidden="true"
-                      />
-                      Department
-                    </dt>
-
-                    <dd>
-                      {profile.department}
-                    </dd>
-                  </div>
-
-
-                  <div>
-                    <dt>
-                      <FiShield
-                        aria-hidden="true"
-                      />
-                      Access Level
-                    </dt>
-
-                    <dd>
-                      {profile.accessLevel}
-                    </dd>
-                  </div>
-
-                </dl>
-
-              </div>
-
+              <span>{profile.accessLevel}</span>
             </div>
 
-          </section>
-        )}
+            {/* INFORMATION */}
 
+            <div className="superadmin-profile-info">
+              <span className="superadmin-profile-kicker">
+                <FiShield aria-hidden="true" />
+                Current database account
+              </span>
+
+              <h2>{profile.name}</h2>
+
+              <p className="superadmin-profile-email">
+                <FiMail aria-hidden="true" />
+
+                {profile.email}
+              </p>
+
+              <dl className="superadmin-profile-details-grid">
+                <div>
+                  <dt>
+                    <FiUser aria-hidden="true" />
+                    Role
+                  </dt>
+
+                  <dd>{profile.role}</dd>
+                </div>
+
+                <div>
+                  <dt>
+                    <FiLayers aria-hidden="true" />
+                    Department
+                  </dt>
+
+                  <dd>{profile.department}</dd>
+                </div>
+
+                <div>
+                  <dt>
+                    <FiShield aria-hidden="true" />
+                    Access Level
+                  </dt>
+
+                  <dd>{profile.accessLevel}</dd>
+                </div>
+              </dl>
+            </div>
+          </div>
+        </section>
+      )}
     </div>
   );
 }

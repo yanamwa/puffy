@@ -3,7 +3,6 @@
    Clean folder-style lesson UI
    ========================================================= */
 
-
 /* =========================================================
    PAGE
    ========================================================= */
@@ -41,7 +40,6 @@
   overflow-x: hidden;
   overflow-y: auto;
 }
-
 
 /* =========================================================
    BACK TO HOMEPAGE
@@ -102,7 +100,6 @@
   transform: translateY(-1px);
 }
 
-
 /* =========================================================
    MAIN FOLDER
    ========================================================= */
@@ -134,7 +131,6 @@
   isolation: isolate;
 }
 
-
 /* =========================================================
    FOLDER TOP
    ========================================================= */
@@ -157,14 +153,7 @@
     var(--folder-edge) 100%
   );
 
-  clip-path: polygon(
-    0 0,
-    32.5% 0,
-    42% 78%,
-    100% 78%,
-    100% 100%,
-    0 100%
-  );
+  clip-path: polygon(0 0, 32.5% 0, 42% 78%, 100% 78%, 100% 100%, 0 100%);
 
   border-radius: 6px 6px 0 0;
 
@@ -172,7 +161,6 @@
 
   z-index: 1;
 }
-
 
 /* =========================================================
    FOLDED EDGE
@@ -198,18 +186,12 @@
     rgba(79, 97, 116, 0.2) 100%
   );
 
-  clip-path: polygon(
-    0 0,
-    100% 78%,
-    82% 78%,
-    0 18%
-  );
+  clip-path: polygon(0 0, 100% 78%, 82% 78%, 0 18%);
 
   pointer-events: none;
 
   z-index: 2;
 }
-
 
 /* Keep folder contents above pseudo-elements */
 
@@ -217,7 +199,6 @@
   position: relative;
   z-index: 3;
 }
-
 
 /* =========================================================
    FOLDER SHADOW
@@ -236,14 +217,7 @@
 
   background: var(--folder-fold-dark);
 
-  clip-path: polygon(
-    0 0,
-    32.5% 0,
-    42% 78%,
-    100% 78%,
-    100% 100%,
-    0 100%
-  );
+  clip-path: polygon(0 0, 32.5% 0, 42% 78%, 100% 78%, 100% 100%, 0 100%);
 
   border-radius: 7px 7px 0 0;
 
@@ -251,7 +225,6 @@
 
   z-index: 0 !important;
 }
-
 
 /* =========================================================
    TOP TABS
@@ -271,13 +244,11 @@
   gap: 24px;
 }
 
-
 .tabs a {
   color: inherit;
 
   text-decoration: none;
 }
-
 
 .welcome,
 .welcomeactive,
@@ -297,16 +268,16 @@
   align-items: center;
   justify-content: center;
 
-  background: #ffffff;
+  background: var(--folder-edge);
 
   border: 1px solid rgba(127, 168, 214, 0.85);
-  border-bottom-color: #ffffff;
+  border-bottom-color: var(--folder-edge);
 
   border-radius: 15px 15px 0 0;
 
   box-shadow: 0 -2px 10px rgba(79, 97, 116, 0.12);
 
-  color: #4f6174;
+  color: #ffffff;
 
   font-family: Georgia, "Times New Roman", serif;
   font-size: 17px;
@@ -325,17 +296,13 @@
     border-color 0.15s ease;
 }
 
-
 .welcomeactive,
 .howitworksactive {
-  background: var(--folder-edge);
-
+  background: #ffffff;
   border-color: var(--folder-edge);
-  border-bottom-color: var(--folder-edge);
-
-  color: #ffffff;
+  border-bottom-color: #ffffff;
+  color: #4f6174;
 }
-
 
 .welcome:hover:not(:disabled),
 .welcomeactive:hover:not(:disabled),
@@ -343,8 +310,8 @@
 .howitworks:hover:not(:disabled),
 .howitworksactive:hover:not(:disabled) {
   background: #eef4fb;
+  color: #4f6174;
 }
-
 
 .welcome:disabled,
 .welcomeactive:disabled,
@@ -355,7 +322,6 @@
 
   cursor: default;
 }
-
 
 /* =========================================================
    MAIN CONTENT
@@ -384,7 +350,6 @@
   overflow: visible;
 }
 
-
 /* =========================================================
    SLIDE COUNTER
    ========================================================= */
@@ -405,7 +370,6 @@
   line-height: 1.2;
 }
 
-
 /* Support older JSX using h3 */
 
 .greets > h3 {
@@ -423,7 +387,6 @@
 
   line-height: 1.2;
 }
-
 
 /* =========================================================
    MODULE COUNTER
@@ -445,7 +408,6 @@
   line-height: 1.2;
 }
 
-
 /* =========================================================
    MODULE TITLE
    ========================================================= */
@@ -466,7 +428,6 @@
   line-height: 1.2;
 }
 
-
 /* =========================================================
    PROGRESS
    ========================================================= */
@@ -480,7 +441,6 @@
   padding: 0;
 }
 
-
 .progressBar {
   width: 100%;
   height: 10px;
@@ -492,7 +452,6 @@
   overflow: hidden;
 }
 
-
 .progressFill {
   height: 100%;
 
@@ -502,7 +461,6 @@
 
   transition: width 0.3s ease;
 }
-
 
 .progressText {
   margin: 13px 0 0;
@@ -517,7 +475,6 @@
 
   line-height: 1.2;
 }
-
 
 /* =========================================================
    LESSON AREA
@@ -544,7 +501,6 @@
   overflow: visible;
 }
 
-
 /* =========================================================
    NORMAL LESSON SLIDE
    ========================================================= */
@@ -557,7 +513,6 @@
 
   white-space: normal;
 }
-
 
 .lessonSlideTitle {
   margin: 0 0 24px;
@@ -599,7 +554,6 @@
   overflow-wrap: anywhere;
 }
 
-
 .lessonSlideContent {
   width: 100%;
 
@@ -618,17 +572,14 @@
   overflow: visible;
 }
 
-
 .lessonSlideContent p {
   margin: 0 0 12px;
   padding: 0;
 }
 
-
 .lessonSlideContent p:last-child {
   margin-bottom: 0;
 }
-
 
 /* =========================================================
    OBJECTIVES
@@ -648,13 +599,11 @@
   line-height: 1.4;
 }
 
-
 .objectivesList li {
   margin-bottom: 8px;
 
   padding-left: 2px;
 }
-
 
 /* =========================================================
    MODULE SECTION TITLE
@@ -670,7 +619,6 @@
   font-size: 18px;
   font-weight: 400;
 }
-
 
 /* =========================================================
    MODULE OVERVIEW
@@ -690,7 +638,6 @@
   margin-top: 16px;
 }
 
-
 .moduleOverviewCard {
   min-width: 0;
 
@@ -705,7 +652,6 @@
   border-radius: 6px;
 }
 
-
 .moduleOverviewCard h3 {
   margin: 0 0 10px;
 
@@ -716,7 +662,6 @@
   font-size: 16px;
   font-weight: 400;
 }
-
 
 .moduleOverviewCard p {
   margin: 0;
@@ -729,7 +674,6 @@
 
   line-height: 1.4;
 }
-
 
 /* =========================================================
    MODULE CONTENT LIST
@@ -745,17 +689,14 @@
   padding-left: 20px;
 }
 
-
 .moduleContentList li {
   padding-left: 2px;
 }
-
 
 .moduleContentList strong,
 .moduleContentList span {
   display: block;
 }
-
 
 .moduleContentList strong {
   color: #222222;
@@ -763,7 +704,6 @@
   font-size: 14px;
   font-weight: 600;
 }
-
 
 .moduleContentList span {
   margin-top: 2px;
@@ -775,7 +715,6 @@
   line-height: 1.35;
 }
 
-
 /* =========================================================
    QUIZ
    ========================================================= */
@@ -786,7 +725,6 @@
   margin: 0;
   padding: 0;
 }
-
 
 .quizTitle {
   margin: 0 0 14px;
@@ -802,7 +740,6 @@
   line-height: 1.2;
 }
 
-
 .quizQuestion {
   margin: 0 0 16px;
   padding: 0;
@@ -817,7 +754,6 @@
   line-height: 1.35;
 }
 
-
 .noOptions {
   margin: 8px 0;
 
@@ -831,7 +767,6 @@
   line-height: 1.35;
 }
 
-
 /* =========================================================
    QUIZ OPTIONS
    ========================================================= */
@@ -844,7 +779,6 @@
 
   gap: 12px;
 }
-
 
 .optionButton {
   width: 100%;
@@ -876,13 +810,11 @@
     border-color 0.15s ease;
 }
 
-
 .optionButton:hover:not(:disabled) {
   background: #f7f7f7;
 
   border-color: #999999;
 }
-
 
 .selectedOption {
   background: #f1f1f1;
@@ -890,13 +822,11 @@
   border-color: #888888;
 }
 
-
 .optionButton:disabled {
   cursor: default;
 
   opacity: 0.75;
 }
-
 
 /* =========================================================
    PREVIOUS / NEXT
@@ -918,7 +848,6 @@
 
   flex-shrink: 0;
 }
-
 
 .button {
   min-width: 112px;
@@ -956,20 +885,17 @@
   transition: background-color 0.15s ease;
 }
 
-
 .button:hover:not(:disabled) {
   background: #f2f2f2;
 
   color: #111111;
 }
 
-
 .button:disabled {
   opacity: 0.35;
 
   cursor: not-allowed;
 }
-
 
 /* =========================================================
    LEGACY CLASSES
@@ -982,7 +908,6 @@
 #backgroundgreet {
   background: transparent;
 }
-
 
 .hello,
 #hello {
@@ -997,7 +922,6 @@
 
   line-height: 1.2;
 }
-
 
 .greeting1,
 #greeting1 {
@@ -1015,7 +939,6 @@
 
   white-space: pre-wrap;
 }
-
 
 /* =========================================================
    SWEETALERT QUIZ POPUP
@@ -1036,17 +959,12 @@
 
   border-radius: 14px !important;
 
-  box-shadow:
-    0 18px 45px rgba(0, 0, 0, 0.12) !important;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.12) !important;
 
-  font-family:
-    Georgia,
-    "Times New Roman",
-    serif !important;
+  font-family: Georgia, "Times New Roman", serif !important;
 
   overflow: hidden !important;
 }
-
 
 :global(.swal2-html-container) {
   width: 100% !important;
@@ -1059,29 +977,21 @@
 
   text-align: center !important;
 
-  font-family:
-    Georgia,
-    "Times New Roman",
-    serif !important;
+  font-family: Georgia, "Times New Roman", serif !important;
 }
-
 
 :global(.quiz-popup-title) {
   margin: 14px 0 24px !important;
 
   color: #222222 !important;
 
-  font-family:
-    Georgia,
-    "Times New Roman",
-    serif !important;
+  font-family: Georgia, "Times New Roman", serif !important;
 
   font-size: 38px !important;
   font-weight: 400 !important;
 
   text-align: center !important;
 }
-
 
 :global(.quiz-popup-content) {
   width: 100%;
@@ -1092,14 +1002,10 @@
 
   color: #222222;
 
-  font-family:
-    Georgia,
-    "Times New Roman",
-    serif;
+  font-family: Georgia, "Times New Roman", serif;
 
   line-height: 1.7;
 }
-
 
 :global(.quiz-popup-answer) {
   margin-bottom: 24px !important;
@@ -1110,7 +1016,6 @@
 
   line-height: 1.6 !important;
 }
-
 
 :global(.quiz-answer-value) {
   display: block;
@@ -1128,7 +1033,6 @@
   word-break: break-word;
 }
 
-
 :global(.quiz-popup-explanation) {
   margin-top: 14px !important;
 
@@ -1140,7 +1044,6 @@
 
   word-break: break-word;
 }
-
 
 :global(.quiz-popup-button) {
   min-width: 200px !important;
@@ -1160,10 +1063,7 @@
 
   color: #222222 !important;
 
-  font-family:
-    Georgia,
-    "Times New Roman",
-    serif !important;
+  font-family: Georgia, "Times New Roman", serif !important;
 
   font-size: 24px !important;
   font-weight: 400 !important;
@@ -1171,11 +1071,9 @@
   cursor: pointer !important;
 }
 
-
 :global(.quiz-popup-button:hover) {
   background: #f2f2f2 !important;
 }
-
 
 :global(.quiz-popup-icon) {
   margin-bottom: 12px !important;
@@ -1183,45 +1081,37 @@
   transform: scale(1.2);
 }
 
-
 /* =========================================================
    TABLET
    ========================================================= */
 
 @media (max-width: 900px) {
-
   .wrapper {
     padding: 104px 20px 60px;
   }
 
-
   .content {
     width: min(1000px, calc(100vw - 40px));
   }
-
 
   .moduleOverviewGrid {
     grid-template-columns: 1fr;
   }
 }
 
-
 /* =========================================================
    MOBILE
    ========================================================= */
 
 @media (max-width: 700px) {
-
   .wrapper {
     padding: 112px 14px 40px;
   }
-
 
   .backButton {
     top: 18px;
     left: 14px;
   }
-
 
   .content {
     width: 100%;
@@ -1232,7 +1122,6 @@
     padding: 28px 22px 32px;
   }
 
-
   /* Folder top */
 
   .content::before {
@@ -1241,16 +1130,8 @@
     width: 100%;
     height: 76px;
 
-    clip-path: polygon(
-      0 0,
-      31% 0,
-      44% 76%,
-      100% 76%,
-      100% 100%,
-      0 100%
-    );
+    clip-path: polygon(0 0, 31% 0, 44% 76%, 100% 76%, 100% 100%, 0 100%);
   }
-
 
   .content::after {
     top: -62px;
@@ -1262,22 +1143,13 @@
     clip-path: polygon(0 0, 100% 76%, 82% 76%, 0 18%);
   }
 
-
   .ribbon {
     top: -72px;
 
     height: 86px;
 
-    clip-path: polygon(
-      0 0,
-      31% 0,
-      44% 76%,
-      100% 76%,
-      100% 100%,
-      0 100%
-    );
+    clip-path: polygon(0 0, 31% 0, 44% 76%, 100% 76%, 100% 100%, 0 100%);
   }
-
 
   /* Tabs */
 
@@ -1287,7 +1159,6 @@
 
     gap: 8px;
   }
-
 
   .welcome,
   .welcomeactive,
@@ -1305,7 +1176,6 @@
     font-size: 13px;
   }
 
-
   /* Text */
 
   .slideCounter,
@@ -1314,33 +1184,27 @@
     font-size: 17px;
   }
 
-
   .greets h2 {
     font-size: 28px;
   }
-
 
   .lessonSlideTitle,
   .quizTitle {
     font-size: 28px;
   }
 
-
   .lessonSlideContent,
   .quizQuestion {
     font-size: 19px;
   }
 
-
   .optionButton {
     font-size: 18px;
   }
 
-
   .navButtons {
     margin-top: 22px;
   }
-
 
   .button {
     min-width: 104px;
@@ -1353,17 +1217,14 @@
   }
 }
 
-
 /* =========================================================
    SMALL MOBILE
    ========================================================= */
 
 @media (max-width: 480px) {
-
   .wrapper {
     padding: 106px 10px 30px;
   }
-
 
   .content {
     width: 100%;
@@ -1372,18 +1233,15 @@
     padding: 22px 15px 24px;
   }
 
-
   .content::before {
     top: -56px;
     height: 68px;
   }
 
-
   .content::after {
     top: -56px;
     height: 68px;
   }
-
 
   .ribbon {
     top: -65px;
@@ -1391,14 +1249,12 @@
     height: 77px;
   }
 
-
   .tabs {
     top: -34px;
     right: 10px;
 
     gap: 5px;
   }
-
 
   .welcome,
   .welcomeactive,
@@ -1414,34 +1270,28 @@
     font-size: 12px;
   }
 
-
   .greets h2 {
     font-size: 24px;
   }
 
-
   .progressWrapper {
     margin-bottom: 25px;
   }
-
 
   .lessonSlideTitle,
   .quizTitle {
     font-size: 20px;
   }
 
-
   .navButtons {
     gap: 7px;
   }
-
 
   .button {
     min-width: 96px;
 
     padding: 0 16px;
   }
-
 
   :global(.quiz-popup-content) {
     padding: 0 5px;
@@ -1455,7 +1305,6 @@
 .introductionPage {
   min-height: 560px;
 }
-
 
 /* =========================================================
    INTRODUCTION CONTENT
@@ -1480,7 +1329,6 @@
   text-align: left;
 }
 
-
 /* =========================================================
    HELLO USER
    ========================================================= */
@@ -1498,7 +1346,6 @@
 
   line-height: 1.16;
 }
-
 
 /* =========================================================
    MODULE TITLE
@@ -1518,7 +1365,6 @@
   line-height: 1.18;
 }
 
-
 /* =========================================================
    LEARNING OBJECTIVES
    ========================================================= */
@@ -1537,7 +1383,6 @@
   line-height: 1.2;
 }
 
-
 /* =========================================================
    DESCRIPTION
    ========================================================= */
@@ -1555,7 +1400,6 @@
 
   line-height: 1.4;
 }
-
 
 /* =========================================================
    OBJECTIVE LIST
@@ -1580,17 +1424,14 @@
   line-height: 1.42;
 }
 
-
 .introObjectivesList li {
   margin: 0 0 7px;
   padding-left: 4px;
 }
 
-
 .introObjectivesList li:last-child {
   margin-bottom: 0;
 }
-
 
 /* =========================================================
    NEXT BUTTON
@@ -1609,22 +1450,18 @@
   padding-top: 26px;
 }
 
-
 .introNavigation a {
   text-decoration: none;
 }
-
 
 /* =========================================================
    MOBILE
    ========================================================= */
 
 @media (max-width: 700px) {
-
   .introductionPage {
     min-height: 430px;
   }
-
 
   .introGreeting {
     margin-bottom: 20px;
@@ -1632,27 +1469,22 @@
     font-size: 28px;
   }
 
-
   .introModuleTitle {
     margin-bottom: 22px;
 
     font-size: 28px;
   }
 
-
   .introSectionTitle {
     font-size: 25px;
   }
-
 
   .introDescription,
   .introObjectivesList {
     font-size: 17px;
   }
 
-
   .introductionContent {
     min-height: auto;
   }
-
 }

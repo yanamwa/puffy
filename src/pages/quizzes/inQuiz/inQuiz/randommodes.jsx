@@ -1,3 +1,5 @@
+import Swal from "sweetalert2";
+import { lessonAuthHeaders } from "../../../../services/lessonAuth.js";
 import { saveAccountQuizResult } from "../../../../utils/quizStorage.js";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -56,7 +58,9 @@ function cleanChoiceText(text = "") {
 }
 
 function cleanQuestionText(text = "") {
-  return String(text).replace(/\s*A\..*/is, "").trim();
+  return String(text)
+    .replace(/\s*A\..*/is, "")
+    .trim();
 }
 
 function cleanAnswerText(text = "") {
@@ -82,7 +86,7 @@ function cleanTypingAnswer(text = "") {
 
 function levenshtein(a, b) {
   const dp = Array.from({ length: a.length + 1 }, () =>
-    Array(b.length + 1).fill(0)
+    Array(b.length + 1).fill(0),
   );
 
   for (let i = 0; i <= a.length; i++) dp[i][0] = i;
@@ -214,7 +218,7 @@ function getOtherAnswerOptions(item, allItems) {
     allItems
       .filter((optionItem) => optionItem.id !== item.id)
       .map((optionItem) => optionItem.answer)
-      .filter((answer) => cleanChoiceText(answer) !== item.answerKey)
+      .filter((answer) => cleanChoiceText(answer) !== item.answerKey),
   );
 }
 
@@ -222,10 +226,10 @@ function buildMultipleChoiceRound(item, allItems) {
   const options =
     item.options.length >= 2
       ? item.options
-      : getUniqueOptions([item.answer, ...getOtherAnswerOptions(item, allItems)]).slice(
-          0,
-          4
-        );
+      : getUniqueOptions([
+          item.answer,
+          ...getOtherAnswerOptions(item, allItems),
+        ]).slice(0, 4);
 
   if (options.length < 2) return null;
 
@@ -239,7 +243,7 @@ function buildMultipleChoiceRound(item, allItems) {
     options: shuffledOptions,
     answer: item.answer,
     correct: shuffledOptions.findIndex(
-      (option) => cleanChoiceText(option) === item.answerKey
+      (option) => cleanChoiceText(option) === item.answerKey,
     ),
     explanation: item.explanation,
   };
@@ -281,7 +285,9 @@ function buildMixedQuestions(items) {
   const sourceItems = Array.isArray(items) ? items : [];
   const baseItems = sourceItems.map(normalizeBaseMixedItem).filter(Boolean);
   const recallRounds = baseItems.flatMap((item) =>
-    [buildMultipleChoiceRound(item, baseItems), buildQandARound(item)].filter(Boolean)
+    [buildMultipleChoiceRound(item, baseItems), buildQandARound(item)].filter(
+      Boolean,
+    ),
   );
   const matchingRounds = buildMatchingRounds(baseItems);
 
@@ -303,7 +309,10 @@ function getRoundPoints(question) {
 }
 
 function getTotalPoints(questions) {
-  return questions.reduce((total, question) => total + getRoundPoints(question), 0);
+  return questions.reduce(
+    (total, question) => total + getRoundPoints(question),
+    0,
+  );
 }
 
 function getReviewAnswer(question, userAnswer, isCorrect) {
@@ -325,8 +334,11 @@ export default function MixedMode() {
   const isDeckMode = Boolean(deckId);
   const practiceSession = useMemo(
     () => getStoredPracticeSession({ lessonId, deckId }),
-    [lessonId, deckId]
+    [lessonId, deckId],
   );
+
+  const isMainQuiz = practiceSession?.scope?.scopeType === "main_quiz";
+  const mainQuizId = useRef(null);
 
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -354,14 +366,57 @@ export default function MixedMode() {
 
       try {
         if (practiceSession) {
-          setQuestions(buildMixedQuestions(practiceSession.items));
+          if (isMainQuiz) {
+            const response = await fetch(
+              `${API_BASE}/lessons/main-quiz/start`,
+              {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                  "Content-Type": "application/json",
+                  ...lessonAuthHeaders(),
+                },
+                body: JSON.stringify({
+                  course_id: Number(practiceSession.scope.courseId),
+                  module_id: practiceSession.scope.scopeId,
+                }),
+              },
+            );
+            const data = await response.json();
+            if (!response.ok || !data.success) {
+              await Swal.fire({
+                icon: "info",
+                title: "Main Quiz",
+                text: data.message,
+                confirmButtonText: "OK",
+              });
+              navigate(
+                `/student/enrolled-courses/${practiceSession.scope.courseId}`,
+                { replace: true },
+              );
+              return;
+            }
+            mainQuizId.current = data.quiz.quizId;
+            setQuestions(
+              data.quiz.questions.map((item, index) => ({
+                id: index,
+                type: item.type === "identification" ? "qna" : "multiple",
+                question: item.question,
+                options: item.options,
+                answer: "",
+                correct: -1,
+              })),
+            );
+          } else {
+            setQuestions(buildMixedQuestions(practiceSession.items));
+          }
           return;
         }
 
         if (isLessonMode) {
           const response = await fetch(
             `${API_BASE}/getLessonsById.php?id=${lessonId}`,
-            { credentials: "include" }
+            { credentials: "include" },
           );
           const lessonData = normalizeLessonData(await response.json());
           const rawQuiz = getLessonQuizData(lessonData);
@@ -375,7 +430,7 @@ export default function MixedMode() {
         if (isDeckMode) {
           const cardsResponse = await fetch(
             `${API_BASE}/getCardsByDeck.php?deckId=${deckId}`,
-            { credentials: "include" }
+            { credentials: "include" },
           );
           const cardsData = await cardsResponse.json();
           const cards = cardsData.success ? cardsData.cards || [] : [];
@@ -411,7 +466,9 @@ export default function MixedMode() {
 
   const question = questions[current];
   const totalPoints = getTotalPoints(questions);
-  const progress = questions.length ? ((current + 1) / questions.length) * 100 : 0;
+  const progress = questions.length
+    ? ((current + 1) / questions.length) * 100
+    : 0;
 
   const leftCards = useMemo(() => {
     if (question?.type !== "matching") return [];
@@ -421,7 +478,7 @@ export default function MixedMode() {
         id: item.id,
         text: item.question,
         side: "left",
-      }))
+      })),
     );
   }, [question]);
 
@@ -433,7 +490,7 @@ export default function MixedMode() {
         id: item.id,
         text: item.answer,
         side: "right",
-      }))
+      })),
     );
   }, [question]);
 
@@ -458,7 +515,7 @@ export default function MixedMode() {
   async function saveQuizAttempt(finalScore) {
     const metadata = getPracticeResultMetadata(
       practiceSession,
-      isDeckMode ? "deck" : "lesson"
+      isDeckMode ? "deck" : "lesson",
     );
 
     try {
@@ -466,6 +523,7 @@ export default function MixedMode() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...lessonAuthHeaders(),
         },
         credentials: "include",
         body: JSON.stringify({
@@ -485,28 +543,67 @@ export default function MixedMode() {
   }
 
   async function finishQuiz(finalScore, finalAnswers) {
-    await saveQuizAttempt(finalScore);
-
+    let mainResult = null;
+    if (isMainQuiz) {
+      try {
+        const response = await fetch(`${API_BASE}/lessons/main-quiz/submit`, {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            ...lessonAuthHeaders(),
+          },
+          body: JSON.stringify({
+            quiz_id: mainQuizId.current,
+            answers: finalAnswers.map((answer) => answer.userAnswer),
+          }),
+        });
+        const data = await response.json();
+        if (!response.ok || !data.success)
+          throw new Error(data.message || "Main Quiz could not be recorded.");
+        mainResult = data.result;
+      } catch (error) {
+        await Swal.fire({
+          icon: "error",
+          title: "Result not saved",
+          text: error.message,
+        });
+        return;
+      }
+    }
     const resultPayload = {
-      ...getPracticeResultMetadata(practiceSession, isDeckMode ? "deck" : "lesson"),
+      ...getPracticeResultMetadata(
+        practiceSession,
+        isDeckMode ? "deck" : "lesson",
+      ),
       quizMode: "mixed",
       deckId: toNumericId(deckId),
       lessonId: lessonId || null,
-      score: finalScore,
-      total: totalPoints,
-      answers: finalAnswers,
+      score: mainResult?.score ?? finalScore,
+      total: mainResult?.total ?? totalPoints,
+      answers: mainResult
+        ? mainResult.answers.map((answer) => ({
+            ...answer,
+            userAnswer: answer.selected_answer,
+            correctAnswer: answer.correct_answer,
+          }))
+        : finalAnswers,
+      savedAttemptId: mainResult ? mainQuizId.current : undefined,
     };
 
     saveAccountQuizResult("lessonQuizResults", JSON.stringify(resultPayload));
 
     if (isDeckMode) {
-      saveAccountQuizResult(`deckQuizResults_${deckId}`, JSON.stringify(resultPayload));
+      saveAccountQuizResult(
+        `deckQuizResults_${deckId}`,
+        JSON.stringify(resultPayload),
+      );
     }
 
     navigate(
       isDeckMode
         ? `/review/deck/${deckId}`
-        : getPracticeReviewPath(practiceSession, { lessonId, deckId })
+        : getPracticeReviewPath(practiceSession, { lessonId, deckId }),
     );
   }
 
@@ -523,9 +620,11 @@ export default function MixedMode() {
     if (locked || !question) return;
 
     setLocked(true);
-    setNotifImage(isCorrect ? "/images/correct_answer.png" : "/images/wrong_answer.png");
-    setNotifOpen(true);
-    setStatus(isCorrect ? styles.correct : styles.wrong);
+    setNotifImage(
+      isCorrect ? "/images/correct_answer.png" : "/images/wrong_answer.png",
+    );
+    setNotifOpen(!isMainQuiz);
+    setStatus(isMainQuiz ? "" : isCorrect ? styles.correct : styles.wrong);
 
     const nextScore = score + (isCorrect ? 1 : 0);
     const nextAnswers = [
@@ -554,7 +653,7 @@ export default function MixedMode() {
 
     recordSingleAnswer(
       typingAnswer,
-      isCloseEnough(typingAnswer, question.answer)
+      isCloseEnough(typingAnswer, question.answer),
     );
   }
 
@@ -666,7 +765,9 @@ export default function MixedMode() {
             <div className={styles.speedBox}>
               <div className={styles.speedHeader}>
                 <label>Voice Speed</label>
-                <span className={styles.speedValue}>{voiceSpeed.toFixed(1)}x</span>
+                <span className={styles.speedValue}>
+                  {voiceSpeed.toFixed(1)}x
+                </span>
               </div>
 
               <input
@@ -714,7 +815,7 @@ export default function MixedMode() {
               navigate(
                 isDeckMode
                   ? `/review/deck/${deckId}`
-                  : getPracticeBackPath(practiceSession, { lessonId, deckId })
+                  : getPracticeBackPath(practiceSession, { lessonId, deckId }),
               )
             }
           >
@@ -747,9 +848,14 @@ export default function MixedMode() {
               Round {current + 1} of {questions.length}
             </div>
             <div className={styles.progressContainer}>
-              <div className={styles.progressBar} style={{ width: `${progress}%` }} />
+              <div
+                className={styles.progressBar}
+                style={{ width: `${progress}%` }}
+              />
             </div>
-            <div className={styles.typeBadge}>{getQuestionTypeLabel(question.type)}</div>
+            <div className={styles.typeBadge}>
+              {getQuestionTypeLabel(question.type)}
+            </div>
           </header>
 
           <main className={styles.quizAppContainer}>
@@ -763,7 +869,8 @@ export default function MixedMode() {
                           className={`${styles.card} ${
                             matchedIds.includes(card.id) ? styles.matched : ""
                           } ${
-                            firstCard?.id === card.id && firstCard?.side === "left"
+                            firstCard?.id === card.id &&
+                            firstCard?.side === "left"
                               ? styles.selected
                               : ""
                           } ${isWrongCard(card, "left") ? styles.wrongShake : ""}`}
@@ -799,7 +906,8 @@ export default function MixedMode() {
                           className={`${styles.card} ${
                             matchedIds.includes(card.id) ? styles.matched : ""
                           } ${
-                            firstCard?.id === card.id && firstCard?.side === "right"
+                            firstCard?.id === card.id &&
+                            firstCard?.side === "right"
                               ? styles.selected
                               : ""
                           } ${isWrongCard(card, "right") ? styles.wrongShake : ""}`}
@@ -834,7 +942,6 @@ export default function MixedMode() {
 
   return (
     <div className={styles.wrapper}>
-
       {notifOpen && (
         <div className={styles.slideNotif}>
           <img
@@ -865,10 +972,15 @@ export default function MixedMode() {
         </div>
 
         <div className={styles.progressContainer}>
-          <div className={styles.progressBar} style={{ width: `${progress}%` }} />
+          <div
+            className={styles.progressBar}
+            style={{ width: `${progress}%` }}
+          />
         </div>
 
-        <div className={styles.typeBadge}>{getQuestionTypeLabel(question.type)}</div>
+        <div className={styles.typeBadge}>
+          {getQuestionTypeLabel(question.type)}
+        </div>
       </div>
 
       <div className={styles.questionBox}>

@@ -12,31 +12,30 @@ export default function RandomModesTutorial() {
   const slides = [
     {
       type: "Multiple Choice",
-      question: "Which keyword is used to prevent a class from being subclassed?",
+      question:
+        "Which keyword is used to prevent a class from being subclassed?",
       options: ["static", "final", "const", "sealed"],
-      correct: "final"
+      correct: "final",
     },
     {
       type: "Q&A",
-      question: "Type the keyword used to prevent a class from being subclassed.",
-      answer: "final"
+      question:
+        "Type the keyword used to prevent a class from being subclassed.",
+      answer: "final",
     },
     {
       type: "Matching Type",
       pairs: [
         ["final", "Prevents subclassing"],
         ["static", "Belongs to the class"],
-        ["const", "Declares a constant"]
-      ]
-    }
+        ["const", "Declares a constant"],
+      ],
+    },
   ];
 
   useEffect(() => {
-
     const interval = setInterval(() => {
-
       setIndex((prev) => {
-
         let next = prev + 1;
 
         if (next >= slides.length) {
@@ -44,13 +43,10 @@ export default function RandomModesTutorial() {
         }
 
         return next;
-
       });
-
     }, 3500);
 
     return () => clearInterval(interval);
-
   }, []);
 
   const handleStart = () => {
@@ -65,21 +61,17 @@ export default function RandomModesTutorial() {
   };
 
   return (
-
     <div className={styles.wrapper}>
       <TutorialBackButton />
-
 
       {/* HEADER */}
 
       <div className={styles.headerBox}>
-
         <div className={styles.headerTop}>
           <h1 className={styles.title}>Mixed Mode</h1>
         </div>
 
         <div className={styles.subtitles}>
-
           <p className={styles.subtitle}>
             Practice with matching type, multiple choice, and Q&A all at once.
           </p>
@@ -88,49 +80,39 @@ export default function RandomModesTutorial() {
             Mixed Mode changes the question style as you play, so review feels
             closer to the real quiz types.
           </p>
-
         </div>
 
         <button className={styles.startBtn} onClick={handleStart}>
           Start
         </button>
-
       </div>
 
       {/* QUIZ */}
 
       <div className={styles.slideshowBox}>
-            <div className={styles.demoHeader}>Quiz Tutorial</div>
+        <div className={styles.demoHeader}>Quiz Tutorial</div>
         {/* SLIDES */}
 
         {slides.map((slide, i) => (
-
           <div
             key={i}
             className={`${styles.slide} ${i === index ? styles.active : ""}`}
           >
-
-            <p className={styles.question}>
-              {slide.type}
-            </p>
+            <p className={styles.question}>{slide.type}</p>
 
             {slide.options && (
               <>
                 <p className={styles.prompt}>{slide.question}</p>
 
                 <div className={styles.options}>
-
                   {slide.options.map((option, j) => (
-
                     <button
                       key={j}
                       className={option === slide.correct ? styles.correct : ""}
                     >
                       {option}
                     </button>
-
                   ))}
-
                 </div>
               </>
             )}
@@ -157,30 +139,20 @@ export default function RandomModesTutorial() {
                 </div>
               </div>
             )}
-
           </div>
-
         ))}
 
         {/* DOTS */}
 
         <div className={styles.dots}>
-
           {slides.map((_, i) => (
-
             <span
               key={i}
               className={`${styles.dot} ${i === index ? styles.activeDot : ""}`}
             />
-
           ))}
-
         </div>
-
       </div>
-
     </div>
-
   );
-
 }

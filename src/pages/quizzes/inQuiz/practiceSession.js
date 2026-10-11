@@ -26,7 +26,10 @@ export function getStoredPracticeSession({ lessonId, deckId } = {}) {
     ? readStorageJson("practiceCards", [])
     : readStorageJson("practiceQuizzes", []);
 
-  if (!Array.isArray(items) || items.length === 0) {
+  if (
+    (!Array.isArray(items) || items.length === 0) &&
+    readStorageJson("practiceScope", {})?.scopeType !== "main_quiz"
+  ) {
     return null;
   }
 

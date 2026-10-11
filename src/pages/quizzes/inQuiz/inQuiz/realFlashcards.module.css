@@ -174,8 +174,8 @@
   margin-top: 25px;
   box-sizing: border-box;
   box-shadow:
-    0 8px 18px rgba(0,0,0,0.08),
-    inset 0 1px 0 rgba(255,255,255,0.7);
+    0 8px 18px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -301,7 +301,7 @@
   transition: 0.2s ease;
   z-index: 5;
 
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
 .audioIconBtn i {
@@ -367,7 +367,7 @@
 
 .difficulty button:active {
   transform: translateY(3px);
-  box-shadow: 0 1px 0 rgba(0,0,0,0.25);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
 }
 
 /* =========================
@@ -610,7 +610,6 @@
   border: 1px solid #b5b5b5;
 }
 
-
 .notifImage {
   width: 200px;
   height: 200px;
@@ -660,7 +659,6 @@
     transform: translate(-50%, -50%);
   }
 }
-
 
 .flashcardImage {
   width: 100%;
@@ -723,8 +721,7 @@
   font-size: 26px;
   line-height: 1.4;
   text-align: center;
-} 
-
+}
 
 .emptyWrapper {
   min-height: 100vh;
@@ -769,7 +766,6 @@
   cursor: pointer;
   font-weight: 600;
 }
-
 
 /* =========================================
    RESPONSIVE ACCESSIBILITY SETTINGS MODAL
@@ -960,7 +956,7 @@
   .switchBtn {
     font-size: 16px;
   }
-} 
+}
 
 /* =========================================
    FIXED RESPONSIVE FLASHCARD - NOT TALL

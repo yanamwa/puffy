@@ -1,12 +1,10 @@
-import { FiSearch } from 'react-icons/fi';
+import { FiSearch } from "react-icons/fi";
 
-import RoleNotificationMenu
-  from '../rolenotif/RoleNotificationMenu';
+import RoleNotificationMenu from "../rolenotif/RoleNotificationMenu";
 
-import HeaderProfileChip
-  from '../HeaderProfileChip';
+import HeaderProfileChip from "../HeaderProfileChip";
 
-import './SuperAdminHeader.css';
+import "./SuperAdminHeader.css";
 
 export default function SuperAdminHeader({
   displayUsername,
@@ -26,9 +24,7 @@ export default function SuperAdminHeader({
       </div>
 
       <div className="admin-header-actions">
-        <RoleNotificationMenu
-          role="superAdmin"
-        />
+        <RoleNotificationMenu role="superAdmin" />
 
         <HeaderProfileChip
           username={displayUsername}
@@ -37,14 +33,14 @@ export default function SuperAdminHeader({
           profilePath="/super-admin/profile"
           menuItems={[
             {
-              label: 'Profile',
-              path: '/super-admin/profile',
-              icon: 'user',
+              label: "Profile",
+              path: "/super-admin/profile",
+              icon: "user",
             },
             {
-              label: 'Settings',
-              path: '/super-admin/settings',
-              icon: 'settings',
+              label: "Settings",
+              path: "/super-admin/settings",
+              icon: "settings",
             },
           ]}
           onLogout={onLogout}

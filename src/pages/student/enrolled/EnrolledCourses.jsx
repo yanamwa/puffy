@@ -35,11 +35,7 @@ function normalizeCourse(course = {}) {
       course.course_id ||
       course.courseCode ||
       course.course_code,
-    code:
-      course.code ||
-      course.courseCode ||
-      course.course_code ||
-      "COURSE",
+    code: course.code || course.courseCode || course.course_code || "COURSE",
     title:
       course.title ||
       course.courseName ||
@@ -190,7 +186,8 @@ export function Icon({ name }) {
 
 export function SortToggle({ options, value, onChange }) {
   const selectedIndex = Math.max(0, options.indexOf(value));
-  const nextIndex = selectedIndex === options.length - 1 ? 0 : selectedIndex + 1;
+  const nextIndex =
+    selectedIndex === options.length - 1 ? 0 : selectedIndex + 1;
 
   return (
     <button
@@ -254,7 +251,7 @@ export default function EnrolledCourses() {
 
       if (!token) {
         throw new Error(
-          "Your login session was not found. Please log in again."
+          "Your login session was not found. Please log in again.",
         );
       }
 
@@ -266,7 +263,7 @@ export default function EnrolledCourses() {
             Accept: "application/json",
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       const data = await response.json().catch(() => ({}));
@@ -285,9 +282,7 @@ export default function EnrolledCourses() {
     } catch (error) {
       console.error("Enrolled courses loading error:", error);
       setCourses([]);
-      setErrorMessage(
-        error.message || "Could not load enrolled courses."
-      );
+      setErrorMessage(error.message || "Could not load enrolled courses.");
     } finally {
       setLoading(false);
     }
@@ -362,10 +357,7 @@ export default function EnrolledCourses() {
       });
 
       const joinedCourseId =
-        course.id ||
-        course.courseId ||
-        course.course_id ||
-        course.code;
+        course.id || course.courseId || course.course_id || course.code;
 
       if (joinedCourseId) {
         navigate(`/student/enrolled-courses/${joinedCourseId}`);
@@ -421,7 +413,7 @@ export default function EnrolledCourses() {
 
       if (!token) {
         throw new Error(
-          "Your login session was not found. Please log in again."
+          "Your login session was not found. Please log in again.",
         );
       }
 
@@ -434,22 +426,20 @@ export default function EnrolledCourses() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       const data = await response.json().catch(() => ({}));
 
       if (!response.ok) {
-        throw new Error(
-          data.message || "Unable to unenroll from this course."
-        );
+        throw new Error(data.message || "Unable to unenroll from this course.");
       }
 
       setCourses((currentCourses) =>
         currentCourses.filter(
           (currentCourse) =>
-            (currentCourse.id || currentCourse.code) !== courseId
-        )
+            (currentCourse.id || currentCourse.code) !== courseId,
+        ),
       );
 
       await Swal.fire({
@@ -464,8 +454,7 @@ export default function EnrolledCourses() {
 
       await Swal.fire({
         title: "Unable to unenroll",
-        text:
-          error.message || "Unable to unenroll from this course.",
+        text: error.message || "Unable to unenroll from this course.",
         icon: "error",
         confirmButtonText: "Okay",
         confirmButtonColor: "#7FA8D6",
@@ -544,18 +533,13 @@ export default function EnrolledCourses() {
             </div>
           </section>
 
-          <section
-            className="courses-grid"
-            aria-label="Enrolled courses"
-          >
+          <section className="courses-grid" aria-label="Enrolled courses">
             {loading ? (
               <div className="student-empty-state">
                 Loading enrolled courses...
               </div>
             ) : errorMessage ? (
-              <div className="student-empty-state">
-                {errorMessage}
-              </div>
+              <div className="student-empty-state">{errorMessage}</div>
             ) : visibleCourses.length === 0 ? (
               <div className="student-empty-state">
                 {searchQuery
@@ -566,27 +550,19 @@ export default function EnrolledCourses() {
               visibleCourses.map((course) => {
                 const courseId = course.id || course.code;
                 const menuOpen = openCourseMenu === courseId;
-                const isUnenrolling =
-                  unenrollingCourseId === courseId;
+                const isUnenrolling = unenrollingCourseId === courseId;
 
                 return (
-                  <div
-                    key={courseId}
-                    className="course-card-wrapper"
-                  >
+                  <div key={courseId} className="course-card-wrapper">
                     <Link
                       to={`/student/enrolled-courses/${courseId}`}
                       className="course-folder enrolled-course-folder"
                       aria-label={`Open ${course.title}`}
                     >
                       <div className="course-card-body">
-                        <span className="course-code">
-                          {course.code}
-                        </span>
+                        <span className="course-code">{course.code}</span>
 
-                        <h2 title={course.title}>
-                          {course.title}
-                        </h2>
+                        <h2 title={course.title}>{course.title}</h2>
                       </div>
 
                       <div className="course-card-footer">
@@ -594,7 +570,7 @@ export default function EnrolledCourses() {
                           src={
                             course.professorProfileImage
                               ? resolveProfileImage(
-                                  course.professorProfileImage
+                                  course.professorProfileImage,
                                 )
                               : undefined
                           }
@@ -603,9 +579,7 @@ export default function EnrolledCourses() {
 
                         <div className="enrolled-course-meta">
                           <span>{course.instructor}</span>
-                          <small>
-                            {course.professorDepartment}
-                          </small>
+                          <small>{course.professorDepartment}</small>
                         </div>
                       </div>
                     </Link>
@@ -624,9 +598,7 @@ export default function EnrolledCourses() {
                           event.stopPropagation();
 
                           setOpenCourseMenu((current) =>
-                            current === courseId
-                              ? null
-                              : courseId
+                            current === courseId ? null : courseId,
                           );
                         }}
                       >
@@ -639,9 +611,7 @@ export default function EnrolledCourses() {
                         <div
                           className="course-options-menu"
                           role="menu"
-                          onClick={(event) =>
-                            event.stopPropagation()
-                          }
+                          onClick={(event) => event.stopPropagation()}
                         >
                           <button
                             type="button"
@@ -654,19 +624,14 @@ export default function EnrolledCourses() {
                               handleUnenrollCourse(course);
                             }}
                           >
-                            <svg
-                              viewBox="0 0 24 24"
-                              aria-hidden="true"
-                            >
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
                               <path d="M10 5H5v14h5" />
                               <path d="m14 8 4 4-4 4" />
                               <path d="M18 12H9" />
                             </svg>
 
                             <span>
-                              {isUnenrolling
-                                ? "Unenrolling..."
-                                : "Unenroll"}
+                              {isUnenrolling ? "Unenrolling..." : "Unenroll"}
                             </span>
                           </button>
                         </div>

@@ -7,7 +7,6 @@
   gap: 22px;
 }
 
-
 /* =====================================================
    PAGE HEADER
 ===================================================== */
@@ -29,7 +28,6 @@
   box-shadow: 5px 5px 0 rgba(25, 135, 84, 0.12);
 }
 
-
 .security-permissions-page .feature-page-top h1 {
   margin: 0 0 7px;
 
@@ -38,7 +36,6 @@
   font-size: 28px;
   font-weight: 900;
 }
-
 
 .security-permissions-page .feature-page-top p {
   max-width: 720px;
@@ -52,7 +49,6 @@
 
   line-height: 1.5;
 }
-
 
 /* =====================================================
    AUDIT LOG BUTTON
@@ -87,7 +83,6 @@
     transform 150ms ease;
 }
 
-
 .security-log-link:hover {
   background: #198754;
 
@@ -96,7 +91,6 @@
   transform: translateY(-1px);
 }
 
-
 /* =====================================================
    POLICY CARDS
 ===================================================== */
@@ -104,12 +98,10 @@
 .security-policy-grid {
   display: grid;
 
-  grid-template-columns:
-    repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 
   gap: 16px;
 }
-
 
 .security-policy-card {
   min-width: 0;
@@ -123,7 +115,6 @@
 
   box-shadow: 4px 4px 0 rgba(25, 135, 84, 0.1);
 }
-
 
 .security-policy-card > span {
   width: 38px;
@@ -141,12 +132,10 @@
   color: #198754;
 }
 
-
 .security-policy-card > span svg {
   width: 18px;
   height: 18px;
 }
-
 
 .security-policy-card small {
   display: inline-block;
@@ -163,7 +152,6 @@
   text-transform: uppercase;
 }
 
-
 .security-policy-card h2 {
   margin: 0 0 6px;
 
@@ -173,7 +161,6 @@
   font-weight: 900;
 }
 
-
 .security-policy-card p {
   margin: 0;
 
@@ -182,7 +169,6 @@
   font-size: 11px;
   font-weight: 600;
 }
-
 
 /* =====================================================
    ROLE / AUDIT CARD
@@ -199,11 +185,9 @@
   box-shadow: 5px 5px 0 rgba(25, 135, 84, 0.1);
 }
 
-
 .security-role-card .feature-card-body {
   padding: 21px;
 }
-
 
 .security-role-card .feature-section-top {
   display: flex;
@@ -215,7 +199,6 @@
   margin-bottom: 17px;
 }
 
-
 .security-role-card .feature-section-top h2 {
   margin: 0 0 5px;
 
@@ -225,7 +208,6 @@
   font-weight: 900;
 }
 
-
 .security-role-card .feature-section-top p {
   margin: 0;
 
@@ -234,7 +216,6 @@
   font-size: 11px;
   font-weight: 600;
 }
-
 
 /* =====================================================
    TABLE
@@ -249,7 +230,6 @@
   border-radius: 10px;
 }
 
-
 .security-table {
   width: 100%;
 
@@ -257,7 +237,6 @@
 
   background: #ffffff;
 }
-
 
 .security-table th,
 .security-table td {
@@ -268,7 +247,6 @@
   text-align: left;
   vertical-align: middle;
 }
-
 
 .security-table th {
   background: #f7f9f8;
@@ -281,7 +259,6 @@
   text-transform: uppercase;
 }
 
-
 .security-table td {
   color: #626871;
 
@@ -291,11 +268,9 @@
   line-height: 1.45;
 }
 
-
 .security-table tbody tr:last-child td {
   border-bottom: 0;
 }
-
 
 .security-table td span {
   display: inline-flex;
@@ -312,18 +287,15 @@
   font-weight: 900;
 }
 
-
 /* =====================================================
    RESPONSIVE
 ===================================================== */
 
 @media (max-width: 1050px) {
   .security-policy-grid {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
-
 
 @media (max-width: 640px) {
   .security-permissions-page .feature-page-top {

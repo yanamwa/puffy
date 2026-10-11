@@ -26,7 +26,7 @@ export default function ModeManagement() {
   });
 
   const notificationCount = bellNotifications.filter(
-    (notif) => notif.status === "unread"
+    (notif) => notif.status === "unread",
   ).length;
 
   const getModeId = (mode) => {
@@ -73,7 +73,7 @@ export default function ModeManagement() {
 
       const res = await fetch(
         `${API_BASE}/getAdminNotifications.php?admin_id=${storedAdmin.id || ""}`,
-        { credentials: "include" }
+        { credentials: "include" },
       );
 
       const data = await res.json();
@@ -180,7 +180,7 @@ export default function ModeManagement() {
 
         if (!title || !description || !route) {
           Swal.showValidationMessage(
-            "Please fill out title, description, and route"
+            "Please fill out title, description, and route",
           );
           return false;
         }
@@ -211,7 +211,11 @@ export default function ModeManagement() {
       const data = safeJsonParse(text);
 
       if (data.success) {
-        Swal.fire("Success", data.message || "Mode added successfully!", "success");
+        Swal.fire(
+          "Success",
+          data.message || "Mode added successfully!",
+          "success",
+        );
         fetchModes();
       } else {
         Swal.fire("Error", data.message || "Failed to add mode", "error");
@@ -221,18 +225,18 @@ export default function ModeManagement() {
     }
   };
 
-const handleViewMode = (mode) => {
-  Swal.fire({
-    title: "View Mode",
-    customClass: {
-      popup: styles.swalPopup,
-      title: styles.swalTitle,
-      htmlContainer: styles.swalHtml,
-      actions: styles.swalActions,
-      confirmButton: styles.swalConfirmBtn,
-    },
-    buttonsStyling: false,
-    html: `
+  const handleViewMode = (mode) => {
+    Swal.fire({
+      title: "View Mode",
+      customClass: {
+        popup: styles.swalPopup,
+        title: styles.swalTitle,
+        htmlContainer: styles.swalHtml,
+        actions: styles.swalActions,
+        confirmButton: styles.swalConfirmBtn,
+      },
+      buttonsStyling: false,
+      html: `
       <div class="${styles.viewModeBox}">
         ${
           mode.image
@@ -261,9 +265,9 @@ const handleViewMode = (mode) => {
         </div>
       </div>
     `,
-    confirmButtonText: "Close",
-  });
-};
+      confirmButtonText: "Close",
+    });
+  };
 
   const handleEditMode = async (mode) => {
     const modeId = getModeId(mode);
@@ -327,7 +331,11 @@ const handleViewMode = (mode) => {
       const data = safeJsonParse(text);
 
       if (data.success) {
-        Swal.fire("Success", data.message || "Mode updated successfully!", "success");
+        Swal.fire(
+          "Success",
+          data.message || "Mode updated successfully!",
+          "success",
+        );
         fetchModes();
       } else {
         Swal.fire("Error", data.message || "Failed to update mode", "error");
@@ -367,7 +375,11 @@ const handleViewMode = (mode) => {
       const data = safeJsonParse(text);
 
       if (data.success) {
-        Swal.fire("Deleted", data.message || "Mode deleted successfully!", "success");
+        Swal.fire(
+          "Deleted",
+          data.message || "Mode deleted successfully!",
+          "success",
+        );
         fetchModes();
       } else {
         Swal.fire("Error", data.message || "Failed to delete mode", "error");
@@ -382,9 +394,15 @@ const handleViewMode = (mode) => {
 
     return (
       String(getModeId(mode)).toLowerCase().includes(q) ||
-      String(mode.title || "").toLowerCase().includes(q) ||
-      String(mode.description || "").toLowerCase().includes(q) ||
-      String(mode.route || "").toLowerCase().includes(q)
+      String(mode.title || "")
+        .toLowerCase()
+        .includes(q) ||
+      String(mode.description || "")
+        .toLowerCase()
+        .includes(q) ||
+      String(mode.route || "")
+        .toLowerCase()
+        .includes(q)
     );
   });
 
@@ -392,19 +410,17 @@ const handleViewMode = (mode) => {
 
   const shownModes = filteredModes.slice(
     (currentPage - 1) * rowsToShow,
-    currentPage * rowsToShow
+    currentPage * rowsToShow,
   );
 
   return (
-<div
-  className={`${styles.gridContainer} ${
-    isCollapsed ? styles.collapsedLayout : ""
-  }`}
->      <AdminSidebar
-        isCollapsed={isCollapsed}
-        setIsCollapsed={setIsCollapsed}
-      />
-
+    <div
+      className={`${styles.gridContainer} ${
+        isCollapsed ? styles.collapsedLayout : ""
+      }`}
+    >
+      {" "}
+      <AdminSidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
       <AdminHeader
         admin={admin}
         searchQuery={searchQuery}
@@ -415,7 +431,6 @@ const handleViewMode = (mode) => {
         notificationCount={notificationCount}
         handleMarkAllAsRead={handleMarkAllAsRead}
       />
-
       <main className={styles.main}>
         <div className={styles.pageTop}>
           <div>
@@ -423,7 +438,11 @@ const handleViewMode = (mode) => {
             <p>Create and manage practice modes for PuffyBrain users.</p>
           </div>
 
-          <button className={styles.addBtn} type="button" onClick={handleAddMode}>
+          <button
+            className={styles.addBtn}
+            type="button"
+            onClick={handleAddMode}
+          >
             + Add New Mode
           </button>
         </div>

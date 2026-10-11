@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 import {
   FiBookOpen,
   FiBriefcase,
@@ -6,23 +6,20 @@ import {
   FiLock,
   FiMail,
   FiUser,
-} from 'react-icons/fi';
-import Swal from 'sweetalert2';
-import './ProfessorProfile.css';
+} from "react-icons/fi";
+import Swal from "sweetalert2";
+import "./ProfessorProfile.css";
 
 /* =====================================================
    API CONFIG
 ===================================================== */
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_URL ||
-  'http://localhost:5000/api';
+  import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
-const SERVER_ORIGIN =
-  API_BASE_URL.replace(/\/api\/?$/, '');
+const SERVER_ORIGIN = API_BASE_URL.replace(/\/api\/?$/, "");
 
-const DEFAULT_PROFILE_IMAGE =
-  '/images/temporaryimg.png';
+const DEFAULT_PROFILE_IMAGE = "/images/temporaryimg.png";
 
 /* =====================================================
    PROFILE IMAGE
@@ -34,10 +31,10 @@ function resolveProfessorImage(imagePath) {
   }
 
   if (
-    imagePath.startsWith('http://') ||
-    imagePath.startsWith('https://') ||
-    imagePath.startsWith('blob:') ||
-    imagePath.startsWith('data:')
+    imagePath.startsWith("http://") ||
+    imagePath.startsWith("https://") ||
+    imagePath.startsWith("blob:") ||
+    imagePath.startsWith("data:")
   ) {
     return imagePath;
   }
@@ -45,18 +42,14 @@ function resolveProfessorImage(imagePath) {
   let fixedPath = imagePath;
 
   // Fix older stored image paths
-  if (
-    fixedPath.startsWith(
-      '/api/uploads/profile-images/'
-    )
-  ) {
+  if (fixedPath.startsWith("/api/uploads/profile-images/")) {
     fixedPath = fixedPath.replace(
-      '/api/uploads/profile-images/',
-      '/uploads/profile-images/'
+      "/api/uploads/profile-images/",
+      "/uploads/profile-images/",
     );
   }
 
-  if (!fixedPath.startsWith('/')) {
+  if (!fixedPath.startsWith("/")) {
     fixedPath = `/${fixedPath}`;
   }
 
@@ -69,41 +62,28 @@ function resolveProfessorImage(imagePath) {
 
 function getProfessorProfileData(user) {
   return {
-    name:
-      user?.displayName ||
-      user?.display_name ||
-      user?.name ||
-      'Not set',
+    name: user?.displayName || user?.display_name || user?.name || "Not set",
 
     employeeId:
       user?.professorFacultyId ||
       user?.professor_faculty_id ||
       user?.professorId ||
       user?.professor_id ||
-      'Not set',
+      "Not set",
 
     department:
-      user?.professorDepartment ||
-      user?.professor_department ||
-      'Not set',
+      user?.professorDepartment || user?.professor_department || "Not set",
 
-    position:
-      user?.professorPosition ||
-      user?.professor_position ||
-      'Not set',
+    position: user?.professorPosition || user?.professor_position || "Not set",
 
-    email:
-      user?.email ||
-      'Not set',
+    email: user?.email || "Not set",
 
     specialization:
       user?.professorSpecialization ||
       user?.professor_specialization ||
-      'Not set',
+      "Not set",
 
-    role:
-      user?.role ||
-      'professor',
+    role: user?.role || "professor",
 
     mustChangePassword:
       user?.mustChangePassword === true ||
@@ -116,7 +96,7 @@ function getProfessorProfileData(user) {
       user?.profile_image ||
       user?.avatar ||
       user?.image ||
-      '',
+      "",
   };
 }
 
@@ -126,15 +106,12 @@ function getProfessorProfileData(user) {
 
 function formatRole(role) {
   if (!role) {
-    return 'Professor';
+    return "Professor";
   }
 
   return String(role)
-    .replace(/_/g, ' ')
-    .replace(
-      /\b\w/g,
-      (letter) => letter.toUpperCase()
-    );
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
 /* =====================================================
@@ -142,24 +119,17 @@ function formatRole(role) {
 ===================================================== */
 
 export default function ProfessorProfile() {
-  const [professorData, setProfessorData] =
-    useState(
-      getProfessorProfileData(null)
-    );
+  const [professorData, setProfessorData] = useState(
+    getProfessorProfileData(null),
+  );
 
-  const [profileImage, setProfileImage] =
-    useState(DEFAULT_PROFILE_IMAGE);
+  const [profileImage, setProfileImage] = useState(DEFAULT_PROFILE_IMAGE);
 
-  const [loading, setLoading] =
-    useState(true);
+  const [loading, setLoading] = useState(true);
 
-  const [error, setError] =
-    useState('');
+  const [error, setError] = useState("");
 
-  const [
-    profileImageUploading,
-    setProfileImageUploading,
-  ] = useState(false);
+  const [profileImageUploading, setProfileImageUploading] = useState(false);
 
   /* =====================================================
      GET TOKEN
@@ -167,11 +137,11 @@ export default function ProfessorProfile() {
 
   const getStoredToken = () => {
     return (
-      localStorage.getItem('token') ||
-      localStorage.getItem('authToken') ||
-      localStorage.getItem('puffy-token') ||
-      sessionStorage.getItem('token') ||
-      sessionStorage.getItem('authToken')
+      localStorage.getItem("token") ||
+      localStorage.getItem("authToken") ||
+      localStorage.getItem("puffy-token") ||
+      sessionStorage.getItem("token") ||
+      sessionStorage.getItem("authToken")
     );
   };
 
@@ -182,102 +152,60 @@ export default function ProfessorProfile() {
   const fetchProfessorProfile = async () => {
     try {
       setLoading(true);
-      setError('');
+      setError("");
 
       const token = getStoredToken();
 
       if (!token) {
         throw new Error(
-          'Your login session was not found. Please log in again.'
+          "Your login session was not found. Please log in again.",
         );
       }
 
-      const response = await fetch(
-        `${API_BASE_URL}/users/me`,
-        {
-          method: 'GET',
+      const response = await fetch(`${API_BASE_URL}/users/me`, {
+        method: "GET",
 
-          headers: {
-            Accept: 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-      const data = await response
-        .json()
-        .catch(() => ({}));
+      const data = await response.json().catch(() => ({}));
 
       if (!response.ok) {
         throw new Error(
-          data.message ||
-            'Unable to load professor information.'
+          data.message || "Unable to load professor information.",
         );
       }
 
-      const loggedInUser =
-        data.user ||
-        data.data?.user ||
-        data.data ||
-        data;
+      const loggedInUser = data.user || data.data?.user || data.data || data;
 
       if (!loggedInUser) {
-        throw new Error(
-          'Professor account information was not found.'
-        );
+        throw new Error("Professor account information was not found.");
       }
 
-      if (
-        loggedInUser.role &&
-        loggedInUser.role !== 'professor'
-      ) {
-        throw new Error(
-          'The logged-in account is not a professor.'
-        );
+      if (loggedInUser.role && loggedInUser.role !== "professor") {
+        throw new Error("The logged-in account is not a professor.");
       }
 
-      const normalizedProfessor =
-        getProfessorProfileData(
-          loggedInUser
-        );
+      const normalizedProfessor = getProfessorProfileData(loggedInUser);
 
-      setProfessorData(
-        normalizedProfessor
-      );
+      setProfessorData(normalizedProfessor);
 
-      setProfileImage(
-        resolveProfessorImage(
-          normalizedProfessor.profileImage
-        )
-      );
+      setProfileImage(resolveProfessorImage(normalizedProfessor.profileImage));
 
-      const serializedUser =
-        JSON.stringify(loggedInUser);
+      const serializedUser = JSON.stringify(loggedInUser);
 
-      localStorage.setItem(
-        'puffy-user',
-        serializedUser
-      );
+      localStorage.setItem("puffy-user", serializedUser);
 
-      localStorage.setItem(
-        'user',
-        serializedUser
-      );
+      localStorage.setItem("user", serializedUser);
 
-      localStorage.setItem(
-        'currentUser',
-        serializedUser
-      );
+      localStorage.setItem("currentUser", serializedUser);
     } catch (error) {
-      console.error(
-        'Professor profile loading error:',
-        error
-      );
+      console.error("Professor profile loading error:", error);
 
-      setError(
-        error.message ||
-          'Unable to load professor profile.'
-      );
+      setError(error.message || "Unable to load professor profile.");
     } finally {
       setLoading(false);
     }
@@ -297,12 +225,8 @@ export default function ProfessorProfile() {
 
   useEffect(() => {
     return () => {
-      if (
-        profileImage?.startsWith('blob:')
-      ) {
-        URL.revokeObjectURL(
-          profileImage
-        );
+      if (profileImage?.startsWith("blob:")) {
+        URL.revokeObjectURL(profileImage);
       }
     };
   }, [profileImage]);
@@ -311,317 +235,222 @@ export default function ProfessorProfile() {
      CHANGE PROFILE PICTURE
   ===================================================== */
 
-  const changeProfilePicture =
-    async (event) => {
-      const selectedFile =
-        event.target.files?.[0];
+  const changeProfilePicture = async (event) => {
+    const selectedFile = event.target.files?.[0];
 
-      event.target.value = '';
+    event.target.value = "";
 
-      if (!selectedFile) {
-        return;
-      }
+    if (!selectedFile) {
+      return;
+    }
 
-      /* INVALID FILE */
+    /* INVALID FILE */
 
-      if (
-        !selectedFile.type.startsWith(
-          'image/'
-        )
-      ) {
-        await Swal.fire({
-          icon: 'error',
-          title: 'Invalid File',
-          text: 'Please select a valid JPG, PNG, or WEBP image.',
-          confirmButtonText: 'OK',
-          confirmButtonColor: '#7FA8D6',
-        });
+    if (!selectedFile.type.startsWith("image/")) {
+      await Swal.fire({
+        icon: "error",
+        title: "Invalid File",
+        text: "Please select a valid JPG, PNG, or WEBP image.",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#7FA8D6",
+      });
 
-        return;
-      }
+      return;
+    }
 
-      /* FILE SIZE */
+    /* FILE SIZE */
 
-      const maximumFileSize =
-        5 * 1024 * 1024;
+    const maximumFileSize = 5 * 1024 * 1024;
 
-      if (
-        selectedFile.size >
-        maximumFileSize
-      ) {
-        await Swal.fire({
-          icon: 'warning',
-          title: 'File Too Large',
-          text: 'Please choose an image smaller than 5 MB.',
-          confirmButtonText: 'OK',
-          confirmButtonColor: '#7FA8D6',
-        });
+    if (selectedFile.size > maximumFileSize) {
+      await Swal.fire({
+        icon: "warning",
+        title: "File Too Large",
+        text: "Please choose an image smaller than 5 MB.",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#7FA8D6",
+      });
 
-        return;
-      }
+      return;
+    }
 
-      /* CHECK SESSION */
+    /* CHECK SESSION */
 
-      const token =
-        getStoredToken();
+    const token = getStoredToken();
 
-      if (!token) {
-        await Swal.fire({
-          icon: 'error',
-          title: 'Session Expired',
-          text: 'Your login session was not found. Please log in again.',
-          confirmButtonText: 'OK',
-          confirmButtonColor: '#7FA8D6',
-        });
+    if (!token) {
+      await Swal.fire({
+        icon: "error",
+        title: "Session Expired",
+        text: "Your login session was not found. Please log in again.",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#7FA8D6",
+      });
 
-        return;
-      }
+      return;
+    }
 
-      const previousImage =
-        profileImage;
+    const previousImage = profileImage;
 
-      const previewUrl =
-        URL.createObjectURL(
-          selectedFile
-        );
+    const previewUrl = URL.createObjectURL(selectedFile);
 
-      // Preview selected image
-      setProfileImage(
-        previewUrl
-      );
+    // Preview selected image
+    setProfileImage(previewUrl);
 
-      setProfileImageUploading(
-        true
-      );
+    setProfileImageUploading(true);
 
-      try {
-        const formData =
-          new FormData();
+    try {
+      const formData = new FormData();
 
-        formData.append(
-          'profileImage',
-          selectedFile
-        );
+      formData.append("profileImage", selectedFile);
 
-        /* ===============================================
+      /* ===============================================
            UPLOAD IMAGE
         =============================================== */
 
-        const response = await fetch(
-          `${API_BASE_URL}/users/me/profile-image`,
-          {
-            method: 'PUT',
+      const response = await fetch(`${API_BASE_URL}/users/me/profile-image`, {
+        method: "PUT",
 
-            headers: {
-              Authorization:
-                `Bearer ${token}`,
-            },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
 
-            body: formData,
-          }
+        body: formData,
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || "Unable to update your profile picture.",
         );
+      }
 
-        const data = await response
-          .json()
-          .catch(() => ({}));
-
-        if (!response.ok) {
-          throw new Error(
-            data.message ||
-              'Unable to update your profile picture.'
-          );
-        }
-
-        /* ===============================================
+      /* ===============================================
            GET RETURNED IMAGE
         =============================================== */
 
-        const returnedUser =
-          data.user ||
-          data.data?.user ||
-          data.data ||
-          {};
+      const returnedUser = data.user || data.data?.user || data.data || {};
 
-        const returnedImage =
-          returnedUser.profileImage ||
-          returnedUser.profile_image ||
-          data.profileImage ||
-          data.profile_image;
+      const returnedImage =
+        returnedUser.profileImage ||
+        returnedUser.profile_image ||
+        data.profileImage ||
+        data.profile_image;
 
-        if (!returnedImage) {
-          throw new Error(
-            'The server updated the photo but did not return its saved path.'
-          );
-        }
-
-        const savedImageUrl =
-          resolveProfessorImage(
-            returnedImage
-          );
-
-        console.log(
-          'Saved professor image path:',
-          returnedImage
+      if (!returnedImage) {
+        throw new Error(
+          "The server updated the photo but did not return its saved path.",
         );
+      }
 
-        console.log(
-          'Professor image URL:',
-          savedImageUrl
-        );
+      const savedImageUrl = resolveProfessorImage(returnedImage);
 
-        /* ===============================================
+      console.log("Saved professor image path:", returnedImage);
+
+      console.log("Professor image URL:", savedImageUrl);
+
+      /* ===============================================
            DISPLAY SAVED IMAGE
         =============================================== */
 
-        setProfileImage(
-          savedImageUrl
-        );
+      setProfileImage(savedImageUrl);
 
-        setProfessorData(
-          (currentProfessor) => ({
-            ...currentProfessor,
+      setProfessorData((currentProfessor) => ({
+        ...currentProfessor,
 
-            profileImage:
-              returnedImage,
-          })
-        );
+        profileImage: returnedImage,
+      }));
 
-        /* ===============================================
+      /* ===============================================
            UPDATE LOCAL STORAGE
         =============================================== */
 
-        const currentSavedUser = (() => {
-          try {
-            const stored =
-              localStorage.getItem(
-                'puffy-user'
-              ) ||
-              localStorage.getItem(
-                'user'
-              ) ||
-              localStorage.getItem(
-                'currentUser'
-              );
+      const currentSavedUser = (() => {
+        try {
+          const stored =
+            localStorage.getItem("puffy-user") ||
+            localStorage.getItem("user") ||
+            localStorage.getItem("currentUser");
 
-            return stored
-              ? JSON.parse(stored)
-              : {};
-          } catch {
-            return {};
-          }
-        })();
+          return stored ? JSON.parse(stored) : {};
+        } catch {
+          return {};
+        }
+      })();
 
-        const updatedStoredUser = {
-          ...currentSavedUser,
-          ...returnedUser,
+      const updatedStoredUser = {
+        ...currentSavedUser,
+        ...returnedUser,
 
-          profileImage:
-            returnedImage,
+        profileImage: returnedImage,
 
-          profile_image:
-            returnedImage,
-        };
+        profile_image: returnedImage,
+      };
 
-        const serializedUser =
-          JSON.stringify(
-            updatedStoredUser
-          );
+      const serializedUser = JSON.stringify(updatedStoredUser);
 
-        localStorage.setItem(
-          'puffy-user',
-          serializedUser
-        );
+      localStorage.setItem("puffy-user", serializedUser);
 
-        localStorage.setItem(
-          'user',
-          serializedUser
-        );
+      localStorage.setItem("user", serializedUser);
 
-        localStorage.setItem(
-          'currentUser',
-          serializedUser
-        );
+      localStorage.setItem("currentUser", serializedUser);
 
-        /* ===============================================
+      /* ===============================================
            UPDATE HEADER / SIDEBAR
         =============================================== */
 
-        window.dispatchEvent(
-          new CustomEvent(
-            'puffy-user-updated',
-            {
-              detail:
-                updatedStoredUser,
-            }
-          )
-        );
+      window.dispatchEvent(
+        new CustomEvent("puffy-user-updated", {
+          detail: updatedStoredUser,
+        }),
+      );
 
-        /* ===============================================
+      /* ===============================================
            REMOVE PREVIEW URL
         =============================================== */
 
-        if (
-          previewUrl.startsWith(
-            'blob:'
-          )
-        ) {
-          URL.revokeObjectURL(
-            previewUrl
-          );
-        }
+      if (previewUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(previewUrl);
+      }
 
-        /* ===============================================
+      /* ===============================================
            SWEETALERT SUCCESS
         =============================================== */
 
-        await Swal.fire({
-          icon: 'success',
-          title: 'Profile Updated!',
-          text: 'Your profile picture has been updated successfully.',
-          showConfirmButton: false,
-          timer: 1800,
-          timerProgressBar: true,
-        });
-      } catch (error) {
-        console.error(
-          'Profile picture update error:',
-          error
-        );
+      await Swal.fire({
+        icon: "success",
+        title: "Profile Updated!",
+        text: "Your profile picture has been updated successfully.",
+        showConfirmButton: false,
+        timer: 1800,
+        timerProgressBar: true,
+      });
+    } catch (error) {
+      console.error("Profile picture update error:", error);
 
-        if (
-          previewUrl.startsWith(
-            'blob:'
-          )
-        ) {
-          URL.revokeObjectURL(
-            previewUrl
-          );
-        }
+      if (previewUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(previewUrl);
+      }
 
-        // Restore previous picture
-        setProfileImage(
-          previousImage
-        );
+      // Restore previous picture
+      setProfileImage(previousImage);
 
-        /* ===============================================
+      /* ===============================================
            SWEETALERT ERROR
         =============================================== */
 
-        await Swal.fire({
-          icon: 'error',
-          title: 'Update Failed',
-          text:
-            error.message ||
-            'Unable to update your profile picture.',
-          confirmButtonText: 'OK',
-          confirmButtonColor: '#7FA8D6',
-        });
-      } finally {
-        setProfileImageUploading(
-          false
-        );
-      }
-    };
+      await Swal.fire({
+        icon: "error",
+        title: "Update Failed",
+        text: error.message || "Unable to update your profile picture.",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#7FA8D6",
+      });
+    } finally {
+      setProfileImageUploading(false);
+    }
+  };
 
   /* =====================================================
      LOADING
@@ -631,15 +460,11 @@ export default function ProfessorProfile() {
     return (
       <div className="professor-profile-page">
         <section className="professor-profile-page-heading">
-          <h1>
-            Professor Profile
-          </h1>
+          <h1>Professor Profile</h1>
         </section>
 
         <section className="professor-profile-content">
-          <p>
-            Loading professor information...
-          </p>
+          <p>Loading professor information...</p>
         </section>
       </div>
     );
@@ -653,9 +478,7 @@ export default function ProfessorProfile() {
     return (
       <div className="professor-profile-page">
         <section className="professor-profile-page-heading">
-          <h1>
-            Professor Profile
-          </h1>
+          <h1>Professor Profile</h1>
         </section>
 
         <section className="professor-profile-content">
@@ -671,56 +494,35 @@ export default function ProfessorProfile() {
 
   return (
     <div className="professor-profile-page">
-
       <section className="professor-profile-page-heading">
-        <h1>
-          Professor Profile
-        </h1>
+        <h1>Professor Profile</h1>
       </section>
 
       <section className="professor-profile-content">
-
         <div className="professor-profile-layout">
-
           {/* LEFT: PROFESSOR ID CARD */}
 
           <article className="professor-identity-card">
-
             <div className="professor-identity-card-accent" />
 
             <div className="professor-identity-header">
-
               <div className="professor-identity-brand">
-
-                <img
-                  src="/images/logo_solo.png"
-                  alt="PuffyBrain"
-                />
+                <img src="/images/logo_solo.png" alt="PuffyBrain" />
 
                 <div>
-                  <strong>
-                    PuffyBrain
-                  </strong>
+                  <strong>PuffyBrain</strong>
 
-                  <span>
-                    Professor Identification Card
-                  </span>
+                  <span>Professor Identification Card</span>
                 </div>
-
               </div>
 
               <span className="professor-identity-role">
-                {formatRole(
-                  professorData.role
-                )}
+                {formatRole(professorData.role)}
               </span>
-
             </div>
 
             <div className="professor-identity-photo-area">
-
               <div className="professor-id-photo-frame">
-
                 <img
                   src={profileImage}
                   alt={`${professorData.name}'s profile`}
@@ -728,15 +530,13 @@ export default function ProfessorProfile() {
 
                   onError={(event) => {
                     console.error(
-                      'Professor profile image failed to load:',
-                      profileImage
+                      "Professor profile image failed to load:",
+                      profileImage,
                     );
 
-                    event.currentTarget.onerror =
-                      null;
+                    event.currentTarget.onerror = null;
 
-                    event.currentTarget.src =
-                      DEFAULT_PROFILE_IMAGE;
+                    event.currentTarget.src = DEFAULT_PROFILE_IMAGE;
                   }}
                 />
 
@@ -745,319 +545,189 @@ export default function ProfessorProfile() {
                   title="Change profile picture"
                   aria-label="Change profile picture"
                 >
-
-                  {profileImageUploading
-                    ? '...'
-                    : (
-                      <FiCamera
-                        aria-hidden="true"
-                      />
-                    )}
+                  {profileImageUploading ? (
+                    "..."
+                  ) : (
+                    <FiCamera aria-hidden="true" />
+                  )}
 
                   <input
                     type="file"
                     accept="image/png,image/jpeg,image/jpg,image/webp"
                     className="professor-photo-input"
-                    onChange={
-                      changeProfilePicture
-                    }
-                    disabled={
-                      profileImageUploading
-                    }
+                    onChange={changeProfilePicture}
+                    disabled={profileImageUploading}
                   />
-
                 </label>
-
               </div>
 
               <div className="professor-identity-main">
-
                 <span className="professor-identity-overline">
                   Official faculty profile
                 </span>
 
-                <h2>
-                  {professorData.name}
-                </h2>
+                <h2>{professorData.name}</h2>
 
                 <strong className="professor-identity-number">
                   {professorData.employeeId}
                 </strong>
 
-                <p>
-                  {professorData.department}
-                </p>
+                <p>{professorData.department}</p>
 
                 <div className="professor-identity-professional-row">
-                  <span>
-                    {professorData.position}
-                  </span>
+                  <span>{professorData.position}</span>
                 </div>
-
               </div>
-
             </div>
 
             <div className="professor-identity-footer">
-
               <div>
-                <span>
-                  Issued by
-                </span>
+                <span>Issued by</span>
 
-                <strong>
-                  PuffyBrain Learning System
-                </strong>
+                <strong>PuffyBrain Learning System</strong>
               </div>
 
-              <div
-                className="professor-id-barcode"
-                aria-hidden="true"
-              />
-
+              <div className="professor-id-barcode" aria-hidden="true" />
             </div>
-
           </article>
 
           {/* RIGHT SIDE */}
 
           <div className="professor-profile-details">
-
             <div className="professor-profile-details-header">
-
               <div>
-
                 <span className="professor-profile-eyebrow">
                   Profile overview
                 </span>
 
-                <h2>
-                  Professor Information
-                </h2>
+                <h2>Professor Information</h2>
 
-                <p>
-                  Your personal, professional,
-                  and account information.
-                </p>
-
+                <p>Your personal, professional, and account information.</p>
               </div>
-
             </div>
 
             {/* PERSONAL INFORMATION */}
 
             <section className="professor-info-section">
-
               <div className="professor-info-section-heading">
-
                 <span className="professor-info-section-icon">
                   <FiUser aria-hidden="true" />
                 </span>
 
                 <div>
-                  <h3>
-                    Personal Information
-                  </h3>
+                  <h3>Personal Information</h3>
 
-                  <p>
-                    Basic professor account details
-                  </p>
+                  <p>Basic professor account details</p>
                 </div>
-
               </div>
 
               <div className="professor-info-grid">
-
                 <div className="professor-info-item">
+                  <span className="professor-info-label">Full Name</span>
 
-                  <span className="professor-info-label">
-                    Full Name
-                  </span>
-
-                  <strong>
-                    {professorData.name}
-                  </strong>
-
+                  <strong>{professorData.name}</strong>
                 </div>
 
                 <div className="professor-info-item">
+                  <span className="professor-info-label">Employee ID</span>
 
-                  <span className="professor-info-label">
-                    Employee ID
-                  </span>
-
-                  <strong>
-                    {professorData.employeeId}
-                  </strong>
-
+                  <strong>{professorData.employeeId}</strong>
                 </div>
 
                 <div className="professor-info-item professor-info-item-wide">
-
-                  <span className="professor-info-label">
-                    Email Address
-                  </span>
+                  <span className="professor-info-label">Email Address</span>
 
                   <div className="professor-info-value-row">
-
                     <FiMail aria-hidden="true" />
 
-                    <strong>
-                      {professorData.email}
-                    </strong>
-
+                    <strong>{professorData.email}</strong>
                   </div>
-
                 </div>
-
               </div>
-
             </section>
 
             {/* PROFESSIONAL INFORMATION */}
 
             <section className="professor-info-section">
-
               <div className="professor-info-section-heading">
-
                 <span className="professor-info-section-icon">
                   <FiBriefcase aria-hidden="true" />
                 </span>
 
                 <div>
+                  <h3>Professional Information</h3>
 
-                  <h3>
-                    Professional Information
-                  </h3>
-
-                  <p>
-                    Faculty assignment and academic expertise
-                  </p>
-
+                  <p>Faculty assignment and academic expertise</p>
                 </div>
-
               </div>
 
               <div className="professor-info-grid">
-
                 <div className="professor-info-item professor-info-item-wide">
-
-                  <span className="professor-info-label">
-                    Department
-                  </span>
+                  <span className="professor-info-label">Department</span>
 
                   <div className="professor-info-value-row">
-
                     <FiBookOpen aria-hidden="true" />
 
-                    <strong>
-                      {professorData.department}
-                    </strong>
-
+                    <strong>{professorData.department}</strong>
                   </div>
-
                 </div>
 
                 <div className="professor-info-item">
+                  <span className="professor-info-label">Position</span>
 
-                  <span className="professor-info-label">
-                    Position
-                  </span>
-
-                  <strong>
-                    {professorData.position}
-                  </strong>
-
+                  <strong>{professorData.position}</strong>
                 </div>
 
                 <div className="professor-info-item">
+                  <span className="professor-info-label">Role</span>
 
-                  <span className="professor-info-label">
-                    Role
-                  </span>
-
-                  <strong>
-                    {formatRole(
-                      professorData.role
-                    )}
-                  </strong>
-
+                  <strong>{formatRole(professorData.role)}</strong>
                 </div>
 
                 <div className="professor-info-item professor-info-item-wide">
+                  <span className="professor-info-label">Specialization</span>
 
-                  <span className="professor-info-label">
-                    Specialization
-                  </span>
-
-                  <strong>
-                    {professorData.specialization}
-                  </strong>
-
+                  <strong>{professorData.specialization}</strong>
                 </div>
-
               </div>
-
             </section>
 
             {/* ACCOUNT SECURITY */}
 
             <section className="professor-info-section professor-security-section">
-
               <div className="professor-info-section-heading">
-
                 <span className="professor-info-section-icon">
                   <FiLock aria-hidden="true" />
                 </span>
 
                 <div>
+                  <h3>Account Security</h3>
 
-                  <h3>
-                    Account Security
-                  </h3>
-
-                  <p>
-                    Password and account status
-                  </p>
-
+                  <p>Password and account status</p>
                 </div>
-
               </div>
 
               <div className="professor-password-card">
-
                 <div className="professor-password-copy">
-
-                  <span className="professor-info-label">
-                    Password Status
-                  </span>
+                  <span className="professor-info-label">Password Status</span>
 
                   <strong>
                     {professorData.mustChangePassword
-                      ? 'Temporary password issued'
-                      : 'Password updated'}
+                      ? "Temporary password issued"
+                      : "Password updated"}
                   </strong>
-
                 </div>
-
               </div>
 
               <p className="professor-password-note">
-
                 {professorData.mustChangePassword
-                  ? 'Your account is currently using a temporary password. Please change it from the Settings page.'
-                  : 'Your account password has already been updated.'}
-
+                  ? "Your account is currently using a temporary password. Please change it from the Settings page."
+                  : "Your account password has already been updated."}
               </p>
-
             </section>
-
           </div>
-
         </div>
-
       </section>
-
     </div>
   );
 }

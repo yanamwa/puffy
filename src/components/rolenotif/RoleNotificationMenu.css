@@ -15,7 +15,9 @@
   background: transparent;
   color: #80866e;
   cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
 }
 
 .role-notification-button:hover,
@@ -191,14 +193,12 @@
 
 .role-notification-item.unread {
   background: #9a7428;
-
 }
 
 .role-notification-item.unread:hover {
   background: #9a7428;
 
-  box-shadow:
-    0 4px 12px rgba(180, 130, 20, 0.08);
+  box-shadow: 0 4px 12px rgba(180, 130, 20, 0.08);
 }
 
 .role-notification-icon {
@@ -383,7 +383,6 @@
   scrollbar-color: #c8cdd5 transparent;
 }
 
-
 /* =========================================
    NOTIFICATION ITEM
 ========================================= */
@@ -417,7 +416,6 @@
     transform 150ms ease;
 }
 
-
 /* READ NOTIFICATION HOVER */
 
 .role-notification-item:hover {
@@ -425,23 +423,19 @@
   border-color: #dbe3ef;
 }
 
-
 /* =========================================
    UNREAD NOTIFICATION
    BLUE THEME
 ========================================= */
 
 .role-notification-item.unread {
-  background:#eef6f1;
- 
+  background: #eef6f1;
 }
 
 .role-notification-item.unread:hover {
   background: #eef6f1;
- 
 
-  box-shadow:
-    0 4px 12px rgba(180, 130, 20, 0.08);
+  box-shadow: 0 4px 12px rgba(180, 130, 20, 0.08);
 }
 
 /* =========================================
@@ -461,14 +455,12 @@
   color: #64748b;
 }
 
-
 /* COURSE / ENROLLMENT ICON */
 
 .role-notification-icon.course {
   background: #e7f0ff;
   color: #2563eb;
 }
-
 
 /* ANNOUNCEMENT ICON
    YELLOW THEME
@@ -478,7 +470,6 @@
   background: #fff6d8;
   color: #c58a00;
 }
-
 
 /* GENERAL / SYSTEM ICON */
 
@@ -497,7 +488,6 @@
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-
 
 /* =========================================
    NOTIFICATION TEXT
@@ -543,7 +533,6 @@
   -webkit-line-clamp: 2;
 }
 
-
 /* TIME */
 
 .role-notification-copy small {
@@ -555,7 +544,6 @@
   font-size: 9px !important;
   font-weight: 750 !important;
 }
-
 
 /* =========================================
    UNREAD DOT
@@ -572,10 +560,8 @@
 
   background: #f4b400;
 
-  box-shadow:
-    0 0 0 3px rgba(244, 180, 0, 0.14);
+  box-shadow: 0 0 0 3px rgba(244, 180, 0, 0.14);
 }
-
 
 /* =========================================
    MARK ALL AS READ
@@ -603,7 +589,6 @@
   background: #eef5ff;
 }
 
-
 /* =========================================
    ALL / UNREAD TABS
 ========================================= */
@@ -613,7 +598,6 @@
   background: #e8f1ff;
   color: #2563eb;
 }
-
 
 /* =========================================
    SEE ALL NOTIFICATIONS

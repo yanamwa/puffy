@@ -65,7 +65,8 @@ export default function AdminSettings() {
 
   const showFeedback = (type, title, text) => {
     Swal.fire({
-      imageUrl: type === "success" ? "/images/success.png" : "/images/error.png",
+      imageUrl:
+        type === "success" ? "/images/success.png" : "/images/error.png",
       imageWidth: 170,
       imageHeight: 170,
       title,
@@ -79,7 +80,7 @@ export default function AdminSettings() {
 
       const res = await fetch(
         `${API_BASE}/getAdminNotifications.php?admin_id=${adminData.id || ""}`,
-        { credentials: "include" }
+        { credentials: "include" },
       );
 
       const data = await res.json();
@@ -223,7 +224,11 @@ export default function AdminSettings() {
         closeEditModal();
         showFeedback("success", "Success", "Profile updated successfully!");
       } else {
-        showFeedback("error", "Failed", data.message || "Failed to update profile.");
+        showFeedback(
+          "error",
+          "Failed",
+          data.message || "Failed to update profile.",
+        );
       }
     } catch (err) {
       console.error(err);
@@ -242,17 +247,29 @@ export default function AdminSettings() {
     const confirmPassword = passwordForm.confirmPassword.trim();
 
     if (!currentPassword || !newPassword || !confirmPassword) {
-      showFeedback("error", "Missing Fields", "Please fill out all password fields.");
+      showFeedback(
+        "error",
+        "Missing Fields",
+        "Please fill out all password fields.",
+      );
       return;
     }
 
     if (newPassword.length < 8) {
-      showFeedback("error", "Weak Password", "New password must be at least 8 characters.");
+      showFeedback(
+        "error",
+        "Weak Password",
+        "New password must be at least 8 characters.",
+      );
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      showFeedback("error", "Password Mismatch", "New password and confirm password do not match.");
+      showFeedback(
+        "error",
+        "Password Mismatch",
+        "New password and confirm password do not match.",
+      );
       return;
     }
 
@@ -279,9 +296,17 @@ export default function AdminSettings() {
           confirmPassword: "",
         });
 
-        showFeedback("success", "Password Updated", data.message || "Password changed successfully.");
+        showFeedback(
+          "success",
+          "Password Updated",
+          data.message || "Password changed successfully.",
+        );
       } else {
-        showFeedback("error", "Failed", data.message || "Failed to change password.");
+        showFeedback(
+          "error",
+          "Failed",
+          data.message || "Failed to change password.",
+        );
       }
     } catch (err) {
       console.error(err);
@@ -296,311 +321,320 @@ export default function AdminSettings() {
       </div>
 
       <div className={styles.profilePage}>
-          <div className={styles.profileOuter}>
-            <div className={styles.profileInner}>
-              <div className={styles.profileCard}>
-                <div className={styles.profileTabs}>
-                  <button
-                    type="button"
-                    className={`${styles.tabBtn} ${
-                      activeTab === "personal" ? styles.activeTab : ""
-                    }`}
-                    onClick={() => setActiveTab("personal")}
-                  >
-                    Personal Information
-                  </button>
+        <div className={styles.profileOuter}>
+          <div className={styles.profileInner}>
+            <div className={styles.profileCard}>
+              <div className={styles.profileTabs}>
+                <button
+                  type="button"
+                  className={`${styles.tabBtn} ${
+                    activeTab === "personal" ? styles.activeTab : ""
+                  }`}
+                  onClick={() => setActiveTab("personal")}
+                >
+                  Personal Information
+                </button>
 
-                  <button
-                    type="button"
-                    className={`${styles.tabBtn} ${
-                      activeTab === "settings" ? styles.activeTab : ""
-                    }`}
-                    onClick={() => setActiveTab("settings")}
-                  >
-                    Settings
-                  </button>
-                </div>
-
-                {activeTab === "personal" && (
-                  <>
-                    <div className={styles.editTop}>
-                      <button
-                        type="button"
-                        className={styles.editBtn}
-                        onClick={openEditModal}
-                      >
-                        Edit
-                      </button>
-                    </div>
-
-                    <div className={styles.profileContent}>
-                      <div className={styles.profileForm}>
-                        <div className={styles.formGroup}>
-                          <label>Full Name</label>
-                          <input type="text" value={admin.full_name} readOnly />
-                        </div>
-
-                        <div className={styles.formGroup}>
-                          <label>Username</label>
-                          <input type="text" value={admin.username} readOnly />
-                        </div>
-
-                        <div className={styles.formGroup}>
-                          <label>Email</label>
-                          <input type="text" value={admin.email} readOnly />
-                        </div>
-
-                        <div className={styles.formGroup}>
-                          <label>Role</label>
-                          <input type="text" value={admin.role} readOnly />
-                        </div>
-                      </div>
-
-                      <div className={styles.profileImageSection}>
-                        <img
-                          src={adminImage}
-                          alt="Admin"
-                          className={styles.largeProfilePic}
-                          onError={(e) => {
-                            e.currentTarget.src = "/images/temporary profile.jpg";
-                          }}
-                        />
-
-                        <p className={styles.imageHint}>
-                          Recommend ratio 1:1
-                          <br />
-                          and file less than 5mb
-                        </p>
-                      </div>
-                    </div>
-                  </>
-                )}
-
-                {activeTab === "settings" && (
-                  <div className={styles.settingsContent}>
-                    <div className={styles.settingsCard}>
-                      <h2 className={styles.settingsHeading}>Change Password</h2>
-                      <div className={styles.settingsDivider}></div>
-
-                      <div className={styles.settingsBody}>
-                        <div className={styles.passwordGroup}>
-                          <label>Current Password</label>
-
-                          <div className={styles.passwordInputWrap}>
-                            <input
-                              type={showCurrentPassword ? "text" : "password"}
-                              value={passwordForm.currentPassword}
-                              onChange={(e) =>
-                                setPasswordForm((prev) => ({
-                                  ...prev,
-                                  currentPassword: e.target.value,
-                                }))
-                              }
-                              placeholder="Enter current password"
-                            />
-
-                            <button
-                              type="button"
-                              className={styles.eyeBtn}
-                              onClick={() =>
-                                setShowCurrentPassword((prev) => !prev)
-                              }
-                            >
-                              <i
-                                className={
-                                  showCurrentPassword ? "bx bx-show" : "bx bx-hide"
-                                }
-                              ></i>
-                            </button>
-                          </div>
-                        </div>
-
-                        <div className={styles.passwordGroup}>
-                          <label>New Password</label>
-
-                          <div className={styles.passwordInputWrap}>
-                            <input
-                              type={showNewPassword ? "text" : "password"}
-                              value={passwordForm.newPassword}
-                              onChange={(e) =>
-                                setPasswordForm((prev) => ({
-                                  ...prev,
-                                  newPassword: e.target.value,
-                                }))
-                              }
-                              placeholder="Enter new password"
-                            />
-
-                            <button
-                              type="button"
-                              className={styles.eyeBtn}
-                              onClick={() => setShowNewPassword((prev) => !prev)}
-                            >
-                              <i
-                                className={
-                                  showNewPassword ? "bx bx-show" : "bx bx-hide"
-                                }
-                              ></i>
-                            </button>
-                          </div>
-                        </div>
-
-                        <div className={styles.passwordGroup}>
-                          <label>Confirm Password</label>
-
-                          <div className={styles.passwordInputWrap}>
-                            <input
-                              type={showConfirmPassword ? "text" : "password"}
-                              value={passwordForm.confirmPassword}
-                              onChange={(e) =>
-                                setPasswordForm((prev) => ({
-                                  ...prev,
-                                  confirmPassword: e.target.value,
-                                }))
-                              }
-                              placeholder="Confirm new password"
-                            />
-
-                            <button
-                              type="button"
-                              className={styles.eyeBtn}
-                              onClick={() =>
-                                setShowConfirmPassword((prev) => !prev)
-                              }
-                            >
-                              <i
-                                className={
-                                  showConfirmPassword ? "bx bx-show" : "bx bx-hide"
-                                }
-                              ></i>
-                            </button>
-                          </div>
-                        </div>
-
-                        <button
-                          type="button"
-                          className={styles.changePasswordBtn}
-                          onClick={handleChangePassword}
-                        >
-                          Change Password
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
+                <button
+                  type="button"
+                  className={`${styles.tabBtn} ${
+                    activeTab === "settings" ? styles.activeTab : ""
+                  }`}
+                  onClick={() => setActiveTab("settings")}
+                >
+                  Settings
+                </button>
               </div>
-            </div>
-          </div>
-        </div>
 
-        {isEditModalOpen && (
-          <div className={styles.modalOverlay} onClick={closeEditModal}>
-            <div className={styles.editModal} onClick={(e) => e.stopPropagation()}>
-              <button
-                type="button"
-                className={styles.modalCloseBtn}
-                onClick={closeEditModal}
-              >
-                <i className="bx bx-x"></i>
-              </button>
-
-              <div className={styles.modalCard}>
-                <h2 className={styles.modalTitle}>Edit Admin Profile</h2>
-                <div className={styles.modalDivider}></div>
-
-                <form className={styles.modalContent} onSubmit={handleSaveProfile}>
-                  <div className={styles.modalForm}>
-                    <div className={styles.modalFormGroup}>
-                      <label>Full Name</label>
-                      <input
-                        type="text"
-                        name="full_name"
-                        value={editForm.full_name}
-                        onChange={handleEditInputChange}
-                      />
-                    </div>
-
-                    <div className={styles.modalFormGroup}>
-                      <label>Username</label>
-                      <input
-                        type="text"
-                        name="username"
-                        value={editForm.username}
-                        onChange={handleEditInputChange}
-                      />
-                    </div>
-
-                    <div className={styles.modalFormGroup}>
-                      <label>Email</label>
-                      <input
-                        type="email"
-                        name="email"
-                        value={editForm.email}
-                        readOnly
-                      />
-                    </div>
-
-                    <div className={styles.modalFormGroup}>
-                      <label>Role</label>
-                      <input
-                        type="text"
-                        name="role"
-                        value={editForm.role}
-                        readOnly
-                      />
-                    </div>
-
-                    <div className={styles.modalActions}>
-                      <button
-                        type="button"
-                        className={styles.cancelBtn}
-                        onClick={closeEditModal}
-                      >
-                        Cancel
-                      </button>
-
-                      <button type="submit" className={styles.saveChangesBtn}>
-                        Save Changes
-                      </button>
-                    </div>
+              {activeTab === "personal" && (
+                <>
+                  <div className={styles.editTop}>
+                    <button
+                      type="button"
+                      className={styles.editBtn}
+                      onClick={openEditModal}
+                    >
+                      Edit
+                    </button>
                   </div>
 
-                  <div className={styles.modalPhotoSection}>
-                    <label className={styles.uploadPhotoCircle}>
+                  <div className={styles.profileContent}>
+                    <div className={styles.profileForm}>
+                      <div className={styles.formGroup}>
+                        <label>Full Name</label>
+                        <input type="text" value={admin.full_name} readOnly />
+                      </div>
+
+                      <div className={styles.formGroup}>
+                        <label>Username</label>
+                        <input type="text" value={admin.username} readOnly />
+                      </div>
+
+                      <div className={styles.formGroup}>
+                        <label>Email</label>
+                        <input type="text" value={admin.email} readOnly />
+                      </div>
+
+                      <div className={styles.formGroup}>
+                        <label>Role</label>
+                        <input type="text" value={admin.role} readOnly />
+                      </div>
+                    </div>
+
+                    <div className={styles.profileImageSection}>
                       <img
-                        src={imagePreview || adminImage}
-                        alt="Admin preview"
-                        className={styles.uploadedPreview}
+                        src={adminImage}
+                        alt="Admin"
+                        className={styles.largeProfilePic}
                         onError={(e) => {
                           e.currentTarget.src = "/images/temporary profile.jpg";
                         }}
                       />
 
-                      <div className={styles.uploadOverlay}>
-                        <i className="bx bx-camera"></i>
-                        <span>Change Photo</span>
+                      <p className={styles.imageHint}>
+                        Recommend ratio 1:1
+                        <br />
+                        and file less than 5mb
+                      </p>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {activeTab === "settings" && (
+                <div className={styles.settingsContent}>
+                  <div className={styles.settingsCard}>
+                    <h2 className={styles.settingsHeading}>Change Password</h2>
+                    <div className={styles.settingsDivider}></div>
+
+                    <div className={styles.settingsBody}>
+                      <div className={styles.passwordGroup}>
+                        <label>Current Password</label>
+
+                        <div className={styles.passwordInputWrap}>
+                          <input
+                            type={showCurrentPassword ? "text" : "password"}
+                            value={passwordForm.currentPassword}
+                            onChange={(e) =>
+                              setPasswordForm((prev) => ({
+                                ...prev,
+                                currentPassword: e.target.value,
+                              }))
+                            }
+                            placeholder="Enter current password"
+                          />
+
+                          <button
+                            type="button"
+                            className={styles.eyeBtn}
+                            onClick={() =>
+                              setShowCurrentPassword((prev) => !prev)
+                            }
+                          >
+                            <i
+                              className={
+                                showCurrentPassword
+                                  ? "bx bx-show"
+                                  : "bx bx-hide"
+                              }
+                            ></i>
+                          </button>
+                        </div>
                       </div>
 
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handlePhotoChange}
-                        hidden
-                      />
-                    </label>
+                      <div className={styles.passwordGroup}>
+                        <label>New Password</label>
 
-                    <p className={styles.uploadHint}>
-                      Recommend ratio 1:1
-                      <br />
-                      and file less than 5mb
-                    </p>
+                        <div className={styles.passwordInputWrap}>
+                          <input
+                            type={showNewPassword ? "text" : "password"}
+                            value={passwordForm.newPassword}
+                            onChange={(e) =>
+                              setPasswordForm((prev) => ({
+                                ...prev,
+                                newPassword: e.target.value,
+                              }))
+                            }
+                            placeholder="Enter new password"
+                          />
+
+                          <button
+                            type="button"
+                            className={styles.eyeBtn}
+                            onClick={() => setShowNewPassword((prev) => !prev)}
+                          >
+                            <i
+                              className={
+                                showNewPassword ? "bx bx-show" : "bx bx-hide"
+                              }
+                            ></i>
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className={styles.passwordGroup}>
+                        <label>Confirm Password</label>
+
+                        <div className={styles.passwordInputWrap}>
+                          <input
+                            type={showConfirmPassword ? "text" : "password"}
+                            value={passwordForm.confirmPassword}
+                            onChange={(e) =>
+                              setPasswordForm((prev) => ({
+                                ...prev,
+                                confirmPassword: e.target.value,
+                              }))
+                            }
+                            placeholder="Confirm new password"
+                          />
+
+                          <button
+                            type="button"
+                            className={styles.eyeBtn}
+                            onClick={() =>
+                              setShowConfirmPassword((prev) => !prev)
+                            }
+                          >
+                            <i
+                              className={
+                                showConfirmPassword
+                                  ? "bx bx-show"
+                                  : "bx bx-hide"
+                              }
+                            ></i>
+                          </button>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        className={styles.changePasswordBtn}
+                        onClick={handleChangePassword}
+                      >
+                        Change Password
+                      </button>
+                    </div>
                   </div>
-                </form>
-              </div>
+                </div>
+              )}
             </div>
           </div>
-        )}
+        </div>
       </div>
+
+      {isEditModalOpen && (
+        <div className={styles.modalOverlay} onClick={closeEditModal}>
+          <div
+            className={styles.editModal}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              className={styles.modalCloseBtn}
+              onClick={closeEditModal}
+            >
+              <i className="bx bx-x"></i>
+            </button>
+
+            <div className={styles.modalCard}>
+              <h2 className={styles.modalTitle}>Edit Admin Profile</h2>
+              <div className={styles.modalDivider}></div>
+
+              <form
+                className={styles.modalContent}
+                onSubmit={handleSaveProfile}
+              >
+                <div className={styles.modalForm}>
+                  <div className={styles.modalFormGroup}>
+                    <label>Full Name</label>
+                    <input
+                      type="text"
+                      name="full_name"
+                      value={editForm.full_name}
+                      onChange={handleEditInputChange}
+                    />
+                  </div>
+
+                  <div className={styles.modalFormGroup}>
+                    <label>Username</label>
+                    <input
+                      type="text"
+                      name="username"
+                      value={editForm.username}
+                      onChange={handleEditInputChange}
+                    />
+                  </div>
+
+                  <div className={styles.modalFormGroup}>
+                    <label>Email</label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={editForm.email}
+                      readOnly
+                    />
+                  </div>
+
+                  <div className={styles.modalFormGroup}>
+                    <label>Role</label>
+                    <input
+                      type="text"
+                      name="role"
+                      value={editForm.role}
+                      readOnly
+                    />
+                  </div>
+
+                  <div className={styles.modalActions}>
+                    <button
+                      type="button"
+                      className={styles.cancelBtn}
+                      onClick={closeEditModal}
+                    >
+                      Cancel
+                    </button>
+
+                    <button type="submit" className={styles.saveChangesBtn}>
+                      Save Changes
+                    </button>
+                  </div>
+                </div>
+
+                <div className={styles.modalPhotoSection}>
+                  <label className={styles.uploadPhotoCircle}>
+                    <img
+                      src={imagePreview || adminImage}
+                      alt="Admin preview"
+                      className={styles.uploadedPreview}
+                      onError={(e) => {
+                        e.currentTarget.src = "/images/temporary profile.jpg";
+                      }}
+                    />
+
+                    <div className={styles.uploadOverlay}>
+                      <i className="bx bx-camera"></i>
+                      <span>Change Photo</span>
+                    </div>
+
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handlePhotoChange}
+                      hidden
+                    />
+                  </label>
+
+                  <p className={styles.uploadHint}>
+                    Recommend ratio 1:1
+                    <br />
+                    and file less than 5mb
+                  </p>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </AdminLayout>
   );
 }

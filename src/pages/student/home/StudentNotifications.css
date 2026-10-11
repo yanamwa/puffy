@@ -8,7 +8,6 @@
   background: #f5f7ff;
 }
 
-
 /* =====================================================
    MAIN AREA
    253px = width of your student sidebar
@@ -23,7 +22,6 @@
   display: flex;
   flex-direction: column;
 }
-
 
 /* =====================================================
    PAGE BODY
@@ -40,7 +38,6 @@
 
   background: #f5f7ff;
 }
-
 
 /* =====================================================
    PAGE CONTENT
@@ -100,7 +97,6 @@
   line-height: 1.6;
 }
 
-
 /* =====================================================
    UNREAD SUMMARY
 ===================================================== */
@@ -148,13 +144,11 @@
   font-size: 10px !important;
 }
 
-
 /* =====================================================
    RESPONSIVE
 ===================================================== */
 
 @media (max-width: 900px) {
-
   .student-notifications-body {
     padding: 22px 20px 40px;
   }
@@ -169,13 +163,10 @@
   }
 }
 
-
 @media (max-width: 520px) {
-
   .student-notifications-body {
     padding: 18px 14px 32px;
   }
-
 }
 /* =====================================================
    STUDENT NOTIFICATIONS PAGE
@@ -185,7 +176,6 @@
   width: 100%;
   padding: 6px 4px 40px;
 }
-
 
 /* =====================================================
    PAGE HEADING
@@ -215,7 +205,6 @@
   line-height: 1.6;
 }
 
-
 /* =====================================================
    TOOLBAR
 ===================================================== */
@@ -238,10 +227,8 @@
 
   background: #ffffff;
 
-  box-shadow:
-    0 3px 12px rgba(30, 41, 59, 0.04);
+  box-shadow: 0 3px 12px rgba(30, 41, 59, 0.04);
 }
-
 
 /* =====================================================
    TABS
@@ -291,7 +278,6 @@
   color: #4057c7;
 }
 
-
 /* TAB COUNT */
 
 .student-tab-count {
@@ -313,7 +299,6 @@
   font-size: 9px !important;
   font-weight: 800 !important;
 }
-
 
 /* =====================================================
    MARK ALL READ
@@ -350,7 +335,6 @@
   cursor: default;
 }
 
-
 /* =====================================================
    NOTIFICATION LIST
 ===================================================== */
@@ -363,7 +347,6 @@
 
   gap: 10px;
 }
-
 
 /* =====================================================
    NOTIFICATION CARD
@@ -408,13 +391,10 @@
 
   background: #fafbff;
 
-  box-shadow:
-    0 5px 16px
-    rgba(30, 41, 59, 0.06);
+  box-shadow: 0 5px 16px rgba(30, 41, 59, 0.06);
 
   transform: translateY(-1px);
 }
-
 
 /* =====================================================
    UNREAD
@@ -432,11 +412,8 @@
 
   border-color: #edcf70;
 
-  box-shadow:
-    0 5px 16px
-    rgba(180, 130, 20, 0.08);
+  box-shadow: 0 5px 16px rgba(180, 130, 20, 0.08);
 }
-
 
 /* =====================================================
    ICON
@@ -480,7 +457,6 @@
   stroke-width: 1.8;
 }
 
-
 /* =====================================================
    CONTENT
 ===================================================== */
@@ -513,7 +489,6 @@
   line-height: 1.55;
 }
 
-
 /* =====================================================
    META
 ===================================================== */
@@ -531,9 +506,7 @@
 .student-notification-meta span {
   color: #8790a1;
 
-  font-family:
-    system-ui,
-    sans-serif !important;
+  font-family: system-ui, sans-serif !important;
 
   font-size: 10px !important;
   font-weight: 600 !important;
@@ -542,7 +515,6 @@
 .student-notification-meta span:last-child {
   color: #4f67d8;
 }
-
 
 /* =====================================================
    TYPE BADGE
@@ -557,9 +529,7 @@
 
   text-transform: capitalize;
 
-  font-family:
-    system-ui,
-    sans-serif !important;
+  font-family: system-ui, sans-serif !important;
 
   font-size: 9px !important;
   font-weight: 800 !important;
@@ -580,7 +550,6 @@
   color: #687184;
 }
 
-
 /* =====================================================
    UNREAD DOT
 ===================================================== */
@@ -593,11 +562,8 @@
 
   background: #f4b400;
 
-  box-shadow:
-    0 0 0 3px
-    rgba(244, 180, 0, 0.15);
+  box-shadow: 0 0 0 3px rgba(244, 180, 0, 0.15);
 }
-
 
 /* =====================================================
    EMPTY STATE
@@ -659,13 +625,11 @@
   font-size: 11px !important;
 }
 
-
 /* =====================================================
    RESPONSIVE
 ===================================================== */
 
 @media (max-width: 800px) {
-
   .student-notification-toolbar {
     align-items: stretch;
     flex-direction: column;
@@ -698,9 +662,7 @@
   }
 }
 
-
 @media (max-width: 520px) {
-
   .student-notifications-heading h1 {
     font-size: 25px !important;
   }

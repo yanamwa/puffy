@@ -1,55 +1,55 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { API_BASE } from '../config.js';
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { API_BASE } from "../config.js";
 import {
   getUserRole,
   isProfessorApprovalRestricted,
   withNormalizedRole,
-} from '../utils/roles.js';
+} from "../utils/roles.js";
 
 const AuthContext = createContext(null);
 
 const sessionStorageKeys = [
-  'puffy-token',
-  'token',
-  'authToken',
-  'puffy-user',
-  'user',
-  'currentUser',
-  'user_id',
-  'user_email',
-  'email',
-  'user_role',
-  'username',
-  'year_level',
-  'section_name',
-  'admin',
-  'admin_id',
-  'admin_email',
-  'admin_username',
-  'school_name',
+  "puffy-token",
+  "token",
+  "authToken",
+  "puffy-user",
+  "user",
+  "currentUser",
+  "user_id",
+  "user_email",
+  "email",
+  "user_role",
+  "username",
+  "year_level",
+  "section_name",
+  "admin",
+  "admin_id",
+  "admin_email",
+  "admin_username",
+  "school_name",
 ];
 
 function readStoredUser() {
   try {
-    const storedUser = JSON.parse(localStorage.getItem('puffy-user') || 'null');
+    const storedUser = JSON.parse(localStorage.getItem("puffy-user") || "null");
     return storedUser ? withNormalizedRole(storedUser) : null;
   } catch {
-    localStorage.removeItem('puffy-user');
+    localStorage.removeItem("puffy-user");
     return null;
   }
 }
 
 function readStoredToken() {
   return (
-    localStorage.getItem('puffy-token') ||
-    localStorage.getItem('token') ||
-    localStorage.getItem('authToken') ||
-    ''
+    localStorage.getItem("puffy-token") ||
+    localStorage.getItem("token") ||
+    localStorage.getItem("authToken") ||
+    ""
   );
 }
 
 function getSessionToken(data) {
-  return data.token || data.accessToken || data.access_token || '';
+  return data.token || data.accessToken || data.access_token || "";
 }
 
 function clearStoredSession() {
@@ -63,35 +63,35 @@ function writeUserSession(sessionUser, token = readStoredToken()) {
   const normalizedUser = withNormalizedRole(sessionUser);
 
   if (token) {
-    localStorage.setItem('puffy-token', token);
-    localStorage.setItem('token', token);
-    localStorage.setItem('authToken', token);
+    localStorage.setItem("puffy-token", token);
+    localStorage.setItem("token", token);
+    localStorage.setItem("authToken", token);
   }
 
-  localStorage.setItem('puffy-user', JSON.stringify(normalizedUser));
-  localStorage.setItem('user', JSON.stringify(normalizedUser));
-  localStorage.setItem('currentUser', JSON.stringify(normalizedUser));
+  localStorage.setItem("puffy-user", JSON.stringify(normalizedUser));
+  localStorage.setItem("user", JSON.stringify(normalizedUser));
+  localStorage.setItem("currentUser", JSON.stringify(normalizedUser));
   localStorage.setItem(
-    'user_id',
-    String(normalizedUser.userId || normalizedUser.id || '')
+    "user_id",
+    String(normalizedUser.userId || normalizedUser.id || ""),
   );
-  localStorage.setItem('user_email', normalizedUser.email || '');
-  localStorage.setItem('email', normalizedUser.email || '');
-  localStorage.setItem('user_role', getUserRole(normalizedUser));
+  localStorage.setItem("user_email", normalizedUser.email || "");
+  localStorage.setItem("email", normalizedUser.email || "");
+  localStorage.setItem("user_role", getUserRole(normalizedUser));
   localStorage.setItem(
-    'username',
+    "username",
     normalizedUser.displayName ||
       normalizedUser.display_name ||
       normalizedUser.name ||
-      ''
+      "",
   );
   localStorage.setItem(
-    'year_level',
-    normalizedUser.yearLevel || normalizedUser.year_level || ''
+    "year_level",
+    normalizedUser.yearLevel || normalizedUser.year_level || "",
   );
   localStorage.setItem(
-    'section_name',
-    normalizedUser.sectionName || normalizedUser.section_name || ''
+    "section_name",
+    normalizedUser.sectionName || normalizedUser.section_name || "",
   );
 
   return normalizedUser;
@@ -107,7 +107,7 @@ export function AuthProvider({ children }) {
         name: data.username,
         role: data.role,
         verificationStatus: data.verificationStatus || data.verification_status,
-      }
+      },
     );
     const token = getSessionToken(data);
 
@@ -115,7 +115,7 @@ export function AuthProvider({ children }) {
       clearStoredSession();
       setUser(null);
       throw new Error(
-        'Your professor registration is pending Super Admin approval.'
+        "Your professor registration is pending Super Admin approval.",
       );
     }
 
@@ -137,11 +137,14 @@ export function AuthProvider({ children }) {
     const nextRole = getUserRole(normalizedNextUser);
     const baseUser =
       storedRole && nextRole && storedRole !== nextRole ? {} : storedUser;
-    const updatedUser = writeUserSession({ ...baseUser, ...normalizedNextUser });
+    const updatedUser = writeUserSession({
+      ...baseUser,
+      ...normalizedNextUser,
+    });
     setUser(updatedUser);
 
     window.dispatchEvent(
-      new CustomEvent('puffy-user-updated', { detail: updatedUser })
+      new CustomEvent("puffy-user-updated", { detail: updatedUser }),
     );
 
     return updatedUser;
@@ -164,7 +167,7 @@ export function AuthProvider({ children }) {
     async function refreshCurrentUser() {
       try {
         const response = await fetch(`${API_BASE}/users/me`, {
-          credentials: 'include',
+          credentials: "include",
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -191,7 +194,7 @@ export function AuthProvider({ children }) {
         const normalizedUser = writeUserSession(data.user, token);
         setUser(normalizedUser);
       } catch (error) {
-        console.warn('Unable to refresh current user session.', error);
+        console.warn("Unable to refresh current user session.", error);
       }
     }
 
@@ -209,56 +212,53 @@ export function AuthProvider({ children }) {
       }
     };
 
-    window.addEventListener('puffy-user-updated', handleUserUpdated);
+    window.addEventListener("puffy-user-updated", handleUserUpdated);
 
     return () => {
-      window.removeEventListener('puffy-user-updated', handleUserUpdated);
+      window.removeEventListener("puffy-user-updated", handleUserUpdated);
     };
   }, []);
 
   const login = async (email, password) => {
     const response = await fetch(`${API_BASE}/login`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
 
     const data = await response.json().catch(() => ({}));
 
     if (!response.ok || !data.success) {
-      throw new Error(data.message || 'Invalid credentials.');
+      throw new Error(data.message || "Invalid credentials.");
     }
 
     return saveSession(data);
   };
 
   const logout = async () => {
-      const token = readStoredToken();
-      clearStoredSession();
-      setUser(null);
+    const token = readStoredToken();
+    clearStoredSession();
+    setUser(null);
 
-      try {
-        if (token) {
-          await fetch(`${API_BASE}/logout`, {
-            method: 'POST',
-            credentials: 'include',
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-        }
-      } catch (error) {
-        console.warn(
-          'Unable to record logout.',
-          error
-        );
+    try {
+      if (token) {
+        await fetch(`${API_BASE}/logout`, {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
       }
-    };
+    } catch (error) {
+      console.warn("Unable to record logout.", error);
+    }
+  };
 
   const value = useMemo(
     () => ({ user, login, logout, saveSession, updateUser }),
-    [user]
+    [user],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

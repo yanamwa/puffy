@@ -119,7 +119,7 @@ export default function MatchingType() {
             </div>
 
             <div className={styles.slideshowBox}>
-            <div className={styles.demoHeader}>Quiz Tutorial</div>
+              <div className={styles.demoHeader}>Quiz Tutorial</div>
               {[0, 1, 2].map((slide) => (
                 <div
                   key={slide}
@@ -132,7 +132,7 @@ export default function MatchingType() {
                       <div
                         className={`${styles.card} ${getCardClass(
                           "A",
-                          "left"
+                          "left",
                         )}`}
                       >
                         What are the 5 main components of an information system?
@@ -141,7 +141,7 @@ export default function MatchingType() {
                       <div
                         className={`${styles.card} ${getCardClass(
                           "B",
-                          "left"
+                          "left",
                         )}`}
                       >
                         What does CPU stand for and what is its main function?
@@ -150,7 +150,7 @@ export default function MatchingType() {
                       <div
                         className={`${styles.card} ${getCardClass(
                           "C",
-                          "left"
+                          "left",
                         )}`}
                       >
                         It is the component on the Arduino Uno that acts as its
@@ -162,7 +162,7 @@ export default function MatchingType() {
                       <div
                         className={`${styles.card} ${getCardClass(
                           "B",
-                          "right"
+                          "right",
                         )}`}
                       >
                         It processes instructions and performs calculations,
@@ -172,7 +172,7 @@ export default function MatchingType() {
                       <div
                         className={`${styles.card} ${getCardClass(
                           "C",
-                          "right"
+                          "right",
                         )}`}
                       >
                         The ATmega328P microcontroller.
@@ -181,7 +181,7 @@ export default function MatchingType() {
                       <div
                         className={`${styles.card} ${getCardClass(
                           "A",
-                          "right"
+                          "right",
                         )}`}
                       >
                         Hardware, Software, Data, People, and Processes.

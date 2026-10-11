@@ -11,227 +11,147 @@ import StudentIdentityCard from "../../../components/students/StudentIdentityCar
 import JoinCourseModal from "../courses/JoinCourseModal";
 
 import {
-
-  enrollStudentInCourseAsync,
-
-  findJoinableCourseByCodeAsync,
-
+  enrollStudentInCourseAsync,
+  findJoinableCourseByCodeAsync,
 } from "../courses/studentCourseData";
 
 import "./StudentProfile.css";
 
 const API_BASE_URL =
-
-  import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+  import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 const DEFAULT_PROFILE_IMAGE = "/images/temporary profile.jpg";
 
 function resolveProfileImage(imagePath) {
+  if (!imagePath) return DEFAULT_PROFILE_IMAGE;
 
-  if (!imagePath) return DEFAULT_PROFILE_IMAGE;
-
-  if (
-
-    imagePath.startsWith("http://") ||
-
-    imagePath.startsWith("https://") ||
-
-    imagePath.startsWith("blob:") ||
-
-    imagePath.startsWith("data:")
-
-  ) {
-
-    return imagePath;
-
-  }
+  if (
+    imagePath.startsWith("http://") ||
+    imagePath.startsWith("https://") ||
+    imagePath.startsWith("blob:") ||
+    imagePath.startsWith("data:")
+  ) {
+    return imagePath;
+  }
   const serverOrigin = API_BASE_URL.replace(/\/api\/?$/, "");
 
-  return `${serverOrigin}${imagePath.startsWith("/") ? "" : "/"}${imagePath}`;
-
+  return `${serverOrigin}${imagePath.startsWith("/") ? "" : "/"}${imagePath}`;
 }
 
 function getUserRole(user) {
-
-  return user?.role || user?.userRole || user?.user_role || "";
-
+  return user?.role || user?.userRole || user?.user_role || "";
 }
 
 function isStudentUser(user) {
-
-  return getUserRole(user) === "student";
-
+  return getUserRole(user) === "student";
 }
 
 function getHomePath(role) {
+  if (role === "super_admin") return "/super-admin";
 
-  if (role === "super_admin") return "/super-admin";
+  if (role === "admin") return "/admin";
 
-  if (role === "admin") return "/admin";
+  if (role === "professor") return "/professor";
 
-  if (role === "professor") return "/professor";
-
-  return "/student";
-
+  return "/student";
 }
 
 function getStoredToken() {
-
-  return (
-
-    localStorage.getItem("token") ||
-
-    localStorage.getItem("authToken") ||
-
-    localStorage.getItem("puffy-token") ||
-
-    sessionStorage.getItem("token") ||
-
-    sessionStorage.getItem("authToken")
-
-  );
-
+  return (
+    localStorage.getItem("token") ||
+    localStorage.getItem("authToken") ||
+    localStorage.getItem("puffy-token") ||
+    sessionStorage.getItem("token") ||
+    sessionStorage.getItem("authToken")
+  );
 }
 
 function getSavedUser() {
+  try {
+    const storedUser =
+      localStorage.getItem("puffy-user") ||
+      localStorage.getItem("user") ||
+      localStorage.getItem("currentUser") ||
+      sessionStorage.getItem("user") ||
+      sessionStorage.getItem("currentUser");
 
-  try {
+    if (!storedUser) return null;
 
-    const storedUser =
+    const savedUser = JSON.parse(storedUser);
 
-      localStorage.getItem("puffy-user") ||
+    return isStudentUser(savedUser) ? savedUser : null;
+  } catch (error) {
+    console.error("Unable to read saved user:", error);
 
-      localStorage.getItem("user") ||
-
-      localStorage.getItem("currentUser") ||
-
-      sessionStorage.getItem("user") ||
-
-      sessionStorage.getItem("currentUser");
-
-    if (!storedUser) return null;
-
-    const savedUser = JSON.parse(storedUser);
-
-    return isStudentUser(savedUser) ? savedUser : null;
-
-  } catch (error) {
-
-    console.error("Unable to read saved user:", error);
-
-    return null;
-
-  }
-
+    return null;
+  }
 }
 
 function saveUpdatedUser(updatedUser) {
+  if (!isStudentUser(updatedUser)) return;
 
-  if (!isStudentUser(updatedUser)) return;
+  const serializedUser = JSON.stringify(updatedUser);
 
-  const serializedUser = JSON.stringify(updatedUser);
+  localStorage.setItem("user", serializedUser);
 
-  localStorage.setItem("user", serializedUser);
+  localStorage.setItem("currentUser", serializedUser);
 
-  localStorage.setItem("currentUser", serializedUser);
+  localStorage.setItem("puffy-user", serializedUser);
 
-  localStorage.setItem("puffy-user", serializedUser);
+  if (sessionStorage.getItem("user")) {
+    sessionStorage.setItem("user", serializedUser);
+  }
 
-  if (sessionStorage.getItem("user")) {
+  if (sessionStorage.getItem("currentUser")) {
+    sessionStorage.setItem("currentUser", serializedUser);
+  }
 
-    sessionStorage.setItem("user", serializedUser);
-
-  }
-
-  if (sessionStorage.getItem("currentUser")) {
-
-    sessionStorage.setItem("currentUser", serializedUser);
-
-  }
-
-  window.dispatchEvent(
-
-    new CustomEvent("puffy-user-updated", {
-
-      detail: updatedUser,
-
-    })
-
-  );
-
+  window.dispatchEvent(
+    new CustomEvent("puffy-user-updated", {
+      detail: updatedUser,
+    }),
+  );
 }
 
 function normalizeStudent(user) {
+  const savedUser = user || {};
 
-  const savedUser = user || {};
+  return {
+    id: savedUser.userId || savedUser.user_id || savedUser.id || "",
 
-  return {
+    name:
+      savedUser.displayName ||
+      savedUser.display_name ||
+      savedUser.name ||
+      savedUser.fullName ||
+      savedUser.full_name ||
+      savedUser.username ||
+      "Student",
 
-    id:
+    studentNumber:
+      savedUser.studentId ||
+      savedUser.student_id ||
+      savedUser.studentNumber ||
+      savedUser.student_number ||
+      savedUser.verificationId ||
+      savedUser.verification_id ||
+      "Not assigned",
 
-      savedUser.userId ||
+    email: savedUser.email || "Not available",
 
-      savedUser.user_id ||
+    year:
+      savedUser.yearLevel ||
+      savedUser.year_level ||
+      savedUser.year ||
+      "Not set",
 
-      savedUser.id ||
+    section:
+      savedUser.sectionName ||
+      savedUser.section_name ||
+      savedUser.section ||
+      "Not set",
 
-      "",
-
-    name:
-
-      savedUser.displayName ||
-
-      savedUser.display_name ||
-
-      savedUser.name ||
-
-      savedUser.fullName ||
-
-      savedUser.full_name ||
-
-      savedUser.username ||
-
-      "Student",
-
-    studentNumber:
-
-      savedUser.studentId ||
-
-      savedUser.student_id ||
-
-      savedUser.studentNumber ||
-
-      savedUser.student_number ||
-
-      savedUser.verificationId ||
-
-      savedUser.verification_id ||
-
-      "Not assigned",
-
-    email: savedUser.email || "Not available",
-
-    year:
-
-      savedUser.yearLevel ||
-
-      savedUser.year_level ||
-
-      savedUser.year ||
-
-      "Not set",
-
-    section:
-
-      savedUser.sectionName ||
-
-      savedUser.section_name ||
-
-      savedUser.section ||
-
-      "Not set",
-
-    role: savedUser.role || "student",
+    role: savedUser.role || "student",
 
     course:
       savedUser.course ||
@@ -239,1191 +159,885 @@ function normalizeStudent(user) {
       savedUser.course_name ||
       "Course not set",
 
-    profileImage:
+    profileImage:
+      savedUser.profileImage ||
+      savedUser.profile_image ||
+      savedUser.avatar ||
+      savedUser.image ||
+      "",
 
-      savedUser.profileImage ||
-
-      savedUser.profile_image ||
-
-      savedUser.avatar ||
-
-      savedUser.image ||
-
-      "",
-
-    temporaryPassword:
-
-      savedUser.temporaryPassword ||
-
-      savedUser.temporary_password ||
-
-      savedUser.initialPassword ||
-
-      savedUser.initial_password ||
-
-      "Not available",
-
-  };
-
+    temporaryPassword:
+      savedUser.temporaryPassword ||
+      savedUser.temporary_password ||
+      savedUser.initialPassword ||
+      savedUser.initial_password ||
+      "Not available",
+  };
 }
 
 export default function StudentProfile() {
+  const navigate = useNavigate();
 
-  const navigate = useNavigate();
+  const savedStudent = normalizeStudent(getSavedUser());
 
-  const savedStudent = normalizeStudent(getSavedUser());
+  const [studentData, setStudentData] = useState(savedStudent);
 
-  const [studentData, setStudentData] = useState(savedStudent);
+  const [profileLoading, setProfileLoading] = useState(true);
 
-  const [profileLoading, setProfileLoading] = useState(true);
+  const [profileError, setProfileError] = useState("");
 
-  const [profileError, setProfileError] = useState("");
+  const [profileImage, setProfileImage] = useState(
+    resolveProfileImage(savedStudent.profileImage),
+  );
 
-  const [profileImage, setProfileImage] = useState(
+  const [profileImageUploading, setProfileImageUploading] = useState(false);
 
-    resolveProfileImage(savedStudent.profileImage)
+  const [showTemporaryPassword, setShowTemporaryPassword] = useState(false);
 
-  );
+  const [joinModalOpen, setJoinModalOpen] = useState(false);
 
-  const [profileImageUploading, setProfileImageUploading] =
+  const [courseCode, setCourseCode] = useState("");
 
-    useState(false);
+  useEffect(() => {
+    let active = true;
 
-  const [showTemporaryPassword, setShowTemporaryPassword] =
+    async function loadStudentProfile() {
+      try {
+        setProfileLoading(true);
 
-    useState(false);
+        setProfileError("");
 
-  const [joinModalOpen, setJoinModalOpen] = useState(false);
+        const token = getStoredToken();
 
-  const [courseCode, setCourseCode] = useState("");
+        if (!token) {
+          throw new Error(
+            "Your login session was not found. Please log in again.",
+          );
+        }
 
-  useEffect(() => {
+        const response = await fetch(`${API_BASE_URL}/users/me`, {
+          method: "GET",
 
-    let active = true;
+          headers: {
+            Accept: "application/json",
 
-    async function loadStudentProfile() {
+            Authorization: `Bearer ${token}`,
+          },
 
-      try {
+          credentials: "include",
+        });
 
-        setProfileLoading(true);
+        const data = await response.json().catch(() => ({}));
 
-        setProfileError("");
+        if (!response.ok) {
+          throw new Error(
+            data.message || "Unable to load your profile information.",
+          );
+        }
 
-        const token = getStoredToken();
+        const loggedInUser = data.user || data.data || data;
 
-        if (!token) {
+        if (!loggedInUser) {
+          throw new Error("Student account information was not found.");
+        }
 
-          throw new Error(
+        const loggedInRole = getUserRole(loggedInUser);
 
-            "Your login session was not found. Please log in again."
+        if (loggedInRole && loggedInRole !== "student") {
+          if (active) {
+            navigate(getHomePath(loggedInRole), {
+              replace: true,
+            });
+          }
 
-          );
+          return;
+        }
 
-        }
+        const normalizedUser = normalizeStudent(loggedInUser);
 
-        const response = await fetch(`${API_BASE_URL}/users/me`, {
+        if (!active) return;
 
-          method: "GET",
+        setStudentData(normalizedUser);
 
-          headers: {
+        setProfileImage(resolveProfileImage(normalizedUser.profileImage));
 
-            Accept: "application/json",
+        saveUpdatedUser(loggedInUser);
+      } catch (error) {
+        console.error("Student profile loading error:", error);
 
-            Authorization: `Bearer ${token}`,
+        if (active) {
+          setProfileError(
+            error.message || "Unable to load your profile information.",
+          );
+        }
+      } finally {
+        if (active) {
+          setProfileLoading(false);
+        }
+      }
+    }
 
-          },
+    loadStudentProfile();
 
-          credentials: "include",
+    return () => {
+      active = false;
+    };
+  }, [navigate]);
 
-        });
+  useEffect(() => {
+    return () => {
+      if (profileImage.startsWith("blob:")) {
+        URL.revokeObjectURL(profileImage);
+      }
+    };
+  }, [profileImage]);
 
-        const data = await response.json().catch(() => ({}));
+  const closeJoinModal = () => {
+    setJoinModalOpen(false);
 
-        if (!response.ok) {
+    setCourseCode("");
+  };
 
-          throw new Error(
+  const joinByCourseCode = async () => {
+    const trimmedCode = courseCode.trim();
 
-            data.message ||
+    if (!trimmedCode) {
+      await Swal.fire({
+        icon: "warning",
 
-              "Unable to load your profile information."
+        title: "Enter Course Code",
 
-          );
+        text: "Please enter the course code provided by your professor.",
 
-        }
+        confirmButtonText: "OK",
 
-        const loggedInUser = data.user || data.data || data;
+        confirmButtonColor: "#7FA8D6",
+      });
 
-        if (!loggedInUser) {
+      return;
+    }
 
-          throw new Error(
+    try {
+      const course = await findJoinableCourseByCodeAsync(trimmedCode);
 
-            "Student account information was not found."
+      if (!course) {
+        await Swal.fire({
+          icon: "error",
 
-          );
+          title: "Course Not Found",
 
-        }
+          text: "Course code not found. Please check the code from your professor.",
 
-        const loggedInRole = getUserRole(loggedInUser);
+          confirmButtonText: "OK",
 
-        if (loggedInRole && loggedInRole !== "student") {
+          confirmButtonColor: "#7FA8D6",
+        });
 
-          if (active) {
+        return;
+      }
 
-            navigate(getHomePath(loggedInRole), {
+      await enrollStudentInCourseAsync(course);
 
-              replace: true,
+      closeJoinModal();
 
-            });
+      await Swal.fire({
+        icon: "success",
 
-          }
+        title: "Course Joined!",
 
-          return;
+        text: `You have successfully joined ${
+          course.title ||
+          course.courseName ||
+          course.course_name ||
+          course.name ||
+          "the course"
+        }.`,
 
-        }
+        confirmButtonText: "Continue",
 
-        const normalizedUser = normalizeStudent(loggedInUser);
+        confirmButtonColor: "#7FA8D6",
+      });
 
-        if (!active) return;
+      const courseId =
+        course.id ||
+        course.courseId ||
+        course.course_id ||
+        course.code ||
+        course.courseCode ||
+        course.course_code;
 
-        setStudentData(normalizedUser);
+      navigate(`/student/enrolled-courses/${courseId}`);
+    } catch (error) {
+      console.error("Join course error:", error);
 
-        setProfileImage(
+      await Swal.fire({
+        icon: "error",
 
-          resolveProfileImage(normalizedUser.profileImage)
+        title: "Unable to Join Course",
 
-        );
+        text: error?.message || "Unable to join the course.",
 
-        saveUpdatedUser(loggedInUser);
+        confirmButtonText: "OK",
 
-      } catch (error) {
+        confirmButtonColor: "#7FA8D6",
+      });
+    }
+  };
 
-        console.error("Student profile loading error:", error);
+  const shareProfile = async () => {
+    const profileLink = `${window.location.origin}/student/profile`;
 
-        if (active) {
+    try {
+      await navigator.clipboard.writeText(profileLink);
 
-          setProfileError(
+      await Swal.fire({
+        icon: "success",
 
-            error.message ||
+        title: "Profile Link Copied",
 
-              "Unable to load your profile information."
+        text: "Your profile link has been copied.",
 
-          );
+        confirmButtonColor: "#7FA8D6",
 
-        }
+        timer: 1600,
 
-      } finally {
+        showConfirmButton: false,
+      });
+    } catch (error) {
+      console.error("Unable to copy profile link:", error);
 
-        if (active) {
+      await Swal.fire({
+        icon: "error",
 
-          setProfileLoading(false);
+        title: "Unable to Copy Link",
 
-        }
+        text: "Unable to copy the profile link.",
 
-      }
+        confirmButtonColor: "#7FA8D6",
+      });
+    }
+  };
 
-    }
+  const changeProfilePicture = async (event) => {
+    const selectedFile = event.target.files?.[0];
 
-    loadStudentProfile();
+    event.target.value = "";
 
-    return () => {
+    if (!selectedFile) return;
 
-      active = false;
+    if (!selectedFile.type.startsWith("image/")) {
+      await Swal.fire({
+        icon: "error",
 
-    };
+        title: "Invalid File",
 
-  }, [navigate]);
+        text: "Please select a valid image file.",
 
-  useEffect(() => {
+        confirmButtonColor: "#7FA8D6",
+      });
 
-    return () => {
+      return;
+    }
 
-      if (profileImage.startsWith("blob:")) {
+    const maximumFileSize = 5 * 1024 * 1024;
 
-        URL.revokeObjectURL(profileImage);
+    if (selectedFile.size > maximumFileSize) {
+      await Swal.fire({
+        icon: "warning",
 
-      }
+        title: "File Too Large",
 
-    };
+        text: "Please choose an image smaller than 5 MB.",
 
-  }, [profileImage]);
+        confirmButtonColor: "#7FA8D6",
+      });
 
-  const closeJoinModal = () => {
+      return;
+    }
 
-    setJoinModalOpen(false);
+    const token = getStoredToken();
 
-    setCourseCode("");
+    if (!token) {
+      await Swal.fire({
+        icon: "error",
 
-  };
+        title: "Session Expired",
 
-  const joinByCourseCode = async () => {
+        text: "Please log in again.",
 
-    const trimmedCode = courseCode.trim();
+        confirmButtonColor: "#7FA8D6",
+      });
 
-    if (!trimmedCode) {
+      return;
+    }
 
-      await Swal.fire({
+    const previousImage = profileImage;
 
-        icon: "warning",
+    const previewUrl = URL.createObjectURL(selectedFile);
 
-        title: "Enter Course Code",
+    setProfileImage(previewUrl);
 
-        text: "Please enter the course code provided by your professor.",
+    setProfileImageUploading(true);
 
-        confirmButtonText: "OK",
+    try {
+      const formData = new FormData();
 
-        confirmButtonColor: "#7FA8D6",
+      formData.append("profileImage", selectedFile);
 
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/users/me/profile-image`,
 
-      return;
+        {
+          method: "PUT",
 
-    }
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
 
-    try {
+          credentials: "include",
 
-      const course =
+          body: formData,
+        },
+      );
 
-        await findJoinableCourseByCodeAsync(trimmedCode);
+      const data = await response.json().catch(() => ({}));
 
-      if (!course) {
+      if (!response.ok) {
+        throw new Error(
+          data.message || "Unable to update your profile picture.",
+        );
+      }
 
-        await Swal.fire({
+      const returnedUser = data.user || data.data?.user || data.data || {};
 
-          icon: "error",
+      const returnedImage =
+        returnedUser.profileImage ||
+        returnedUser.profile_image ||
+        data.profileImage ||
+        data.profile_image;
 
-          title: "Course Not Found",
+      if (!returnedImage) {
+        throw new Error(
+          "The server updated the photo but did not return its saved path.",
+        );
+      }
 
-          text: "Course code not found. Please check the code from your professor.",
+      const currentSavedUser = getSavedUser() || {};
 
-          confirmButtonText: "OK",
+      const updatedUser = {
+        ...currentSavedUser,
 
-          confirmButtonColor: "#7FA8D6",
+        ...returnedUser,
 
-        });
+        profileImage: returnedImage,
 
-        return;
+        profile_image: returnedImage,
+      };
 
-      }
+      const savedImageUrl = resolveProfileImage(returnedImage);
 
-      await enrollStudentInCourseAsync(course);
+      URL.revokeObjectURL(previewUrl);
 
-      closeJoinModal();
+      setProfileImage(savedImageUrl);
 
-      await Swal.fire({
+      setStudentData(normalizeStudent(updatedUser));
 
-        icon: "success",
+      saveUpdatedUser(updatedUser);
 
-        title: "Course Joined!",
+      await Swal.fire({
+        icon: "success",
 
-        text: `You have successfully joined ${
+        title: "Profile Updated!",
 
-          course.title ||
+        text: "Your profile picture has been updated successfully.",
 
-          course.courseName ||
+        confirmButtonColor: "#7FA8D6",
 
-          course.course_name ||
+        timer: 1800,
 
-          course.name ||
+        showConfirmButton: false,
+      });
+    } catch (error) {
+      console.error("Profile picture update error:", error);
 
-          "the course"
+      URL.revokeObjectURL(previewUrl);
 
-        }.`,
+      setProfileImage(previousImage);
 
-        confirmButtonText: "Continue",
+      await Swal.fire({
+        icon: "error",
 
-        confirmButtonColor: "#7FA8D6",
+        title: "Update Failed",
 
-      });
+        text: error.message || "Unable to update your profile picture.",
 
-      const courseId =
+        confirmButtonColor: "#7FA8D6",
+      });
+    } finally {
+      setProfileImageUploading(false);
+    }
+  };
 
-        course.id ||
+  return (
+    <div className="enrolled-dashboard striped-dashboard">
+            <StudentSidebar />     {" "}
+      <main className="enrolled-main">
+               {" "}
+        <StudentHeader
+          searchPlaceholder="Search your course"
 
-        course.courseId ||
+          onJoinCourse={() => setJoinModalOpen(true)}
+        />
+        <section className="public-heading">
+                    <h1>Student Profile</h1>       {" "}
+        </section>
+               {" "}
+        {profileLoading && (
+          <div className="student-empty-state">
+                        Loading your profile             information...        
+             {" "}
+          </div>
+        )}
+               {" "}
+        {!profileLoading && profileError && (
+          <div className="student-empty-state">
+                          {profileError}           {" "}
+          </div>
+        )}
+               {" "}
+        {!profileLoading && !profileError && (
+          <section className="student-profile-content">
+                         {" "}
+            <div className="student-profile-layout">
+                             {" "}
+              <StudentIdentityCard
+                student={studentData}
+                editable={true}
+                profileImage={profileImage}
+                profileImageUploading={profileImageUploading}
+                onProfileImageChange={changeProfilePicture}
+              />
+                             {" "}
+              <div className="student-profile-details">
+                                 {" "}
+                <div className="student-profile-details-header">
+                                     {" "}
+                  <div>
+                                         {" "}
+                    <span className="student-profile-eyebrow">
+                                              Profile overview                  
+                         {" "}
+                    </span>
+                                         {" "}
+                    <h2>
+                                              Student Information              
+                             {" "}
+                    </h2>
+                                         {" "}
+                    <p>
+                                              Your personal,                    
+                          academic, and account                        
+                      information.                      {" "}
+                    </p>
+                                       {" "}
+                  </div>
+                                     {" "}
+                  <button
+                    type="button"
 
-        course.course_id ||
+                    className="student-profile-share-button"
 
-        course.code ||
+                    onClick={shareProfile}
 
-        course.courseCode ||
+                    title="Copy profile link"
 
-        course.course_code;
-
-      navigate(`/student/enrolled-courses/${courseId}`);
-
-    } catch (error) {
-
-      console.error("Join course error:", error);
-
-      await Swal.fire({
-
-        icon: "error",
-
-        title: "Unable to Join Course",
-
-        text: error?.message || "Unable to join the course.",
-
-        confirmButtonText: "OK",
-
-        confirmButtonColor: "#7FA8D6",
-
-      });
-
-    }
-
-  };
-
-  const shareProfile = async () => {
-
-    const profileLink = `${window.location.origin}/student/profile`;
-
-    try {
-
-      await navigator.clipboard.writeText(profileLink);
-
-      await Swal.fire({
-
-        icon: "success",
-
-        title: "Profile Link Copied",
-
-        text: "Your profile link has been copied.",
-
-        confirmButtonColor: "#7FA8D6",
-
-        timer: 1600,
-
-        showConfirmButton: false,
-
-      });
-
-    } catch (error) {
-
-      console.error("Unable to copy profile link:", error);
-
-      await Swal.fire({
-
-        icon: "error",
-
-        title: "Unable to Copy Link",
-
-        text: "Unable to copy the profile link.",
-
-        confirmButtonColor: "#7FA8D6",
-
-      });
-
-    }
-
-  };
-
-  const changeProfilePicture = async (event) => {
-
-    const selectedFile = event.target.files?.[0];
-
-    event.target.value = "";
-
-    if (!selectedFile) return;
-
-    if (!selectedFile.type.startsWith("image/")) {
-
-      await Swal.fire({
-
-        icon: "error",
-
-        title: "Invalid File",
-
-        text: "Please select a valid image file.",
-
-        confirmButtonColor: "#7FA8D6",
-
-      });
-
-      return;
-
-    }
-
-    const maximumFileSize = 5 * 1024 * 1024;
-
-    if (selectedFile.size > maximumFileSize) {
-
-      await Swal.fire({
-
-        icon: "warning",
-
-        title: "File Too Large",
-
-        text: "Please choose an image smaller than 5 MB.",
-
-        confirmButtonColor: "#7FA8D6",
-
-      });
-
-      return;
-
-    }
-
-    const token = getStoredToken();
-
-    if (!token) {
-
-      await Swal.fire({
-
-        icon: "error",
-
-        title: "Session Expired",
-
-        text: "Please log in again.",
-
-        confirmButtonColor: "#7FA8D6",
-
-      });
-
-      return;
-
-    }
-
-    const previousImage = profileImage;
-
-    const previewUrl = URL.createObjectURL(selectedFile);
-
-    setProfileImage(previewUrl);
-
-    setProfileImageUploading(true);
-
-    try {
-
-      const formData = new FormData();
-
-      formData.append("profileImage", selectedFile);
-
-      const response = await fetch(
-
-        `${API_BASE_URL}/users/me/profile-image`,
-
-        {
-
-          method: "PUT",
-
-          headers: {
-
-            Authorization: `Bearer ${token}`,
-
-          },
-
-          credentials: "include",
-
-          body: formData,
-
-        }
-
-      );
-
-      const data = await response.json().catch(() => ({}));
-
-      if (!response.ok) {
-
-        throw new Error(
-
-          data.message ||
-
-            "Unable to update your profile picture."
-
-        );
-
-      }
-
-      const returnedUser =
-
-        data.user || data.data?.user || data.data || {};
-
-      const returnedImage =
-
-        returnedUser.profileImage ||
-
-        returnedUser.profile_image ||
-
-        data.profileImage ||
-
-        data.profile_image;
-
-      if (!returnedImage) {
-
-        throw new Error(
-
-          "The server updated the photo but did not return its saved path."
-
-        );
-
-      }
-
-      const currentSavedUser = getSavedUser() || {};
-
-      const updatedUser = {
-
-        ...currentSavedUser,
-
-        ...returnedUser,
-
-        profileImage: returnedImage,
-
-        profile_image: returnedImage,
-
-      };
-
-      const savedImageUrl =
-
-        resolveProfileImage(returnedImage);
-
-      URL.revokeObjectURL(previewUrl);
-
-      setProfileImage(savedImageUrl);
-
-      setStudentData(normalizeStudent(updatedUser));
-
-      saveUpdatedUser(updatedUser);
-
-      await Swal.fire({
-
-        icon: "success",
-
-        title: "Profile Updated!",
-
-        text: "Your profile picture has been updated successfully.",
-
-        confirmButtonColor: "#7FA8D6",
-
-        timer: 1800,
-
-        showConfirmButton: false,
-
-      });
-
-    } catch (error) {
-
-      console.error("Profile picture update error:", error);
-
-      URL.revokeObjectURL(previewUrl);
-
-      setProfileImage(previousImage);
-
-      await Swal.fire({
-
-        icon: "error",
-
-        title: "Update Failed",
-
-        text:
-
-          error.message ||
-
-          "Unable to update your profile picture.",
-
-        confirmButtonColor: "#7FA8D6",
-
-      });
-
-    } finally {
-
-      setProfileImageUploading(false);
-
-    }
-
-  };
-
-  return (
-
-    <div className="enrolled-dashboard striped-dashboard">
-
-      <StudentSidebar />
-
-      <main className="enrolled-main">
-
-        <StudentHeader
-
-          searchPlaceholder="Search your course"
-
-          onJoinCourse={() => setJoinModalOpen(true)}
-
-        />
-
-<section className="public-heading">
-
-          <h1>Student Profile</h1>
-
-        </section>
-
-        {profileLoading && (
-
-          <div className="student-empty-state">
-
-            Loading your profile
-
-            information...
-
-          </div>
-
-        )}
-
-        {!profileLoading &&
-
-          profileError && (
-
-            <div className="student-empty-state">
-
-              {profileError}
-
-            </div>
-
-          )}
-
-        {!profileLoading &&
-
-          !profileError && (
-
-            <section className="student-profile-content">
-
-              <div className="student-profile-layout">
-
-                <StudentIdentityCard
-                  student={studentData}
-                  editable={true}
-                  profileImage={profileImage}
-                  profileImageUploading={profileImageUploading}
-                  onProfileImageChange={changeProfilePicture}
-                />
-
-                <div className="student-profile-details">
-
-                  <div className="student-profile-details-header">
-
-                    <div>
-
-                      <span className="student-profile-eyebrow">
-
-                        Profile overview
-
-                      </span>
-
-                      <h2>
-
-                        Student Information
-
-                      </h2>
-
-                      <p>
-
-                        Your personal,
-
-                        academic, and account
-
-                        information.
-
-                      </p>
-
-                    </div>
-
-                    <button
-
-                      type="button"
-
-                      className="student-profile-share-button"
-
-                      onClick={shareProfile}
-
-                      title="Copy profile link"
-
-                      aria-label="Copy profile link"
-
-                    >
-
-                      <svg
-
-                        viewBox="0 0 24 24"
-
-                        aria-hidden="true"
-
-                      >
-
-                        <circle
-
-                          cx="18"
-
-                          cy="5"
-
-                          r="2.5"
-
-                        />
-
-                        <circle
-
-                          cx="6"
-
-                          cy="12"
-
-                          r="2.5"
-
-                        />
-
-                        <circle
-
-                          cx="18"
-
-                          cy="19"
-
-                          r="2.5"
-
-                        />
-
-                        <path d="m8.2 10.8 7.5-4.4" />
-
-                        <path d="m8.2 13.2 7.5 4.4" />
-
-                      </svg>
-
-                    </button>
-
-                  </div>
-
-                  <section className="student-info-section">
-
-                    <div className="student-info-section-heading">
-
-                      <span className="student-info-section-icon">
-
-                        <svg
-
-                          viewBox="0 0 24 24"
-
-                          aria-hidden="true"
-
-                        >
-
-                          <circle
-
-                            cx="12"
-
-                            cy="8"
-
-                            r="4"
-
-                          />
-
-                          <path d="M5 20c.8-4 3.2-6 7-6s6.2 2 7 6" />
-
-                        </svg>
-
-                      </span>
-
-                      <div>
-
-                        <h3>
-
-                          Personal Information
-
-                        </h3>
-
-                        <p>
-
-                          Basic student account
-
-                          details
-
-                        </p>
-
-                      </div>
-
-                    </div>
-
-                    <div className="student-info-grid">
-
-                      <div className="student-info-item">
-
-                        <span className="student-info-label">
-
-                          Full Name
-
-                        </span>
-
-                        <strong>
-
-                          {studentData.name}
-
-                        </strong>
-
-                      </div>
-
-                      <div className="student-info-item">
-
-                        <span className="student-info-label">
-
-                          Student Number
-
-                        </span>
-
-                        <strong>
-
-                          {
-
-                            studentData.studentNumber
-
-                          }
-
-                        </strong>
-
-                      </div>
-
-                      <div className="student-info-item student-info-item-wide">
-
-                        <span className="student-info-label">
-
-                          Email Address
-
-                        </span>
-
-                        <strong>
-
-                          {studentData.email}
-
-                        </strong>
-
-                      </div>
-
-                    </div>
-
-                  </section>
-
-                  <section className="student-info-section">
-
-                    <div className="student-info-section-heading">
-
-                      <span className="student-info-section-icon">
-
-                        <svg
-
-                          viewBox="0 0 24 24"
-
-                          aria-hidden="true"
-
-                        >
-
-                          <path d="m3.5 8.2 8.5-4.7 8.5 4.7-8.5 4.7-8.5-4.7Z" />
-
-                          <path d="M6.5 10.2v5c0 1.3 2.5 3 5.5 3s5.5-1.7 5.5-3v-5" />
-
-                        </svg>
-
-                      </span>
-
-                      <div>
-
-                        <h3>
-
-                          Academic Information
-
-                        </h3>
-
-                        <p>
-
-                          Year level and class
-
-                          assignment
-
-                        </p>
-
-                      </div>
-
-                    </div>
-
-                    <div className="student-info-grid">
-
-                      <div className="student-info-item student-info-item-wide">
-
-                        <span className="student-info-label">
-
-                          Course
-
-                        </span>
-
-                        <strong>
-
-                          {studentData.course}
-
-                        </strong>
-
-                      </div>
-
-
-                      <div className="student-info-item">
-
-                        <span className="student-info-label">
-
-                          Year Level
-
-                        </span>
-
-                        <strong>
-
-                          {studentData.year}
-
-                        </strong>
-
-                      </div>
-
-                      <div className="student-info-item">
-
-                        <span className="student-info-label">
-
-                          Section
-
-                        </span>
-
-                        <strong>
-
-                          {studentData.section}
-
-                        </strong>
-
-                      </div>
-
-                    </div>
-
-                  </section>
-
-                  <section className="student-info-section student-security-section">
-
-                    <div className="student-info-section-heading">
-
-                      <span className="student-info-section-icon">
-
-                        <svg
-
-                          viewBox="0 0 24 24"
-
-                          aria-hidden="true"
-
-                        >
-
-                          <rect
-
-                            x="5"
-
-                            y="10"
-
-                            width="14"
-
-                            height="10"
-
-                            rx="2"
-
-                          />
-
-                          <path d="M8 10V7a4 4 0 0 1 8 0v3" />
-
-                        </svg>
-
-                      </span>
-
-                      <div>
-
-                        <h3>
-
-                          Account Security
-
-                        </h3>
-
-                        <p>
-
-                          Temporary account
-
-                          credentials
-
-                        </p>
-
-                      </div>
-
-                    </div>
-
-                    <div className="student-password-card">
-
-                      <div className="student-password-copy">
-
-                        <span className="student-info-label">
-
-                          Temporary Password
-
-                        </span>
-
-                        <strong
-
-                          className={
-
-                            showTemporaryPassword
-
-                              ? 'student-password-visible'
-
-                              : 'student-password-hidden'
-
-                          }
-
-                        >
-
-                          {showTemporaryPassword
-
-                            ? studentData.temporaryPassword
-
-                            : '••••••••••••••'}
-
-                        </strong>
-
-                      </div>
-
-                      <button
-
-                        type="button"
-
-                        className="student-password-toggle"
-
-                        onClick={() =>
-
-                          setShowTemporaryPassword(
-
-                            (currentValue) =>
-
-                              !currentValue,
-
-                          )
-
-                        }
-
-                        title={
-
-                          showTemporaryPassword
-
-                            ? 'Hide temporary password'
-
-                            : 'Show temporary password'
-
-                        }
-
-                        aria-label={
-
-                          showTemporaryPassword
-
-                            ? 'Hide temporary password'
-
-                            : 'Show temporary password'
-
-                        }
-
-                        aria-pressed={
-
-                          showTemporaryPassword
-
-                        }
-
-                      >
-
-                        {showTemporaryPassword ? (
-
-                          <svg
-
-                            viewBox="0 0 24 24"
-
-                            aria-hidden="true"
-
-                          >
-
-                            <path d="m3 3 18 18" />
-
-                            <path d="M10.6 6.2A10.3 10.3 0 0 1 12 6c6 0 9.5 6 9.5 6a18.8 18.8 0 0 1-2.5 3.2" />
-
-                            <path d="M6.2 6.2C3.8 8 2.5 12 2.5 12S6 18 12 18a9.7 9.7 0 0 0 3.8-.8" />
-
-                            <path d="M9.8 9.8a3 3 0 0 0 4.4 4.4" />
-
-                          </svg>
-
-                        ) : (
-
-                          <svg
-
-                            viewBox="0 0 24 24"
-
-                            aria-hidden="true"
-
-                          >
-
-                            <path d="M2.5 12S6 6 12 6s9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" />
-
-                            <circle
-
-                              cx="12"
-
-                              cy="12"
-
-                              r="3"
-
-                            />
-
-                          </svg>
-
-                        )}
-
-                        <span>
-
-                          {showTemporaryPassword
-
-                            ? 'Hide'
-
-                            : 'Show'}
-
-                        </span>
-
-                      </button>
-
-                    </div>
-
-                    <p className="student-password-note">
-
-                      This is the password assigned
-
-                      when your account was created.
-
-                      Keep it private and change it
-
-                      from the Settings page.
-
-                    </p>
-
-                  </section>
-
-                </div>
-
-              </div>
-
-            </section>
-
-          )}
-
-        <JoinCourseModal
-
-          open={joinModalOpen}
-
-          courseCode={courseCode}
-
-          onCourseCodeChange={setCourseCode}
-
-          onCancel={closeJoinModal}
-
-          onJoin={joinByCourseCode}
-
-        />
-
-      </main>
-
-    </div>
-
-  );
-
+                    aria-label="Copy profile link"
+                  >
+                                         {" "}
+                    <svg
+                      viewBox="0 0 24 24"
+
+                      aria-hidden="true"
+                    >
+                                             {" "}
+                      <circle
+                        cx="18"
+
+                        cy="5"
+
+                        r="2.5"
+                      />
+                                             {" "}
+                      <circle
+                        cx="6"
+
+                        cy="12"
+
+                        r="2.5"
+                      />
+                                             {" "}
+                      <circle
+                        cx="18"
+
+                        cy="19"
+
+                        r="2.5"
+                      />
+                                              <path d="m8.2 10.8 7.5-4.4" />
+                                              <path d="m8.2 13.2 7.5 4.4" />   
+                                       {" "}
+                    </svg>
+                                       {" "}
+                  </button>
+                                   {" "}
+                </div>
+                                 {" "}
+                <section className="student-info-section">
+                                     {" "}
+                  <div className="student-info-section-heading">
+                                         {" "}
+                    <span className="student-info-section-icon">
+                                             {" "}
+                      <svg
+                        viewBox="0 0 24 24"
+
+                        aria-hidden="true"
+                      >
+                                                 {" "}
+                        <circle
+                          cx="12"
+
+                          cy="8"
+
+                          r="4"
+                        />
+                                                 {" "}
+                        <path d="M5 20c.8-4 3.2-6 7-6s6.2 2 7 6" />             
+                                 {" "}
+                      </svg>
+                                           {" "}
+                    </span>
+                                         {" "}
+                    <div>
+                                             {" "}
+                      <h3>
+                                                  Personal Information          
+                                     {" "}
+                      </h3>
+                                             {" "}
+                      <p>
+                                                  Basic student account        
+                                          details                        {" "}
+                      </p>
+                                           {" "}
+                    </div>
+                                       {" "}
+                  </div>
+                                     {" "}
+                  <div className="student-info-grid">
+                                         {" "}
+                    <div className="student-info-item">
+                                             {" "}
+                      <span className="student-info-label">
+                                                  Full Name                    
+                           {" "}
+                      </span>
+                                             {" "}
+                      <strong>
+                                                  {studentData.name}           
+                                   {" "}
+                      </strong>
+                                           {" "}
+                    </div>
+                                         {" "}
+                    <div className="student-info-item">
+                                             {" "}
+                      <span className="student-info-label">
+                                                  Student Number                
+                               {" "}
+                      </span>
+                                             {" "}
+                      <strong>
+                                                  {studentData.studentNumber}   
+                                           {" "}
+                      </strong>
+                                           {" "}
+                    </div>
+                                         {" "}
+                    <div className="student-info-item student-info-item-wide">
+                                             {" "}
+                      <span className="student-info-label">
+                                                  Email Address                
+                               {" "}
+                      </span>
+                                             {" "}
+                      <strong>
+                                                  {studentData.email}           
+                                   {" "}
+                      </strong>
+                                           {" "}
+                    </div>
+                                       {" "}
+                  </div>
+                                   {" "}
+                </section>
+                                 {" "}
+                <section className="student-info-section">
+                                     {" "}
+                  <div className="student-info-section-heading">
+                                         {" "}
+                    <span className="student-info-section-icon">
+                                             {" "}
+                      <svg
+                        viewBox="0 0 24 24"
+
+                        aria-hidden="true"
+                      >
+                                                 {" "}
+                        <path d="m3.5 8.2 8.5-4.7 8.5 4.7-8.5 4.7-8.5-4.7Z" /> 
+                                               {" "}
+                        <path d="M6.5 10.2v5c0 1.3 2.5 3 5.5 3s5.5-1.7 5.5-3v-5" />
+                                               {" "}
+                      </svg>
+                                           {" "}
+                    </span>
+                                         {" "}
+                    <div>
+                                             {" "}
+                      <h3>
+                                                  Academic Information          
+                                     {" "}
+                      </h3>
+                                             {" "}
+                      <p>
+                                                  Year level and class          
+                                        assignment                        {" "}
+                      </p>
+                                           {" "}
+                    </div>
+                                       {" "}
+                  </div>
+                                     {" "}
+                  <div className="student-info-grid">
+                                         {" "}
+                    <div className="student-info-item student-info-item-wide">
+                                             {" "}
+                      <span className="student-info-label">
+                                                  Course                      
+                         {" "}
+                      </span>
+                                             {" "}
+                      <strong>
+                                                  {studentData.course}         
+                                     {" "}
+                      </strong>
+                                           {" "}
+                    </div>
+                                         {" "}
+                    <div className="student-info-item">
+                                             {" "}
+                      <span className="student-info-label">
+                                                  Year Level                    
+                           {" "}
+                      </span>
+                                             {" "}
+                      <strong>
+                                                  {studentData.year}           
+                                   {" "}
+                      </strong>
+                                           {" "}
+                    </div>
+                                         {" "}
+                    <div className="student-info-item">
+                                             {" "}
+                      <span className="student-info-label">
+                                                  Section                      
+                         {" "}
+                      </span>
+                                             {" "}
+                      <strong>
+                                                  {studentData.section}         
+                                     {" "}
+                      </strong>
+                                           {" "}
+                    </div>
+                                       {" "}
+                  </div>
+                                   {" "}
+                </section>
+                                 {" "}
+                <section className="student-info-section student-security-section">
+                                     {" "}
+                  <div className="student-info-section-heading">
+                                         {" "}
+                    <span className="student-info-section-icon">
+                                             {" "}
+                      <svg
+                        viewBox="0 0 24 24"
+
+                        aria-hidden="true"
+                      >
+                                                 {" "}
+                        <rect
+                          x="5"
+
+                          y="10"
+
+                          width="14"
+
+                          height="10"
+
+                          rx="2"
+                        />
+                                                 {" "}
+                        <path d="M8 10V7a4 4 0 0 1 8 0v3" />                   
+                           {" "}
+                      </svg>
+                                           {" "}
+                    </span>
+                                         {" "}
+                    <div>
+                                             {" "}
+                      <h3>
+                                                  Account Security              
+                                 {" "}
+                      </h3>
+                                             {" "}
+                      <p>
+                                                  Temporary account            
+                                      credentials                        {" "}
+                      </p>
+                                           {" "}
+                    </div>
+                                       {" "}
+                  </div>
+                                     {" "}
+                  <div className="student-password-card">
+                                         {" "}
+                    <div className="student-password-copy">
+                                             {" "}
+                      <span className="student-info-label">
+                                                  Temporary Password            
+                                   {" "}
+                      </span>
+                                             {" "}
+                      <strong
+                        className={
+                          showTemporaryPassword
+                            ? "student-password-visible"
+                            : "student-password-hidden"
+                        }
+                      >
+                                                 {" "}
+                        {showTemporaryPassword
+                          ? studentData.temporaryPassword
+                          : "••••••••••••••"}
+                                               {" "}
+                      </strong>
+                                           {" "}
+                    </div>
+                                         {" "}
+                    <button
+                      type="button"
+
+                      className="student-password-toggle"
+
+                      onClick={() =>
+                        setShowTemporaryPassword(
+                          (currentValue) => !currentValue,
+                        )
+                      }
+
+                      title={
+                        showTemporaryPassword
+                          ? "Hide temporary password"
+                          : "Show temporary password"
+                      }
+
+                      aria-label={
+                        showTemporaryPassword
+                          ? "Hide temporary password"
+                          : "Show temporary password"
+                      }
+
+                      aria-pressed={showTemporaryPassword}
+                    >
+                                             {" "}
+                      {showTemporaryPassword ? (
+                        <svg
+                          viewBox="0 0 24 24"
+
+                          aria-hidden="true"
+                        >
+                                                      <path d="m3 3 18 18" />   
+                                                 {" "}
+                          <path d="M10.6 6.2A10.3 10.3 0 0 1 12 6c6 0 9.5 6 9.5 6a18.8 18.8 0 0 1-2.5 3.2" />
+                                                     {" "}
+                          <path d="M6.2 6.2C3.8 8 2.5 12 2.5 12S6 18 12 18a9.7 9.7 0 0 0 3.8-.8" />
+                                                     {" "}
+                          <path d="M9.8 9.8a3 3 0 0 0 4.4 4.4" />               
+                                   {" "}
+                        </svg>
+                      ) : (
+                        <svg
+                          viewBox="0 0 24 24"
+
+                          aria-hidden="true"
+                        >
+                                                     {" "}
+                          <path d="M2.5 12S6 6 12 6s9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" />
+                                                     {" "}
+                          <circle
+                            cx="12"
+
+                            cy="12"
+
+                            r="3"
+                          />
+                                                   {" "}
+                        </svg>
+                      )}
+                                             {" "}
+                      <span>
+                                                 {" "}
+                        {showTemporaryPassword ? "Hide" : "Show"}               
+                               {" "}
+                      </span>
+                                           {" "}
+                    </button>
+                                       {" "}
+                  </div>
+                                     {" "}
+                  <p className="student-password-note">
+                                          This is the password assigned        
+                                  when your account was created.                
+                          Keep it private and change it                      
+                    from the Settings page.                    {" "}
+                  </p>
+                                   {" "}
+                </section>
+                               {" "}
+              </div>
+                           {" "}
+            </div>
+                       {" "}
+          </section>
+        )}
+               {" "}
+        <JoinCourseModal
+          open={joinModalOpen}
+
+          courseCode={courseCode}
+
+          onCourseCodeChange={setCourseCode}
+
+          onCancel={closeJoinModal}
+
+          onJoin={joinByCourseCode}
+        />
+             {" "}
+      </main>
+         {" "}
+    </div>
+  );
 }

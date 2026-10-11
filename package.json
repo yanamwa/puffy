@@ -23,6 +23,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.4",
+    "prettier": "^3.9.10",
     "vite": "^5.4.21"
   },
   "scripts": {
@@ -31,7 +32,9 @@
     "build": "vite build",
     "preview": "vite preview",
     "server": "node server/index.js",
-    "test": "echo \"No tests configured yet\""
+    "test": "echo \"No tests configured yet\"",
+    "format": "prettier --write src tests --ignore-unknown",
+    "format:check": "prettier --check src tests --ignore-unknown"
   },
   "browserslist": {
     "production": [

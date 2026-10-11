@@ -35,7 +35,8 @@ export default function UserManagement() {
   });
 
   const adminImage =
-    admin.profile_image && !admin.profile_image.includes("temporary profile.jpg")
+    admin.profile_image &&
+    !admin.profile_image.includes("temporary profile.jpg")
       ? admin.profile_image.startsWith("http")
         ? admin.profile_image
         : `${API_BASE}/${admin.profile_image.replace(/^\/+/, "")}`
@@ -241,12 +242,12 @@ export default function UserManagement() {
     try {
       const res = await fetch(
         `${API_BASE}/getUserDetailsAdmin.php?user_id=${encodeURIComponent(
-          user.id
+          user.id,
         )}`,
         {
           method: "GET",
           credentials: "include",
-        }
+        },
       );
 
       const data = await res.json();
@@ -265,7 +266,7 @@ export default function UserManagement() {
         Swal.fire(
           "Error",
           data.message || "Failed to fetch user details",
-          "error"
+          "error",
         );
       }
     } catch (err) {
@@ -309,11 +310,21 @@ export default function UserManagement() {
     const q = searchQuery.trim().toLowerCase();
 
     return (
-      String(user.id || "").toLowerCase().includes(q) ||
-      String(user.username || "").toLowerCase().includes(q) ||
-      String(user.email || "").toLowerCase().includes(q) ||
-      String(user.year_level || "").toLowerCase().includes(q) ||
-      String(user.school || "").toLowerCase().includes(q)
+      String(user.id || "")
+        .toLowerCase()
+        .includes(q) ||
+      String(user.username || "")
+        .toLowerCase()
+        .includes(q) ||
+      String(user.email || "")
+        .toLowerCase()
+        .includes(q) ||
+      String(user.year_level || "")
+        .toLowerCase()
+        .includes(q) ||
+      String(user.school || "")
+        .toLowerCase()
+        .includes(q)
     );
   });
 
@@ -336,7 +347,7 @@ export default function UserManagement() {
 
   const currentUsers = sortedUsers.slice(
     (currentPage - 1) * rowsToShow,
-    currentPage * rowsToShow
+    currentPage * rowsToShow,
   );
 
   return (
@@ -446,7 +457,7 @@ export default function UserManagement() {
                   >
                     {page}
                   </button>
-                )
+                ),
               )}
 
               <button
@@ -491,7 +502,6 @@ export default function UserManagement() {
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
               User Profile
-
               <span
                 className={styles.close}
                 onClick={() => setSelectedUser(null)}

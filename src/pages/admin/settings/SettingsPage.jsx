@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState } from "react";
 import {
   FiCheck,
   FiEye,
@@ -7,16 +7,16 @@ import {
   FiLock,
   FiShield,
   FiX,
-} from 'react-icons/fi';
+} from "react-icons/fi";
 
-import { useAuth } from '../../../context/AuthContext';
-import { API_BASE } from '../../../config.js';
-import './Settings.css';
+import { useAuth } from "../../../context/AuthContext";
+import { API_BASE } from "../../../config.js";
+import "./Settings.css";
 
 const initialPasswordForm = {
-  currentPassword: '',
-  newPassword: '',
-  confirmPassword: '',
+  currentPassword: "",
+  newPassword: "",
+  confirmPassword: "",
 };
 
 function getAdminAccount(user) {
@@ -27,31 +27,21 @@ function getAdminAccount(user) {
       user?.fullName ||
       user?.full_name ||
       user?.name ||
-      localStorage.getItem('username') ||
-      'Administrator',
+      localStorage.getItem("username") ||
+      "Administrator",
 
-    email:
-      user?.email ||
-      localStorage.getItem('user_email') ||
-      '',
+    email: user?.email || localStorage.getItem("user_email") || "",
 
-    role:
-      user?.role ||
-      localStorage.getItem('user_role') ||
-      'Administrator',
+    role: user?.role || localStorage.getItem("user_role") || "Administrator",
   };
 }
 
 export default function SettingsPage() {
   const { user } = useAuth();
 
-  const adminAccount = useMemo(
-    () => getAdminAccount(user),
-    [user]
-  );
+  const adminAccount = useMemo(() => getAdminAccount(user), [user]);
 
-  const [passwordForm, setPasswordForm] =
-    useState(initialPasswordForm);
+  const [passwordForm, setPasswordForm] = useState(initialPasswordForm);
 
   const [visiblePasswords, setVisiblePasswords] = useState({
     currentPassword: false,
@@ -60,17 +50,16 @@ export default function SettingsPage() {
   });
 
   const [passwordNotice, setPasswordNotice] = useState({
-    type: '',
-    message: '',
+    type: "",
+    message: "",
   });
 
-  const [isSubmittingPassword, setIsSubmittingPassword] =
-    useState(false);
+  const [isSubmittingPassword, setIsSubmittingPassword] = useState(false);
 
   const updatePasswordField = (fieldName) => (event) => {
     setPasswordNotice({
-      type: '',
-      message: '',
+      type: "",
+      message: "",
     });
 
     setPasswordForm((currentForm) => ({
@@ -94,17 +83,13 @@ export default function SettingsPage() {
     symbol: /[^A-Za-z0-9]/.test(passwordForm.newPassword),
   };
 
-  const passwordIsStrong = Object.values(
-    passwordChecks
-  ).every(Boolean);
+  const passwordIsStrong = Object.values(passwordChecks).every(Boolean);
 
-  const confirmPasswordHasValue =
-    passwordForm.confirmPassword.length > 0;
+  const confirmPasswordHasValue = passwordForm.confirmPassword.length > 0;
 
   const passwordsMatch =
     confirmPasswordHasValue &&
-    passwordForm.newPassword ===
-      passwordForm.confirmPassword;
+    passwordForm.newPassword === passwordForm.confirmPassword;
 
   const clearPasswordForm = () => {
     setPasswordForm(initialPasswordForm);
@@ -116,8 +101,8 @@ export default function SettingsPage() {
     });
 
     setPasswordNotice({
-      type: '',
-      message: '',
+      type: "",
+      message: "",
     });
   };
 
@@ -125,14 +110,14 @@ export default function SettingsPage() {
     event.preventDefault();
 
     setPasswordNotice({
-      type: '',
-      message: '',
+      type: "",
+      message: "",
     });
 
     if (!passwordForm.currentPassword.trim()) {
       setPasswordNotice({
-        type: 'error',
-        message: 'Enter your current password first.',
+        type: "error",
+        message: "Enter your current password first.",
       });
 
       return;
@@ -140,8 +125,8 @@ export default function SettingsPage() {
 
     if (!passwordForm.newPassword) {
       setPasswordNotice({
-        type: 'error',
-        message: 'Enter your new password.',
+        type: "error",
+        message: "Enter your new password.",
       });
 
       return;
@@ -149,9 +134,8 @@ export default function SettingsPage() {
 
     if (!passwordIsStrong) {
       setPasswordNotice({
-        type: 'error',
-        message:
-          'Your new password does not meet all password requirements.',
+        type: "error",
+        message: "Your new password does not meet all password requirements.",
       });
 
       return;
@@ -159,22 +143,18 @@ export default function SettingsPage() {
 
     if (!passwordsMatch) {
       setPasswordNotice({
-        type: 'error',
-        message:
-          'The new password and confirmation do not match.',
+        type: "error",
+        message: "The new password and confirmation do not match.",
       });
 
       return;
     }
 
-    if (
-      passwordForm.currentPassword ===
-      passwordForm.newPassword
-    ) {
+    if (passwordForm.currentPassword === passwordForm.newPassword) {
       setPasswordNotice({
-        type: 'error',
+        type: "error",
         message:
-          'Your new password must be different from your current password.',
+          "Your new password must be different from your current password.",
       });
 
       return;
@@ -184,46 +164,37 @@ export default function SettingsPage() {
 
     try {
       const token =
-        localStorage.getItem('puffy-token') ||
-        localStorage.getItem('token');
+        localStorage.getItem("puffy-token") || localStorage.getItem("token");
 
-      console.log(
-        'Password request URL:',
-        `${API_BASE}/users/change-password`
-      );
+      console.log("Password request URL:", `${API_BASE}/users/change-password`);
 
-      const response = await fetch(
-          `${API_BASE}/users/change-password`,
-          {
-            method: 'PUT',
+      const response = await fetch(`${API_BASE}/users/change-password`, {
+        method: "PUT",
 
-            headers: {
-              'Content-Type': 'application/json',
+        headers: {
+          "Content-Type": "application/json",
 
-              ...(token
-                ? {
-                    Authorization: `Bearer ${token}`,
-                  }
-                : {}),
-            },
+          ...(token
+            ? {
+                Authorization: `Bearer ${token}`,
+              }
+            : {}),
+        },
 
-            credentials: 'include',
+        credentials: "include",
 
-            body: JSON.stringify({
-              currentPassword: passwordForm.currentPassword,
-              newPassword: passwordForm.newPassword,
-            }),
-          }
-        );
+        body: JSON.stringify({
+          currentPassword: passwordForm.currentPassword,
+          newPassword: passwordForm.newPassword,
+        }),
+      });
 
-      const data = await response
-        .json()
-        .catch(() => ({}));
+      const data = await response.json().catch(() => ({}));
 
       if (!response.ok) {
         throw new Error(
           data.message ||
-            `Unable to change password. Server returned ${response.status}.`
+            `Unable to change password. Server returned ${response.status}.`,
         );
       }
 
@@ -236,22 +207,18 @@ export default function SettingsPage() {
       });
 
       setPasswordNotice({
-        type: 'success',
+        type: "success",
         message:
           data.message ||
-          'Your administrator password was changed successfully.',
+          "Your administrator password was changed successfully.",
       });
     } catch (error) {
-      console.error(
-        'Change password error:',
-        error
-      );
+      console.error("Change password error:", error);
 
       setPasswordNotice({
-        type: 'error',
+        type: "error",
         message:
-          error.message ||
-          'Something went wrong while changing your password.',
+          error.message || "Something went wrong while changing your password.",
       });
     } finally {
       setIsSubmittingPassword(false);
@@ -260,28 +227,28 @@ export default function SettingsPage() {
 
   const requirements = [
     {
-      id: 'length',
-      label: 'At least 12 characters',
+      id: "length",
+      label: "At least 12 characters",
       met: passwordChecks.length,
     },
     {
-      id: 'uppercase',
-      label: 'One uppercase letter',
+      id: "uppercase",
+      label: "One uppercase letter",
       met: passwordChecks.uppercase,
     },
     {
-      id: 'lowercase',
-      label: 'One lowercase letter',
+      id: "lowercase",
+      label: "One lowercase letter",
       met: passwordChecks.lowercase,
     },
     {
-      id: 'number',
-      label: 'One number',
+      id: "number",
+      label: "One number",
       met: passwordChecks.number,
     },
     {
-      id: 'symbol',
-      label: 'One special character',
+      id: "symbol",
+      label: "One special character",
       met: passwordChecks.symbol,
     },
   ];
@@ -290,16 +257,11 @@ export default function SettingsPage() {
     <div className="admin-settings-page">
       <section className="admin-settings-heading">
         <div>
-          <span className="admin-settings-eyebrow">
-            Account security
-          </span>
+          <span className="admin-settings-eyebrow">Account security</span>
 
           <h1>Admin Settings</h1>
 
-          <p>
-            Manage your password and protect your
-            administrator account.
-          </p>
+          <p>Manage your password and protect your administrator account.</p>
         </div>
       </section>
 
@@ -308,12 +270,8 @@ export default function SettingsPage() {
         aria-label="Administrator account settings"
       >
         <div className="admin-password-settings-card">
-
           <header className="admin-password-card-header">
-            <span
-              className="admin-password-card-icon"
-              aria-hidden="true"
-            >
+            <span className="admin-password-card-icon" aria-hidden="true">
               <FiLock />
             </span>
 
@@ -325,34 +283,22 @@ export default function SettingsPage() {
               <h2>Change Password</h2>
 
               <p>
-                Create a secure password that is not used
-                for another account.
+                Create a secure password that is not used for another account.
               </p>
             </div>
           </header>
 
           <div className="admin-account-summary">
-            <span
-              className="admin-account-summary-icon"
-              aria-hidden="true"
-            >
+            <span className="admin-account-summary-icon" aria-hidden="true">
               <FiShield />
             </span>
 
             <div>
-              <span>
-                {adminAccount.role} account
-              </span>
+              <span>{adminAccount.role} account</span>
 
-              <strong>
-                {adminAccount.name}
-              </strong>
+              <strong>{adminAccount.name}</strong>
 
-              {adminAccount.email && (
-                <small>
-                  {adminAccount.email}
-                </small>
-              )}
+              {adminAccount.email && <small>{adminAccount.email}</small>}
             </div>
           </div>
 
@@ -364,21 +310,11 @@ export default function SettingsPage() {
               id="admin-current-password"
               label="Current Password"
               placeholder="Enter your current password"
-              value={
-                passwordForm.currentPassword
-              }
-              visible={
-                visiblePasswords.currentPassword
-              }
+              value={passwordForm.currentPassword}
+              visible={visiblePasswords.currentPassword}
               autoComplete="current-password"
-              onChange={updatePasswordField(
-                'currentPassword'
-              )}
-              onToggle={() =>
-                togglePasswordVisibility(
-                  'currentPassword'
-                )
-              }
+              onChange={updatePasswordField("currentPassword")}
+              onToggle={() => togglePasswordVisibility("currentPassword")}
             />
 
             <div className="admin-password-form-divider" />
@@ -387,21 +323,11 @@ export default function SettingsPage() {
               id="admin-new-password"
               label="New Password"
               placeholder="Create a new password"
-              value={
-                passwordForm.newPassword
-              }
-              visible={
-                visiblePasswords.newPassword
-              }
+              value={passwordForm.newPassword}
+              visible={visiblePasswords.newPassword}
               autoComplete="new-password"
-              onChange={updatePasswordField(
-                'newPassword'
-              )}
-              onToggle={() =>
-                togglePasswordVisibility(
-                  'newPassword'
-                )
-              }
+              onChange={updatePasswordField("newPassword")}
+              onToggle={() => togglePasswordVisibility("newPassword")}
             />
 
             <div
@@ -411,36 +337,26 @@ export default function SettingsPage() {
               <div className="admin-password-requirements-heading">
                 <FiShield aria-hidden="true" />
 
-                <span>
-                  Password requirements
-                </span>
+                <span>Password requirements</span>
               </div>
 
               <div className="admin-password-requirements-grid">
-                {requirements.map(
-                  (requirement) => (
-                    <div
-                      key={requirement.id}
-                      className={
-                        requirement.met
-                          ? 'admin-password-requirement met'
-                          : 'admin-password-requirement'
-                      }
-                    >
-                      <span aria-hidden="true">
-                        {requirement.met ? (
-                          <FiCheck />
-                        ) : (
-                          <FiX />
-                        )}
-                      </span>
+                {requirements.map((requirement) => (
+                  <div
+                    key={requirement.id}
+                    className={
+                      requirement.met
+                        ? "admin-password-requirement met"
+                        : "admin-password-requirement"
+                    }
+                  >
+                    <span aria-hidden="true">
+                      {requirement.met ? <FiCheck /> : <FiX />}
+                    </span>
 
-                      <strong>
-                        {requirement.label}
-                      </strong>
-                    </div>
-                  )
-                )}
+                    <strong>{requirement.label}</strong>
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -448,33 +364,20 @@ export default function SettingsPage() {
               id="admin-confirm-password"
               label="Confirm New Password"
               placeholder="Re-enter your new password"
-              value={
-                passwordForm.confirmPassword
-              }
-              visible={
-                visiblePasswords.confirmPassword
-              }
+              value={passwordForm.confirmPassword}
+              visible={visiblePasswords.confirmPassword}
               autoComplete="new-password"
-              invalid={
-                confirmPasswordHasValue &&
-                !passwordsMatch
-              }
-              onChange={updatePasswordField(
-                'confirmPassword'
-              )}
-              onToggle={() =>
-                togglePasswordVisibility(
-                  'confirmPassword'
-                )
-              }
+              invalid={confirmPasswordHasValue && !passwordsMatch}
+              onChange={updatePasswordField("confirmPassword")}
+              onToggle={() => togglePasswordVisibility("confirmPassword")}
             />
 
             {confirmPasswordHasValue && (
               <div
                 className={
                   passwordsMatch
-                    ? 'admin-password-match-message success'
-                    : 'admin-password-match-message error'
+                    ? "admin-password-match-message success"
+                    : "admin-password-match-message error"
                 }
               >
                 {passwordsMatch ? (
@@ -485,8 +388,8 @@ export default function SettingsPage() {
 
                 <span>
                   {passwordsMatch
-                    ? 'Passwords match.'
-                    : 'Passwords do not match.'}
+                    ? "Passwords match."
+                    : "Passwords do not match."}
                 </span>
               </div>
             )}
@@ -494,23 +397,15 @@ export default function SettingsPage() {
             {passwordNotice.message && (
               <div
                 className={`admin-password-notice ${passwordNotice.type}`}
-                role={
-                  passwordNotice.type ===
-                  'error'
-                    ? 'alert'
-                    : 'status'
-                }
+                role={passwordNotice.type === "error" ? "alert" : "status"}
               >
-                {passwordNotice.type ===
-                'success' ? (
+                {passwordNotice.type === "success" ? (
                   <FiCheck aria-hidden="true" />
                 ) : (
                   <FiInfo aria-hidden="true" />
                 )}
 
-                <span>
-                  {passwordNotice.message}
-                </span>
+                <span>{passwordNotice.message}</span>
               </div>
             )}
 
@@ -519,9 +414,7 @@ export default function SettingsPage() {
                 type="button"
                 className="admin-password-clear-button"
                 onClick={clearPasswordForm}
-                disabled={
-                  isSubmittingPassword
-                }
+                disabled={isSubmittingPassword}
               >
                 Clear
               </button>
@@ -529,36 +422,25 @@ export default function SettingsPage() {
               <button
                 type="submit"
                 className="admin-password-save-button"
-                disabled={
-                  isSubmittingPassword
-                }
+                disabled={isSubmittingPassword}
               >
-                {isSubmittingPassword
-                  ? 'Updating...'
-                  : 'Update Password'}
+                {isSubmittingPassword ? "Updating..." : "Update Password"}
               </button>
             </div>
           </form>
         </div>
 
         <aside className="admin-password-security-note">
-          <span
-            className="admin-security-note-icon"
-            aria-hidden="true"
-          >
+          <span className="admin-security-note-icon" aria-hidden="true">
             <FiInfo />
           </span>
 
           <div>
-            <strong>
-              Administrator security reminder
-            </strong>
+            <strong>Administrator security reminder</strong>
 
             <p>
-              Never share your administrator
-              credentials. Sign out after managing
-              the system on shared or public
-              devices.
+              Never share your administrator credentials. Sign out after
+              managing the system on shared or public devices.
             </p>
           </div>
         </aside>
@@ -580,22 +462,14 @@ function PasswordField({
 }) {
   return (
     <div className="admin-password-field-group">
-      <label htmlFor={id}>
-        {label}
-      </label>
+      <label htmlFor={id}>{label}</label>
 
       <div
-        className={`admin-password-input-wrapper ${
-          invalid ? 'has-error' : ''
-        }`}
+        className={`admin-password-input-wrapper ${invalid ? "has-error" : ""}`}
       >
         <input
           id={id}
-          type={
-            visible
-              ? 'text'
-              : 'password'
-          }
+          type={visible ? "text" : "password"}
           value={value}
           onChange={onChange}
           autoComplete={autoComplete}
@@ -611,11 +485,7 @@ function PasswordField({
               ? `Hide ${label.toLowerCase()}`
               : `Show ${label.toLowerCase()}`
           }
-          title={
-            visible
-              ? 'Hide password'
-              : 'Show password'
-          }
+          title={visible ? "Hide password" : "Show password"}
         >
           {visible ? (
             <FiEyeOff aria-hidden="true" />
@@ -623,9 +493,7 @@ function PasswordField({
             <FiEye aria-hidden="true" />
           )}
 
-          <span>
-            {visible ? 'Hide' : 'Show'}
-          </span>
+          <span>{visible ? "Hide" : "Show"}</span>
         </button>
       </div>
     </div>

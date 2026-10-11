@@ -533,7 +533,9 @@
   text-decoration: none;
   font-size: 15px;
 
-  transition: background 0.2s ease, transform 0.2s ease;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
 }
 
 .home-profile-button:hover {
@@ -796,18 +798,8 @@
 
 .home-todo-item input:checked {
   background:
-    linear-gradient(
-      135deg,
-      transparent 45%,
-      #fff 45% 56%,
-      transparent 56%
-    ),
-    linear-gradient(
-      45deg,
-      transparent 43%,
-      #fff 43% 56%,
-      transparent 56%
-    ),
+    linear-gradient(135deg, transparent 45%, #fff 45% 56%, transparent 56%),
+    linear-gradient(45deg, transparent 43%, #fff 43% 56%, transparent 56%),
     #25714e;
 }
 

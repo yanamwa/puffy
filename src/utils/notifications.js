@@ -1,30 +1,28 @@
-import { API_BASE } from '../config.js';
+import { API_BASE } from "../config.js";
 
 export const MANAGED_NOTIFICATION_STORAGE_KEY =
-  'puffy-notifications-announcements';
+  "puffy-notifications-announcements";
 
-export const LEGACY_NOTIFICATION_STORAGE_KEY =
-  'admin-notifications';
+export const LEGACY_NOTIFICATION_STORAGE_KEY = "admin-notifications";
 
 const MANAGED_NOTIFICATION_READ_STORAGE_KEY =
-  'puffy-managed-notification-read-state';
+  "puffy-managed-notification-read-state";
 
-export const MANAGED_NOTIFICATION_EVENT =
-  'puffy-managed-notifications-updated';
+export const MANAGED_NOTIFICATION_EVENT = "puffy-managed-notifications-updated";
 
 export const managedNotificationTargetOptions = [
-  { value: 'all', label: 'All users' },
-  { value: 'student', label: 'Students' },
-  { value: 'professor', label: 'Professors' },
-  { value: 'admin', label: 'Admins' },
-  { value: 'superAdmin', label: 'Super admins' },
+  { value: "all", label: "All users" },
+  { value: "student", label: "Students" },
+  { value: "professor", label: "Professors" },
+  { value: "admin", label: "Admins" },
+  { value: "superAdmin", label: "Super admins" },
 ];
 
 const seedManagedNotifications = [];
 
 function getBrowserStorage() {
   try {
-    if (typeof window === 'undefined') return null;
+    if (typeof window === "undefined") return null;
     return window.localStorage;
   } catch {
     return null;
@@ -47,7 +45,7 @@ function readJsonStorage(key, fallback) {
 }
 
 function dispatchManagedNotificationEvent(detail = {}) {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
 
   window.dispatchEvent(
     new CustomEvent(MANAGED_NOTIFICATION_EVENT, {
@@ -56,74 +54,74 @@ function dispatchManagedNotificationEvent(detail = {}) {
   );
 }
 
-export function normalizeNotificationRole(role = '') {
-  const normalized = String(role || '')
+export function normalizeNotificationRole(role = "") {
+  const normalized = String(role || "")
     .trim()
     .toLowerCase()
-    .replace(/[\s_-]+/g, '');
+    .replace(/[\s_-]+/g, "");
 
-  if (!normalized) return '';
-  if (normalized === 'superadmin' || normalized === 'superadministrator') {
-    return 'superAdmin';
+  if (!normalized) return "";
+  if (normalized === "superadmin" || normalized === "superadministrator") {
+    return "superAdmin";
   }
-  if (normalized === 'administrator') return 'admin';
-  if (normalized === 'instructor') return 'professor';
-  if (normalized === 'learner') return 'student';
+  if (normalized === "administrator") return "admin";
+  if (normalized === "instructor") return "professor";
+  if (normalized === "learner") return "student";
 
   return normalized;
 }
 
-export function formatNotificationRoleLabel(role = '') {
+export function formatNotificationRoleLabel(role = "") {
   const normalizedRole = normalizeNotificationRole(role);
 
-  if (normalizedRole === 'superAdmin') return 'Super admin';
-  if (normalizedRole === 'admin') return 'Admin';
-  if (normalizedRole === 'professor') return 'Professor';
-  if (normalizedRole === 'student') return 'Student';
+  if (normalizedRole === "superAdmin") return "Super admin";
+  if (normalizedRole === "admin") return "Admin";
+  if (normalizedRole === "professor") return "Professor";
+  if (normalizedRole === "student") return "Student";
 
-  return 'User';
+  return "User";
 }
 
-export function normalizeNotificationTarget(target = 'all') {
-  const normalized = String(target || 'all')
+export function normalizeNotificationTarget(target = "all") {
+  const normalized = String(target || "all")
     .trim()
     .toLowerCase()
-    .replace(/[\s_-]+/g, '');
+    .replace(/[\s_-]+/g, "");
 
-  if (!normalized || normalized === 'everyone') return 'all';
-  if (normalized === 'allusers') return 'all';
-  if (normalized === 'users') return 'user';
-  if (normalized === 'students') return 'student';
-  if (normalized === 'professors' || normalized === 'instructors') {
-    return 'professor';
+  if (!normalized || normalized === "everyone") return "all";
+  if (normalized === "allusers") return "all";
+  if (normalized === "users") return "user";
+  if (normalized === "students") return "student";
+  if (normalized === "professors" || normalized === "instructors") {
+    return "professor";
   }
-  if (normalized === 'admins' || normalized === 'administrators') {
-    return 'admin';
+  if (normalized === "admins" || normalized === "administrators") {
+    return "admin";
   }
-  if (normalized === 'superadmins' || normalized === 'superadministrators') {
-    return 'superAdmin';
+  if (normalized === "superadmins" || normalized === "superadministrators") {
+    return "superAdmin";
   }
 
-  return normalizeNotificationRole(normalized) || 'all';
+  return normalizeNotificationRole(normalized) || "all";
 }
 
 export function notificationTargetsRole(target, role) {
   const normalizedTarget = normalizeNotificationTarget(target);
   const normalizedRole = normalizeNotificationRole(role);
 
-  if (normalizedTarget === 'all') return true;
-  if (normalizedTarget === 'user') {
-    return ['student', 'professor'].includes(normalizedRole);
+  if (normalizedTarget === "all") return true;
+  if (normalizedTarget === "user") {
+    return ["student", "professor"].includes(normalizedRole);
   }
-  if (normalizedTarget === 'admin') {
-    return ['admin', 'superAdmin'].includes(normalizedRole);
+  if (normalizedTarget === "admin") {
+    return ["admin", "superAdmin"].includes(normalizedRole);
   }
 
   return normalizedTarget === normalizedRole;
 }
 
 function normalizeStoredNotification(notification, index = 0) {
-  if (!notification || typeof notification !== 'object') {
+  if (!notification || typeof notification !== "object") {
     return null;
   }
 
@@ -135,14 +133,14 @@ function normalizeStoredNotification(notification, index = 0) {
 
   return {
     id: String(id),
-    title: String(notification.title || 'Notification'),
-    message: String(notification.message || notification.body || ''),
+    title: String(notification.title || "Notification"),
+    message: String(notification.message || notification.body || ""),
     target: normalizeNotificationTarget(
       notification.target ||
         notification.sendTo ||
         notification.send_to ||
         notification.audience ||
-        'all',
+        "all",
     ),
     createdAt:
       notification.createdAt ||
@@ -153,7 +151,7 @@ function normalizeStoredNotification(notification, index = 0) {
       notification.createdByRole ||
         notification.created_by_role ||
         notification.creatorRole ||
-        '',
+        "",
     ),
     createdByName: String(
       notification.createdByName ||
@@ -164,9 +162,9 @@ function normalizeStoredNotification(notification, index = 0) {
         notification.author_name ||
         notification.createdBy ||
         notification.created_by ||
-        '',
+        "",
     ),
-    type: String(notification.type || 'announcement').trim() || 'announcement',
+    type: String(notification.type || "announcement").trim() || "announcement",
   };
 }
 
@@ -188,9 +186,9 @@ function keepOnlyNewestNotification(notifications) {
 
     const id = String(
       notification.id ||
-      notification.notificationId ||
-      notification.notification_id ||
-      ''
+        notification.notificationId ||
+        notification.notification_id ||
+        "",
     );
 
     if (!id) return;
@@ -202,8 +200,10 @@ function keepOnlyNewestNotification(notifications) {
 }
 
 function isAnnouncementNotification(notification) {
-  return String(notification?.type || 'announcement').toLowerCase() ===
-    'announcement';
+  return (
+    String(notification?.type || "announcement").toLowerCase() ===
+    "announcement"
+  );
 }
 
 export function readManagedNotifications() {
@@ -223,7 +223,10 @@ export function readManagedNotifications() {
     const newestNotifications = keepOnlyNewestNotification(
       notifications
         .map(normalizeStoredNotification)
-        .filter((notification) => notification && isAnnouncementNotification(notification)),
+        .filter(
+          (notification) =>
+            notification && isAnnouncementNotification(notification),
+        ),
     );
 
     if (saved) {
@@ -247,7 +250,10 @@ export function writeManagedNotifications(notifications) {
     Array.isArray(notifications)
       ? notifications
           .map(normalizeStoredNotification)
-          .filter((notification) => notification && isAnnouncementNotification(notification))
+          .filter(
+            (notification) =>
+              notification && isAnnouncementNotification(notification),
+          )
       : [],
   );
 
@@ -269,9 +275,9 @@ export function writeManagedNotifications(notifications) {
 export function createManagedNotification({
   title,
   message,
-  target = 'all',
-  createdByRole = '',
-  createdByName = '',
+  target = "all",
+  createdByRole = "",
+  createdByName = "",
 }) {
   return normalizeStoredNotification({
     id: Date.now(),
@@ -280,7 +286,7 @@ export function createManagedNotification({
     target,
     createdByRole,
     createdByName,
-    type: 'announcement',
+    type: "announcement",
     createdAt: new Date().toISOString(),
   });
 }
@@ -291,9 +297,9 @@ function readStoredUser() {
   if (!storage) return null;
 
   const candidates = [
-    storage.getItem('puffy-user'),
-    storage.getItem('user'),
-    storage.getItem('currentUser'),
+    storage.getItem("puffy-user"),
+    storage.getItem("user"),
+    storage.getItem("currentUser"),
   ];
 
   for (const candidate of candidates) {
@@ -311,16 +317,16 @@ function readStoredUser() {
 
 function getAudienceKey(role, user = readStoredUser()) {
   const storage = getBrowserStorage();
-  const normalizedRole = normalizeNotificationRole(role) || 'user';
+  const normalizedRole = normalizeNotificationRole(role) || "user";
   const identity =
     user?.userId ||
     user?.user_id ||
     user?.id ||
     user?.email ||
-    storage?.getItem('user_id') ||
-    storage?.getItem('user_email') ||
-    storage?.getItem('email') ||
-    'guest';
+    storage?.getItem("user_id") ||
+    storage?.getItem("user_email") ||
+    storage?.getItem("email") ||
+    "guest";
 
   return `${normalizedRole}:${identity}`;
 }
@@ -346,17 +352,17 @@ function writeReadState(state) {
 
 function normalizeManagedNotificationId(notificationOrId) {
   const id =
-    typeof notificationOrId === 'object'
+    typeof notificationOrId === "object"
       ? notificationOrId.managedSourceId ||
         notificationOrId.sourceId ||
         notificationOrId.id
       : notificationOrId;
 
-  return String(id || '').replace(/^managed-/, '');
+  return String(id || "").replace(/^managed-/, "");
 }
 
 function getStoredToken() {
-  if (typeof window === 'undefined') return '';
+  if (typeof window === "undefined") return "";
 
   const storages = [];
 
@@ -372,7 +378,7 @@ function getStoredToken() {
     // Ignore inaccessible storage.
   }
 
-  const tokenKeys = ['puffy-token', 'token', 'authToken'];
+  const tokenKeys = ["puffy-token", "token", "authToken"];
 
   for (const storage of storages) {
     for (const key of tokenKeys) {
@@ -382,35 +388,35 @@ function getStoredToken() {
     }
   }
 
-  return '';
+  return "";
 }
 
 async function requestManagedNotificationApi(path, options = {}) {
   const token = getStoredToken();
 
   if (!token) {
-    throw new Error('Authentication token is missing.');
+    throw new Error("Authentication token is missing.");
   }
 
   const headers = {
-    Accept: 'application/json',
+    Accept: "application/json",
     Authorization: `Bearer ${token}`,
     ...(options.headers || {}),
   };
 
-  if (options.body && !headers['Content-Type']) {
-    headers['Content-Type'] = 'application/json';
+  if (options.body && !headers["Content-Type"]) {
+    headers["Content-Type"] = "application/json";
   }
 
   const response = await fetch(`${API_BASE}${path}`, {
-    credentials: 'include',
+    credentials: "include",
     ...options,
     headers,
   });
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok || data.success === false) {
-    throw new Error(data.message || 'Notification request failed.');
+    throw new Error(data.message || "Notification request failed.");
   }
 
   return data;
@@ -426,30 +432,32 @@ function normalizeNotificationApiPayload(data, fallback = []) {
   return keepOnlyNewestNotification(
     source
       .map(normalizeStoredNotification)
-      .filter((notification) => notification && isAnnouncementNotification(notification)),
+      .filter(
+        (notification) =>
+          notification && isAnnouncementNotification(notification),
+      ),
   );
 }
 
 export async function fetchManagedNotificationsFromServer() {
-  const data = await requestManagedNotificationApi('/notifications');
+  const data = await requestManagedNotificationApi("/notifications");
   const notifications = normalizeNotificationApiPayload(data);
 
   return writeManagedNotifications(notifications);
 }
 
 export async function saveManagedNotificationToServer(notification) {
-  const normalizedNotification =
-    normalizeStoredNotification(notification);
+  const normalizedNotification = normalizeStoredNotification(notification);
 
   if (!normalizedNotification) {
-    throw new Error('Notification is invalid.');
+    throw new Error("Notification is invalid.");
   }
 
   /*
    * First create the new announcement.
    */
-  await requestManagedNotificationApi('/notifications', {
-    method: 'POST',
+  await requestManagedNotificationApi("/notifications", {
+    method: "POST",
 
     body: JSON.stringify({
       title: normalizedNotification.title,
@@ -468,11 +476,9 @@ export async function saveManagedNotificationToServer(notification) {
    * After creating the announcement, fetch the complete list
    * from the server again.
    */
-  const data =
-    await requestManagedNotificationApi('/notifications');
+  const data = await requestManagedNotificationApi("/notifications");
 
-  const notifications =
-    normalizeNotificationApiPayload(data);
+  const notifications = normalizeNotificationApiPayload(data);
 
   return writeManagedNotifications(notifications);
 }
@@ -481,13 +487,13 @@ export async function deleteManagedNotificationFromServer(notificationOrId) {
   const notificationId = normalizeManagedNotificationId(notificationOrId);
 
   if (!notificationId) {
-    throw new Error('Notification id is invalid.');
+    throw new Error("Notification id is invalid.");
   }
 
   const data = await requestManagedNotificationApi(
     `/notifications/${encodeURIComponent(notificationId)}`,
     {
-      method: 'DELETE',
+      method: "DELETE",
     },
   );
   const notifications = normalizeNotificationApiPayload(data, []);
@@ -498,7 +504,7 @@ export async function deleteManagedNotificationFromServer(notificationOrId) {
 let lastManagedNotificationServerSyncAt = 0;
 
 function syncManagedNotificationsFromServerSoon() {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
 
   const now = Date.now();
 
@@ -569,7 +575,7 @@ export function formatNotificationTime(value) {
   const date = new Date(value);
 
   if (Number.isNaN(date.getTime())) {
-    return 'No date';
+    return "No date";
   }
 
   const diff = Date.now() - date.getTime();
@@ -577,17 +583,17 @@ export function formatNotificationTime(value) {
   const hour = 60 * minute;
   const day = 24 * hour;
 
-  if (diff < minute) return 'Just now';
+  if (diff < minute) return "Just now";
   if (diff < hour) return `${Math.floor(diff / minute)} minutes ago`;
   if (diff < day) return `${Math.floor(diff / hour)} hours ago`;
-  if (diff < 2 * day) return 'Yesterday';
+  if (diff < 2 * day) return "Yesterday";
 
-  return date.toLocaleString('en-US', {
-    month: '2-digit',
-    day: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
+  return date.toLocaleString("en-US", {
+    month: "2-digit",
+    day: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
     hour12: true,
   });
 }
@@ -599,31 +605,33 @@ export function formatNotificationTarget(value) {
   );
 
   if (option) return option.label;
-  if (target === 'user') return 'Users';
+  if (target === "user") return "Users";
 
-  return target || 'All users';
+  return target || "All users";
 }
 
 function normalizeNotificationLabel(value) {
-  return String(value || '')
+  return String(value || "")
     .trim()
     .toLowerCase()
-    .replace(/[\s_-]+/g, '');
+    .replace(/[\s_-]+/g, "");
 }
 
 function isEmailLike(value) {
-  return /\S+@\S+/.test(String(value || ''));
+  return /\S+@\S+/.test(String(value || ""));
 }
 
 function getSafeNotificationCreatorName(value, roleLabel) {
-  const creatorName = String(value || '').replace(/^@+/, '').trim();
+  const creatorName = String(value || "")
+    .replace(/^@+/, "")
+    .trim();
 
-  if (!creatorName || isEmailLike(creatorName)) return '';
+  if (!creatorName || isEmailLike(creatorName)) return "";
   if (
     normalizeNotificationLabel(creatorName) ===
     normalizeNotificationLabel(roleLabel)
   ) {
-    return '';
+    return "";
   }
 
   return creatorName;
@@ -636,7 +644,7 @@ export function formatNotificationCreator(
   const creatorRole = formatNotificationRoleLabel(notification.createdByRole);
   const creatorName = includeName
     ? getSafeNotificationCreatorName(notification.createdByName, creatorRole)
-    : '';
+    : "";
 
   if (creatorName) {
     return `Posted by ${creatorName}, ${creatorRole}`;
@@ -649,12 +657,13 @@ export function getManagedNotificationsForRole(role, user) {
   const normalizedRole = normalizeNotificationRole(role);
   const state = readReadState();
   const readForAudience = state[getAudienceKey(normalizedRole, user)] || {};
-  const isPublicAudience = ['student', 'professor'].includes(normalizedRole);
+  const isPublicAudience = ["student", "professor"].includes(normalizedRole);
 
   return readManagedNotifications()
-    .filter((notification) =>
-      isAnnouncementNotification(notification) &&
-      notificationTargetsRole(notification.target, normalizedRole),
+    .filter(
+      (notification) =>
+        isAnnouncementNotification(notification) &&
+        notificationTargetsRole(notification.target, normalizedRole),
     )
     .sort(newestFirst)
     .map((notification) => {
@@ -667,16 +676,16 @@ export function getManagedNotificationsForRole(role, user) {
         ...notification,
         id: `managed-${notification.id}`,
         managedSourceId: notification.id,
-        icon: 'announcement',
+        icon: "announcement",
         isManagedNotification: true,
-        course: 'Announcement',
+        course: "Announcement",
         creatorLabel,
         createdTime,
         time: isPublicAudience
           ? createdTime
           : `${creatorLabel} • ${createdTime}`,
         unread: !readForAudience[notification.id],
-        status: readForAudience[notification.id] ? 'read' : 'unread',
+        status: readForAudience[notification.id] ? "read" : "unread",
       };
     });
 }
@@ -690,7 +699,7 @@ export function mergeManagedNotificationsForRole(
 }
 
 export function subscribeToManagedNotifications(callback) {
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     return () => {};
   }
 
@@ -710,7 +719,7 @@ export function subscribeToManagedNotifications(callback) {
     callback(event);
   };
 
-  window.addEventListener('storage', handleStorage);
+  window.addEventListener("storage", handleStorage);
   window.addEventListener(
     MANAGED_NOTIFICATION_EVENT,
     handleManagedNotificationEvent,
@@ -718,7 +727,7 @@ export function subscribeToManagedNotifications(callback) {
   syncManagedNotificationsFromServerSoon();
 
   return () => {
-    window.removeEventListener('storage', handleStorage);
+    window.removeEventListener("storage", handleStorage);
     window.removeEventListener(
       MANAGED_NOTIFICATION_EVENT,
       handleManagedNotificationEvent,

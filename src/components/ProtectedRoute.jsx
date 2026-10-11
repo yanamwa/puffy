@@ -1,41 +1,41 @@
-import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { requiresStudentPasswordChange } from '../utils/passwordPolicy.js';
+import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { requiresStudentPasswordChange } from "../utils/passwordPolicy.js";
 import {
   APP_ROLES,
   getHomePathForRole,
   getUserRole,
   isProfessorApprovalRestricted,
-} from '../utils/roles.js';
+} from "../utils/roles.js";
 
 const studentOnlyPrefixes = [
-  '/learning',
-  '/introduction',
-  '/lesson',
-  '/review',
-  '/flashcards-tutorial',
-  '/QandA-tutorial',
-  '/qna-tutorial',
-  '/multipleChoice-tutorial',
-  '/multiple-choice-tutorial',
-  '/Matching-tutorial',
-  '/matching-tutorial',
-  '/timedquiz-tutorial',
-  '/random-modes-tutorial',
-  '/mixed-mode-tutorial',
-  '/flashcard',
-  '/qna',
-  '/multiple-choice',
-  '/matching-type',
-  '/timedquiz',
-  '/mixed-mode',
-  '/random-modes',
-  '/survival',
+  "/learning",
+  "/introduction",
+  "/lesson",
+  "/review",
+  "/flashcards-tutorial",
+  "/QandA-tutorial",
+  "/qna-tutorial",
+  "/multipleChoice-tutorial",
+  "/multiple-choice-tutorial",
+  "/Matching-tutorial",
+  "/matching-tutorial",
+  "/timedquiz-tutorial",
+  "/random-modes-tutorial",
+  "/mixed-mode-tutorial",
+  "/flashcard",
+  "/qna",
+  "/multiple-choice",
+  "/matching-type",
+  "/timedquiz",
+  "/mixed-mode",
+  "/random-modes",
+  "/survival",
 ];
 
 function getStoredUser() {
   try {
-    return JSON.parse(localStorage.getItem('puffy-user') || 'null');
+    return JSON.parse(localStorage.getItem("puffy-user") || "null");
   } catch {
     return null;
   }
@@ -43,10 +43,10 @@ function getStoredUser() {
 
 function getStoredToken() {
   return (
-    localStorage.getItem('puffy-token') ||
-    localStorage.getItem('token') ||
-    localStorage.getItem('authToken') ||
-    ''
+    localStorage.getItem("puffy-token") ||
+    localStorage.getItem("token") ||
+    localStorage.getItem("authToken") ||
+    ""
   );
 }
 
@@ -56,16 +56,16 @@ function getTokenUser(token) {
   }
 
   try {
-    const payload = token.split('.')[1];
+    const payload = token.split(".")[1];
 
     if (!payload) {
       return null;
     }
 
-    const normalizedPayload = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const normalizedPayload = payload.replace(/-/g, "+").replace(/_/g, "/");
     const paddedPayload = normalizedPayload.padEnd(
       Math.ceil(normalizedPayload.length / 4) * 4,
-      '=',
+      "=",
     );
 
     return JSON.parse(atob(paddedPayload));
@@ -88,24 +88,24 @@ function isTemporaryExpired(user) {
 }
 
 function clearStoredAuth() {
-  localStorage.removeItem('puffy-token');
-  localStorage.removeItem('token');
-  localStorage.removeItem('authToken');
-  localStorage.removeItem('puffy-user');
-  localStorage.removeItem('user');
-  localStorage.removeItem('currentUser');
-  localStorage.removeItem('user_id');
-  localStorage.removeItem('user_email');
-  localStorage.removeItem('email');
-  localStorage.removeItem('user_role');
-  localStorage.removeItem('username');
-  localStorage.removeItem('year_level');
-  localStorage.removeItem('section_name');
-  localStorage.removeItem('admin');
-  localStorage.removeItem('admin_id');
-  localStorage.removeItem('admin_email');
-  localStorage.removeItem('admin_username');
-  localStorage.removeItem('school_name');
+  localStorage.removeItem("puffy-token");
+  localStorage.removeItem("token");
+  localStorage.removeItem("authToken");
+  localStorage.removeItem("puffy-user");
+  localStorage.removeItem("user");
+  localStorage.removeItem("currentUser");
+  localStorage.removeItem("user_id");
+  localStorage.removeItem("user_email");
+  localStorage.removeItem("email");
+  localStorage.removeItem("user_role");
+  localStorage.removeItem("username");
+  localStorage.removeItem("year_level");
+  localStorage.removeItem("section_name");
+  localStorage.removeItem("admin");
+  localStorage.removeItem("admin_id");
+  localStorage.removeItem("admin_email");
+  localStorage.removeItem("admin_username");
+  localStorage.removeItem("school_name");
 }
 
 export default function ProtectedRoute() {
@@ -137,7 +137,10 @@ export default function ProtectedRoute() {
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
 
-  if (requiresStudentPasswordChange(currentUser) && pathname !== '/student/settings') {
+  if (
+    requiresStudentPasswordChange(currentUser) &&
+    pathname !== "/student/settings"
+  ) {
     return <Navigate to="/student/settings" replace />;
   }
 
@@ -162,19 +165,19 @@ export default function ProtectedRoute() {
     }
   }
 
-  if (pathname.startsWith('/super-admin') && role !== APP_ROLES.SUPER_ADMIN) {
+  if (pathname.startsWith("/super-admin") && role !== APP_ROLES.SUPER_ADMIN) {
     return <Navigate to={getHomePathForRole(role)} replace />;
   }
 
-  if (pathname.startsWith('/admin') && role !== APP_ROLES.ADMIN) {
+  if (pathname.startsWith("/admin") && role !== APP_ROLES.ADMIN) {
     return <Navigate to={getHomePathForRole(role)} replace />;
   }
 
-  if (pathname.startsWith('/professor') && role !== APP_ROLES.PROFESSOR) {
+  if (pathname.startsWith("/professor") && role !== APP_ROLES.PROFESSOR) {
     return <Navigate to={getHomePathForRole(role)} replace />;
   }
 
-  if (pathname.startsWith('/student') && role !== APP_ROLES.STUDENT) {
+  if (pathname.startsWith("/student") && role !== APP_ROLES.STUDENT) {
     return <Navigate to={getHomePathForRole(role)} replace />;
   }
 

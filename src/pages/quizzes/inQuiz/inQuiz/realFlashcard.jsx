@@ -1,3 +1,4 @@
+import { lessonAuthHeaders } from "../../../../services/lessonAuth.js";
 import { saveAccountQuizResult } from "../../../../utils/quizStorage.js";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -23,7 +24,7 @@ export default function Flashcards() {
   const isDeckMode = Boolean(deckId);
   const practiceSession = useMemo(
     () => getStoredPracticeSession({ lessonId, deckId }),
-    [lessonId, deckId]
+    [lessonId, deckId],
   );
 
   const [deck, setDeck] = useState(null);
@@ -51,7 +52,9 @@ export default function Flashcards() {
   };
 
   const getCleanQuestion = (rawQuestion = "") => {
-    return String(rawQuestion).replace(/\s*A\..*/is, "").trim();
+    return String(rawQuestion)
+      .replace(/\s*A\..*/is, "")
+      .trim();
   };
 
   const getCardImageSrc = (image) => {
@@ -106,7 +109,7 @@ export default function Flashcards() {
         if (isLessonMode) {
           const res = await fetch(
             `${API_BASE}/getLessonsById.php?id=${lessonId}`,
-            { credentials: "include" }
+            { credentials: "include" },
           );
 
           const data = normalizeLessonData(await res.json());
@@ -166,7 +169,7 @@ export default function Flashcards() {
             answer: getQuizItemAnswer(item, "No answer available."),
             explanation: item.explanation || "",
             image: item.image || null,
-          }))
+          })),
         );
       } catch {
         return [];
@@ -181,7 +184,7 @@ export default function Flashcards() {
           answer: getQuizItemAnswer(card, "No answer available."),
           explanation: "",
           image: card.image || null,
-        }))
+        })),
       );
     }
 
@@ -192,7 +195,10 @@ export default function Flashcards() {
   const checkpointEndIndex = checkpointOpen
     ? checkpointReviewEndIndex
     : Math.min(currentIndex + 1, flashcards.length);
-  const checkpointCards = flashcards.slice(checkpointStartIndex, checkpointEndIndex);
+  const checkpointCards = flashcards.slice(
+    checkpointStartIndex,
+    checkpointEndIndex,
+  );
   const progressPercent = flashcards.length
     ? (checkpointEndIndex / flashcards.length) * 100
     : 0;
@@ -229,10 +235,13 @@ export default function Flashcards() {
     window.speechSynthesis.speak(utterance);
   };
 
-  const saveQuizAttempt = async (finalScore, finalTotal = flashcards.length) => {
+  const saveQuizAttempt = async (
+    finalScore,
+    finalTotal = flashcards.length,
+  ) => {
     const metadata = getPracticeResultMetadata(
       practiceSession,
-      isDeckMode ? "deck" : "lesson"
+      isDeckMode ? "deck" : "lesson",
     );
 
     try {
@@ -240,6 +249,7 @@ export default function Flashcards() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...lessonAuthHeaders(),
         },
         credentials: "include",
         body: JSON.stringify({
@@ -258,11 +268,16 @@ export default function Flashcards() {
     }
   };
 
-  const finishFlashcards = async (finalScore, finalResults, returnToDeck = false) => {
-    await saveQuizAttempt(finalScore, finalResults.length);
-
+  const finishFlashcards = async (
+    finalScore,
+    finalResults,
+    returnToDeck = false,
+  ) => {
     const resultPayload = {
-      ...getPracticeResultMetadata(practiceSession, isDeckMode ? "deck" : "lesson"),
+      ...getPracticeResultMetadata(
+        practiceSession,
+        isDeckMode ? "deck" : "lesson",
+      ),
       quizMode: "flashcard",
       deckId: toNumericId(deckId),
       lessonId: lessonId || null,
@@ -276,7 +291,7 @@ export default function Flashcards() {
     if (isDeckMode) {
       saveAccountQuizResult(
         `deckQuizResults_${deckId}`,
-        JSON.stringify(resultPayload)
+        JSON.stringify(resultPayload),
       );
     }
 
@@ -284,14 +299,16 @@ export default function Flashcards() {
       returnToDeck && isDeckMode
         ? `/deck/${deckId}`
         : isDeckMode
-        ? `/review/deck/${deckId}`
-        : getPracticeReviewPath(practiceSession, { lessonId, deckId })
+          ? `/review/deck/${deckId}`
+          : getPracticeReviewPath(practiceSession, { lessonId, deckId }),
     );
   };
 
   const repeatCheckpointCards = () => {
     const repeatResults = userResults.slice(0, checkpointStartIndex);
-    const repeatScore = repeatResults.filter((result) => result.isCorrect).length;
+    const repeatScore = repeatResults.filter(
+      (result) => result.isCorrect,
+    ).length;
 
     setUserResults(repeatResults);
     setScore(repeatScore);
@@ -414,7 +431,7 @@ export default function Flashcards() {
               navigate(
                 isDeckMode
                   ? `/review/deck/${deckId}`
-                  : getPracticeBackPath(practiceSession, { lessonId, deckId })
+                  : getPracticeBackPath(practiceSession, { lessonId, deckId }),
               )
             }
           >
@@ -427,7 +444,6 @@ export default function Flashcards() {
 
   return (
     <div className={styles.container}>
-
       {notifOpen && (
         <div className={styles.slideNotif}>
           <img
@@ -575,126 +591,126 @@ export default function Flashcards() {
         </div>
       ) : (
         <>
-      <div className={styles.flashcardInfo}>
-        <h2 className={styles.deckTitle}>
-          {isLessonMode
-            ? lesson?.title || "Lesson Flashcards"
-            : deck?.title || "Deck Flashcards"}
-        </h2>
+          <div className={styles.flashcardInfo}>
+            <h2 className={styles.deckTitle}>
+              {isLessonMode
+                ? lesson?.title || "Lesson Flashcards"
+                : deck?.title || "Deck Flashcards"}
+            </h2>
 
-        <div className={styles.progressBar}>
-          <div
-            className={styles.progressFill}
-            style={{
-              width: `${((currentIndex + 1) / flashcards.length) * 100}%`,
-            }}
-          ></div>
-        </div>
+            <div className={styles.progressBar}>
+              <div
+                className={styles.progressFill}
+                style={{
+                  width: `${((currentIndex + 1) / flashcards.length) * 100}%`,
+                }}
+              ></div>
+            </div>
 
-        <p className={styles.questionCount}>
-          Question {currentIndex + 1} of {flashcards.length}
-        </p>
-      </div>
+            <p className={styles.questionCount}>
+              Question {currentIndex + 1} of {flashcards.length}
+            </p>
+          </div>
 
-      <div className={styles.flashcardWrapper}>
-        <div className={styles.tab}>
-          <span className={styles.active}>
-            {flipped ? "Answer" : "Question"}
-          </span>
+          <div className={styles.flashcardWrapper}>
+            <div className={styles.tab}>
+              <span className={styles.active}>
+                {flipped ? "Answer" : "Question"}
+              </span>
 
-          <span onClick={() => setFlipped((prev) => !prev)}>Flip</span>
-        </div>
+              <span onClick={() => setFlipped((prev) => !prev)}>Flip</span>
+            </div>
 
-        <div
-          className={`${styles.flashcard} ${flipped ? styles.flipped : ""}`}
-          onClick={() => setFlipped((prev) => !prev)}
-        >
-          <div className={styles.flashcardInner}>
-            <div className={`${styles.flashcardFace} ${styles.front}`}>
-              {ttsEnabled && (
-                <button
-                  type="button"
-                  className={styles.audioIconBtn}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    speakText(getCleanQuestion(currentCard.question));
-                  }}
-                >
-                  <i className="bx bx-volume-full"></i>
-                </button>
-              )}
+            <div
+              className={`${styles.flashcard} ${flipped ? styles.flipped : ""}`}
+              onClick={() => setFlipped((prev) => !prev)}
+            >
+              <div className={styles.flashcardInner}>
+                <div className={`${styles.flashcardFace} ${styles.front}`}>
+                  {ttsEnabled && (
+                    <button
+                      type="button"
+                      className={styles.audioIconBtn}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        speakText(getCleanQuestion(currentCard.question));
+                      }}
+                    >
+                      <i className="bx bx-volume-full"></i>
+                    </button>
+                  )}
 
-              <div className={styles.flashcardContent}>
-                <p>{getCleanQuestion(currentCard.question)}</p>
+                  <div className={styles.flashcardContent}>
+                    <p>{getCleanQuestion(currentCard.question)}</p>
 
-                {currentCard.image && (
-                  <img
-                    src={getCardImageSrc(currentCard.image)}
-                    alt="Flashcard"
-                    className={styles.flashcardImage}
-                  />
-                )}
+                    {currentCard.image && (
+                      <img
+                        src={getCardImageSrc(currentCard.image)}
+                        alt="Flashcard"
+                        className={styles.flashcardImage}
+                      />
+                    )}
+                  </div>
+                </div>
+
+                <div className={`${styles.flashcardFace} ${styles.back}`}>
+                  {ttsEnabled && (
+                    <button
+                      type="button"
+                      className={styles.audioIconBtn}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        speakText(currentCard.answer);
+                      }}
+                    >
+                      <i className="bx bx-volume-full"></i>
+                    </button>
+                  )}
+
+                  <p>{currentCard.answer}</p>
+                </div>
               </div>
-            </div>
 
-            <div className={`${styles.flashcardFace} ${styles.back}`}>
-              {ttsEnabled && (
+              <div className={styles.difficulty}>
                 <button
-                  type="button"
-                  className={styles.audioIconBtn}
+                  className={styles.easy}
+                  disabled={notifOpen}
                   onClick={(e) => {
                     e.stopPropagation();
-                    speakText(currentCard.answer);
+                    loadNextCard("easy");
                   }}
                 >
-                  <i className="bx bx-volume-full"></i>
+                  Easy
                 </button>
-              )}
 
-              <p>{currentCard.answer}</p>
+                <button
+                  className={styles.good}
+                  disabled={notifOpen}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    loadNextCard("good");
+                  }}
+                >
+                  Good
+                </button>
+
+                <button
+                  className={styles.hard}
+                  disabled={notifOpen}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    loadNextCard("hard");
+                  }}
+                >
+                  Hard
+                </button>
+              </div>
+
+              <p className={styles.difficultyHint}>
+                Easy = mastered • Good = understood • Hard = needs review
+              </p>
             </div>
           </div>
-
-          <div className={styles.difficulty}>
-            <button
-              className={styles.easy}
-              disabled={notifOpen}
-              onClick={(e) => {
-                e.stopPropagation();
-                loadNextCard("easy");
-              }}
-            >
-              Easy
-            </button>
-
-            <button
-              className={styles.good}
-              disabled={notifOpen}
-              onClick={(e) => {
-                e.stopPropagation();
-                loadNextCard("good");
-              }}
-            >
-              Good
-            </button>
-
-            <button
-              className={styles.hard}
-              disabled={notifOpen}
-              onClick={(e) => {
-                e.stopPropagation();
-                loadNextCard("hard");
-              }}
-            >
-              Hard
-            </button>
-          </div>
-
-          <p className={styles.difficultyHint}>
-            Easy = mastered • Good = understood • Hard = needs review
-          </p>
-        </div>
-      </div>
         </>
       )}
     </div>

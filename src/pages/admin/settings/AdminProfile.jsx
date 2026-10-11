@@ -57,7 +57,8 @@ export default function AdminProfile() {
   const adminImage = getAdminImageUrl(admin.profile_image);
 
   const formatActivityDate = (dateValue) => {
-    if (!dateValue || dateValue === "Not recorded yet") return "Not recorded yet";
+    if (!dateValue || dateValue === "Not recorded yet")
+      return "Not recorded yet";
 
     const date = new Date(dateValue);
     if (Number.isNaN(date.getTime())) return dateValue;
@@ -108,7 +109,8 @@ export default function AdminProfile() {
           "System Administrator",
         email: data.admin?.email || data.admin?.Email || "Not set",
         role: data.admin?.role || data.admin?.Role || "Administrator",
-        profile_image: data.admin?.profile_image || "/images/temporary profile.jpg",
+        profile_image:
+          data.admin?.profile_image || "/images/temporary profile.jpg",
       });
     } catch (err) {
       console.error("Failed to fetch admin:", err);
@@ -126,7 +128,7 @@ export default function AdminProfile() {
 
       const res = await fetch(
         `${API_BASE}/getAdminActivity.php?admin_id=${adminData.id}`,
-        { credentials: "include" }
+        { credentials: "include" },
       );
 
       const data = await res.json();
@@ -139,8 +141,8 @@ export default function AdminProfile() {
           backendLoginHistory.length > 0
             ? backendLoginHistory
             : lastLogin !== "Not recorded yet"
-            ? [{ login_time: lastLogin }]
-            : [];
+              ? [{ login_time: lastLogin }]
+              : [];
 
         setAdminActivity({
           last_login: lastLogin,
@@ -160,7 +162,7 @@ export default function AdminProfile() {
 
       const res = await fetch(
         `${API_BASE}/getAdminNotifications.php?admin_id=${adminData.id}`,
-        { credentials: "include" }
+        { credentials: "include" },
       );
 
       const data = await res.json();
@@ -187,7 +189,7 @@ export default function AdminProfile() {
 
     const handler = (e) => {
       const insideDropdown = e.target.closest(
-        '[class*="notificationWrapper"], [class*="customSort"]'
+        '[class*="notificationWrapper"], [class*="customSort"]',
       );
 
       if (!insideDropdown) {
@@ -289,12 +291,12 @@ export default function AdminProfile() {
 
   const paginatedLoginHistory = sortedLoginHistory.slice(
     (loginPage - 1) * rowsPerPage,
-    loginPage * rowsPerPage
+    loginPage * rowsPerPage,
   );
 
   const paginatedRecentActions = sortedRecentActions.slice(
     (actionPage - 1) * rowsPerPage,
-    actionPage * rowsPerPage
+    actionPage * rowsPerPage,
   );
 
   return (
@@ -362,7 +364,9 @@ export default function AdminProfile() {
                 <span className={styles.profileValue}>{admin.username}</span>
               </div>
 
-              <div className={`${styles.profileField} ${styles.profileFieldWide}`}>
+              <div
+                className={`${styles.profileField} ${styles.profileFieldWide}`}
+              >
                 <span className={styles.profileLabel}>Email:</span>
                 <span className={styles.profileValue}>{admin.email}</span>
               </div>
@@ -451,7 +455,10 @@ export default function AdminProfile() {
                     const count = (loginPage - 1) * rowsPerPage + index + 1;
 
                     return (
-                      <div className={styles.loginTableRow} key={`${rawDate}-${index}`}>
+                      <div
+                        className={styles.loginTableRow}
+                        key={`${rawDate}-${index}`}
+                      >
                         <span>{count}</span>
                         <span>{phDate.date}</span>
                         <span>{phDate.time}</span>
@@ -545,7 +552,9 @@ export default function AdminProfile() {
                   </div>
                 ))
               ) : (
-                <p className={styles.noActivity}>No recent admin actions yet.</p>
+                <p className={styles.noActivity}>
+                  No recent admin actions yet.
+                </p>
               )}
 
               {totalActionPages > 1 && (

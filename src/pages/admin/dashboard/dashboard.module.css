@@ -15,7 +15,6 @@
   grid-template-columns: 60px 1fr;
 }
 
-
 /* HEADER */
 .headerContainer {
   grid-area: header;
@@ -220,7 +219,9 @@
   border-radius: 999px 0 0 999px;
   text-align: left;
   cursor: pointer;
-  transition: background 0.25s ease, transform 0.25s ease;
+  transition:
+    background 0.25s ease,
+    transform 0.25s ease;
   font-family: inherit;
   font-size: 16px;
   gap: 10px;
@@ -293,7 +294,7 @@
 .sidebar.collapsed .menuItem:hover,
 .sidebar.collapsed .menuItem.active,
 .sidebar.collapsed .active {
-  background: rgba(255,255,255,0.7);
+  background: rgba(255, 255, 255, 0.7);
   transform: none;
 }
 
@@ -479,11 +480,11 @@
   background: none;
   font-family: "Jersey 15", sans-serif;
   font-weight: 700;
-   text-decoration: none;
+  text-decoration: none;
 }
 
 .showAll:hover {
-  text-decoration:none;
+  text-decoration: none;
 }
 
 .listItem {
@@ -561,53 +562,51 @@
   color: #6e7480;
 }
 
-
 .show {
   display: block;
 }
 
-  .headerContainer {
-    padding: 0 16px;
-  }
+.headerContainer {
+  padding: 0 16px;
+}
 
-  .searchBar {
-    width: 300px;
-  }
+.searchBar {
+  width: 300px;
+}
 
-  .notificationWrapper {
-    right: 16px;
-  }
+.notificationWrapper {
+  right: 16px;
+}
 
-  .main {
-    padding: 24px 16px;
-  }
+.main {
+  padding: 24px 16px;
+}
 
-  .pageHeader {
-    align-items: flex-start;
-    flex-direction: column;
-  }
+.pageHeader {
+  align-items: flex-start;
+  flex-direction: column;
+}
 
-  .table {
-    min-width: 850px;
-  }
+.table {
+  min-width: 850px;
+}
 
-  .paginationWrapper {
-    justify-content: flex-start;
-    overflow-x: auto;
-    padding-bottom: 12px;
-  }
+.paginationWrapper {
+  justify-content: flex-start;
+  overflow-x: auto;
+  padding-bottom: 12px;
+}
 
-  .rowsControl {
-    position: static;
-    margin-left: 16px;
-  }
+.rowsControl {
+  position: static;
+  margin-left: 16px;
+}
 
-  .mmDetails {
-    grid-template-columns: 1fr;
-    column-gap: 0;
-    row-gap: 16px;
-  }
-
+.mmDetails {
+  grid-template-columns: 1fr;
+  column-gap: 0;
+  row-gap: 16px;
+}
 
 @media (max-width: 520px) {
   .searchBar {

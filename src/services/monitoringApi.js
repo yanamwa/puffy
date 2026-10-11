@@ -18,7 +18,7 @@ export async function fetchCourseMonitoring(courseId) {
     `${API_BASE}/monitoring/${encodeURIComponent(courseId)}`,
     {
       credentials: "include",
-    }
+    },
   );
   const data = await parseResponse(response);
 

@@ -98,7 +98,9 @@
   font-size: 12px;
   font-weight: 900;
   box-shadow: 3px 3px 0 rgba(25, 135, 84, 0.22);
-  transition: background 0.16s ease, transform 0.16s ease;
+  transition:
+    background 0.16s ease,
+    transform 0.16s ease;
 }
 
 .report-export-actions button:hover {
@@ -150,7 +152,10 @@
   font-family: inherit;
   font-size: 12px;
   font-weight: 900;
-  transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+  transition:
+    background 0.16s ease,
+    border-color 0.16s ease,
+    color 0.16s ease;
 }
 
 .report-range-filter button:hover,

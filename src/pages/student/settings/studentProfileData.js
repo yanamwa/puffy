@@ -1,11 +1,10 @@
-import { useEffect, useState } from 'react';
-import { API_BASE } from '../../../config.js';
+import { useEffect, useState } from "react";
+import { API_BASE } from "../../../config.js";
 
-export const DEFAULT_STUDENT_PROFILE_IMAGE =
-  '/images/temporary profile.jpg';
+export const DEFAULT_STUDENT_PROFILE_IMAGE = "/images/temporary profile.jpg";
 
 export function cleanStudentProfileText(value) {
-  return String(value || '').trim();
+  return String(value || "").trim();
 }
 
 function valueOrFallback(value, fallback) {
@@ -14,40 +13,40 @@ function valueOrFallback(value, fallback) {
 }
 
 function getUserRole(user) {
-  return user?.role || user?.userRole || user?.user_role || '';
+  return user?.role || user?.userRole || user?.user_role || "";
 }
 
 function isStudentUser(user) {
-  return getUserRole(user) === 'student';
+  return getUserRole(user) === "student";
 }
 
 export function normalizeStudentProfileImage(image) {
   const cleaned = cleanStudentProfileText(image);
 
-  if (!cleaned || cleaned.includes('temporary profile.jpg')) {
+  if (!cleaned || cleaned.includes("temporary profile.jpg")) {
     return DEFAULT_STUDENT_PROFILE_IMAGE;
   }
 
   if (
-    cleaned.startsWith('blob:') ||
-    cleaned.startsWith('http://') ||
-    cleaned.startsWith('https://') ||
-    cleaned.startsWith('/images/')
+    cleaned.startsWith("blob:") ||
+    cleaned.startsWith("http://") ||
+    cleaned.startsWith("https://") ||
+    cleaned.startsWith("/images/")
   ) {
     return cleaned;
   }
 
-  const serverOrigin = API_BASE.replace(/\/api\/?$/, '');
-  const normalizedPath = cleaned.replace(/^\/+/, '');
+  const serverOrigin = API_BASE.replace(/\/api\/?$/, "");
+  const normalizedPath = cleaned.replace(/^\/+/, "");
 
   if (
-    normalizedPath.startsWith('uploads/') ||
-    normalizedPath.startsWith('api/uploads/')
+    normalizedPath.startsWith("uploads/") ||
+    normalizedPath.startsWith("api/uploads/")
   ) {
     return `${serverOrigin}/${normalizedPath}`;
   }
 
-  if (cleaned.startsWith('/')) {
+  if (cleaned.startsWith("/")) {
     return cleaned;
   }
 
@@ -56,22 +55,21 @@ export function normalizeStudentProfileImage(image) {
 
 export function getStoredStudentToken() {
   return (
-    localStorage.getItem('puffy-token') ||
-    localStorage.getItem('token') ||
-    localStorage.getItem('authToken') ||
-    sessionStorage.getItem('puffy-token') ||
-    sessionStorage.getItem('token') ||
-    sessionStorage.getItem('authToken') ||
-    ''
+    localStorage.getItem("puffy-token") ||
+    localStorage.getItem("token") ||
+    localStorage.getItem("authToken") ||
+    sessionStorage.getItem("puffy-token") ||
+    sessionStorage.getItem("token") ||
+    sessionStorage.getItem("authToken") ||
+    ""
   );
 }
 
 export function getStoredStudentUser() {
-  const storageKeys = ['puffy-user', 'user', 'currentUser'];
+  const storageKeys = ["puffy-user", "user", "currentUser"];
 
   for (const key of storageKeys) {
-    const rawUser =
-      localStorage.getItem(key) || sessionStorage.getItem(key);
+    const rawUser = localStorage.getItem(key) || sessionStorage.getItem(key);
 
     if (!rawUser) continue;
 
@@ -82,50 +80,47 @@ export function getStoredStudentUser() {
         return storedUser;
       }
     } catch (error) {
-      console.error('Unable to read stored student profile:', error);
+      console.error("Unable to read stored student profile:", error);
     }
   }
 
-  const storedRole = localStorage.getItem('user_role') || '';
+  const storedRole = localStorage.getItem("user_role") || "";
 
-  if (storedRole !== 'student') {
+  if (storedRole !== "student") {
     return {};
   }
 
   return {
-    displayName: localStorage.getItem('username') || '',
-    email: localStorage.getItem('user_email') || '',
-    role: localStorage.getItem('user_role') || 'student',
-    yearLevel: localStorage.getItem('year_level') || '',
-    sectionName: localStorage.getItem('section_name') || '',
+    displayName: localStorage.getItem("username") || "",
+    email: localStorage.getItem("user_email") || "",
+    role: localStorage.getItem("user_role") || "student",
+    yearLevel: localStorage.getItem("year_level") || "",
+    sectionName: localStorage.getItem("section_name") || "",
   };
 }
 
 export function buildStudentProfile(user = {}) {
   const displayName =
-    user.displayName ||
-    user.display_name ||
-    user.name ||
-    user.username;
+    user.displayName || user.display_name || user.name || user.username;
 
   return {
-    name: valueOrFallback(displayName, 'Student'),
+    name: valueOrFallback(displayName, "Student"),
     studentNumber: valueOrFallback(
       user.studentId ||
         user.student_id ||
         user.verificationId ||
         user.verification_id,
-      'Student number not set',
+      "Student number not set",
     ),
     year: valueOrFallback(
       user.yearLevel || user.year_level,
-      'Year level not set',
+      "Year level not set",
     ),
     section: valueOrFallback(
       user.sectionName || user.section_name,
-      'Section not set',
+      "Section not set",
     ),
-    email: valueOrFallback(user.email, 'Email not set'),
+    email: valueOrFallback(user.email, "Email not set"),
     course: valueOrFallback(
       user.program ||
         user.programName ||
@@ -133,7 +128,7 @@ export function buildStudentProfile(user = {}) {
         user.course ||
         user.courseName ||
         user.course_name,
-      'Program not set',
+      "Program not set",
     ),
     temporaryPassword: cleanStudentProfileText(
       user.temporaryPassword || user.temporary_password,
@@ -145,17 +140,16 @@ export function buildStudentProfile(user = {}) {
 }
 
 export function getStudentProfileHandle(profile) {
-  const name =
-    typeof profile === 'string' ? profile : profile?.name;
+  const name = typeof profile === "string" ? profile : profile?.name;
   const cleanedName = cleanStudentProfileText(name);
 
-  return cleanedName ? `@${cleanedName.replace(/^@/, '')}` : '@student';
+  return cleanedName ? `@${cleanedName.replace(/^@/, "")}` : "@student";
 }
 
 export function getStudentAccountLabel(profile) {
-  return profile?.email && profile.email !== 'Email not set'
+  return profile?.email && profile.email !== "Email not set"
     ? profile.email
-    : 'Student account';
+    : "Student account";
 }
 
 export function storeStudentUserProfile(user = {}) {
@@ -163,26 +157,21 @@ export function storeStudentUserProfile(user = {}) {
     return;
   }
 
-  localStorage.setItem('puffy-user', JSON.stringify(user));
-  localStorage.setItem('user', JSON.stringify(user));
-  localStorage.setItem('currentUser', JSON.stringify(user));
-  localStorage.setItem('user_role', user.role || 'student');
+  localStorage.setItem("puffy-user", JSON.stringify(user));
+  localStorage.setItem("user", JSON.stringify(user));
+  localStorage.setItem("currentUser", JSON.stringify(user));
+  localStorage.setItem("user_role", user.role || "student");
+  localStorage.setItem("user_email", cleanStudentProfileText(user.email));
   localStorage.setItem(
-    'user_email',
-    cleanStudentProfileText(user.email),
+    "username",
+    cleanStudentProfileText(user.displayName || user.display_name || user.name),
   );
   localStorage.setItem(
-    'username',
-    cleanStudentProfileText(
-      user.displayName || user.display_name || user.name,
-    ),
-  );
-  localStorage.setItem(
-    'year_level',
+    "year_level",
     cleanStudentProfileText(user.yearLevel || user.year_level),
   );
   localStorage.setItem(
-    'section_name',
+    "section_name",
     cleanStudentProfileText(user.sectionName || user.section_name),
   );
 }
@@ -195,9 +184,9 @@ export async function fetchCurrentStudentUser() {
   }
 
   const response = await fetch(`${API_BASE}/users/me`, {
-    method: 'GET',
+    method: "GET",
     headers: {
-      Accept: 'application/json',
+      Accept: "application/json",
       Authorization: `Bearer ${token}`,
     },
   });
@@ -205,7 +194,7 @@ export async function fetchCurrentStudentUser() {
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
-    throw new Error(data.message || 'Could not load your profile.');
+    throw new Error(data.message || "Could not load your profile.");
   }
 
   const loadedUser = data.user || data.data || null;
@@ -236,7 +225,7 @@ export function useStudentProfile() {
         storeStudentUserProfile(loadedUser);
         setStudentProfile(buildStudentProfile(loadedUser));
       } catch (error) {
-        console.error('Student profile loading error:', error);
+        console.error("Student profile loading error:", error);
       }
     }
 
@@ -252,22 +241,22 @@ export function useStudentProfile() {
 
 export function clearStudentSession() {
   [
-    'puffy-token',
-    'puffy-user',
-    'token',
-    'authToken',
-    'user',
-    'currentUser',
-    'user_email',
-    'user_role',
-    'username',
-    'year_level',
-    'section_name',
-    'school_name',
-    'admin',
-    'admin_id',
-    'admin_email',
-    'admin_username',
+    "puffy-token",
+    "puffy-user",
+    "token",
+    "authToken",
+    "user",
+    "currentUser",
+    "user_email",
+    "user_role",
+    "username",
+    "year_level",
+    "section_name",
+    "school_name",
+    "admin",
+    "admin_id",
+    "admin_email",
+    "admin_username",
   ].forEach((key) => localStorage.removeItem(key));
 
   sessionStorage.clear();

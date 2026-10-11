@@ -5,7 +5,7 @@
 :root {
   --color-primary: #7fa8d6;
   --color-secondary: #7fa8d6;
-  --color-shadow: rgba(0,0,0,0.15);
+  --color-shadow: rgba(0, 0, 0, 0.15);
 }
 
 /* =========================
@@ -69,7 +69,7 @@
 }
 
 .title {
-  font-family: 'Jersey 15', sans-serif;
+  font-family: "Jersey 15", sans-serif;
 
   font-size: 48px;
 
@@ -196,7 +196,7 @@
 
   color: #111;
 
-  box-shadow: 0 4px rgb(220,220,220);
+  box-shadow: 0 4px rgb(220, 220, 220);
 }
 
 /* =========================
@@ -233,7 +233,7 @@
 
   cursor: pointer;
 
-  box-shadow: 0 4px rgb(220,220,220);
+  box-shadow: 0 4px rgb(220, 220, 220);
 
   transition: 0.25s ease;
 }
@@ -315,7 +315,6 @@
 ========================= */
 
 @media (max-width: 768px) {
-
   .headerBox,
   .slideshowBox {
     width: 95%;
@@ -553,9 +552,16 @@
   border-radius: 0;
   box-sizing: border-box;
 }
-.title { margin: 0; }
-.subtitles { margin: 0; }
-.subtitle { margin: 8px 0; padding: 0; }
+.title {
+  margin: 0;
+}
+.subtitles {
+  margin: 0;
+}
+.subtitle {
+  margin: 8px 0;
+  padding: 0;
+}
 .startBtn {
   width: auto;
   min-width: 120px;
@@ -581,7 +587,8 @@
   color: white;
   box-sizing: border-box;
 }
-.question, .prompt {
+.question,
+.prompt {
   width: 100%;
   box-sizing: border-box;
 }
@@ -596,10 +603,27 @@
   margin: 0;
   box-sizing: border-box;
 }
-.qnaPreview input { width: min(100%, 540px); box-sizing: border-box; }
+.qnaPreview input {
+  width: min(100%, 540px);
+  box-sizing: border-box;
+}
 @media (max-width: 600px) {
-  .headerBox { margin-top: 20px; padding-right: 16px; padding-left: 16px; }
-  .headerTop { width: calc(100% + 32px); margin-left: -16px; margin-right: -16px; }
-  .slideshowBox { padding-right: 16px; padding-left: 16px; }
-  .demoHeader { margin-left: -16px; margin-right: -16px; }
+  .headerBox {
+    margin-top: 20px;
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+  .headerTop {
+    width: calc(100% + 32px);
+    margin-left: -16px;
+    margin-right: -16px;
+  }
+  .slideshowBox {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+  .demoHeader {
+    margin-left: -16px;
+    margin-right: -16px;
+  }
 }

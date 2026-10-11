@@ -21,8 +21,7 @@ function Signup() {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] =
-    useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [isSigningUp, setIsSigningUp] = useState(false);
 
@@ -33,11 +32,7 @@ function Signup() {
   const hasSymbol = /[^A-Za-z0-9]/.test(password);
 
   const isPasswordValid =
-    hasLength &&
-    hasUpper &&
-    hasLower &&
-    hasNumber &&
-    hasSymbol;
+    hasLength && hasUpper && hasLower && hasNumber && hasSymbol;
 
   const passwordsMatch =
     password.length > 0 &&
@@ -91,18 +86,10 @@ function Signup() {
       return;
     }
 
-    const allowedTypes = [
-      "image/jpeg",
-      "image/jpg",
-      "image/png",
-      "image/webp",
-    ];
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
     if (!allowedTypes.includes(file.type)) {
-      showError(
-        "Invalid File",
-        "Please upload a JPG, PNG, or WEBP image."
-      );
+      showError("Invalid File", "Please upload a JPG, PNG, or WEBP image.");
 
       event.target.value = "";
       return;
@@ -113,7 +100,7 @@ function Signup() {
     if (file.size > maximumSize) {
       showError(
         "File Too Large",
-        "The uploaded ID photo must not exceed 5 MB."
+        "The uploaded ID photo must not exceed 5 MB.",
       );
 
       event.target.value = "";
@@ -146,36 +133,26 @@ function Signup() {
     const cleanDepartment = department.trim();
 
     if (!cleanFullName) {
-      showError(
-        "Full Name Required",
-        "Please enter your full name."
-      );
+      showError("Full Name Required", "Please enter your full name.");
       return;
     }
 
     if (!cleanEmail) {
-      showError(
-        "Email Required",
-        "Please enter your email."
-      );
+      showError("Email Required", "Please enter your email.");
       return;
     }
 
-    const emailPattern =
-      /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!emailPattern.test(cleanEmail)) {
-      showError(
-        "Invalid Email",
-        "Please enter a valid email address."
-      );
+      showError("Invalid Email", "Please enter a valid email address.");
       return;
     }
 
     if (!cleanFacultyId) {
       showError(
         "Employee or Faculty ID Required",
-        "Please enter your employee or faculty ID."
+        "Please enter your employee or faculty ID.",
       );
       return;
     }
@@ -183,56 +160,44 @@ function Signup() {
     if (cleanFacultyId.length > 100) {
       showError(
         "Employee or Faculty ID Too Long",
-        "Employee or faculty ID must be 100 characters or fewer."
+        "Employee or faculty ID must be 100 characters or fewer.",
       );
       return;
     }
 
     if (!cleanDepartment) {
-      showError(
-        "Department Required",
-        "Please select your department."
-      );
+      showError("Department Required", "Please select your department.");
       return;
     }
 
     if (!employmentProof) {
       showError(
         "ID Photo Required",
-        "Please upload a clear photo of your faculty or employee ID."
+        "Please upload a clear photo of your faculty or employee ID.",
       );
       return;
     }
 
     if (!password) {
-      showError(
-        "Password Required",
-        "Please enter your password."
-      );
+      showError("Password Required", "Please enter your password.");
       return;
     }
 
     if (!isPasswordValid) {
       showError(
         "Weak Password",
-        "Password must meet all security requirements."
+        "Password must meet all security requirements.",
       );
       return;
     }
 
     if (!confirmPassword) {
-      showError(
-        "Confirm Password Required",
-        "Please confirm your password."
-      );
+      showError("Confirm Password Required", "Please confirm your password.");
       return;
     }
 
     if (password !== confirmPassword) {
-      showError(
-        "Password Mismatch",
-        "Passwords do not match."
-      );
+      showError("Password Mismatch", "Passwords do not match.");
       return;
     }
 
@@ -249,55 +214,34 @@ function Signup() {
       formData.append("department", cleanDepartment);
       formData.append("employmentProof", employmentProof);
 
-      const response = await fetch(
-        `${API_BASE}/signup`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+      const response = await fetch(`${API_BASE}/signup`, {
+        method: "POST",
+        body: formData,
+      });
 
-      const data = await response
-        .json()
-        .catch(() => ({
-          success: false,
-          message:
-            "Server returned an invalid response.",
-        }));
+      const data = await response.json().catch(() => ({
+        success: false,
+        message: "Server returned an invalid response.",
+      }));
 
       if (!response.ok || !data.success) {
-        showError(
-          "Signup Failed",
-          data.message ||
-            "Unable to create account."
-        );
+        showError("Signup Failed", data.message || "Unable to create account.");
         return;
       }
 
-      sessionStorage.setItem(
-        "otp_email",
-        cleanEmail
-      );
+      sessionStorage.setItem("otp_email", cleanEmail);
 
-      const otpSecondsRemaining = Number(
-        data.otpSecondsRemaining || 300
-      );
-      const otpExpiresAt =
-        Date.now() +
-        Math.max(0, otpSecondsRemaining) * 1000;
+      const otpSecondsRemaining = Number(data.otpSecondsRemaining || 300);
+      const otpExpiresAt = Date.now() + Math.max(0, otpSecondsRemaining) * 1000;
 
-      sessionStorage.setItem(
-        "otp_expires_at",
-        String(otpExpiresAt)
-      );
+      sessionStorage.setItem("otp_expires_at", String(otpExpiresAt));
 
       await Swal.fire({
         imageUrl: "/images/success.png",
         imageWidth: 170,
         imageHeight: 170,
         title: "Verification Code Sent",
-        text:
-          "Please verify your email. After verification, the Super Admin will review your professor account and uploaded ID.",
+        text: "Please verify your email. After verification, the Super Admin will review your professor account and uploaded ID.",
         confirmButtonText: "Continue",
       });
 
@@ -314,63 +258,35 @@ function Signup() {
 
       showError(
         "Server Error",
-        "Cannot connect to the server. Make sure your backend is running."
+        "Cannot connect to the server. Make sure your backend is running.",
       );
     } finally {
       setIsSigningUp(false);
     }
   };
 
-  const passwordStrength =
-    getPasswordStrength(password);
+  const passwordStrength = getPasswordStrength(password);
 
   return (
     <div className={styles.wrapper}>
       <section className={styles.container}>
-        <div
-          className={styles.background}
-          aria-hidden="true"
-        />
+        <div className={styles.background} aria-hidden="true" />
 
         <PublicNavbar />
 
-        <main
-          className={
-            styles.professorSignupContainer
-          }
-        >
-          <form
-            className={styles.professorSignupCard}
-            onSubmit={handleSignup}
-          >
-            <div
-              className={
-                styles.professorSignupHeading
-              }
-            >
+        <main className={styles.professorSignupContainer}>
+          <form className={styles.professorSignupCard} onSubmit={handleSignup}>
+            <div className={styles.professorSignupHeading}>
               <div>
                 <h1>Create a Professor Account</h1>
 
-                <p>
-                  Register your professor account for
-                  Super Admin review.
-                </p>
+                <p>Register your professor account for Super Admin review.</p>
               </div>
             </div>
 
-            <div
-              className={
-                styles.professorSignupFormGrid
-              }
-            >
-              <div
-                className={
-                  styles.professorFormGroup
-                }
-              >
-                <label htmlFor="professor-fullname">
-                  Full Name
-                </label>
+            <div className={styles.professorSignupFormGrid}>
+              <div className={styles.professorFormGroup}>
+                <label htmlFor="professor-fullname">Full Name</label>
 
                 <input
                   id="professor-fullname"
@@ -379,20 +295,12 @@ function Signup() {
                   value={fullName}
                   disabled={isSigningUp}
                   autoComplete="name"
-                  onChange={(event) =>
-                    setFullName(event.target.value)
-                  }
+                  onChange={(event) => setFullName(event.target.value)}
                 />
               </div>
 
-              <div
-                className={
-                  styles.professorFormGroup
-                }
-              >
-                <label htmlFor="professor-email">
-                  Email Address
-                </label>
+              <div className={styles.professorFormGroup}>
+                <label htmlFor="professor-email">Email Address</label>
 
                 <input
                   id="professor-email"
@@ -401,17 +309,11 @@ function Signup() {
                   value={email}
                   disabled={isSigningUp}
                   autoComplete="email"
-                  onChange={(event) =>
-                    setEmail(event.target.value)
-                  }
+                  onChange={(event) => setEmail(event.target.value)}
                 />
               </div>
 
-              <div
-                className={
-                  styles.professorFormGroup
-                }
-              >
+              <div className={styles.professorFormGroup}>
                 <label htmlFor="professor-faculty-id">
                   Employee or Faculty ID
                 </label>
@@ -425,32 +327,20 @@ function Signup() {
                   autoComplete="off"
                   maxLength={100}
                   required
-                  onChange={(event) =>
-                    setFacultyId(event.target.value)
-                  }
+                  onChange={(event) => setFacultyId(event.target.value)}
                 />
               </div>
 
-              <div
-                className={
-                  styles.professorFormGroup
-                }
-              >
-                <label htmlFor="department">
-                  Department
-                </label>
+              <div className={styles.professorFormGroup}>
+                <label htmlFor="department">Department</label>
 
                 <select
                   id="department"
                   value={department}
                   disabled={isSigningUp}
-                  onChange={(event) =>
-                    setDepartment(event.target.value)
-                  }
+                  onChange={(event) => setDepartment(event.target.value)}
                 >
-                  <option value="">
-                    Select your department
-                  </option>
+                  <option value="">Select your department</option>
 
                   <option value="Computer Science Department">
                     Computer Science Department
@@ -469,65 +359,42 @@ function Signup() {
                   Upload Your Faculty or Employee ID
                 </label>
 
-                <p
-                  className={
-                    styles.professorUploadDescription
-                  }
-                >
-                  Upload a clear photo of the front of
-                  your valid school faculty or employee
-                  ID. Accepted formats are JPG, PNG, and
-                  WEBP, up to 5 MB.
+                <p className={styles.professorUploadDescription}>
+                  Upload a clear photo of the front of your valid school faculty
+                  or employee ID. Accepted formats are JPG, PNG, and WEBP, up to
+                  5 MB.
                 </p>
 
-                <div
-                  className={
-                    styles.professorUploadArea
-                  }
-                >
+                <div className={styles.professorUploadArea}>
                   <input
                     id="employment-proof"
                     type="file"
                     accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
                     disabled={isSigningUp}
-                    className={
-                      styles.professorFileInput
-                    }
+                    className={styles.professorFileInput}
                     onChange={handleProofUpload}
                   />
 
                   <label
                     htmlFor="employment-proof"
-                    className={
-                      styles.professorUploadButton
-                    }
+                    className={styles.professorUploadButton}
                   >
                     <i className="fa-solid fa-image" />
 
                     <span>
-                      {employmentProof
-                        ? "Change ID Photo"
-                        : "Choose ID Photo"}
+                      {employmentProof ? "Change ID Photo" : "Choose ID Photo"}
                     </span>
                   </label>
 
                   {employmentProof && (
-                    <span
-                      className={
-                        styles.professorFileName
-                      }
-                    >
+                    <span className={styles.professorFileName}>
                       {employmentProof.name}
                     </span>
                   )}
                 </div>
 
                 {proofPreview && (
-                  <div
-                    className={
-                      styles.professorProofPreview
-                    }
-                  >
+                  <div className={styles.professorProofPreview}>
                     <img
                       src={proofPreview}
                       alt="Uploaded faculty or employee ID preview"
@@ -545,53 +412,29 @@ function Signup() {
                 )}
               </div>
 
-              <div
-                className={
-                  styles.professorFormGroup
-                }
-              >
-                <label htmlFor="professor-password">
-                  Password
-                </label>
+              <div className={styles.professorFormGroup}>
+                <label htmlFor="professor-password">Password</label>
 
-                <div
-                  className={
-                    styles.professorPasswordWrapper
-                  }
-                >
+                <div className={styles.professorPasswordWrapper}>
                   <input
                     id="professor-password"
-                    type={
-                      showPassword
-                        ? "text"
-                        : "password"
-                    }
+                    type={showPassword ? "text" : "password"}
                     placeholder="Enter your password"
                     value={password}
                     disabled={isSigningUp}
                     autoComplete="new-password"
-                    onChange={(event) =>
-                      setPassword(event.target.value)
-                    }
+                    onChange={(event) => setPassword(event.target.value)}
                   />
 
                   <button
                     type="button"
-                    className={
-                      styles.professorToggleEye
-                    }
+                    className={styles.professorToggleEye}
                     aria-label={
-                      showPassword
-                        ? "Hide password"
-                        : "Show password"
+                      showPassword ? "Hide password" : "Show password"
                     }
                     aria-pressed={showPassword}
                     disabled={isSigningUp}
-                    onClick={() =>
-                      setShowPassword(
-                        (current) => !current
-                      )
-                    }
+                    onClick={() => setShowPassword((current) => !current)}
                   >
                     {showPassword ? (
                       <FiEyeOff aria-hidden="true" />
@@ -602,54 +445,30 @@ function Signup() {
                 </div>
               </div>
 
-              <div
-                className={
-                  styles.professorFormGroup
-                }
-              >
-                <label htmlFor="confirm-password">
-                  Confirm Password
-                </label>
+              <div className={styles.professorFormGroup}>
+                <label htmlFor="confirm-password">Confirm Password</label>
 
-                <div
-                  className={
-                    styles.professorPasswordWrapper
-                  }
-                >
+                <div className={styles.professorPasswordWrapper}>
                   <input
                     id="confirm-password"
-                    type={
-                      showConfirmPassword
-                        ? "text"
-                        : "password"
-                    }
+                    type={showConfirmPassword ? "text" : "password"}
                     placeholder="Confirm your password"
                     value={confirmPassword}
                     disabled={isSigningUp}
                     autoComplete="new-password"
-                    onChange={(event) =>
-                      setConfirmPassword(
-                        event.target.value
-                      )
-                    }
+                    onChange={(event) => setConfirmPassword(event.target.value)}
                   />
 
                   <button
                     type="button"
-                    className={
-                      styles.professorToggleEye
-                    }
+                    className={styles.professorToggleEye}
                     aria-label={
-                      showConfirmPassword
-                        ? "Hide password"
-                        : "Show password"
+                      showConfirmPassword ? "Hide password" : "Show password"
                     }
                     aria-pressed={showConfirmPassword}
                     disabled={isSigningUp}
                     onClick={() =>
-                      setShowConfirmPassword(
-                        (current) => !current
-                      )
+                      setShowConfirmPassword((current) => !current)
                     }
                   >
                     {showConfirmPassword ? (
@@ -665,64 +484,25 @@ function Signup() {
                 <div
                   className={`${styles.professorPasswordPanel} ${styles.professorFullWidth}`}
                 >
-                  <div
-                    className={
-                      styles.professorPasswordRules
-                    }
-                  >
-                    <p
-                      className={
-                        hasLength
-                          ? styles.valid
-                          : styles.invalid
-                      }
-                    >
-                      {hasLength ? "✓" : "×"} At least
-                      12 characters
+                  <div className={styles.professorPasswordRules}>
+                    <p className={hasLength ? styles.valid : styles.invalid}>
+                      {hasLength ? "✓" : "×"} At least 12 characters
                     </p>
 
-                    <p
-                      className={
-                        hasUpper
-                          ? styles.valid
-                          : styles.invalid
-                      }
-                    >
-                      {hasUpper ? "✓" : "×"} One
-                      uppercase letter
+                    <p className={hasUpper ? styles.valid : styles.invalid}>
+                      {hasUpper ? "✓" : "×"} One uppercase letter
                     </p>
 
-                    <p
-                      className={
-                        hasLower
-                          ? styles.valid
-                          : styles.invalid
-                      }
-                    >
-                      {hasLower ? "✓" : "×"} One
-                      lowercase letter
+                    <p className={hasLower ? styles.valid : styles.invalid}>
+                      {hasLower ? "✓" : "×"} One lowercase letter
                     </p>
 
-                    <p
-                      className={
-                        hasNumber
-                          ? styles.valid
-                          : styles.invalid
-                      }
-                    >
-                      {hasNumber ? "✓" : "×"} One
-                      number
+                    <p className={hasNumber ? styles.valid : styles.invalid}>
+                      {hasNumber ? "✓" : "×"} One number
                     </p>
 
-                    <p
-                      className={
-                        hasSymbol
-                          ? styles.valid
-                          : styles.invalid
-                      }
-                    >
-                      {hasSymbol ? "✓" : "×"} One
-                      special character
+                    <p className={hasSymbol ? styles.valid : styles.invalid}>
+                      {hasSymbol ? "✓" : "×"} One special character
                     </p>
                   </div>
 
@@ -735,14 +515,12 @@ function Signup() {
                           : styles.error
                     }`}
                   >
-                    {passwordStrength === "weak" &&
-                      "Weak password"}
+                    {passwordStrength === "weak" && "Weak password"}
 
                     {passwordStrength === "medium" &&
                       "Medium-strength password"}
 
-                    {passwordStrength === "strong" &&
-                      "Strong password"}
+                    {passwordStrength === "strong" && "Strong password"}
                   </div>
                 </div>
               )}
@@ -750,9 +528,7 @@ function Signup() {
               {confirmPassword.length > 0 && (
                 <div
                   className={`${styles.professorMatchMessage} ${
-                    passwordsMatch
-                      ? styles.success
-                      : styles.error
+                    passwordsMatch ? styles.success : styles.error
                   } ${styles.professorFullWidth}`}
                 >
                   {passwordsMatch
@@ -762,31 +538,19 @@ function Signup() {
               )}
             </div>
 
-            <div
-              className={
-                styles.professorSignupActions
-              }
-            >
+            <div className={styles.professorSignupActions}>
               <button
                 type="submit"
-                className={
-                  styles.professorSignupButton
-                }
+                className={styles.professorSignupButton}
                 disabled={isSigningUp}
               >
-                {isSigningUp
-                  ? "Registering..."
-                  : "Register Professor Account"}
+                {isSigningUp ? "Registering..." : "Register Professor Account"}
               </button>
 
-              <p>
-                Professor accounts require Super Admin
-                approval.
-              </p>
+              <p>Professor accounts require Super Admin approval.</p>
 
               <p>
-                Already have an account?{" "}
-                <Link to="/login">Sign in</Link>
+                Already have an account? <Link to="/login">Sign in</Link>
               </p>
             </div>
           </form>

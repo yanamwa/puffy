@@ -1,18 +1,94 @@
-.lessonGenerationToast { 
-    font-family: Arial, 
-    sans-serif !important; 
-    border-radius: 12px !important; 
-    border: 1px solid #dce5ee; 
-    box-shadow: 0 8px 28px #29476524 
-    !important; 
+.lessonGenerationToast {
+  font-family: Arial, sans-serif !important;
+  border-radius: 12px !important;
+  border: 1px solid #dce5ee;
+  box-shadow: 0 8px 28px #29476524 !important;
 }
 
-.lessonGenerationToast .swal2-title { 
-    color: #294765 !important; 
-    font-size: 15px !important; 
+.lessonGenerationToast .swal2-title {
+  color: #294765 !important;
+  font-size: 15px !important;
 }
-.lessonGenerationToast .swal2-html-container { 
-    color: #536b82 !important; 
-    font-size: 13px !important; 
-    line-height: 1.5 !important; 
+.lessonGenerationToast .swal2-html-container {
+  color: #536b82 !important;
+  font-size: 13px !important;
+  line-height: 1.5 !important;
+}
+.lessonGenerationSummary {
+  font-family: Arial, sans-serif !important;
+  color: #294765 !important;
+  border-radius: 16px !important;
+  width: min(640px, calc(100vw - 32px)) !important;
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+}
+.lessonGenerationSummary .swal2-title {
+  color: #294765;
+  font-size: 24px;
+}
+.lessonGenerationSummaryContent {
+  text-align: left;
+  color: #375675;
+  font-size: 15px;
+  line-height: 1.6;
+}
+.lessonGenerationSummaryContent > p:first-child {
+  text-align: center;
+  margin: 0 0 22px;
+}
+.lessonGenerationSummaryContent h3 {
+  font-size: 16px;
+  margin: 0 0 12px;
+}
+.lessonGenerationSummaryContent ol {
+  margin: 0;
+  padding: 16px 16px 16px 38px;
+  max-height: 280px;
+  overflow-y: auto;
+  background: #f6f9fd;
+  border: 1px solid #d2deeb;
+  border-radius: 8px;
+}
+.lessonGenerationSummaryContent li {
+  padding: 5px 0;
+  overflow-wrap: anywhere;
+}
+.lessonGenerationSummaryReminder {
+  color: #65788b;
+  font-size: 13px;
+  margin-top: 18px;
+}
+.lessonGenerationSummaryDone {
+  font:
+    600 15px Arial,
+    sans-serif;
+  background: #7199c6;
+  color: white;
+  border: 0;
+  border-radius: 8px;
+  padding: 12px 32px;
+  cursor: pointer;
+}
+.lessonGenerationSummaryDone:focus-visible {
+  outline: 3px solid #b9d5f3;
+  outline-offset: 3px;
+}
+.lessonGenerationSummary {
+  padding: 24px !important;
+}
+.lessonGenerationSummary .swal2-icon {
+  margin: 0 auto 16px;
+}
+.lessonGenerationSummary .swal2-title {
+  padding: 0;
+}
+.lessonGenerationSummary .swal2-html-container {
+  margin: 16px 0 0;
+}
+.lessonGenerationSummary .swal2-actions {
+  margin: 16px auto 0;
+}
+.lessonGenerationSummaryContent ol {
+  box-sizing: border-box;
+  max-height: 260px;
 }

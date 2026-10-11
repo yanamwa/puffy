@@ -1,3 +1,4 @@
+import { lessonAuthHeaders } from "../../../../services/lessonAuth.js";
 import { saveAccountQuizResult } from "../../../../utils/quizStorage.js";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -38,7 +39,7 @@ export default function TimedQuiz() {
   const isDeckMode = Boolean(deckId);
   const practiceSession = useMemo(
     () => getStoredPracticeSession({ lessonId, deckId }),
-    [lessonId, deckId]
+    [lessonId, deckId],
   );
 
   const [loading, setLoading] = useState(true);
@@ -73,7 +74,9 @@ export default function TimedQuiz() {
   }
 
   function cleanQuestionText(text = "") {
-    return String(text).replace(/\s*A\..*/is, "").trim();
+    return String(text)
+      .replace(/\s*A\..*/is, "")
+      .trim();
   }
 
   function cleanAnswer(text = "") {
@@ -105,7 +108,7 @@ export default function TimedQuiz() {
   function extractOptionsFromQuestion(questionText = "") {
     const optionMatches = [
       ...String(questionText).matchAll(
-        /([A-D])\.\s*(.*?)(?=\s+[A-D]\.\s+|$)/gi
+        /([A-D])\.\s*(.*?)(?=\s+[A-D]\.\s+|$)/gi,
       ),
     ];
 
@@ -229,14 +232,14 @@ export default function TimedQuiz() {
 
           const shuffledQuestions = shuffleArray(practiceQuestions);
           const savedSeconds = Number(
-            window.localStorage.getItem("timedQuizSeconds")
+            window.localStorage.getItem("timedQuizSeconds"),
           );
 
           setQuestions(shuffledQuestions);
           setTime(
             Number.isFinite(savedSeconds) && savedSeconds > 0
               ? savedSeconds
-              : shuffledQuestions.length * 60
+              : shuffledQuestions.length * 60,
           );
           return;
         }
@@ -244,7 +247,7 @@ export default function TimedQuiz() {
         if (isLessonMode) {
           const res = await fetch(
             `${API_BASE}/getLessonsById.php?id=${lessonId}`,
-            { credentials: "include" }
+            { credentials: "include" },
           );
 
           const lessonData = normalizeLessonData(await res.json());
@@ -311,14 +314,14 @@ export default function TimedQuiz() {
         if (isDeckMode) {
           const deckRes = await fetch(
             `${API_BASE}/getDeckById.php?deckId=${deckId}`,
-            { credentials: "include" }
+            { credentials: "include" },
           );
 
           const deckData = await deckRes.json();
 
           const cardsRes = await fetch(
             `${API_BASE}/getCardsByDeck.php?deckId=${deckId}`,
-            { credentials: "include" }
+            { credentials: "include" },
           );
 
           const cardsData = await cardsRes.json();
@@ -329,7 +332,7 @@ export default function TimedQuiz() {
               deckData?.deck?.deck_title ||
               cardsData?.deck?.title ||
               cardsData?.deck_title ||
-              "Deck Timed Quiz"
+              "Deck Timed Quiz",
           );
 
           const deckQuestionsRaw = await Promise.all(
@@ -358,13 +361,13 @@ export default function TimedQuiz() {
                 options = getUniqueOptions(extractedOptions).slice(0, 4);
               } else if (savedOptions.length >= 3) {
                 options = shuffleArray(
-                  getUniqueOptions([correctAnswer, ...savedOptions])
+                  getUniqueOptions([correctAnswer, ...savedOptions]),
                 ).slice(0, 4);
               } else {
                 const generated = await generateWrongOptions(
                   questionText,
                   correctAnswer,
-                  cardId
+                  cardId,
                 );
 
                 if (generated.wrongOptions.length < 3) {
@@ -374,7 +377,7 @@ export default function TimedQuiz() {
                 explanation = generated.explanation || correctAnswer;
 
                 options = shuffleArray(
-                  getUniqueOptions([correctAnswer, ...generated.wrongOptions])
+                  getUniqueOptions([correctAnswer, ...generated.wrongOptions]),
                 ).slice(0, 4);
               }
 
@@ -387,7 +390,7 @@ export default function TimedQuiz() {
                 answer: String(correctAnswer),
                 explanation,
               };
-            })
+            }),
           );
 
           const deckQuestions = deckQuestionsRaw.filter(Boolean);
@@ -415,7 +418,12 @@ export default function TimedQuiz() {
   }, []);
 
   useEffect(() => {
-    if (loading || questions.length === 0 || finishedRef.current || checkpointOpen) {
+    if (
+      loading ||
+      questions.length === 0 ||
+      finishedRef.current ||
+      checkpointOpen
+    ) {
       return;
     }
 
@@ -486,7 +494,7 @@ export default function TimedQuiz() {
       {
         question: currentQuestion.question,
         answer: currentQuestion.answer,
-      }
+      },
     );
 
     setTimeout(() => {
@@ -513,7 +521,7 @@ export default function TimedQuiz() {
   async function saveQuizAttempt(finalScore, finishReason) {
     const metadata = getPracticeResultMetadata(
       practiceSession,
-      isDeckMode ? "deck" : "lesson"
+      isDeckMode ? "deck" : "lesson",
     );
 
     try {
@@ -521,6 +529,7 @@ export default function TimedQuiz() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...lessonAuthHeaders(),
         },
         credentials: "include",
         body: JSON.stringify({
@@ -543,17 +552,18 @@ export default function TimedQuiz() {
     finalScore,
     finalResults,
     finishReason = "completed",
-    returnToDeck = false
+    returnToDeck = false,
   ) {
     if (finishedRef.current) return;
 
     finishedRef.current = true;
     window.speechSynthesis?.cancel();
 
-    await saveQuizAttempt(finalScore, finishReason);
-
     const resultPayload = {
-      ...getPracticeResultMetadata(practiceSession, isDeckMode ? "deck" : "lesson"),
+      ...getPracticeResultMetadata(
+        practiceSession,
+        isDeckMode ? "deck" : "lesson",
+      ),
       quizMode: "timed",
       finishReason,
       isTimedOut: finishReason === "timeout",
@@ -569,7 +579,7 @@ export default function TimedQuiz() {
     if (isDeckMode) {
       saveAccountQuizResult(
         `deckQuizResults_${deckId}`,
-        JSON.stringify(resultPayload)
+        JSON.stringify(resultPayload),
       );
     }
 
@@ -579,14 +589,16 @@ export default function TimedQuiz() {
       returnToDeck && isDeckMode
         ? `/deck/${deckId}`
         : isDeckMode
-        ? `/review/deck/${deckId}`
-        : getPracticeReviewPath(practiceSession, { lessonId, deckId })
+          ? `/review/deck/${deckId}`
+          : getPracticeReviewPath(practiceSession, { lessonId, deckId }),
     );
   }
 
   function repeatCheckpointQuestions() {
     const repeatedResults = userResults.slice(0, checkpointStartIndex);
-    const repeatedScore = repeatedResults.filter((result) => result.isCorrect).length;
+    const repeatedScore = repeatedResults.filter(
+      (result) => result.isCorrect,
+    ).length;
 
     setUserResults(repeatedResults);
     setScore(repeatedScore);
@@ -629,7 +641,7 @@ export default function TimedQuiz() {
               navigate(
                 isDeckMode
                   ? `/review/deck/${deckId}`
-                  : getPracticeBackPath(practiceSession, { lessonId, deckId })
+                  : getPracticeBackPath(practiceSession, { lessonId, deckId }),
               )
             }
           >
@@ -648,7 +660,7 @@ export default function TimedQuiz() {
     : Math.min(questionIndex + 1, questions.length);
   const checkpointQuestions = questions.slice(
     checkpointStartIndex,
-    checkpointEndIndex
+    checkpointEndIndex,
   );
   const checkpointProgress = questions.length
     ? (checkpointEndIndex / questions.length) * 100
@@ -658,16 +670,11 @@ export default function TimedQuiz() {
   const isDangerTime = time <= 10;
 
   const timerClass = `${styles.timer} ${
-    isDangerTime
-      ? styles.dangerTimer
-      : isWarningTime
-      ? styles.warningTimer
-      : ""
+    isDangerTime ? styles.dangerTimer : isWarningTime ? styles.warningTimer : ""
   }`;
 
   return (
     <div className={styles.page}>
-
       <button
         type="button"
         className={styles.settingsBtn}
@@ -802,75 +809,77 @@ export default function TimedQuiz() {
         </div>
       ) : (
         <>
-      <div className={styles.quizHeader}>
-        <h1 className={styles.title}>{title}</h1>
+          <div className={styles.quizHeader}>
+            <h1 className={styles.title}>{title}</h1>
 
-        <div className={styles.progressContainer}>
-          <div
-            className={styles.progressBar}
-            style={{ width: `${progress}%` }}
-          />
-        </div>
+            <div className={styles.progressContainer}>
+              <div
+                className={styles.progressBar}
+                style={{ width: `${progress}%` }}
+              />
+            </div>
 
-        <p className={styles.subtitle}>
-          Question {questionIndex + 1} of {questions.length}
-        </p>
-      </div>
-
-      <div className={styles.questionBox}>
-        <div className={styles.timerBox}>
-          <div className={timerClass}>
-            {minutes}:{seconds.toString().padStart(2, "0")}
+            <p className={styles.subtitle}>
+              Question {questionIndex + 1} of {questions.length}
+            </p>
           </div>
-        </div>
 
-        <div className={styles.questionTextBox}>
-          {ttsEnabled && (
-            <button
-              type="button"
-              className={styles.audioIconBtn}
-              onClick={() => speakText(questions[questionIndex].question)}
-            >
-              <i className="bx bx-volume-full"></i>
-            </button>
-          )}
+          <div className={styles.questionBox}>
+            <div className={styles.timerBox}>
+              <div className={timerClass}>
+                {minutes}:{seconds.toString().padStart(2, "0")}
+              </div>
+            </div>
 
-          <p className={styles.question}>{questions[questionIndex].question}</p>
-        </div>
+            <div className={styles.questionTextBox}>
+              {ttsEnabled && (
+                <button
+                  type="button"
+                  className={styles.audioIconBtn}
+                  onClick={() => speakText(questions[questionIndex].question)}
+                >
+                  <i className="bx bx-volume-full"></i>
+                </button>
+              )}
 
-        <div className={styles.options}>
-          {questions[questionIndex].options.map((option, i) => {
-            const letters = ["A", "B", "C", "D"];
+              <p className={styles.question}>
+                {questions[questionIndex].question}
+              </p>
+            </div>
 
-            return (
-              <button
-                key={i}
-                className={`${styles.option} ${
-                  selectedAnswer === option ? styles.selectedOption : ""
-                }`}
-                onClick={() => handleAnswer(option)}
-                disabled={selectedAnswer !== null}
-              >
-                {ttsEnabled && (
-                  <span
-                    className={styles.optionAudioIcon}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      speakText(option);
-                    }}
+            <div className={styles.options}>
+              {questions[questionIndex].options.map((option, i) => {
+                const letters = ["A", "B", "C", "D"];
+
+                return (
+                  <button
+                    key={i}
+                    className={`${styles.option} ${
+                      selectedAnswer === option ? styles.selectedOption : ""
+                    }`}
+                    onClick={() => handleAnswer(option)}
+                    disabled={selectedAnswer !== null}
                   >
-                    <i className="bx bx-volume-full"></i>
-                  </span>
-                )}
+                    {ttsEnabled && (
+                      <span
+                        className={styles.optionAudioIcon}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          speakText(option);
+                        }}
+                      >
+                        <i className="bx bx-volume-full"></i>
+                      </span>
+                    )}
 
-                <span>
-                  {letters[i]}. {String(option).replace(/^[A-D]\.\s*/i, "")}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
+                    <span>
+                      {letters[i]}. {String(option).replace(/^[A-D]\.\s*/i, "")}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </>
       )}
     </div>

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from "react";
 import {
   FiActivity,
   FiAward,
@@ -15,134 +15,134 @@ import {
   FiUserCheck,
   FiUsers,
   FiZap,
-} from 'react-icons/fi';
-import { API_BASE } from '../../../config';
-import { fetchCourses } from '../../../services/courseApi';
-import { fetchQuizModes } from '../../../services/quizModeApi';
-import { getProfessorCourseOwner } from '../../professor/professorData';
-import './ReportsPage.css';
+} from "react-icons/fi";
+import { API_BASE } from "../../../config";
+import { fetchCourses } from "../../../services/courseApi";
+import { fetchQuizModes } from "../../../services/quizModeApi";
+import { getProfessorCourseOwner } from "../../professor/professorData";
+import "./ReportsPage.css";
 
 const rangeOptions = [
   {
-    id: 'today',
-    label: 'Today',
+    id: "today",
+    label: "Today",
     factor: 0.12,
-    labels: ['8 AM', '10 AM', '12 PM', '2 PM', '4 PM'],
+    labels: ["8 AM", "10 AM", "12 PM", "2 PM", "4 PM"],
   },
   {
-    id: 'week',
-    label: 'This Week',
+    id: "week",
+    label: "This Week",
     factor: 0.35,
-    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
   },
   {
-    id: 'month',
-    label: 'This Month',
+    id: "month",
+    label: "This Month",
     factor: 1,
-    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+    labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
   },
   {
-    id: 'semester',
-    label: 'Semester',
+    id: "semester",
+    label: "Semester",
     factor: 2.8,
-    labels: ['Prelim', 'Midterm', 'Prefinal', 'Final'],
+    labels: ["Prelim", "Midterm", "Prefinal", "Final"],
   },
   {
-    id: 'school-year',
-    label: 'School Year',
+    id: "school-year",
+    label: "School Year",
     factor: 4.6,
-    labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+    labels: ["Q1", "Q2", "Q3", "Q4"],
   },
   {
-    id: 'custom',
-    label: 'Custom Date Range',
+    id: "custom",
+    label: "Custom Date Range",
     factor: 1.4,
-    labels: ['Start', 'Middle', 'End'],
+    labels: ["Start", "Middle", "End"],
   },
 ];
 
 const fallbackUsers = [
   {
     id: 1,
-    name: 'Meiko Santos',
-    role: 'student',
-    status: 'Active',
-    joined: '2026-07-01',
-    lastLogin: '2026-08-06 09:12',
-    yearSection: 'BSIT 3A',
+    name: "Meiko Santos",
+    role: "student",
+    status: "Active",
+    joined: "2026-07-01",
+    lastLogin: "2026-08-06 09:12",
+    yearSection: "BSIT 3A",
   },
   {
     id: 2,
-    name: 'Ashborn Reyes',
-    role: 'professor',
-    status: 'Active',
-    joined: '2026-06-21',
-    lastLogin: '2026-08-06 18:44',
+    name: "Ashborn Reyes",
+    role: "professor",
+    status: "Active",
+    joined: "2026-06-21",
+    lastLogin: "2026-08-06 18:44",
   },
   {
     id: 3,
-    name: 'Anie Cruz',
-    role: 'student',
-    status: 'Active',
-    joined: '2026-07-04',
-    lastLogin: '2026-08-05 12:08',
-    yearSection: 'BSIT 2B',
+    name: "Anie Cruz",
+    role: "student",
+    status: "Active",
+    joined: "2026-07-04",
+    lastLogin: "2026-08-05 12:08",
+    yearSection: "BSIT 2B",
   },
   {
     id: 4,
-    name: 'Diana Reyes',
-    role: 'professor',
-    status: 'Active',
-    joined: '2026-07-08',
-    lastLogin: '2026-08-05 14:31',
+    name: "Diana Reyes",
+    role: "professor",
+    status: "Active",
+    joined: "2026-07-08",
+    lastLogin: "2026-08-05 14:31",
   },
   {
     id: 5,
-    name: 'Nighjri Tan',
-    role: 'student',
-    status: 'Active',
-    joined: '2026-06-11',
-    lastLogin: '2026-08-04 20:03',
-    yearSection: 'BSCS 1A',
+    name: "Nighjri Tan",
+    role: "student",
+    status: "Active",
+    joined: "2026-06-11",
+    lastLogin: "2026-08-04 20:03",
+    yearSection: "BSCS 1A",
   },
   {
     id: 6,
-    name: 'Puffy Admin',
-    role: 'admin',
-    status: 'Active',
-    joined: '2026-05-18',
-    lastLogin: '2026-08-06 10:20',
+    name: "Puffy Admin",
+    role: "admin",
+    status: "Active",
+    joined: "2026-05-18",
+    lastLogin: "2026-08-06 10:20",
   },
 ];
 
 const sampleCourses = [
   {
-    id: 'sample-im',
-    title: 'Information Management',
-    code: 'IM101',
-    professorName: 'Ashborn Reyes',
+    id: "sample-im",
+    title: "Information Management",
+    code: "IM101",
+    professorName: "Ashborn Reyes",
     students: 52,
     modules: 7,
     quizzes: 6,
-    status: 'published',
-    updatedAt: '2026-08-04',
+    status: "published",
+    updatedAt: "2026-08-04",
   },
   {
-    id: 'sample-db',
-    title: 'Database Systems',
-    code: 'DBS204',
-    professorName: 'Diana Reyes',
+    id: "sample-db",
+    title: "Database Systems",
+    code: "DBS204",
+    professorName: "Diana Reyes",
     students: 38,
     modules: 5,
     quizzes: 4,
-    status: 'published',
-    updatedAt: '2026-08-01',
+    status: "published",
+    updatedAt: "2026-08-01",
   },
 ];
 
 function titleCase(value) {
-  return String(value || 'Unknown')
-    .replace(/[-_]/g, ' ')
+  return String(value || "Unknown")
+    .replace(/[-_]/g, " ")
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
@@ -163,26 +163,31 @@ function numberFrom(...values) {
 }
 
 function normalizeUser(user) {
-  const role = String(user.role || user.user_role || 'student').toLowerCase();
+  const role = String(user.role || user.user_role || "student").toLowerCase();
   const status =
     user.status ||
     user.account_status ||
-    (user.is_archived || user.isArchived ? 'Inactive' : 'Active');
+    (user.is_archived || user.isArchived ? "Inactive" : "Active");
 
   return {
     id: user.id || user.userId || user.user_id || user.email || user.name,
-    name: user.name || user.displayName || user.display_name || user.username || 'Unnamed user',
+    name:
+      user.name ||
+      user.displayName ||
+      user.display_name ||
+      user.username ||
+      "Unnamed user",
     role,
     status: titleCase(status),
-    joined: user.joined || user.created_at || user.createdAt || '',
+    joined: user.joined || user.created_at || user.createdAt || "",
     lastActivity:
       user.lastActivity ||
       user.last_activity ||
       user.lastLogin ||
       user.last_login ||
       user.updated_at ||
-      '',
-    yearSection: user.yearSection || user.year_section || user.section || '',
+      "",
+    yearSection: user.yearSection || user.year_section || user.section || "",
     modulesCompleted: numberFrom(
       user.modulesCompleted,
       user.modules_completed,
@@ -199,15 +204,25 @@ function normalizeUser(user) {
 }
 
 function getCourseTitle(course) {
-  return course.title || course.courseName || course.course_name || course.subject || 'Untitled course';
+  return (
+    course.title ||
+    course.courseName ||
+    course.course_name ||
+    course.subject ||
+    "Untitled course"
+  );
 }
 
 function getCourseCode(course) {
-  return course.code || course.courseCode || course.course_code || 'COURSE';
+  return course.code || course.courseCode || course.course_code || "COURSE";
 }
 
 function getCourseStudents(course) {
-  return numberFrom(course.students, course.enrolled_students, course.student_count);
+  return numberFrom(
+    course.students,
+    course.enrolled_students,
+    course.student_count,
+  );
 }
 
 function getCourseModules(course) {
@@ -219,15 +234,25 @@ function getCourseModules(course) {
     return contentModules.length;
   }
 
-  return numberFrom(course.modules, course.moduleCount, course.module_count, course.lessonPages?.length);
+  return numberFrom(
+    course.modules,
+    course.moduleCount,
+    course.module_count,
+    course.lessonPages?.length,
+  );
 }
 
 function getCourseQuizzes(course) {
-  return numberFrom(course.quizzes, course.quiz_count, course.quizItems?.length, course.quiz_items?.length);
+  return numberFrom(
+    course.quizzes,
+    course.quiz_count,
+    course.quizItems?.length,
+    course.quiz_items?.length,
+  );
 }
 
 function getCourseStatus(course) {
-  return String(course.status || '').toLowerCase();
+  return String(course.status || "").toLowerCase();
 }
 
 function isCourseArchived(course) {
@@ -242,19 +267,27 @@ function isCourseArchived(course) {
 
 function getScore(value, fallback) {
   const parsed = Number(value);
-  return Number.isFinite(parsed) && parsed > 0 ? clamp(Math.round(parsed), 0, 100) : fallback;
+  return Number.isFinite(parsed) && parsed > 0
+    ? clamp(Math.round(parsed), 0, 100)
+    : fallback;
 }
 
 function getCourseAverageScore(course, index) {
   return getScore(
-    course.averageQuizScore || course.average_quiz_score || course.averageScore || course.average_score,
+    course.averageQuizScore ||
+      course.average_quiz_score ||
+      course.averageScore ||
+      course.average_score,
     clamp(87 - index * 4 + (getCourseQuizzes(course) % 3), 68, 94),
   );
 }
 
 function getCourseCompletionRate(course, index) {
   return getScore(
-    course.completionRate || course.completion_rate || course.progressRate || course.progress_rate,
+    course.completionRate ||
+      course.completion_rate ||
+      course.progressRate ||
+      course.progress_rate,
     clamp(91 - index * 5 + (getCourseModules(course) % 4), 60, 97),
   );
 }
@@ -268,24 +301,27 @@ function getModuleList(course) {
     return contentModules;
   }
 
-  return Array.from({ length: Math.max(1, getCourseModules(course)) }, (_, index) => ({
-    id: `${course.id || getCourseCode(course)}-module-${index + 1}`,
-    title: `Module ${index + 1}`,
-  }));
+  return Array.from(
+    { length: Math.max(1, getCourseModules(course)) },
+    (_, index) => ({
+      id: `${course.id || getCourseCode(course)}-module-${index + 1}`,
+      title: `Module ${index + 1}`,
+    }),
+  );
 }
 
 function formatDateTime(value) {
-  if (!value) return 'No activity yet';
+  if (!value) return "No activity yet";
 
   const date = new Date(value);
 
   if (Number.isNaN(date.getTime())) return String(value);
 
-  return date.toLocaleString('en-US', {
-    month: 'short',
-    day: '2-digit',
-    hour: 'numeric',
-    minute: '2-digit',
+  return date.toLocaleString("en-US", {
+    month: "short",
+    day: "2-digit",
+    hour: "numeric",
+    minute: "2-digit",
   });
 }
 
@@ -295,7 +331,10 @@ function makeSeries(labels, total, offset = 1) {
 
   return labels.map((label, index) => ({
     label,
-    value: Math.max(1, Math.round((base / count) * (0.72 + ((index + offset) % 4) * 0.16))),
+    value: Math.max(
+      1,
+      Math.round((base / count) * (0.72 + ((index + offset) % 4) * 0.16)),
+    ),
   }));
 }
 
@@ -305,28 +344,28 @@ function toPercent(value, total) {
 }
 
 function getAdaptiveLevel(score, modulesCompleted) {
-  if (score >= 90 && modulesCompleted >= 5) return 'Advanced';
-  if (score >= 82) return 'Proficient';
-  if (score >= 74) return 'Developing';
-  if (score >= 66) return 'Foundation';
-  return 'Needs Intervention';
+  if (score >= 90 && modulesCompleted >= 5) return "Advanced";
+  if (score >= 82) return "Proficient";
+  if (score >= 74) return "Developing";
+  if (score >= 66) return "Foundation";
+  return "Needs Intervention";
 }
 
 function slug(value) {
-  return String(value || '')
+  return String(value || "")
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '');
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
 }
 
 function csvEscape(value) {
-  return `"${String(value ?? '').replace(/"/g, '""')}"`;
+  return `"${String(value ?? "").replace(/"/g, '""')}"`;
 }
 
 function downloadFile(filename, content, type) {
   const blob = new Blob([content], { type });
   const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
+  const link = document.createElement("a");
 
   link.href = url;
   link.download = filename;
@@ -414,7 +453,11 @@ function BarChart({ items }) {
             <strong>{item.value}</strong>
           </div>
           <i>
-            <b style={{ width: `${Math.max(8, ((Number(item.value) || 0) / max) * 100)}%` }} />
+            <b
+              style={{
+                width: `${Math.max(8, ((Number(item.value) || 0) / max) * 100)}%`,
+              }}
+            />
           </i>
         </div>
       ))}
@@ -422,7 +465,7 @@ function BarChart({ items }) {
   );
 }
 
-function SmallMetric({ label, value, tone = 'neutral' }) {
+function SmallMetric({ label, value, tone = "neutral" }) {
   return (
     <div className={`report-small-metric tone-${tone}`}>
       <span>{label}</span>
@@ -432,7 +475,7 @@ function SmallMetric({ label, value, tone = 'neutral' }) {
 }
 
 function ScorePill({ value }) {
-  const tone = value >= 85 ? 'high' : value >= 75 ? 'mid' : 'low';
+  const tone = value >= 85 ? "high" : value >= 75 ? "mid" : "low";
 
   return <span className={`score-pill tone-${tone}`}>{value}%</span>;
 }
@@ -442,15 +485,15 @@ function LevelPill({ level }) {
 }
 
 export default function ReportsPage() {
-  const [dateFilter, setDateFilter] = useState('month');
+  const [dateFilter, setDateFilter] = useState("month");
   const [customRange, setCustomRange] = useState({
-    startDate: '2026-08-01',
-    endDate: '2026-08-07',
+    startDate: "2026-08-01",
+    endDate: "2026-08-07",
   });
   const [courses, setCourses] = useState(sampleCourses);
   const [users, setUsers] = useState(fallbackUsers.map(normalizeUser));
   const [modes, setModes] = useState([]);
-  const [studentSearch, setStudentSearch] = useState('');
+  const [studentSearch, setStudentSearch] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -470,9 +513,18 @@ export default function ReportsPage() {
 
       if (!active) return;
 
-      setCourses(Array.isArray(courseData) && courseData.length ? courseData : sampleCourses);
+      setCourses(
+        Array.isArray(courseData) && courseData.length
+          ? courseData
+          : sampleCourses,
+      );
       setModes(Array.isArray(modeData) ? modeData : []);
-      setUsers((Array.isArray(userData) && userData.length ? userData : fallbackUsers).map(normalizeUser));
+      setUsers(
+        (Array.isArray(userData) && userData.length
+          ? userData
+          : fallbackUsers
+        ).map(normalizeUser),
+      );
       setLoading(false);
     }
 
@@ -484,12 +536,19 @@ export default function ReportsPage() {
   }, []);
 
   const reportData = useMemo(() => {
-    const selectedRange = rangeOptions.find((item) => item.id === dateFilter) || rangeOptions[2];
+    const selectedRange =
+      rangeOptions.find((item) => item.id === dateFilter) || rangeOptions[2];
     const normalizedUsers = users.map(normalizeUser);
-    const studentUsers = normalizedUsers.filter((user) => user.role === 'student');
-    const professorUsers = normalizedUsers.filter((user) => user.role === 'professor');
+    const studentUsers = normalizedUsers.filter(
+      (user) => user.role === "student",
+    );
+    const professorUsers = normalizedUsers.filter(
+      (user) => user.role === "professor",
+    );
     const activeCourses = courses.filter((course) => !isCourseArchived(course));
-    const publishedCourses = activeCourses.filter((course) => getCourseStatus(course) === 'published');
+    const publishedCourses = activeCourses.filter(
+      (course) => getCourseStatus(course) === "published",
+    );
     const courseRows = activeCourses.map((course, index) => {
       const students = getCourseStudents(course);
       const modules = getCourseModules(course);
@@ -498,7 +557,10 @@ export default function ReportsPage() {
       const completionRate = getCourseCompletionRate(course, index);
       const attempts = Math.max(
         1,
-        Math.round((quizzes * 18 + students * 1.6 + modules * 3 + index * 5) * selectedRange.factor),
+        Math.round(
+          (quizzes * 18 + students * 1.6 + modules * 3 + index * 5) *
+            selectedRange.factor,
+        ),
       );
 
       return {
@@ -519,14 +581,29 @@ export default function ReportsPage() {
       getModuleList(courseRow.course).map((module, moduleIndex) => {
         const averageScore = getScore(
           module.averageScore || module.average_score,
-          clamp(courseRow.averageScore - 4 + ((moduleIndex + courseIndex) % 5) * 2, 58, 98),
+          clamp(
+            courseRow.averageScore - 4 + ((moduleIndex + courseIndex) % 5) * 2,
+            58,
+            98,
+          ),
         );
         const attempts = Math.max(
           1,
-          Math.round((courseRow.students * 0.8 + courseRow.quizzes * 6 + moduleIndex * 2) * selectedRange.factor),
+          Math.round(
+            (courseRow.students * 0.8 +
+              courseRow.quizzes * 6 +
+              moduleIndex * 2) *
+              selectedRange.factor,
+          ),
         );
-        const highestScore = getScore(module.highestScore || module.highest_score, clamp(averageScore + 9, 0, 100));
-        const lowestScore = getScore(module.lowestScore || module.lowest_score, clamp(averageScore - 18, 0, 100));
+        const highestScore = getScore(
+          module.highestScore || module.highest_score,
+          clamp(averageScore + 9, 0, 100),
+        );
+        const lowestScore = getScore(
+          module.lowestScore || module.lowest_score,
+          clamp(averageScore - 18, 0, 100),
+        );
         const completionRate = getScore(
           module.completionRate || module.completion_rate,
           clamp(courseRow.completionRate - 6 + (moduleIndex % 4) * 2, 48, 99),
@@ -534,7 +611,8 @@ export default function ReportsPage() {
 
         return {
           key: `${courseRow.id}-${module.id || moduleIndex}`,
-          title: module.title || module.module_title || `Module ${moduleIndex + 1}`,
+          title:
+            module.title || module.module_title || `Module ${moduleIndex + 1}`,
           course: courseRow.name,
           attempts,
           averageScore,
@@ -544,11 +622,20 @@ export default function ReportsPage() {
         };
       }),
     );
-    const totalModules = courseRows.reduce((sum, course) => sum + course.modules, 0);
-    const totalQuizAttempts = courseRows.reduce((sum, course) => sum + course.attempts, 0);
+    const totalModules = courseRows.reduce(
+      (sum, course) => sum + course.modules,
+      0,
+    );
+    const totalQuizAttempts = courseRows.reduce(
+      (sum, course) => sum + course.attempts,
+      0,
+    );
     const averageStudentPerformance =
       courseRows.length > 0
-        ? Math.round(courseRows.reduce((sum, course) => sum + course.averageScore, 0) / courseRows.length)
+        ? Math.round(
+            courseRows.reduce((sum, course) => sum + course.averageScore, 0) /
+              courseRows.length,
+          )
         : 0;
     const studentRows = studentUsers.map((student, index) => {
       const course = courseRows[index % Math.max(courseRows.length, 1)];
@@ -564,7 +651,7 @@ export default function ReportsPage() {
       return {
         key: student.id,
         student: student.name,
-        course: course?.name || 'Information Management',
+        course: course?.name || "Information Management",
         overallAverage,
         modulesCompleted,
         totalModules: courseModules,
@@ -573,23 +660,41 @@ export default function ReportsPage() {
       };
     });
     const professorNames = [
-      ...new Set([
-        ...professorUsers.map((professor) => professor.name),
-        ...courseRows.map((course) => course.professor),
-      ].filter(Boolean)),
+      ...new Set(
+        [
+          ...professorUsers.map((professor) => professor.name),
+          ...courseRows.map((course) => course.professor),
+        ].filter(Boolean),
+      ),
     ];
     const professorRows = professorNames.map((professor, index) => {
-      const ownedCourses = courseRows.filter((course) => course.professor === professor);
+      const ownedCourses = courseRows.filter(
+        (course) => course.professor === professor,
+      );
       const assignedCourses = ownedCourses.length
         ? ownedCourses
-        : courseRows.filter((_, courseIndex) => courseIndex % Math.max(professorNames.length, 1) === index);
-      const coursesHandled = Math.max(assignedCourses.length, professorUsers[index] ? 1 : 0);
-      const modulesCreated = assignedCourses.reduce((sum, course) => sum + course.modules, 0);
-      const studentsHandled = assignedCourses.reduce((sum, course) => sum + course.students, 0);
+        : courseRows.filter(
+            (_, courseIndex) =>
+              courseIndex % Math.max(professorNames.length, 1) === index,
+          );
+      const coursesHandled = Math.max(
+        assignedCourses.length,
+        professorUsers[index] ? 1 : 0,
+      );
+      const modulesCreated = assignedCourses.reduce(
+        (sum, course) => sum + course.modules,
+        0,
+      );
+      const studentsHandled = assignedCourses.reduce(
+        (sum, course) => sum + course.students,
+        0,
+      );
       const quizCompletionRate = assignedCourses.length
         ? Math.round(
-            assignedCourses.reduce((sum, course) => sum + course.completionRate, 0) /
-              assignedCourses.length,
+            assignedCourses.reduce(
+              (sum, course) => sum + course.completionRate,
+              0,
+            ) / assignedCourses.length,
           )
         : clamp(82 - index * 4, 62, 94);
 
@@ -603,13 +708,21 @@ export default function ReportsPage() {
       };
     });
     const averageAttemptsBeforeMastery = totalQuizAttempts
-      ? Math.max(1, (totalQuizAttempts / Math.max(1, studentRows.length * 6)).toFixed(1))
-      : '0.0';
+      ? Math.max(
+          1,
+          (totalQuizAttempts / Math.max(1, studentRows.length * 6)).toFixed(1),
+        )
+      : "0.0";
     const interventionRows = studentRows.filter(
-      (student) => student.overallAverage < 70 || student.adaptiveLevel === 'Needs Intervention',
+      (student) =>
+        student.overallAverage < 70 ||
+        student.adaptiveLevel === "Needs Intervention",
     );
     const quizAverage = moduleRows.length
-      ? Math.round(moduleRows.reduce((sum, row) => sum + row.averageScore, 0) / moduleRows.length)
+      ? Math.round(
+          moduleRows.reduce((sum, row) => sum + row.averageScore, 0) /
+            moduleRows.length,
+        )
       : averageStudentPerformance;
     const highestScore = moduleRows.length
       ? Math.max(...moduleRows.map((row) => row.highestScore))
@@ -638,12 +751,35 @@ export default function ReportsPage() {
       averageStudentPerformance,
       adaptive: {
         difficultyLevels: [
-          { label: 'Foundation', value: studentRows.filter((row) => row.adaptiveLevel === 'Foundation').length },
-          { label: 'Developing', value: studentRows.filter((row) => row.adaptiveLevel === 'Developing').length },
-          { label: 'Proficient', value: studentRows.filter((row) => row.adaptiveLevel === 'Proficient').length },
-          { label: 'Advanced', value: studentRows.filter((row) => row.adaptiveLevel === 'Advanced').length },
+          {
+            label: "Foundation",
+            value: studentRows.filter(
+              (row) => row.adaptiveLevel === "Foundation",
+            ).length,
+          },
+          {
+            label: "Developing",
+            value: studentRows.filter(
+              (row) => row.adaptiveLevel === "Developing",
+            ).length,
+          },
+          {
+            label: "Proficient",
+            value: studentRows.filter(
+              (row) => row.adaptiveLevel === "Proficient",
+            ).length,
+          },
+          {
+            label: "Advanced",
+            value: studentRows.filter((row) => row.adaptiveLevel === "Advanced")
+              .length,
+          },
         ],
-        improvementOverTime: makeSeries(selectedRange.labels, Math.max(8, averageStudentPerformance), 2),
+        improvementOverTime: makeSeries(
+          selectedRange.labels,
+          Math.max(8, averageStudentPerformance),
+          2,
+        ),
         averageAttemptsBeforeMastery,
         studentsNeedingIntervention: interventionRows.length,
         interventionRows,
@@ -655,11 +791,21 @@ export default function ReportsPage() {
         lowestScore,
         passRate,
         failedRate,
-        modeRows: (modes.length ? modes : [{ title: 'Flashcards' }, { title: 'Multiple Choice' }, { title: 'Q & A' }])
+        modeRows: (modes.length
+          ? modes
+          : [
+              { title: "Flashcards" },
+              { title: "Multiple Choice" },
+              { title: "Q & A" },
+            ]
+        )
           .slice(0, 6)
           .map((mode, index) => ({
             label: mode.title || mode.mode_name || `Quiz Mode ${index + 1}`,
-            value: Math.max(1, Math.round(totalQuizAttempts * (0.16 + index * 0.04))),
+            value: Math.max(
+              1,
+              Math.round(totalQuizAttempts * (0.16 + index * 0.04)),
+            ),
           })),
       },
     };
@@ -672,7 +818,7 @@ export default function ReportsPage() {
 
     return reportData.studentRows.filter((student) =>
       [student.student, student.course, student.adaptiveLevel]
-        .join(' ')
+        .join(" ")
         .toLowerCase()
         .includes(query),
     );
@@ -680,55 +826,62 @@ export default function ReportsPage() {
 
   const overviewCards = [
     {
-      label: 'Total Students',
+      label: "Total Students",
       value: reportData.totalStudents,
       detail: `${toPercent(reportData.totalStudents, reportData.normalizedUsers.length)}% of users`,
       icon: FiUsers,
     },
     {
-      label: 'Total Professors',
+      label: "Total Professors",
       value: reportData.totalProfessors,
       detail: `${reportData.professorRows.length} active report owner(s)`,
       icon: FiShield,
     },
     {
-      label: 'Total Courses',
+      label: "Total Courses",
       value: reportData.totalCourses,
       detail: `${reportData.totalPublishedCourses} published`,
       icon: FiBookOpen,
     },
     {
-      label: 'Total Modules',
+      label: "Total Modules",
       value: reportData.totalModules,
-      detail: 'Learning content tracked',
+      detail: "Learning content tracked",
       icon: FiLayers,
     },
     {
-      label: 'Total Quiz Attempts',
+      label: "Total Quiz Attempts",
       value: reportData.totalQuizAttempts,
       detail: reportData.selectedRange.label,
       icon: FiActivity,
     },
     {
-      label: 'Average Student Performance',
+      label: "Average Student Performance",
       value: `${reportData.averageStudentPerformance}%`,
-      detail: 'Across active courses',
+      detail: "Across active courses",
       icon: FiAward,
     },
   ];
 
   const buildReportCsv = () => {
     const rows = [
-      ['Reports Dashboard'],
-      ['Date Filter', reportData.selectedRange.label],
-      ['Custom Range', `${customRange.startDate} to ${customRange.endDate}`],
+      ["Reports Dashboard"],
+      ["Date Filter", reportData.selectedRange.label],
+      ["Custom Range", `${customRange.startDate} to ${customRange.endDate}`],
       [],
-      ['Overview Cards'],
-      ['Metric', 'Value', 'Detail'],
+      ["Overview Cards"],
+      ["Metric", "Value", "Detail"],
       ...overviewCards.map((card) => [card.label, card.value, card.detail]),
       [],
-      ['Course Reports'],
-      ['Course', 'Professor', 'Enrolled Students', 'Modules', 'Average Quiz Score', 'Completion Rate'],
+      ["Course Reports"],
+      [
+        "Course",
+        "Professor",
+        "Enrolled Students",
+        "Modules",
+        "Average Quiz Score",
+        "Completion Rate",
+      ],
       ...reportData.courseRows.map((course) => [
         course.name,
         course.professor,
@@ -738,8 +891,16 @@ export default function ReportsPage() {
         `${course.completionRate}%`,
       ]),
       [],
-      ['Module Reports'],
-      ['Module', 'Course', 'Attempts', 'Average Score', 'Highest Score', 'Lowest Score', 'Completion Rate'],
+      ["Module Reports"],
+      [
+        "Module",
+        "Course",
+        "Attempts",
+        "Average Score",
+        "Highest Score",
+        "Lowest Score",
+        "Completion Rate",
+      ],
       ...reportData.moduleRows.map((module) => [
         module.title,
         module.course,
@@ -750,8 +911,15 @@ export default function ReportsPage() {
         `${module.completionRate}%`,
       ]),
       [],
-      ['Student Performance'],
-      ['Student', 'Course', 'Overall Average', 'Modules Completed', 'Adaptive Level', 'Last Activity'],
+      ["Student Performance"],
+      [
+        "Student",
+        "Course",
+        "Overall Average",
+        "Modules Completed",
+        "Adaptive Level",
+        "Last Activity",
+      ],
       ...reportData.studentRows.map((student) => [
         student.student,
         student.course,
@@ -761,8 +929,14 @@ export default function ReportsPage() {
         student.lastActivity,
       ]),
       [],
-      ['Professor Activity'],
-      ['Professor', 'Courses Handled', 'Modules Created', 'Students Handled', 'Quiz Completion Rate'],
+      ["Professor Activity"],
+      [
+        "Professor",
+        "Courses Handled",
+        "Modules Created",
+        "Students Handled",
+        "Quiz Completion Rate",
+      ],
       ...reportData.professorRows.map((professor) => [
         professor.professor,
         professor.coursesHandled,
@@ -771,8 +945,15 @@ export default function ReportsPage() {
         `${professor.quizCompletionRate}%`,
       ]),
       [],
-      ['Quiz Statistics'],
-      ['Total Quizzes Taken', 'Average Score', 'Highest Score', 'Lowest Score', 'Pass Rate', 'Failed Rate'],
+      ["Quiz Statistics"],
+      [
+        "Total Quizzes Taken",
+        "Average Score",
+        "Highest Score",
+        "Lowest Score",
+        "Pass Rate",
+        "Failed Rate",
+      ],
       [
         reportData.quiz.totalTaken,
         `${reportData.quiz.averageScore}%`,
@@ -783,11 +964,15 @@ export default function ReportsPage() {
       ],
     ];
 
-    return rows.map((row) => row.map(csvEscape).join(',')).join('\n');
+    return rows.map((row) => row.map(csvEscape).join(",")).join("\n");
   };
 
   const exportExcel = () => {
-    downloadFile('puffybrain-reports-dashboard.csv', buildReportCsv(), 'text/csv;charset=utf-8');
+    downloadFile(
+      "puffybrain-reports-dashboard.csv",
+      buildReportCsv(),
+      "text/csv;charset=utf-8",
+    );
   };
 
   const printReport = () => {
@@ -803,7 +988,10 @@ export default function ReportsPage() {
             Admin reports
           </span>
           <h1>Reports Dashboard</h1>
-          <p>Performance, activity, adaptive learning, and quiz results for PuffyBrain.</p>
+          <p>
+            Performance, activity, adaptive learning, and quiz results for
+            PuffyBrain.
+          </p>
         </div>
 
         <div className="report-export-actions" aria-label="Export reports">
@@ -833,7 +1021,7 @@ export default function ReportsPage() {
             <button
               key={option.id}
               type="button"
-              className={dateFilter === option.id ? 'active' : ''}
+              className={dateFilter === option.id ? "active" : ""}
               onClick={() => setDateFilter(option.id)}
             >
               {option.label}
@@ -841,7 +1029,7 @@ export default function ReportsPage() {
           ))}
         </div>
 
-        {dateFilter === 'custom' && (
+        {dateFilter === "custom" && (
           <div className="report-custom-range">
             <label>
               <span>Start</span>
@@ -849,7 +1037,10 @@ export default function ReportsPage() {
                 type="date"
                 value={customRange.startDate}
                 onChange={(event) =>
-                  setCustomRange((current) => ({ ...current, startDate: event.target.value }))
+                  setCustomRange((current) => ({
+                    ...current,
+                    startDate: event.target.value,
+                  }))
                 }
               />
             </label>
@@ -859,7 +1050,10 @@ export default function ReportsPage() {
                 type="date"
                 value={customRange.endDate}
                 onChange={(event) =>
-                  setCustomRange((current) => ({ ...current, endDate: event.target.value }))
+                  setCustomRange((current) => ({
+                    ...current,
+                    endDate: event.target.value,
+                  }))
                 }
               />
             </label>
@@ -881,7 +1075,14 @@ export default function ReportsPage() {
         icon={FiBookOpen}
       >
         <ReportTable
-          columns={['Course', 'Professor', 'Enrolled Students', 'Modules', 'Average Quiz Score', 'Completion Rate']}
+          columns={[
+            "Course",
+            "Professor",
+            "Enrolled Students",
+            "Modules",
+            "Average Quiz Score",
+            "Completion Rate",
+          ]}
           emptyMessage="No course reports available."
           rows={reportData.courseRows.map((course) => ({
             key: course.id,
@@ -903,7 +1104,15 @@ export default function ReportsPage() {
         icon={FiLayers}
       >
         <ReportTable
-          columns={['Module', 'Course', 'Attempts', 'Average Score', 'Highest Score', 'Lowest Score', 'Completion Rate']}
+          columns={[
+            "Module",
+            "Course",
+            "Attempts",
+            "Average Score",
+            "Highest Score",
+            "Lowest Score",
+            "Completion Rate",
+          ]}
           emptyMessage="No module reports available."
           rows={reportData.moduleRows.map((module) => ({
             key: module.key,
@@ -937,7 +1146,14 @@ export default function ReportsPage() {
         }
       >
         <ReportTable
-          columns={['Student', 'Course', 'Overall Average', 'Modules Completed', 'Adaptive Level', 'Last Activity']}
+          columns={[
+            "Student",
+            "Course",
+            "Overall Average",
+            "Modules Completed",
+            "Adaptive Level",
+            "Last Activity",
+          ]}
           emptyMessage="No matching student performance records."
           rows={filteredStudentRows.map((student) => ({
             key: student.key,
@@ -959,7 +1175,13 @@ export default function ReportsPage() {
         icon={FiShield}
       >
         <ReportTable
-          columns={['Professor', 'Courses Handled', 'Modules Created', 'Students Handled', 'Quiz Completion Rate']}
+          columns={[
+            "Professor",
+            "Courses Handled",
+            "Modules Created",
+            "Students Handled",
+            "Quiz Completion Rate",
+          ]}
           emptyMessage="No professor activity available."
           rows={reportData.professorRows.map((professor) => ({
             key: professor.key,
@@ -1003,7 +1225,7 @@ export default function ReportsPage() {
         </div>
 
         <ReportTable
-          columns={['Student', 'Course', 'Overall Average', 'Adaptive Level']}
+          columns={["Student", "Course", "Overall Average", "Adaptive Level"]}
           emptyMessage="No students currently need intervention."
           rows={reportData.adaptive.interventionRows.map((student) => ({
             key: `intervention-${student.key}`,
@@ -1023,12 +1245,36 @@ export default function ReportsPage() {
         icon={FiTarget}
       >
         <div className="report-quiz-summary">
-          <SmallMetric label="Total Quizzes Taken" value={reportData.quiz.totalTaken} tone="blue" />
-          <SmallMetric label="Average Score" value={`${reportData.quiz.averageScore}%`} tone="green" />
-          <SmallMetric label="Highest Score" value={`${reportData.quiz.highestScore}%`} tone="gold" />
-          <SmallMetric label="Lowest Score" value={`${reportData.quiz.lowestScore}%`} tone="red" />
-          <SmallMetric label="Pass Rate" value={`${reportData.quiz.passRate}%`} tone="green" />
-          <SmallMetric label="Failed Rate" value={`${reportData.quiz.failedRate}%`} tone="red" />
+          <SmallMetric
+            label="Total Quizzes Taken"
+            value={reportData.quiz.totalTaken}
+            tone="blue"
+          />
+          <SmallMetric
+            label="Average Score"
+            value={`${reportData.quiz.averageScore}%`}
+            tone="green"
+          />
+          <SmallMetric
+            label="Highest Score"
+            value={`${reportData.quiz.highestScore}%`}
+            tone="gold"
+          />
+          <SmallMetric
+            label="Lowest Score"
+            value={`${reportData.quiz.lowestScore}%`}
+            tone="red"
+          />
+          <SmallMetric
+            label="Pass Rate"
+            value={`${reportData.quiz.passRate}%`}
+            tone="green"
+          />
+          <SmallMetric
+            label="Failed Rate"
+            value={`${reportData.quiz.failedRate}%`}
+            tone="red"
+          />
         </div>
 
         <div className="report-analytics-grid two-column">
@@ -1040,8 +1286,8 @@ export default function ReportsPage() {
             <h3>Pass and Failed Rate</h3>
             <BarChart
               items={[
-                { label: 'Pass Rate', value: reportData.quiz.passRate },
-                { label: 'Failed Rate', value: reportData.quiz.failedRate },
+                { label: "Pass Rate", value: reportData.quiz.passRate },
+                { label: "Failed Rate", value: reportData.quiz.failedRate },
               ]}
             />
           </div>

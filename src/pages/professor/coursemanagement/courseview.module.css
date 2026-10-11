@@ -314,7 +314,6 @@
   transform: translateY(1px);
 }
 
-
 .studentModalOverlay {
   position: fixed;
   inset: 0;
@@ -610,4 +609,3 @@
     flex-wrap: wrap;
   }
 }
-

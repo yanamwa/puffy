@@ -1,32 +1,26 @@
-
-import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   archiveCourseById,
   fetchCourses,
-} from '../../../services/courseApi.js';
-import styles from './modulemanage.module.css';
-import Swal from 'sweetalert2';
+} from "../../../services/courseApi.js";
+import styles from "./modulemanage.module.css";
+import Swal from "sweetalert2";
 
 function formatCourseId(course) {
-  return (
-    course.code ||
-    `CRS${String(course.id)
-      .slice(-3)
-      .padStart(3, '0')}`
-  );
+  return course.code || `CRS${String(course.id).slice(-3).padStart(3, "0")}`;
 }
 
 export default function ModuleManagement() {
   const navigate = useNavigate();
 
   const [courses, setCourses] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [courseView, setCourseView] = useState('active');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [courseView, setCourseView] = useState("active");
   const [rowsToShow, setRowsToShow] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
 
   /* =========================================
      LOAD COURSES
@@ -38,25 +32,18 @@ export default function ModuleManagement() {
     async function loadCourses() {
       try {
         setLoading(true);
-        setErrorMessage('');
+        setErrorMessage("");
 
         const loadedCourses = await fetchCourses({
           includeArchived: true,
         });
 
         if (active) {
-          setCourses(
-            Array.isArray(loadedCourses)
-              ? loadedCourses
-              : []
-          );
+          setCourses(Array.isArray(loadedCourses) ? loadedCourses : []);
         }
       } catch (error) {
         if (active) {
-          setErrorMessage(
-            error.message ||
-              'Could not load courses.'
-          );
+          setErrorMessage(error.message || "Could not load courses.");
         }
       } finally {
         if (active) {
@@ -77,21 +64,19 @@ export default function ModuleManagement() {
   ========================================= */
 
   useEffect(() => {
-  setCurrentPage(1);
-}, [searchQuery, rowsToShow, courseView]);
+    setCurrentPage(1);
+  }, [searchQuery, rowsToShow, courseView]);
 
   /* =========================================
      FILTER COURSES
   ========================================= */
 
   const filteredCourses = useMemo(() => {
-    const query = searchQuery
-      .trim()
-      .toLowerCase();
+    const query = searchQuery.trim().toLowerCase();
 
     return courses
       .filter((course) => {
-        if (courseView === 'archived') {
+        if (courseView === "archived") {
           return Boolean(course.archived);
         }
 
@@ -110,7 +95,7 @@ export default function ModuleManagement() {
           course.status,
         ]
           .filter(Boolean)
-          .join(' ')
+          .join(" ")
           .toLowerCase()
           .includes(query);
       });
@@ -122,14 +107,12 @@ export default function ModuleManagement() {
 
   const totalPages = Math.max(
     1,
-    Math.ceil(
-      filteredCourses.length / rowsToShow
-    )
+    Math.ceil(filteredCourses.length / rowsToShow),
   );
 
   const shownCourses = filteredCourses.slice(
     (currentPage - 1) * rowsToShow,
-    currentPage * rowsToShow
+    currentPage * rowsToShow,
   );
 
   /* =========================================
@@ -137,9 +120,7 @@ export default function ModuleManagement() {
   ========================================= */
 
   const openCourse = (courseId) => {
-    navigate(
-      `/professor/courses/view/${courseId}`
-    );
+    navigate(`/professor/courses/view/${courseId}`);
   };
 
   /* =========================================
@@ -148,14 +129,14 @@ export default function ModuleManagement() {
 
   const archiveCourse = async (course) => {
     const result = await Swal.fire({
-      title: 'Archive Course?',
+      title: "Archive Course?",
       text: `"${course.title}" will be moved to Archived Courses.`,
-      icon: 'warning',
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonText: 'Archive',
-      cancelButtonText: 'Cancel',
-      confirmButtonColor: '#dc3545',
-      cancelButtonColor: '#6c757d',
+      confirmButtonText: "Archive",
+      cancelButtonText: "Cancel",
+      confirmButtonColor: "#dc3545",
+      cancelButtonColor: "#6c757d",
       reverseButtons: true,
     });
 
@@ -164,10 +145,7 @@ export default function ModuleManagement() {
     }
 
     try {
-      await archiveCourseById(
-        course.id,
-        true
-      );
+      await archiveCourseById(course.id, true);
 
       setCourses((current) =>
         current.map((item) =>
@@ -176,83 +154,76 @@ export default function ModuleManagement() {
                 ...item,
                 archived: true,
               }
-            : item
-        )
+            : item,
+        ),
       );
 
       await Swal.fire({
-        title: 'Course Archived',
+        title: "Course Archived",
         text: `"${course.title}" was archived successfully.`,
-        icon: 'success',
-        confirmButtonText: 'OK',
-        confirmButtonColor: '#7fa9d6',
+        icon: "success",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#7fa9d6",
       });
     } catch (error) {
       await Swal.fire({
-        title: 'Archive Failed',
-        text:
-          error.message ||
-          'Could not archive the course.',
-        icon: 'error',
-        confirmButtonText: 'OK',
-        confirmButtonColor: '#7fa9d6',
+        title: "Archive Failed",
+        text: error.message || "Could not archive the course.",
+        icon: "error",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#7fa9d6",
       });
     }
   };
 
-    const restoreCourse = async (course) => {
-      const result = await Swal.fire({
-        title: 'Restore Course?',
-        text: `"${course.title}" will be moved back to Active Courses.`,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'Restore',
-        cancelButtonText: 'Cancel',
-        confirmButtonColor: '#7fa9d6',
-        cancelButtonColor: '#6c757d',
-        reverseButtons: true,
+  const restoreCourse = async (course) => {
+    const result = await Swal.fire({
+      title: "Restore Course?",
+      text: `"${course.title}" will be moved back to Active Courses.`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Restore",
+      cancelButtonText: "Cancel",
+      confirmButtonColor: "#7fa9d6",
+      cancelButtonColor: "#6c757d",
+      reverseButtons: true,
+    });
+
+    if (!result.isConfirmed) {
+      return;
+    }
+
+    try {
+      await archiveCourseById(course.id, false);
+
+      setCourses((current) =>
+        current.map((item) =>
+          String(item.id) === String(course.id)
+            ? {
+                ...item,
+                archived: false,
+              }
+            : item,
+        ),
+      );
+
+      await Swal.fire({
+        title: "Course Restored",
+        text: `"${course.title}" is now available under Active Courses.`,
+        icon: "success",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#7fa9d6",
       });
-
-      if (!result.isConfirmed) {
-        return;
-      }
-
-      try {
-        await archiveCourseById(
-          course.id,
-          false
-        );
-
-        setCourses((current) =>
-          current.map((item) =>
-            String(item.id) === String(course.id)
-              ? {
-                  ...item,
-                  archived: false,
-                }
-              : item
-          )
-        );
-
-        await Swal.fire({
-          title: 'Course Restored',
-          text: `"${course.title}" is now available under Active Courses.`,
-          icon: 'success',
-          confirmButtonText: 'OK',
-          confirmButtonColor: '#7fa9d6',
-        });
-      } catch (error) {
-        await Swal.fire({
-          title: 'Restore Failed',
-          text:
-            error.message ||
-            'Could not restore the course.',
-          icon: 'error',
-          confirmButtonText: 'OK',
-          confirmButtonColor: '#7fa9d6',
-        });
-      }
-    };
+    } catch (error) {
+      await Swal.fire({
+        title: "Restore Failed",
+        text: error.message || "Could not restore the course.",
+        icon: "error",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#7fa9d6",
+      });
+    }
+  };
 
   /* =========================================
      PAGE
@@ -266,24 +237,15 @@ export default function ModuleManagement() {
 
       <div className={styles.pageTop}>
         <div className={styles.titleSection}>
-          <h1 className={styles.pageTitle}>
-            Course Management
-          </h1>
+          <h1 className={styles.pageTitle}>Course Management</h1>
 
-          <p>
-            Create and manage courses for your
-            students.
-          </p>
+          <p>Create and manage courses for your students.</p>
         </div>
 
         <button
           type="button"
           className={styles.addBtn}
-          onClick={() =>
-            navigate(
-              '/professor/courses/new'
-            )
-          }
+          onClick={() => navigate("/professor/courses/new")}
         >
           + Add new course
         </button>
@@ -297,9 +259,7 @@ export default function ModuleManagement() {
         <input
           type="search"
           value={searchQuery}
-          onChange={(event) =>
-            setSearchQuery(event.target.value)
-          }
+          onChange={(event) => setSearchQuery(event.target.value)}
           placeholder="Search courses..."
           aria-label="Search courses"
         />
@@ -307,24 +267,16 @@ export default function ModuleManagement() {
         <div className={styles.courseViewToggle}>
           <button
             type="button"
-            className={
-              courseView === 'active'
-                ? styles.courseViewActive
-                : ''
-            }
-            onClick={() => setCourseView('active')}
+            className={courseView === "active" ? styles.courseViewActive : ""}
+            onClick={() => setCourseView("active")}
           >
             Active
           </button>
 
           <button
             type="button"
-            className={
-              courseView === 'archived'
-                ? styles.courseViewActive
-                : ''
-            }
-            onClick={() => setCourseView('archived')}
+            className={courseView === "archived" ? styles.courseViewActive : ""}
+            onClick={() => setCourseView("archived")}
           >
             Archived
           </button>
@@ -337,47 +289,25 @@ export default function ModuleManagement() {
 
       <div className={styles.tableCard}>
         {loading ? (
-          <div
-            className={styles.emptyState}
-          >
-            Loading courses...
-          </div>
+          <div className={styles.emptyState}>Loading courses...</div>
         ) : errorMessage ? (
-          <div
-            className={styles.emptyState}
-          >
-            {errorMessage}
-          </div>
+          <div className={styles.emptyState}>{errorMessage}</div>
         ) : shownCourses.length === 0 ? (
-          <div
-            className={styles.emptyState}
-          >
-            No courses found.
-          </div>
+          <div className={styles.emptyState}>No courses found.</div>
         ) : (
-          <div
-            className={styles.moduleGrid}
-          >
+          <div className={styles.moduleGrid}>
             {shownCourses.map((course) => (
               <article
                 key={course.id}
                 className={styles.moduleBox}
                 role="button"
                 tabIndex={0}
-                onClick={() =>
-                  openCourse(course.id)
-                }
+                onClick={() => openCourse(course.id)}
                 onKeyDown={(event) => {
-                  if (
-                    event.key ===
-                      'Enter' ||
-                    event.key === ' '
-                  ) {
+                  if (event.key === "Enter" || event.key === " ") {
                     event.preventDefault();
 
-                    openCourse(
-                      course.id
-                    );
+                    openCourse(course.id);
                   }
                 }}
               >
@@ -385,40 +315,21 @@ export default function ModuleManagement() {
                     CARD TOP
                 ========================== */}
 
-                <div
-                  className={
-                    styles.moduleBoxTop
-                  }
-                >
-                  <span
-                    className={
-                      styles.courseCode
-                    }
-                  >
-                    {formatCourseId(
-                      course
-                    )}
+                <div className={styles.moduleBoxTop}>
+                  <span className={styles.courseCode}>
+                    {formatCourseId(course)}
                   </span>
 
-                  <div
-                    className={
-                      styles.moduleBadges
-                    }
-                  >
+                  <div className={styles.moduleBadges}>
                     <span
                       className={
-                        course.status ===
-                        'published'
+                        course.status === "published"
                           ? styles.statusActive
                           : styles.statusInactive
                       }
                     >
-                      {course.status ===
-                      'published'
-                        ? 'Published'
-                        : 'Draft'}
+                      {course.status === "published" ? "Published" : "Draft"}
                     </span>
-
                   </div>
                 </div>
 
@@ -426,52 +337,30 @@ export default function ModuleManagement() {
                     COURSE INFORMATION
                 ========================== */}
 
-                <h2>
-                  {course.title ||
-                    'Untitled Course'}
-                </h2>
+                <h2>{course.title || "Untitled Course"}</h2>
 
-                <p>
-                  {course.summary ||
-                    'No course description yet.'}
-                </p>
+                <p>{course.summary || "No course description yet."}</p>
 
                 {/* =========================
                     COURSE STATS
                 ========================== */}
 
-                <div
-                  className={
-                    styles.courseStats
-                  }
-                >
+                <div className={styles.courseStats}>
                   <span>
-                    {course.students ||
-                      course.studentCount ||
-                      0}{' '}
-                    students
+                    {course.students || course.studentCount || 0} students
                   </span>
 
                   <span>
-                    {course.moduleCount ||
-                      course.modules ||
-                      0}{' '}
-                    modules
+                    {course.moduleCount || course.modules || 0} modules
                   </span>
 
                   <span>
-                    {course.lessonPageCount ||
-                      course.lessonPages
-                        ?.length ||
-                      0}{' '}
+                    {course.lessonPageCount || course.lessonPages?.length || 0}{" "}
                     pages
                   </span>
 
                   <span>
-                    {course.quizzes ||
-                      course.quizCount ||
-                      0}{' '}
-                    quiz items
+                    {course.quizzes || course.quizCount || 0} quiz items
                   </span>
                 </div>
 
@@ -479,37 +368,25 @@ export default function ModuleManagement() {
                     COURSE META
                 ========================== */}
 
-                <div
-                  className={
-                    styles.courseMeta
-                  }
-                >
-                  Date created:{' '}
+                <div className={styles.courseMeta}>
+                  Date created:{" "}
                   {course.createdAt ||
                     course.updatedAt ||
                     course.dateCreated ||
-                    'N/A'}
+                    "N/A"}
                 </div>
 
-                <div
-                  className={
-                    styles.courseMeta
-                  }
-                >
-                  {course.visibility ===
-                  'public'
-                    ? 'Visible to students in Public Courses'
-                    : `Private access: ${
-                        course.code ||
-                        'course code'
-                      }`}
+                <div className={styles.courseMeta}>
+                  {course.status === "published"
+                    ? "Visible to students in Public Courses"
+                    : "Draft — hidden from students"}
                 </div>
 
                 {/* =========================
                     ACTION BUTTONS
                 ========================== */}
 
-                {courseView === 'active' ? (
+                {courseView === "active" ? (
                   <>
                     <button
                       type="button"
@@ -517,9 +394,7 @@ export default function ModuleManagement() {
                       onClick={(event) => {
                         event.stopPropagation();
 
-                        navigate(
-                          `/professor/courses/edit/${course.id}`
-                        );
+                        navigate(`/professor/courses/edit/${course.id}`);
                       }}
                     >
                       Edit
@@ -557,56 +432,30 @@ export default function ModuleManagement() {
             PAGINATION
         ================================== */}
 
-        <div
-          className={
-            styles.paginationWrapper
-          }
-        >
-          <div
-            className={
-              styles.paginationCenter
-            }
-          >
+        <div className={styles.paginationWrapper}>
+          <div className={styles.paginationCenter}>
             <button
               type="button"
               className={styles.navBtn}
-              disabled={
-                currentPage === 1
-              }
-              onClick={() =>
-                setCurrentPage(
-                  (page) =>
-                    Math.max(
-                      1,
-                      page - 1
-                    )
-                )
-              }
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
             >
-              {'<'}
+              {"<"}
             </button>
 
             {Array.from(
               {
                 length: totalPages,
               },
-              (_, index) =>
-                index + 1
+              (_, index) => index + 1,
             ).map((page) => (
               <button
                 key={page}
                 type="button"
-                className={`${
-                  styles.pageBtn
-                } ${
-                  currentPage ===
-                  page
-                    ? styles.pageActive
-                    : ''
+                className={`${styles.pageBtn} ${
+                  currentPage === page ? styles.pageActive : ""
                 }`}
-                onClick={() =>
-                  setCurrentPage(page)
-                }
+                onClick={() => setCurrentPage(page)}
               >
                 {page}
               </button>
@@ -615,21 +464,12 @@ export default function ModuleManagement() {
             <button
               type="button"
               className={styles.navBtn}
-              disabled={
-                currentPage ===
-                totalPages
-              }
+              disabled={currentPage === totalPages}
               onClick={() =>
-                setCurrentPage(
-                  (page) =>
-                    Math.min(
-                      totalPages,
-                      page + 1
-                    )
-                )
+                setCurrentPage((page) => Math.min(totalPages, page + 1))
               }
             >
-              {'>'}
+              {">"}
             </button>
           </div>
 
@@ -637,34 +477,18 @@ export default function ModuleManagement() {
               ROW CONTROL
           ================================ */}
 
-          <div
-            className={
-              styles.rowsControl
-            }
-          >
+          <div className={styles.rowsControl}>
             <span>Show</span>
 
             <select
               value={rowsToShow}
-              onChange={(event) =>
-                setRowsToShow(
-                  Number(
-                    event.target.value
-                  )
-                )
-              }
+              onChange={(event) => setRowsToShow(Number(event.target.value))}
             >
-              <option value={10}>
-                10
-              </option>
+              <option value={10}>10</option>
 
-              <option value={20}>
-                20
-              </option>
+              <option value={20}>20</option>
 
-              <option value={50}>
-                50
-              </option>
+              <option value={50}>50</option>
             </select>
 
             <span>Row</span>
@@ -674,4 +498,3 @@ export default function ModuleManagement() {
     </section>
   );
 }
-

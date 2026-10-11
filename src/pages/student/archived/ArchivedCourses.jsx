@@ -45,10 +45,7 @@ function normalizeArchivedCourse(course) {
     "Untitled course";
 
   const code =
-    course.code ||
-    course.courseCode ||
-    course.course_code ||
-    "COURSE";
+    course.code || course.courseCode || course.course_code || "COURSE";
 
   return {
     ...course,
@@ -142,22 +139,21 @@ export default function ArchivedCourses() {
 
           return (
             getArchivedCourseTitle(firstCourse).localeCompare(
-              getArchivedCourseTitle(secondCourse)
+              getArchivedCourseTitle(secondCourse),
             ) * direction
           );
         }
 
         const direction = dateSort === "Recent" ? -1 : 1;
         const difference =
-          getCourseTimestamp(firstCourse) -
-          getCourseTimestamp(secondCourse);
+          getCourseTimestamp(firstCourse) - getCourseTimestamp(secondCourse);
 
         if (difference !== 0) {
           return difference * direction;
         }
 
         return getArchivedCourseTitle(firstCourse).localeCompare(
-          getArchivedCourseTitle(secondCourse)
+          getArchivedCourseTitle(secondCourse),
         );
       });
   }, [activeSort, archivedCourses, dateSort, searchQuery, titleSort]);
@@ -177,7 +173,7 @@ export default function ArchivedCourses() {
         setArchivedCourses(
           Array.isArray(loadedCourses)
             ? loadedCourses.map(normalizeArchivedCourse)
-            : []
+            : [],
         );
       } catch (error) {
         console.error("Archived courses loading error:", error);
@@ -185,7 +181,7 @@ export default function ArchivedCourses() {
         if (active) {
           setArchivedCourses([]);
           setCoursesErrorMessage(
-            error.message || "Could not load archived classes."
+            error.message || "Could not load archived classes.",
           );
         }
       } finally {
@@ -258,8 +254,7 @@ export default function ArchivedCourses() {
         icon: "error",
         title: "Unable to Join Course",
         text:
-          error?.message ||
-          "Something went wrong while joining the course.",
+          error?.message || "Something went wrong while joining the course.",
         confirmButtonText: "OK",
         confirmButtonColor: "#7FA8D6",
       });
@@ -319,9 +314,7 @@ export default function ArchivedCourses() {
                 Loading archived classes...
               </div>
             ) : coursesErrorMessage ? (
-              <div className="student-empty-state">
-                {coursesErrorMessage}
-              </div>
+              <div className="student-empty-state">{coursesErrorMessage}</div>
             ) : filteredArchivedCourses.length === 0 ? (
               <div className="student-empty-state">
                 {searchQuery.trim()
@@ -334,9 +327,7 @@ export default function ArchivedCourses() {
                   key={course.id || course.code}
                   className="course-folder archived-course-folder"
                 >
-                  <span className="archived-course-badge">
-                    Archived
-                  </span>
+                  <span className="archived-course-badge">Archived</span>
 
                   <div className="course-card-body">
                     <h2>{getArchivedCourseTitle(course)}</h2>
@@ -346,9 +337,7 @@ export default function ArchivedCourses() {
                     <Avatar
                       src={
                         course.professorProfileImage
-                          ? resolveProfileImage(
-                              course.professorProfileImage
-                            )
+                          ? resolveProfileImage(course.professorProfileImage)
                           : undefined
                       }
                       alt={`${course.instructor}'s profile`}
@@ -356,9 +345,7 @@ export default function ArchivedCourses() {
 
                     <div className="archived-course-meta">
                       <span>{course.instructor}</span>
-                      <small>
-                        {getProfessorDepartment(course)}
-                      </small>
+                      <small>{getProfessorDepartment(course)}</small>
                     </div>
 
                     <button

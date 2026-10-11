@@ -1,13 +1,18 @@
-import QuizSourceEvidence from '../../../components/quizmodes/QuizSourceEvidence.jsx';
-import { requestQuizSettings, quizSourceFields, quizGenerationFields, notifyQuizGenerated } from '../../../services/quizGenerationUi.js';
-import { notifyLessonGenerated } from '../../../services/lessonNotifications.js';
+import QuizSourceEvidence from "../../../components/quizmodes/QuizSourceEvidence.jsx";
+import {
+  requestQuizSettings,
+  quizSourceFields,
+  quizGenerationFields,
+  notifyQuizGenerated,
+} from "../../../services/quizGenerationUi.js";
+import { notifyLessonGenerated } from "../../../services/lessonNotifications.js";
 import React, { useEffect, useState } from "react";
 import { NavLink, useNavigate, useParams } from "react-router-dom";
-import { lessonAuthHeaders } from '../../../services/lessonAuth.js';
-import { uploadLessonSource } from '../../../services/lessonRagApi.js';
-import LessonSourceEvidence from '../../../components/lesson/LessonSourceEvidence.jsx';
-import LessonSourceManager from '../../../components/lesson/LessonSourceManager.jsx';
-import LessonFilePicker from '../../../components/lesson/LessonFilePicker.jsx';
+import { lessonAuthHeaders } from "../../../services/lessonAuth.js";
+import { uploadLessonSource } from "../../../services/lessonRagApi.js";
+import LessonSourceEvidence from "../../../components/lesson/LessonSourceEvidence.jsx";
+import LessonSourceManager from "../../../components/lesson/LessonSourceManager.jsx";
+import LessonFilePicker from "../../../components/lesson/LessonFilePicker.jsx";
 import {
   LayoutDashboard,
   Users,
@@ -42,7 +47,7 @@ function parseDeckCards(raw) {
         options: item.options,
         correct_answer: item.correct_answer || item.correctAnswer,
         explanation: String(item.explanation || "").trim(),
-      })
+      }),
     );
   }
 
@@ -61,7 +66,7 @@ function parseDeckCards(raw) {
           options: x.options,
           correct_answer: x.correct_answer || x.correctAnswer,
           explanation: String(x.explanation || "").trim(),
-        })
+        }),
       );
     }
   } catch (error) {
@@ -81,7 +86,7 @@ function serializeQuizItems(items) {
         : [],
       correct_answer: String(item.correct_answer || "").trim(),
       explanation: String(item.explanation || "").trim(),
-    }))
+    })),
   );
 }
 
@@ -127,7 +132,7 @@ function serializeLessonPages(pages) {
       ...page,
       title: String(page.title || "").trim(),
       content: String(page.content || "").trim(),
-    }))
+    })),
   );
 }
 
@@ -181,7 +186,6 @@ function hasTooMuchRepeatedPattern(value) {
   return chunks.length >= 8 && uniqueChunks.size <= 3;
 }
 
-
 function isLikelyGibberish(value) {
   const text = String(value || "")
     .toLowerCase()
@@ -220,28 +224,46 @@ function isInvalidText(value) {
 }
 
 function counterClass(current, limit) {
-  return current >= limit ? `${styles.wordCounter} ${styles.wordCounterFull}` : styles.wordCounter;
+  return current >= limit
+    ? `${styles.wordCounter} ${styles.wordCounterFull}`
+    : styles.wordCounter;
 }
 
 function normalizeQuizItem(item) {
-  if (item.type === 'identification') return { ...item, options: [], correct_answer: String(item.correct_answer || item.correctAnswer || '').trim() };
-  if (item.type === 'true_false') return { ...item, options: ['True', 'False'], correct_answer: String(item.correct_answer || item.correctAnswer || '').trim() };
+  if (item.type === "identification")
+    return {
+      ...item,
+      options: [],
+      correct_answer: String(
+        item.correct_answer || item.correctAnswer || "",
+      ).trim(),
+    };
+  if (item.type === "true_false")
+    return {
+      ...item,
+      options: ["True", "False"],
+      correct_answer: String(
+        item.correct_answer || item.correctAnswer || "",
+      ).trim(),
+    };
 
   const correctAnswer = limitChars(
     String(item.correct_answer || item.correctAnswer || "").trim(),
-    QUIZ_CHAR_LIMIT
+    QUIZ_CHAR_LIMIT,
   );
 
   const options = Array.isArray(item.options)
     ? [...item.options, "", "", ""]
         .slice(0, 4)
-        .map((option) => limitChars(String(option || "").trim(), QUIZ_CHAR_LIMIT))
+        .map((option) =>
+          limitChars(String(option || "").trim(), QUIZ_CHAR_LIMIT),
+        )
     : ["", "", "", ""];
 
   if (
     correctAnswer &&
     !options.some(
-      (option) => option.trim().toLowerCase() === correctAnswer.toLowerCase()
+      (option) => option.trim().toLowerCase() === correctAnswer.toLowerCase(),
     )
   ) {
     const emptyIndex = options.findIndex((option) => !option.trim());
@@ -256,11 +278,16 @@ function normalizeQuizItem(item) {
 }
 
 function getCorrectOptionIndex(item) {
-  const answer = String(item.correct_answer || "").trim().toLowerCase();
+  const answer = String(item.correct_answer || "")
+    .trim()
+    .toLowerCase();
   if (!answer || !Array.isArray(item.options)) return "";
 
   const index = item.options.findIndex(
-    (option) => String(option || "").trim().toLowerCase() === answer
+    (option) =>
+      String(option || "")
+        .trim()
+        .toLowerCase() === answer,
   );
 
   return index === -1 ? "" : String(index);
@@ -279,7 +306,7 @@ export default function EditModule() {
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [bellNotifications, setBellNotifications] = useState([]);
   const notificationCount = bellNotifications.filter(
-    (notif) => notif.status === "unread"
+    (notif) => notif.status === "unread",
   ).length;
 
   const [loading, setLoading] = useState(true);
@@ -315,12 +342,36 @@ export default function EditModule() {
   };
 
   const menuItems = [
-    { label: "Dashboard", path: "/admin/dashboard", icon: <LayoutDashboard size={20} /> },
-    { label: "User Management", path: "/admin/users", icon: <Users size={20} /> },
-    { label: "Module Management", path: "/admin/modules", icon: <Layers size={20} /> },
-    { label: "Decks Management", path: "/admin/decks", icon: <LibraryBig size={20} /> },
-    { label: "Notification Management", path: "/admin/notifications", icon: <i className="bx bx-bell"></i> },
-    { label: "Backup & Restore", path: "/admin/backup-restore", icon: <Database size={20} /> },
+    {
+      label: "Dashboard",
+      path: "/admin/dashboard",
+      icon: <LayoutDashboard size={20} />,
+    },
+    {
+      label: "User Management",
+      path: "/admin/users",
+      icon: <Users size={20} />,
+    },
+    {
+      label: "Module Management",
+      path: "/admin/modules",
+      icon: <Layers size={20} />,
+    },
+    {
+      label: "Decks Management",
+      path: "/admin/decks",
+      icon: <LibraryBig size={20} />,
+    },
+    {
+      label: "Notification Management",
+      path: "/admin/notifications",
+      icon: <i className="bx bx-bell"></i>,
+    },
+    {
+      label: "Backup & Restore",
+      path: "/admin/backup-restore",
+      icon: <Database size={20} />,
+    },
   ];
 
   const handleLogout = (e) => {
@@ -348,7 +399,8 @@ export default function EditModule() {
         full_name: data.admin?.full_name || "",
         email: data.admin?.email || "",
         role: data.admin?.role || "Administrator",
-        profile_image: data.admin?.profile_image || "/images/temporary profile.jpg",
+        profile_image:
+          data.admin?.profile_image || "/images/temporary profile.jpg",
       });
     } catch (err) {
       console.error("Fetch admin error:", err);
@@ -361,7 +413,7 @@ export default function EditModule() {
 
       const res = await fetch(
         `${API_BASE}/getAdminNotifications.php?admin_id=${storedAdmin.id || ""}`,
-        { credentials: "include" }
+        { credentials: "include" },
       );
 
       const data = await res.json();
@@ -446,8 +498,8 @@ export default function EditModule() {
                 mod.lessonContent ||
                 mod.lesson_pages ||
                 mod.lessonPages ||
-                ""
-            )
+                "",
+            ),
           );
           setEditStatus(String(mod.status || "draft").toLowerCase());
           setEditQuizItems(
@@ -455,8 +507,8 @@ export default function EditModule() {
               mod.quiz_contents ||
                 mod.quizModule ||
                 mod.quiz_items ||
-                mod.quizItems
-            )
+                mod.quizItems,
+            ),
           );
         }
       } catch (err) {
@@ -519,13 +571,17 @@ export default function EditModule() {
     if (!confirm.isConfirmed) return;
 
     const formData = new FormData();
-    uploadedFile.forEach(file => formData.append('files', file));
+    uploadedFile.forEach((file) => formData.append("files", file));
     if (!sourceCourseId) {
-      Swal.fire('Course required', 'This module needs a saved course association before indexing a source.', 'info');
+      Swal.fire(
+        "Course required",
+        "This module needs a saved course association before indexing a source.",
+        "info",
+      );
       return;
     }
-    formData.append('course_id', sourceCourseId);
-    formData.append('lesson_id', id);
+    formData.append("course_id", sourceCourseId);
+    formData.append("lesson_id", id);
 
     setExtractingFile(true);
 
@@ -548,8 +604,11 @@ export default function EditModule() {
     });
 
     try {
-      const data = await uploadLessonSource(formData, job => {
-        if (Swal.isVisible()) Swal.update({ text: `Organizing lesson: ${job.progress}% (${job.phase})` });
+      const data = await uploadLessonSource(formData, (job) => {
+        if (Swal.isVisible())
+          Swal.update({
+            text: `Organizing lesson: ${job.progress}% (${job.phase})`,
+          });
       });
 
       Swal.close();
@@ -571,7 +630,7 @@ export default function EditModule() {
       if (pages.length === 0) {
         throw new Error(
           data.message ||
-            "The materials uploaded, but no lesson pages were created. Use files containing selectable text."
+            "The materials uploaded, but no lesson pages were created. Use files containing selectable text.",
         );
       }
 
@@ -582,7 +641,7 @@ export default function EditModule() {
       setEditLessonPages(pages);
       setUploadedFile([]);
 
-      notifyLessonGenerated(pages.length);
+      notifyLessonGenerated(pages);
     } catch (err) {
       console.error("UPLOAD EXTRACT ERROR:", err);
       Swal.close();
@@ -616,7 +675,11 @@ export default function EditModule() {
         lesson_title: editTitle,
         learning_objectives: editLearningObjectives,
         lesson_content: getLessonContentForAI(),
-        ...quizGenerationFields(settings),
+        ...quizGenerationFields(settings, {
+          lessonTitle: editTitle,
+          learningObjectives: editLearningObjectives,
+          lessonContent: getLessonContentForAI(),
+        }),
       }),
     });
 
@@ -651,12 +714,14 @@ export default function EditModule() {
         options: item.options,
         correct_answer: item.correct_answer || item.correctAnswer,
         explanation: String(item.explanation || "").trim(),
-      })
+      }),
     );
   };
 
   const handleGenerateQuizForEdit = async () => {
-    const lastGeneratedAt = Number(localStorage.getItem(GENERATE_COOLDOWN_KEY) || 0);
+    const lastGeneratedAt = Number(
+      localStorage.getItem(GENERATE_COOLDOWN_KEY) || 0,
+    );
     const now = Date.now();
     const timeLeft = GENERATE_COOLDOWN_MS - (now - lastGeneratedAt);
 
@@ -729,7 +794,7 @@ export default function EditModule() {
     return {
       ...item,
       options: [...data.wrong_options.slice(0, 3), item.correct_answer].map(
-        (option) => limitChars(String(option || "").trim(), QUIZ_CHAR_LIMIT)
+        (option) => limitChars(String(option || "").trim(), QUIZ_CHAR_LIMIT),
       ),
       explanation: item.explanation?.trim()
         ? item.explanation
@@ -738,9 +803,15 @@ export default function EditModule() {
   };
 
   const isTrueFalseQuestion = (item) => {
-    const answer = String(item.correct_answer || "").trim().toLowerCase();
+    const answer = String(item.correct_answer || "")
+      .trim()
+      .toLowerCase();
     const options = Array.isArray(item.options)
-      ? item.options.map((opt) => String(opt || "").trim().toLowerCase())
+      ? item.options.map((opt) =>
+          String(opt || "")
+            .trim()
+            .toLowerCase(),
+        )
       : [];
 
     return (
@@ -766,16 +837,14 @@ export default function EditModule() {
       isInvalidText(editSubject) ||
       isInvalidText(editLearningObjectives) ||
       editLessonPages.some(
-        (page) =>
-          isInvalidText(page.title) ||
-          isInvalidText(page.content)
+        (page) => isInvalidText(page.title) || isInvalidText(page.content),
       ) ||
       editQuizItems.some(
         (item) =>
           isInvalidText(item.question) ||
           isInvalidText(item.correct_answer) ||
           isInvalidText(item.explanation) ||
-          item.options.some((option) => isInvalidText(option))
+          item.options.some((option) => isInvalidText(option)),
       );
 
     if (hasInvalidRepeatedText) {
@@ -819,8 +888,7 @@ export default function EditModule() {
 
     const hasLessons = editLessonPages.some(
       (page) =>
-        String(page.title || "").trim() &&
-        String(page.content || "").trim()
+        String(page.title || "").trim() && String(page.content || "").trim(),
     );
 
     const hasQuiz =
@@ -833,7 +901,9 @@ export default function EditModule() {
 
         if (isTrueFalseQuestion(item)) return true;
 
-        return item.options.slice(0, 4).every((opt) => String(opt || "").trim());
+        return item.options
+          .slice(0, 4)
+          .every((opt) => String(opt || "").trim());
       });
 
     const hasRequiredContent =
@@ -952,7 +1022,9 @@ export default function EditModule() {
         const titleInput = document.getElementById("lesson-title");
         const contentInput = document.getElementById("lesson-content");
         const titleCounter = document.getElementById("lesson-title-counter");
-        const contentCounter = document.getElementById("lesson-content-counter");
+        const contentCounter = document.getElementById(
+          "lesson-content-counter",
+        );
 
         const syncCounter = (input, counter, limit) => {
           input.value = limitChars(input.value, limit);
@@ -962,25 +1034,27 @@ export default function EditModule() {
         };
 
         titleInput.addEventListener("input", () =>
-          syncCounter(titleInput, titleCounter, TITLE_CHAR_LIMIT)
+          syncCounter(titleInput, titleCounter, TITLE_CHAR_LIMIT),
         );
 
         contentInput.addEventListener("input", () =>
-          syncCounter(contentInput, contentCounter, LESSON_CONTENT_CHAR_LIMIT)
+          syncCounter(contentInput, contentCounter, LESSON_CONTENT_CHAR_LIMIT),
         );
       },
       preConfirm: () => {
         const title = limitChars(
           document.getElementById("lesson-title")?.value.trim(),
-          TITLE_CHAR_LIMIT
+          TITLE_CHAR_LIMIT,
         );
         const content = limitChars(
           document.getElementById("lesson-content")?.value.trim(),
-          LESSON_CONTENT_CHAR_LIMIT
+          LESSON_CONTENT_CHAR_LIMIT,
         );
 
         if (!title || !content) {
-          Swal.showValidationMessage("Please fill in the page title and content.");
+          Swal.showValidationMessage(
+            "Please fill in the page title and content.",
+          );
           return false;
         }
 
@@ -1002,8 +1076,23 @@ export default function EditModule() {
 
   const updateLessonPage = (index, field, value) => {
     setEditLessonPages((prev) =>
-      prev.map((page, i) => (i === index ? { ...page, [field]: value,
-        ...(field === 'content' ? { grounding: { ...page.grounding, model_review_passed: false, human_review_required: true } } : {}) } : page))
+      prev.map((page, i) =>
+        i === index
+          ? {
+              ...page,
+              [field]: value,
+              ...(field === "content"
+                ? {
+                    grounding: {
+                      ...page.grounding,
+                      model_review_passed: false,
+                      human_review_required: true,
+                    },
+                  }
+                : {}),
+            }
+          : page,
+      ),
     );
   };
 
@@ -1011,9 +1100,9 @@ export default function EditModule() {
     setEditLessonPages((prev) => prev.filter((_, i) => i !== index));
   };
 
-const addEditQuizItem = async () => {
-  const { value } = await Swal.fire({
-    html: `
+  const addEditQuizItem = async () => {
+    const { value } = await Swal.fire({
+      html: `
       <div class="${styles.quizGenerateModal}">
         <div class="${styles.quizGenerateHeader}">
           <span>Add Quiz Item</span>
@@ -1062,117 +1151,129 @@ const addEditQuizItem = async () => {
         </div>
       </div>
     `,
-    showCancelButton: true,
-    buttonsStyling: false,
-    confirmButtonText: "Add Quiz",
-    cancelButtonText: "Cancel",
-    customClass: {
-      popup: styles.quizGeneratePopup,
-      htmlContainer: styles.quizGenerateHtml,
-      actions: styles.quizGenerateActions,
-      confirmButton: styles.quizGenerateConfirm,
-      cancelButton: styles.quizGenerateCancel,
-    },
-    didOpen: () => {
-      const questionInput = document.getElementById("quiz-question");
-      const questionCounter = document.getElementById("question-counter");
-      const explanationInput = document.getElementById("quiz-explanation");
-      const explanationCounter = document.getElementById("explanation-counter");
-      const optionInputs = [1, 2, 3, 4].map((num) =>
-        document.getElementById(`quiz-option-${num}`)
-      );
-      const optionCounters = [1, 2, 3, 4].map((num) =>
-        document.getElementById(`option-${num}-counter`)
-      );
-
-      const updateQuizCounter = (input, counter) => {
-        input.value = limitChars(input.value, QUIZ_CHAR_LIMIT);
-
-        const count = getCharCount(input.value);
-        counter.textContent = `${count}/${QUIZ_CHAR_LIMIT} characters`;
-        counter.style.color = count >= QUIZ_CHAR_LIMIT ? "#b0478f" : "#666";
-      };
-
-      questionInput.addEventListener("input", () =>
-        updateQuizCounter(questionInput, questionCounter)
-      );
-
-      optionInputs.forEach((input, index) => {
-        input.addEventListener("input", () =>
-          updateQuizCounter(input, optionCounters[index])
+      showCancelButton: true,
+      buttonsStyling: false,
+      confirmButtonText: "Add Quiz",
+      cancelButtonText: "Cancel",
+      customClass: {
+        popup: styles.quizGeneratePopup,
+        htmlContainer: styles.quizGenerateHtml,
+        actions: styles.quizGenerateActions,
+        confirmButton: styles.quizGenerateConfirm,
+        cancelButton: styles.quizGenerateCancel,
+      },
+      didOpen: () => {
+        const questionInput = document.getElementById("quiz-question");
+        const questionCounter = document.getElementById("question-counter");
+        const explanationInput = document.getElementById("quiz-explanation");
+        const explanationCounter = document.getElementById(
+          "explanation-counter",
         );
-      });
-
-      explanationInput.addEventListener("input", () => {
-        explanationInput.value = limitChars(
-          explanationInput.value,
-          EXPLANATION_CHAR_LIMIT
+        const optionInputs = [1, 2, 3, 4].map((num) =>
+          document.getElementById(`quiz-option-${num}`),
+        );
+        const optionCounters = [1, 2, 3, 4].map((num) =>
+          document.getElementById(`option-${num}-counter`),
         );
 
-        const count = getCharCount(explanationInput.value);
-        explanationCounter.textContent = `${count}/${EXPLANATION_CHAR_LIMIT} characters`;
-        explanationCounter.style.color =
-          count >= EXPLANATION_CHAR_LIMIT ? "#b0478f" : "#666";
-      });
-    },
-    preConfirm: () => {
-      const question = limitChars(
-        document.getElementById("quiz-question")?.value || "",
-        QUIZ_CHAR_LIMIT
-      ).trim();
+        const updateQuizCounter = (input, counter) => {
+          input.value = limitChars(input.value, QUIZ_CHAR_LIMIT);
 
-      const options = [1, 2, 3, 4].map((num) =>
-        limitChars(
-          document.getElementById(`quiz-option-${num}`)?.value || "",
-          QUIZ_CHAR_LIMIT
-        ).trim()
-      );
+          const count = getCharCount(input.value);
+          counter.textContent = `${count}/${QUIZ_CHAR_LIMIT} characters`;
+          counter.style.color = count >= QUIZ_CHAR_LIMIT ? "#b0478f" : "#666";
+        };
 
-      const [option1, option2, option3, option4] = options;
-      const answerValue = document.getElementById("quiz-answer")?.value || "";
-      const answerIndex = Number(answerValue);
-      const correct_answer = answerValue !== "" ? options[answerIndex] || "" : "";
-
-      const explanation = limitChars(
-        document.getElementById("quiz-explanation")?.value || "",
-        EXPLANATION_CHAR_LIMIT
-      ).trim();
-
-      if (!question || !option1 || !option2 || !option3 || !option4 || !correct_answer) {
-        Swal.showValidationMessage(
-          "Please fill in the question, 4 options, and select the correct answer."
+        questionInput.addEventListener("input", () =>
+          updateQuizCounter(questionInput, questionCounter),
         );
-        return false;
-      }
 
-      return {
-        question,
-        options,
-        correct_answer,
-        explanation,
-      };
-    },
-  });
+        optionInputs.forEach((input, index) => {
+          input.addEventListener("input", () =>
+            updateQuizCounter(input, optionCounters[index]),
+          );
+        });
 
-  if (!value) return;
+        explanationInput.addEventListener("input", () => {
+          explanationInput.value = limitChars(
+            explanationInput.value,
+            EXPLANATION_CHAR_LIMIT,
+          );
 
-  setEditQuizItems((prev) => [
-    ...prev,
-    normalizeQuizItem({
-      id: prev.length + 1,
-      question: value.question,
-      options: value.options,
-      correct_answer: value.correct_answer,
-      explanation: value.explanation,
-    }),
-  ]);
-};
+          const count = getCharCount(explanationInput.value);
+          explanationCounter.textContent = `${count}/${EXPLANATION_CHAR_LIMIT} characters`;
+          explanationCounter.style.color =
+            count >= EXPLANATION_CHAR_LIMIT ? "#b0478f" : "#666";
+        });
+      },
+      preConfirm: () => {
+        const question = limitChars(
+          document.getElementById("quiz-question")?.value || "",
+          QUIZ_CHAR_LIMIT,
+        ).trim();
+
+        const options = [1, 2, 3, 4].map((num) =>
+          limitChars(
+            document.getElementById(`quiz-option-${num}`)?.value || "",
+            QUIZ_CHAR_LIMIT,
+          ).trim(),
+        );
+
+        const [option1, option2, option3, option4] = options;
+        const answerValue = document.getElementById("quiz-answer")?.value || "";
+        const answerIndex = Number(answerValue);
+        const correct_answer =
+          answerValue !== "" ? options[answerIndex] || "" : "";
+
+        const explanation = limitChars(
+          document.getElementById("quiz-explanation")?.value || "",
+          EXPLANATION_CHAR_LIMIT,
+        ).trim();
+
+        if (
+          !question ||
+          !option1 ||
+          !option2 ||
+          !option3 ||
+          !option4 ||
+          !correct_answer
+        ) {
+          Swal.showValidationMessage(
+            "Please fill in the question, 4 options, and select the correct answer.",
+          );
+          return false;
+        }
+
+        return {
+          question,
+          options,
+          correct_answer,
+          explanation,
+        };
+      },
+    });
+
+    if (!value) return;
+
+    setEditQuizItems((prev) => [
+      ...prev,
+      normalizeQuizItem({
+        id: prev.length + 1,
+        question: value.question,
+        options: value.options,
+        correct_answer: value.correct_answer,
+        explanation: value.explanation,
+      }),
+    ]);
+  };
 
   const updateEditQuizQuestion = (index, value) => {
     setEditQuizItems((prev) =>
       prev.map((item, i) =>
-        i === index ? { ...item, question: limitChars(value, QUIZ_CHAR_LIMIT) } : item
-      )
+        i === index
+          ? { ...item, question: limitChars(value, QUIZ_CHAR_LIMIT) }
+          : item,
+      ),
     );
   };
 
@@ -1196,7 +1297,7 @@ const addEditQuizItem = async () => {
               ? updatedOptions[optionIndex]
               : item.correct_answer,
         };
-      })
+      }),
     );
   };
 
@@ -1207,21 +1308,22 @@ const addEditQuizItem = async () => {
 
         return {
           ...item,
-          correct_answer: optionIndex === "" ? "" : item.options[Number(optionIndex)] || "",
+          correct_answer:
+            optionIndex === "" ? "" : item.options[Number(optionIndex)] || "",
         };
-      })
+      }),
     );
   };
 
-const updateEditExplanation = (index, value) => {
-  setEditQuizItems((prev) =>
-    prev.map((item, i) =>
-      i === index
-        ? { ...item, explanation: limitChars(value, EXPLANATION_CHAR_LIMIT) }
-        : item
-    )
-  );
-};
+  const updateEditExplanation = (index, value) => {
+    setEditQuizItems((prev) =>
+      prev.map((item, i) =>
+        i === index
+          ? { ...item, explanation: limitChars(value, EXPLANATION_CHAR_LIMIT) }
+          : item,
+      ),
+    );
+  };
   const removeEditQuizItem = (index) => {
     setEditQuizItems((prev) => prev.filter((_, i) => i !== index));
   };
@@ -1236,27 +1338,27 @@ const updateEditExplanation = (index, value) => {
     );
   }
 
- return (
-  <div className={styles.gridContainer}>
-    <AdminSidebar
-      isCollapsed={isCollapsed}
-      setIsCollapsed={setIsCollapsed}
-    />
+  return (
+    <div className={styles.gridContainer}>
+      <AdminSidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
 
-    <AdminHeader
-      admin={admin}
-      searchQuery={searchQuery}
-      setSearchQuery={setSearchQuery}
-      notificationOpen={notificationOpen}
-      setNotificationOpen={setNotificationOpen}
-      bellNotifications={bellNotifications}
-      notificationCount={notificationCount}
-      handleMarkAllAsRead={handleMarkAllAsRead}
-    />
+      <AdminHeader
+        admin={admin}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        notificationOpen={notificationOpen}
+        setNotificationOpen={setNotificationOpen}
+        bellNotifications={bellNotifications}
+        notificationCount={notificationCount}
+        handleMarkAllAsRead={handleMarkAllAsRead}
+      />
       <main className={styles.main}>
         <div className={styles.pageHeader}>
           <h1>Edit Module</h1>
-          <p className={styles.pageHeaderText}>Build the course using modules. Each module can contain lesson pages and its own quiz.</p>
+          <p className={styles.pageHeaderText}>
+            Build the course using modules. Each module can contain lesson pages
+            and its own quiz.
+          </p>
         </div>
 
         <div className={styles.formCard}>
@@ -1266,15 +1368,20 @@ const updateEditExplanation = (index, value) => {
                 Module Title <span className={styles.required}>*Required</span>
               </label>
 
-             <input
-              className={styles.popupInput}
-              value={editTitle}
-              onChange={handleLimitedChange(setEditTitle, TITLE_CHAR_LIMIT)}
-              placeholder="Enter module title"
-            />
-            <div className={counterClass(getCharCount(editTitle), TITLE_CHAR_LIMIT)}>
-              {getCharCount(editTitle)}/{TITLE_CHAR_LIMIT} characters
-            </div>
+              <input
+                className={styles.popupInput}
+                value={editTitle}
+                onChange={handleLimitedChange(setEditTitle, TITLE_CHAR_LIMIT)}
+                placeholder="Enter module title"
+              />
+              <div
+                className={counterClass(
+                  getCharCount(editTitle),
+                  TITLE_CHAR_LIMIT,
+                )}
+              >
+                {getCharCount(editTitle)}/{TITLE_CHAR_LIMIT} characters
+              </div>
             </div>
 
             <div className={styles.popupField}>
@@ -1293,18 +1400,24 @@ const updateEditExplanation = (index, value) => {
 
           <div className={styles.popupSection}>
             <label className={styles.popupLabel}>
-              Module Description <span className={styles.required}>*Required</span>
+              Module Description{" "}
+              <span className={styles.required}>*Required</span>
             </label>
 
-       <textarea
-  className={`${styles.popupTextarea} ${styles.popupSmallBox}`}
-  value={editDesc}
-  onChange={handleLimitedChange(setEditDesc, LONG_TEXT_CHAR_LIMIT)}
-  placeholder="Enter module description"
-/>
-<div className={counterClass(getCharCount(editDesc), LONG_TEXT_CHAR_LIMIT)}>
-  {getCharCount(editDesc)}/{LONG_TEXT_CHAR_LIMIT} characters
-</div>
+            <textarea
+              className={`${styles.popupTextarea} ${styles.popupSmallBox}`}
+              value={editDesc}
+              onChange={handleLimitedChange(setEditDesc, LONG_TEXT_CHAR_LIMIT)}
+              placeholder="Enter module description"
+            />
+            <div
+              className={counterClass(
+                getCharCount(editDesc),
+                LONG_TEXT_CHAR_LIMIT,
+              )}
+            >
+              {getCharCount(editDesc)}/{LONG_TEXT_CHAR_LIMIT} characters
+            </div>
           </div>
 
           <div className={styles.popupSection}>
@@ -1312,22 +1425,34 @@ const updateEditExplanation = (index, value) => {
               Subject <span className={styles.required}>*Required</span>
             </label>
 
-      <input
-      className={styles.popupInput}
-    value={editSubject}
-    onChange={handleLimitedChange(setEditSubject, TITLE_CHAR_LIMIT)}
-    placeholder="Enter subject"
-  />
-  <div className={counterClass(getCharCount(editSubject), TITLE_CHAR_LIMIT)}>
-    {getCharCount(editSubject)}/{TITLE_CHAR_LIMIT} characters
-  </div>
+            <input
+              className={styles.popupInput}
+              value={editSubject}
+              onChange={handleLimitedChange(setEditSubject, TITLE_CHAR_LIMIT)}
+              placeholder="Enter subject"
+            />
+            <div
+              className={counterClass(
+                getCharCount(editSubject),
+                TITLE_CHAR_LIMIT,
+              )}
+            >
+              {getCharCount(editSubject)}/{TITLE_CHAR_LIMIT} characters
+            </div>
           </div>
 
           <div className={styles.popupSection}>
-            <label className={styles.popupLabel}>Generate Module from Material</label>
+            <label className={styles.popupLabel}>
+              Generate Module from Material
+            </label>
 
             <div className={styles.uploadRow}>
-              <LessonFilePicker files={uploadedFile} disabled={extractingFile} buttonClassName={styles.customFileBtn} onChange={setUploadedFile} />
+              <LessonFilePicker
+                files={uploadedFile}
+                disabled={extractingFile}
+                buttonClassName={styles.customFileBtn}
+                onChange={setUploadedFile}
+              />
 
               <button
                 type="button"
@@ -1338,27 +1463,48 @@ const updateEditExplanation = (index, value) => {
                 {extractingFile ? "Generating..." : "Generate Module"}
               </button>
             </div>
-            <LessonSourceManager courseId={sourceCourseId} lessonId={Number(id)} onGenerated={result => {
-              setEditTitle(result.module_title); setEditDesc(result.description); setEditSubject(result.subject);
-              setEditLearningObjectives(result.learning_objectives);
-              setEditLessonPages(result.lesson_pages.map((page, index) => ({ ...page, id: index + 1 })));
-            }} />
+            <LessonSourceManager
+              courseId={sourceCourseId}
+              lessonId={Number(id)}
+              onGenerated={(result) => {
+                setEditTitle(result.module_title);
+                setEditDesc(result.description);
+                setEditSubject(result.subject);
+                setEditLearningObjectives(result.learning_objectives);
+                setEditLessonPages(
+                  result.lesson_pages.map((page, index) => ({
+                    ...page,
+                    id: index + 1,
+                  })),
+                );
+              }}
+            />
           </div>
 
           <div className={styles.popupSection}>
             <label className={styles.popupLabel}>
-              Learning Objectives <span className={styles.required}>*Required</span>
+              Learning Objectives{" "}
+              <span className={styles.required}>*Required</span>
             </label>
 
- <textarea
-  className={`${styles.popupTextarea} ${styles.popupSmallBox}`}
-  value={editLearningObjectives}
-  onChange={handleLimitedChange(setEditLearningObjectives, LONG_TEXT_CHAR_LIMIT)}
-  placeholder="Enter learning objectives"
-/>
-<div className={counterClass(getCharCount(editLearningObjectives), LONG_TEXT_CHAR_LIMIT)}>
-  {getCharCount(editLearningObjectives)}/{LONG_TEXT_CHAR_LIMIT} characters
-</div>
+            <textarea
+              className={`${styles.popupTextarea} ${styles.popupSmallBox}`}
+              value={editLearningObjectives}
+              onChange={handleLimitedChange(
+                setEditLearningObjectives,
+                LONG_TEXT_CHAR_LIMIT,
+              )}
+              placeholder="Enter learning objectives"
+            />
+            <div
+              className={counterClass(
+                getCharCount(editLearningObjectives),
+                LONG_TEXT_CHAR_LIMIT,
+              )}
+            >
+              {getCharCount(editLearningObjectives)}/{LONG_TEXT_CHAR_LIMIT}{" "}
+              characters
+            </div>
           </div>
 
           <div className={styles.popupSection}>
@@ -1398,21 +1544,40 @@ const updateEditExplanation = (index, value) => {
                   <input
                     className={`${styles.popupInput} ${styles.lessonPageText}`}
                     value={page.title}
-                    onChange={handleLimitedLessonChange(index, "title", TITLE_CHAR_LIMIT)}
+                    onChange={handleLimitedLessonChange(
+                      index,
+                      "title",
+                      TITLE_CHAR_LIMIT,
+                    )}
                     placeholder="Page title"
                   />
-                  <div className={counterClass(getCharCount(page.title), TITLE_CHAR_LIMIT)}>
+                  <div
+                    className={counterClass(
+                      getCharCount(page.title),
+                      TITLE_CHAR_LIMIT,
+                    )}
+                  >
                     {getCharCount(page.title)}/{TITLE_CHAR_LIMIT} characters
                   </div>
 
                   <textarea
                     className={`${styles.popupTextarea} ${styles.popupLargeBox} ${styles.lessonPageText}`}
                     value={page.content}
-                   onChange={handleLimitedLessonChange(index, "content", LESSON_CONTENT_CHAR_LIMIT)}
+                    onChange={handleLimitedLessonChange(
+                      index,
+                      "content",
+                      LESSON_CONTENT_CHAR_LIMIT,
+                    )}
                     placeholder="Page content"
                   />
-                  <div className={counterClass(getCharCount(page.content), LESSON_CONTENT_CHAR_LIMIT)}>
-                    {getCharCount(page.content)}/{LESSON_CONTENT_CHAR_LIMIT} characters
+                  <div
+                    className={counterClass(
+                      getCharCount(page.content),
+                      LESSON_CONTENT_CHAR_LIMIT,
+                    )}
+                  >
+                    {getCharCount(page.content)}/{LESSON_CONTENT_CHAR_LIMIT}{" "}
+                    characters
                   </div>
                   <LessonSourceEvidence page={page} />
                 </div>
@@ -1468,10 +1633,17 @@ const updateEditExplanation = (index, value) => {
                   <input
                     className={styles.popupInput}
                     value={item.question}
-                    onChange={(e) => updateEditQuizQuestion(index, e.target.value)}
+                    onChange={(e) =>
+                      updateEditQuizQuestion(index, e.target.value)
+                    }
                     placeholder="Question"
                   />
-                  <div className={counterClass(getCharCount(item.question), QUIZ_CHAR_LIMIT)}>
+                  <div
+                    className={counterClass(
+                      getCharCount(item.question),
+                      QUIZ_CHAR_LIMIT,
+                    )}
+                  >
                     {getCharCount(item.question)}/{QUIZ_CHAR_LIMIT} characters
                   </div>
 
@@ -1482,47 +1654,83 @@ const updateEditExplanation = (index, value) => {
                         className={styles.popupInput}
                         value={option}
                         onChange={(e) =>
-                          updateEditQuizOption(index, optionIndex, e.target.value)
+                          updateEditQuizOption(
+                            index,
+                            optionIndex,
+                            e.target.value,
+                          )
                         }
                         placeholder={`Option ${optionIndex + 1}`}
                       />
                     ))}
                   </div>
 
-                  {item.type === 'identification' ? <input className={styles.popupInput} value={item.correct_answer}
-                    aria-label="Correct identification answer" placeholder="Correct identification answer" maxLength={150}
-                    onChange={event => setEditQuizItems(current => current.map((q, i) => i === index ? { ...q, correct_answer: event.target.value } : q))} /> : (
-                  <select
-                    className={styles.popupInput}
-                    value={getCorrectOptionIndex(item)}
-                    onChange={(e) => updateEditCorrectAnswer(index, e.target.value)}
+                  {item.type === "identification" ? (
+                    <input
+                      className={styles.popupInput}
+                      value={item.correct_answer}
+                      aria-label="Correct identification answer"
+                      placeholder="Correct identification answer"
+                      maxLength={150}
+                      onChange={(event) =>
+                        setEditQuizItems((current) =>
+                          current.map((q, i) =>
+                            i === index
+                              ? { ...q, correct_answer: event.target.value }
+                              : q,
+                          ),
+                        )
+                      }
+                    />
+                  ) : (
+                    <select
+                      className={styles.popupInput}
+                      value={getCorrectOptionIndex(item)}
+                      onChange={(e) =>
+                        updateEditCorrectAnswer(index, e.target.value)
+                      }
+                    >
+                      <option value="">Select correct answer</option>
+                      {item.options.slice(0, 4).map((option, optionIndex) => (
+                        <option
+                          key={optionIndex}
+                          value={optionIndex}
+                          disabled={!String(option || "").trim()}
+                        >
+                          Option {optionIndex + 1}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                  <div
+                    className={counterClass(
+                      getCharCount(item.correct_answer),
+                      QUIZ_CHAR_LIMIT,
+                    )}
                   >
-                    <option value="">Select correct answer</option>
-                    {item.options.slice(0, 4).map((option, optionIndex) => (
-                      <option
-                        key={optionIndex}
-                        value={optionIndex}
-                        disabled={!String(option || "").trim()}
-                      >
-                        Option {optionIndex + 1}
-                      </option>
-                    ))}
-                  </select>)}
-                  <div className={counterClass(getCharCount(item.correct_answer), QUIZ_CHAR_LIMIT)}>
-                    {getCharCount(item.correct_answer)}/{QUIZ_CHAR_LIMIT} characters
+                    {getCharCount(item.correct_answer)}/{QUIZ_CHAR_LIMIT}{" "}
+                    characters
                   </div>
 
-             <textarea
-  className={`${styles.popupTextarea} ${styles.popupAnswerBox}`}
-  value={item.explanation}
-  onChange={(e) => updateEditExplanation(index, e.target.value)}
-  placeholder="Explanation"
-/>
-<QuizSourceEvidence question={item} />
+                  <textarea
+                    className={`${styles.popupTextarea} ${styles.popupAnswerBox}`}
+                    value={item.explanation}
+                    onChange={(e) =>
+                      updateEditExplanation(index, e.target.value)
+                    }
+                    placeholder="Explanation"
+                  />
+                  <QuizSourceEvidence question={item} />
 
-<div className={counterClass(getCharCount(item.explanation), EXPLANATION_CHAR_LIMIT)}>
-  {getCharCount(item.explanation)}/{EXPLANATION_CHAR_LIMIT} characters
-</div>
+                  <div
+                    className={counterClass(
+                      getCharCount(item.explanation),
+                      EXPLANATION_CHAR_LIMIT,
+                    )}
+                  >
+                    {getCharCount(item.explanation)}/{EXPLANATION_CHAR_LIMIT}{" "}
+                    characters
+                  </div>
                 </div>
               ))
             )}
@@ -1537,7 +1745,11 @@ const updateEditExplanation = (index, value) => {
               Cancel
             </button>
 
-            <button className={styles.popupSaveBtn} type="button" onClick={saveEdit}>
+            <button
+              className={styles.popupSaveBtn}
+              type="button"
+              onClick={saveEdit}
+            >
               Save
             </button>
           </div>

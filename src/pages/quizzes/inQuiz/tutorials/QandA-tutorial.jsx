@@ -21,11 +21,7 @@ const slidesData = [
   },
 ];
 
-const qnaFrames = [
-  "/images/qna.png",
-  "/images/qna2.png",
-  "/images/qna3.png",
-];
+const qnaFrames = ["/images/qna.png", "/images/qna2.png", "/images/qna3.png"];
 
 export default function QandATutorial() {
   const navigate = useNavigate();
@@ -136,9 +132,7 @@ export default function QandATutorial() {
                 <p className={styles.question}>{slide.question}</p>
 
                 {slide.type === "input" && (
-                  <div className={styles.inputPreview}>
-                    {slide.placeholder}
-                  </div>
+                  <div className={styles.inputPreview}>{slide.placeholder}</div>
                 )}
 
                 {slide.type === "correct" && (

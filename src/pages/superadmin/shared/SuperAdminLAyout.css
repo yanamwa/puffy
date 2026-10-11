@@ -6,8 +6,7 @@
     var(--superadmin-sidebar-expanded)
     minmax(0, 1fr);
 
-  transition:
-    grid-template-columns 220ms ease;
+  transition: grid-template-columns 220ms ease;
 }
 
 .superadmin-layout.superadmin-sidebar-collapsed {

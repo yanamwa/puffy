@@ -1,4 +1,9 @@
-import { readAccountQuizResult, saveAccountQuizResult } from "../../utils/quizStorage.js";
+const attemptSaves = new Map();
+import { lessonAuthHeaders } from "../../services/lessonAuth.js";
+import {
+  readAccountQuizResult,
+  saveAccountQuizResult,
+} from "../../utils/quizStorage.js";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { API_BASE } from "../../config.js";
@@ -95,7 +100,7 @@ const getAdaptiveRecommendation = (
   topic,
   confidence,
   quizMode,
-  missedConcepts = []
+  missedConcepts = [],
 ) => {
   const focusText =
     missedConcepts.length > 0
@@ -120,12 +125,12 @@ const getAdaptiveRecommendation = (
 
   if (confidence < 80) {
     return `Review your mistakes in ${topic} and practice again using ${getQuizTypeLabel(
-      quizMode
+      quizMode,
     )}.${focusText}`;
   }
 
   return `Continue practicing with ${getQuizTypeLabel(
-    quizMode
+    quizMode,
   )} to improve mastery.`;
 };
 
@@ -136,7 +141,7 @@ const getFocusedConcept = (answer) => {
       answer.category ||
       answer.subject ||
       answer.topic ||
-      ""
+      "",
   ).trim();
 
   if (explicitConcept) return explicitConcept;
@@ -156,8 +161,7 @@ const getFocusedConcept = (answer) => {
 
   if (
     questionLower.includes("aguinaldo") &&
-    (questionLower.includes("decree") ||
-      questionLower.includes("proclamation"))
+    (questionLower.includes("decree") || questionLower.includes("proclamation"))
   ) {
     return "Significance of Aguinaldo's decree";
   }
@@ -325,14 +329,15 @@ export default function LessonResult() {
     try {
       const query = new URLSearchParams({
         source: savedResults.source || (deckId ? "deck" : "lesson"),
-        lessonId: savedResults.lessonId || savedResults.lesson_id || lessonId || "",
+        lessonId:
+          savedResults.lessonId || savedResults.lesson_id || lessonId || "",
         deckId: savedResults.deckId || savedResults.deck_id || deckId || "",
         quizMode: savedResults.quizMode || savedResults.mode || "",
       });
 
       const res = await fetch(
         `${API_BASE}/getQuizAttempts.php?${query.toString()}`,
-        { credentials: "include" }
+        { credentials: "include", headers: lessonAuthHeaders() },
       );
 
       const data = await res.json();
@@ -365,6 +370,11 @@ export default function LessonResult() {
     ];
     const storedResult = resultKeys
       .map((key) => ({ key, data: parseStorage(key) }))
+      .sort(
+        (first, second) =>
+          Number(second.data?.completedAt || 0) -
+          Number(first.data?.completedAt || 0),
+      )
       .find(({ data }) => data);
     const savedResults = storedResult?.data;
 
@@ -372,19 +382,14 @@ export default function LessonResult() {
       const savedAnswers = Array.isArray(savedResults.answers)
         ? savedResults.answers
         : [];
-      const detectedSource = savedResults.source || (deckId ? "deck" : "lesson");
+      const detectedSource =
+        savedResults.source || (deckId ? "deck" : "lesson");
       const detectedQuizMode =
         savedResults.quizMode || savedResults.mode || "quiz";
       const detectedLessonId =
-        savedResults.lessonId ||
-        savedResults.lesson_id ||
-        lessonId ||
-        null;
+        savedResults.lessonId || savedResults.lesson_id || lessonId || null;
       const detectedDeckId =
-        savedResults.deckId ||
-        savedResults.deck_id ||
-        deckId ||
-        null;
+        savedResults.deckId || savedResults.deck_id || deckId || null;
       const detectedCourseId =
         savedResults.courseId ||
         savedResults.course_id ||
@@ -393,22 +398,22 @@ export default function LessonResult() {
       const detectedModuleIndex = toOptionalNumber(
         savedResults.moduleIndex ??
           savedResults.module_index ??
-          savedResults.scope?.moduleIndex
+          savedResults.scope?.moduleIndex,
       );
       const detectedModuleNumber = toOptionalNumber(
         savedResults.moduleNumber ??
           savedResults.module_number ??
-          savedResults.scope?.moduleNumber
+          savedResults.scope?.moduleNumber,
       );
       const detectedModuleCount = toOptionalNumber(
         savedResults.moduleCount ??
           savedResults.module_count ??
-          savedResults.scope?.moduleCount
+          savedResults.scope?.moduleCount,
       );
       const detectedNextModuleIndex = toOptionalNumber(
         savedResults.nextModuleIndex ??
           savedResults.next_module_index ??
-          savedResults.scope?.nextModuleIndex
+          savedResults.scope?.nextModuleIndex,
       );
 
       setResults({
@@ -418,7 +423,9 @@ export default function LessonResult() {
       });
 
       setSource(detectedSource);
-      setResultDeckId(savedResults.deckId || savedResults.deck_id || deckId || null);
+      setResultDeckId(
+        savedResults.deckId || savedResults.deck_id || deckId || null,
+      );
       setResultCourseId(detectedCourseId);
       setModuleNavigation({
         moduleIndex: Number.isInteger(detectedModuleIndex)
@@ -448,7 +455,9 @@ export default function LessonResult() {
         if (savedResults.savedAttemptId || savedResults.attemptId) return;
 
         try {
-          const attemptTotal = Number(savedResults.total || savedAnswers.length || 0);
+          const attemptTotal = Number(
+            savedResults.total || savedAnswers.length || 0,
+          );
 
           if (attemptTotal <= 0) return;
 
@@ -457,6 +466,7 @@ export default function LessonResult() {
             credentials: "include",
             headers: {
               "Content-Type": "application/json",
+              ...lessonAuthHeaders(),
             },
             body: JSON.stringify({
               user_id: getStoredUserId(),
@@ -465,20 +475,44 @@ export default function LessonResult() {
               deck_id: detectedDeckId,
               course_id: detectedCourseId,
               quiz_mode: detectedQuizMode,
-              assessment_type: /main/i.test(String(savedResults.scopeType || savedResults.scope?.scopeType || detectedSource)) ? 'main' : 'practice',
+              assessment_type:
+                detectedQuizMode === "lesson"
+                  ? "recap"
+                  : /main/i.test(
+                        String(
+                          savedResults.scopeType ||
+                            savedResults.scope?.scopeType ||
+                            detectedSource,
+                        ),
+                      )
+                    ? "main"
+                    : "practice",
               module_index: detectedModuleIndex,
-              answers: savedAnswers.map(answer => {
+              answers: savedAnswers.map((answer) => {
                 let sourceItems = [];
-                try { sourceItems = JSON.parse(localStorage.getItem('practiceQuizzes') || '[]'); } catch {}
-                const original = Array.isArray(sourceItems) ? sourceItems.find(item => (item.question || item.q) === answer.question) : null;
-                return { ...answer, topic: answer.topic || original?.topic,
-                  cognitive_level: answer.cognitive_level || original?.cognitive_level,
-                  thinking_skill: answer.thinking_skill || original?.thinking_skill };
+                try {
+                  sourceItems = JSON.parse(
+                    localStorage.getItem("practiceQuizzes") || "[]",
+                  );
+                } catch {}
+                const original = Array.isArray(sourceItems)
+                  ? sourceItems.find(
+                      (item) => (item.question || item.q) === answer.question,
+                    )
+                  : null;
+                return {
+                  ...answer,
+                  topic: answer.topic || original?.topic,
+                  cognitive_level:
+                    answer.cognitive_level || original?.cognitive_level,
+                  thinking_skill:
+                    answer.thinking_skill || original?.thinking_skill,
+                };
               }),
               score: Number(savedResults.score || 0),
               total: attemptTotal,
               time_spent: Number(
-                savedResults.timeSpent || savedResults.time_spent || 0
+                savedResults.timeSpent || savedResults.time_spent || 0,
               ),
             }),
           });
@@ -494,18 +528,33 @@ export default function LessonResult() {
               JSON.stringify({
                 ...savedResults,
                 savedAttemptId: data.attemptId,
-              })
+              }),
             );
           }
         } catch (error) {
           console.error("Save quiz attempt error:", error);
+          throw error;
         }
       };
 
-      persistQuizAttempt().finally(() => fetchAttempts(savedResults));
+      const saveKey = `${getStoredUserId()}:${savedResults.sessionId || JSON.stringify(savedResults)}`;
+      if (!attemptSaves.has(saveKey))
+        attemptSaves.set(saveKey, persistQuizAttempt());
+      attemptSaves
+        .get(saveKey)
+        .then(() => fetchAttempts(savedResults))
+        .catch(() => {
+          attemptSaves.delete(saveKey);
+          Swal.fire({
+            icon: "error",
+            title: "Result not saved",
+            text: "Your quiz result could not be recorded. Refresh this result page to retry.",
+            confirmButtonText: "OK",
+          });
+        });
       syncDeckCardMemorizationFromAnswers(
         detectedSource === "deck",
-        savedAnswers
+        savedAnswers,
       );
 
       if (savedAnswers.length > 0) {
@@ -515,19 +564,19 @@ export default function LessonResult() {
         const generateFeedback = async () => {
           try {
             let resolvedTitle = String(
-                savedResults.contentTitle ||
+              savedResults.contentTitle ||
                 savedResults.scopeTitle ||
                 savedResults.scope_title ||
                 savedResults.lessonTitle ||
                 savedResults.deckTitle ||
                 savedResults.title ||
-                ""
+                "",
             ).trim();
 
             if (!resolvedTitle && detectedSource === "deck" && detectedDeckId) {
               const titleResponse = await fetch(
                 `${API_BASE}/getDeckById.php?deckId=${detectedDeckId}`,
-                { credentials: "include" }
+                { credentials: "include" },
               );
               const titleData = await titleResponse.json();
               resolvedTitle = String(
@@ -535,7 +584,7 @@ export default function LessonResult() {
                   titleData?.deck?.deck_title ||
                   titleData?.deck?.name ||
                   titleData?.title ||
-                  ""
+                  "",
               ).trim();
             }
 
@@ -546,7 +595,10 @@ export default function LessonResult() {
             ) {
               const titleData = await fetchCourseContent(detectedLessonId);
               resolvedTitle = String(
-                titleData?.title || titleData?.courseName || titleData?.course_name || ""
+                titleData?.title ||
+                  titleData?.courseName ||
+                  titleData?.course_name ||
+                  "",
               ).trim();
             }
 
@@ -567,16 +619,17 @@ export default function LessonResult() {
                 !savedTopic ||
                 savedTopic.toLowerCase() === resolvedTitle.toLowerCase() ||
                 ["this lesson", "this deck", "general", "quiz"].includes(
-                  savedTopic.toLowerCase()
+                  savedTopic.toLowerCase(),
                 );
 
               return {
                 ...answer,
                 topic: isGenericTopic ? "" : savedTopic,
-                lessonTitle:
-                  ["lesson", "module", "course"].includes(detectedSource)
-                    ? resolvedTitle
-                    : undefined,
+                lessonTitle: ["lesson", "module", "course"].includes(
+                  detectedSource,
+                )
+                  ? resolvedTitle
+                  : undefined,
                 deckTitle:
                   detectedSource === "deck" ? resolvedTitle : undefined,
               };
@@ -598,6 +651,7 @@ export default function LessonResult() {
                 credentials: "include",
                 headers: {
                   "Content-Type": "application/json",
+                  ...lessonAuthHeaders(),
                 },
                 body: JSON.stringify({
                   user_id: getStoredUserId(),
@@ -608,7 +662,7 @@ export default function LessonResult() {
                   quizMode: detectedQuizMode,
                   answers: titledAnswers,
                 }),
-              }
+              },
             );
 
             const responseText = await response.text();
@@ -620,14 +674,14 @@ export default function LessonResult() {
               throw new Error(
                 `Adaptive feedback returned invalid JSON (${response.status}): ${responseText.slice(
                   0,
-                  200
-                )}`
+                  200,
+                )}`,
               );
             }
 
             if (!response.ok || !data.success) {
               throw new Error(
-                data.message || "Unable to generate adaptive feedback."
+                data.message || "Unable to generate adaptive feedback.",
               );
             }
 
@@ -647,30 +701,29 @@ export default function LessonResult() {
                         ? feedback.question_indexes
                         : [],
                     recommendation: String(
-                      feedback.recommendation || ""
+                      feedback.recommendation || "",
                     ).trim(),
                     strengths: Array.isArray(feedback.strengths)
                       ? feedback.strengths
                       : [],
                     areasForImprovement: Array.isArray(
-                      feedback.areasForImprovement
+                      feedback.areasForImprovement,
                     )
                       ? feedback.areasForImprovement
                       : [],
                     suggestedReviewTopics: Array.isArray(
-                      feedback.suggestedReviewTopics
+                      feedback.suggestedReviewTopics,
                     )
                       ? feedback.suggestedReviewTopics
                       : [],
                     adaptiveRecommendation: String(
-                      feedback.adaptiveRecommendation || ""
+                      feedback.adaptiveRecommendation || "",
                     ).trim(),
                     nextGoal: String(feedback.nextGoal || "").trim(),
                   }))
                   .filter(
-                    (feedback) =>
-                      feedback.topic && feedback.recommendation
-                  )
+                    (feedback) => feedback.topic && feedback.recommendation,
+                  ),
               );
             }
           } catch (error) {
@@ -753,7 +806,7 @@ export default function LessonResult() {
               fallbackTopic,
               fallbackConfidence,
               quizMode,
-              missedConcepts
+              missedConcepts,
             ),
           },
         ]
@@ -765,13 +818,13 @@ export default function LessonResult() {
       : topicFeedback;
   const activeFeedbackIndex = Math.min(
     feedbackIndex,
-    Math.max(displayedFeedback.length - 1, 0)
+    Math.max(displayedFeedback.length - 1, 0),
   );
   const activeFeedback = displayedFeedback[activeFeedbackIndex];
   const activeQuizMode = activeFeedback?.quizType || quizMode;
   const activeConfidence = Math.max(
     0,
-    Math.min(100, Number(activeFeedback?.confidence) || 0)
+    Math.min(100, Number(activeFeedback?.confidence) || 0),
   );
   const topicAnswers =
     activeFeedback?.questionIndexes?.length > 0
@@ -819,7 +872,7 @@ export default function LessonResult() {
   const adaptivePlan = getAdaptivePlan(
     activeFeedback?.topic || "this topic",
     activeConfidence,
-    attempts
+    attempts,
   );
 
   let feedbackTitle = "";
@@ -889,7 +942,7 @@ export default function LessonResult() {
       navigate(
         resultCourseId
           ? `/student/enrolled-courses/${resultCourseId}`
-          : "/student/enrolled-courses"
+          : "/student/enrolled-courses",
       );
     } else {
       navigate(`/introduction/${lessonId}`);
@@ -899,7 +952,7 @@ export default function LessonResult() {
   const continueToNextModule = () => {
     if (resultCourseId && moduleNavigation.nextModuleIndex !== null) {
       navigate(
-        `/introduction/${resultCourseId}?module=${moduleNavigation.nextModuleIndex}`
+        `/introduction/${resultCourseId}?module=${moduleNavigation.nextModuleIndex}`,
       );
     }
   };
@@ -1043,7 +1096,7 @@ export default function LessonResult() {
                 <div className={styles.insightCard}>
                   <h4>Strengths</h4>
                   {strengths.length > 0 ? (
-                  <ul className={styles.strengthList}>
+                    <ul className={styles.strengthList}>
                       {strengths.map((strength, index) => (
                         <li key={`${strength}-${index}`}>{strength}</li>
                       ))}
@@ -1056,7 +1109,7 @@ export default function LessonResult() {
                 <div className={styles.insightCard}>
                   <h4>Areas for Improvement</h4>
                   {areasForImprovement.length > 0 ? (
-                  <ul className={styles.improvementList}>
+                    <ul className={styles.improvementList}>
                       {areasForImprovement.map((area, index) => (
                         <li key={`${area}-${index}`}>{area}</li>
                       ))}
@@ -1134,7 +1187,7 @@ export default function LessonResult() {
                     }
                     onClick={() =>
                       setFeedbackIndex((current) =>
-                        Math.min(displayedFeedback.length - 1, current + 1)
+                        Math.min(displayedFeedback.length - 1, current + 1),
                       )
                     }
                   >
@@ -1156,7 +1209,9 @@ export default function LessonResult() {
                 <p>No strong areas detected yet.</p>
               ) : (
                 correctAnswers.map((item, index) => (
-                  <p key={index}>✅ {item.question || "Question not available"}</p>
+                  <p key={index}>
+                    ✅ {item.question || "Question not available"}
+                  </p>
                 ))
               )}
             </div>

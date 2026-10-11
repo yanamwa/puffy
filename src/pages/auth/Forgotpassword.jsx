@@ -35,18 +35,15 @@ function ForgotPassword() {
     try {
       setIsSubmitting(true);
 
-      const response = await fetch(
-        `${API_BASE}/forgot-password`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email: cleanEmail,
-          }),
-        }
-      );
+      const response = await fetch(`${API_BASE}/forgot-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: cleanEmail,
+        }),
+      });
 
       const data = await response.json();
 
@@ -91,22 +88,14 @@ function ForgotPassword() {
   return (
     <div className={styles.wrapper}>
       <section className={styles.container}>
-        <div
-          className={styles.background}
-          aria-hidden="true"
-        />
+        <div className={styles.background} aria-hidden="true" />
 
         <PublicNavbar />
 
         <main className={styles.signupContainer}>
-          <form
-            className={styles.signupCard}
-            onSubmit={handleSubmit}
-          >
+          <form className={styles.signupCard} onSubmit={handleSubmit}>
             <h2>Forgot Password</h2>
-            <label htmlFor="forgot-password-email">
-              Email Address
-            </label>
+            <label htmlFor="forgot-password-email">Email Address</label>
 
             <input
               id="forgot-password-email"
@@ -114,9 +103,7 @@ function ForgotPassword() {
               type="email"
               placeholder="Enter your email address"
               value={email}
-              onChange={(event) =>
-                setEmail(event.target.value)
-              }
+              onChange={(event) => setEmail(event.target.value)}
               autoComplete="email"
               required
             />
@@ -131,11 +118,7 @@ function ForgotPassword() {
 
             <p className={styles.forgotText}>
               Already remembered?
-
-              <Link
-                to="/login"
-                className={styles.forgotLoginLink}
-              >
+              <Link to="/login" className={styles.forgotLoginLink}>
                 Login
               </Link>
             </p>

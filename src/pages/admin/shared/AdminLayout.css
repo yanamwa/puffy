@@ -18,7 +18,6 @@
   --admin-green-soft: #e8f5ee;
 }
 
-
 /* =====================================================
    LAYOUT
 ===================================================== */
@@ -35,10 +34,8 @@
   background: var(--admin-bg);
   color: var(--admin-ink);
 
-  transition:
-    grid-template-columns 0.22s ease;
+  transition: grid-template-columns 0.22s ease;
 }
-
 
 /* =====================================================
    COLLAPSED LAYOUT
@@ -47,7 +44,6 @@
 .admin-layout.admin-sidebar-collapsed {
   grid-template-columns: 76px minmax(0, 1fr);
 }
-
 
 /* =====================================================
    SIDEBAR
@@ -69,10 +65,8 @@
 
   color: #ffffff;
 
-  transition:
-    width 0.22s ease;
+  transition: width 0.22s ease;
 }
-
 
 /* =====================================================
    BRAND
@@ -90,12 +84,10 @@
   margin: 0 10px;
   padding: 16px 12px;
 
-  border-bottom:
-    1px solid rgba(255, 255, 255, 0.25);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.25);
 
   overflow: hidden;
 }
-
 
 /* =====================================================
    LOGO BUTTON
@@ -124,11 +116,8 @@
     background 0.18s ease;
 }
 
-
-
 .admin-logo-button:focus-visible {
-  outline:
-    2px solid #ffffff;
+  outline: 2px solid #ffffff;
 
   outline-offset: 3px;
 }
@@ -141,7 +130,6 @@
 
   object-fit: contain;
 }
-
 
 /* =====================================================
    BRAND NAME
@@ -164,7 +152,6 @@
     width 0.22s ease;
 }
 
-
 /* =====================================================
    NAVIGATION
 ===================================================== */
@@ -177,10 +164,8 @@
 
   gap: 8px;
 
-  padding:
-    24px 0 20px 18px;
+  padding: 24px 0 20px 18px;
 }
-
 
 /* =====================================================
    NAV LINK
@@ -197,21 +182,17 @@
 
   gap: 12px;
 
-  padding:
-    0 14px;
+  padding: 0 14px;
 
-  border:
-    1.5px solid transparent;
+  border: 1.5px solid transparent;
 
   border-right: 0;
 
-  border-radius:
-    999px 0 0 999px;
+  border-radius: 999px 0 0 999px;
 
   background: transparent;
 
-  color:
-    rgba(255, 255, 255, 0.86);
+  color: rgba(255, 255, 255, 0.86);
 
   text-decoration: none;
 
@@ -230,7 +211,6 @@
     border-color 0.18s ease;
 }
 
-
 /* =====================================================
    ICON
 ===================================================== */
@@ -243,7 +223,6 @@
 
   color: currentColor;
 }
-
 
 /* =====================================================
    LINK LABEL
@@ -259,22 +238,18 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 
-  transition:
-    opacity 0.16s ease;
+  transition: opacity 0.16s ease;
 }
-
 
 /* =====================================================
    HOVER
 ===================================================== */
 
 .sidebar-link:not(.active):hover {
-  background:
-    rgba(255, 255, 255, 0.11);
+  background: rgba(255, 255, 255, 0.11);
 
   color: #ffffff;
 }
-
 
 /* =====================================================
    ACTIVE
@@ -283,8 +258,7 @@
 .sidebar-link.active {
   background: #ffffff;
 
-  border-color:
-    rgba(255, 255, 255, 0.9);
+  border-color: rgba(255, 255, 255, 0.9);
 
   color: #52615a;
 
@@ -293,14 +267,13 @@
   z-index: 2;
 }
 
-
 /*
    Covers the tiny green line that can
    appear on the right side of the pill.
 */
 
 .sidebar-link.active::after {
-  content: '';
+  content: "";
 
   position: absolute;
 
@@ -312,7 +285,6 @@
 
   background: #ffffff;
 }
-
 
 /* =====================================================
    LOGOUT 
@@ -369,15 +341,13 @@
    COLLAPSED SIDEBAR
 ===================================================== */
 
-.admin-sidebar-collapsed
-.sidebar-brand {
+.admin-sidebar-collapsed .sidebar-brand {
   margin-inline: 8px;
 
   padding-inline: 0;
 }
 
-.admin-sidebar-collapsed
-.admin-brand-name {
+.admin-sidebar-collapsed .admin-brand-name {
   width: 0;
 
   opacity: 0;
@@ -387,20 +357,15 @@
   pointer-events: none;
 }
 
-
 /* MENU */
 
-.admin-sidebar-collapsed
-.sidebar-menu {
-  padding:
-    24px 8px 20px;
+.admin-sidebar-collapsed .sidebar-menu {
+  padding: 24px 8px 20px;
 }
-
 
 /* LINKS */
 
-.admin-sidebar-collapsed
-.sidebar-link {
+.admin-sidebar-collapsed .sidebar-link {
   width: 52px;
 
   min-height: 46px;
@@ -411,33 +376,26 @@
 
   gap: 0;
 
-  margin:
-    0 auto;
+  margin: 0 auto;
 
   padding: 0;
 
-  border-right:
-    1.5px solid transparent;
+  border-right: 1.5px solid transparent;
 
   border-radius: 999px;
 }
 
-.admin-sidebar-collapsed
-.sidebar-link.active {
-  border-color:
-    rgba(255, 255, 255, 0.85);
+.admin-sidebar-collapsed .sidebar-link.active {
+  border-color: rgba(255, 255, 255, 0.85);
 }
 
-.admin-sidebar-collapsed
-.sidebar-link.active::after {
+.admin-sidebar-collapsed .sidebar-link.active::after {
   display: none;
 }
 
-
 /* LABEL */
 
-.admin-sidebar-collapsed
-.admin-nav-label {
+.admin-sidebar-collapsed .admin-nav-label {
   position: absolute;
 
   width: 0;
@@ -450,16 +408,13 @@
   pointer-events: none;
 }
 
-
 /* LOGOUT */
 
-.admin-sidebar-collapsed
-.logout-btn {
+.admin-sidebar-collapsed .logout-btn {
   width: 100%;
   min-height: 66px;
 
-  margin:
-    auto 0 0;
+  margin: auto 0 0;
 
   padding: 0;
 
@@ -475,8 +430,7 @@
   color: #52615a;
 }
 
-.admin-sidebar-collapsed
-.admin-logout-label {
+.admin-sidebar-collapsed .admin-logout-label {
   display: none;
 }
 
@@ -498,7 +452,6 @@
   background: var(--admin-bg);
 }
 
-
 /* =====================================================
    HEADER
 ===================================================== */
@@ -514,18 +467,14 @@
 
   gap: 24px;
 
-  padding:
-    0 32px;
+  padding: 0 32px;
 
-  background:
-    var(--admin-card);
+  background: var(--admin-card);
 
-  border-bottom:
-    1.5px solid var(--admin-line);
+  border-bottom: 1.5px solid var(--admin-line);
 
   z-index: 100;
 }
-
 
 /* =====================================================
    SEARCH
@@ -534,8 +483,7 @@
 .admin-header-search {
   position: relative;
 
-  width:
-    min(720px, 52vw);
+  width: min(720px, 52vw);
 
   height: 43px;
 
@@ -547,11 +495,9 @@
   width: 100%;
   height: 43px;
 
-  padding:
-    0 42px 0 16px;
+  padding: 0 42px 0 16px;
 
-  border:
-    1.5px solid var(--admin-line);
+  border: 1.5px solid var(--admin-line);
 
   border-radius: 999px;
 
@@ -575,19 +521,14 @@
 }
 
 .admin-header-search input:focus {
-  border-color:
-    var(--admin-green);
+  border-color: var(--admin-green);
 
-  box-shadow:
-    0 0 0 3px
-    rgba(25, 135, 84, 0.1);
+  box-shadow: 0 0 0 3px rgba(25, 135, 84, 0.1);
 }
-
 
 /* SEARCH ICON */
 
-.admin-header-search
-.search-icon {
+.admin-header-search .search-icon {
   position: absolute;
 
   right: 16px;
@@ -595,8 +536,7 @@
 
   top: 50%;
 
-  transform:
-    translateY(-50%);
+  transform: translateY(-50%);
 
   width: 16px;
   height: 16px;
@@ -604,18 +544,15 @@
   display: grid;
   place-items: center;
 
-  color:
-    var(--admin-muted);
+  color: var(--admin-muted);
 
   pointer-events: none;
 }
 
-.admin-header-search
-.search-icon svg {
+.admin-header-search .search-icon svg {
   width: 16px;
   height: 16px;
 }
-
 
 /* =====================================================
    HEADER ACTIONS
@@ -630,7 +567,6 @@
   flex: 0 0 auto;
 }
 
-
 /* =====================================================
    CONTENT
 ===================================================== */
@@ -644,20 +580,16 @@
   overflow-x: hidden;
   overflow-y: auto;
 
-  padding:
-    34px 42px 48px;
+  padding: 34px 42px 48px;
 }
-
 
 /* =====================================================
    TABLET
 ===================================================== */
 
 @media (max-width: 900px) {
-
   .admin-layout {
-    grid-template-columns:
-      76px minmax(0, 1fr);
+    grid-template-columns: 76px minmax(0, 1fr);
   }
 
   .admin-brand-name,
@@ -673,8 +605,7 @@
   }
 
   .sidebar-menu {
-    padding:
-      20px 8px;
+    padding: 20px 8px;
   }
 
   .sidebar-link {
@@ -684,14 +615,12 @@
 
     gap: 0;
 
-    margin:
-      0 auto;
+    margin: 0 auto;
 
     padding: 0;
 
     border-radius: 999px;
-    border-right:
-      1.5px solid transparent;
+    border-right: 1.5px solid transparent;
   }
 
   .sidebar-link.active::after {
@@ -705,36 +634,29 @@
 
     gap: 0;
 
-    margin:
-      auto auto 18px;
+    margin: auto auto 18px;
 
     padding: 0;
   }
 
   .admin-header {
-    padding:
-      0 20px;
+    padding: 0 20px;
   }
 
   .admin-header-search {
-    width:
-      min(420px, 50vw);
+    width: min(420px, 50vw);
   }
 
   .admin-content {
-    padding:
-      28px 24px 38px;
+    padding: 28px 24px 38px;
   }
-
 }
-
 
 /* =====================================================
    MOBILE
 ===================================================== */
 
 @media (max-width: 640px) {
-
   .admin-layout,
   .admin-layout.admin-sidebar-collapsed {
     grid-template-columns: 1fr;
@@ -756,14 +678,11 @@
     overflow-x: auto;
     overflow-y: hidden;
 
-    padding:
-      6px 8px;
+    padding: 6px 8px;
 
     border-right: 0;
 
-    border-bottom:
-      1px solid
-      rgba(255, 255, 255, 0.25);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.25);
   }
 
   .sidebar-brand {
@@ -773,14 +692,11 @@
 
     margin: 0 8px 0 0;
 
-    padding:
-      0 8px 0 0;
+    padding: 0 8px 0 0;
 
     border-bottom: 0;
 
-    border-right:
-      1px solid
-      rgba(255, 255, 255, 0.25);
+    border-right: 1px solid rgba(255, 255, 255, 0.25);
   }
 
   .admin-logo-button {
@@ -863,8 +779,7 @@
 
     gap: 10px;
 
-    padding:
-      10px 12px;
+    padding: 10px 12px;
   }
 
   .admin-header-search {
@@ -880,8 +795,6 @@
   .admin-content {
     overflow: visible;
 
-    padding:
-      22px 16px 32px;
+    padding: 22px 16px 32px;
   }
-
 }

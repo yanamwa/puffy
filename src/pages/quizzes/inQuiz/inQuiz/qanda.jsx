@@ -1,3 +1,4 @@
+import { lessonAuthHeaders } from "../../../../services/lessonAuth.js";
 import { saveAccountQuizResult } from "../../../../utils/quizStorage.js";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -24,7 +25,7 @@ export default function QandA() {
   const isDeckMode = Boolean(deckId);
   const practiceSession = useMemo(
     () => getStoredPracticeSession({ lessonId, deckId }),
-    [lessonId, deckId]
+    [lessonId, deckId],
   );
 
   const [lesson, setLesson] = useState(null);
@@ -105,7 +106,7 @@ export default function QandA() {
         if (isLessonMode) {
           const res = await fetch(
             `${API_BASE}/getLessonsById.php?id=${lessonId}`,
-            { credentials: "include" }
+            { credentials: "include" },
           );
           const data = normalizeLessonData(await res.json());
           setLesson(data);
@@ -114,7 +115,7 @@ export default function QandA() {
         if (isDeckMode) {
           const deckRes = await fetch(
             `${API_BASE}/getDeckById.php?deckId=${deckId}`,
-            { credentials: "include" }
+            { credentials: "include" },
           );
           const deckData = await deckRes.json();
 
@@ -122,12 +123,12 @@ export default function QandA() {
             deckData?.deck?.title ||
               deckData?.deck?.deck_title ||
               deckData?.title ||
-              "Deck Q&A"
+              "Deck Q&A",
           );
 
           const cardsRes = await fetch(
             `${API_BASE}/getCardsByDeck.php?deckId=${deckId}`,
-            { credentials: "include" }
+            { credentials: "include" },
           );
           const cardsData = await cardsRes.json();
 
@@ -163,7 +164,7 @@ export default function QandA() {
             q: cleanQuestionText(getQuizItemQuestion(item)),
             correctAnswer: cleanAnswerText(getQuizItemAnswer(item)),
             explanation: item.explanation || getQuizItemAnswer(item) || "",
-          }))
+          })),
         );
       } catch {
         return [];
@@ -177,7 +178,7 @@ export default function QandA() {
           q: cleanQuestionText(getQuizItemQuestion(card)),
           correctAnswer: cleanAnswerText(getQuizItemAnswer(card)),
           explanation: getQuizItemAnswer(card) || "",
-        }))
+        })),
       );
     }
 
@@ -221,7 +222,7 @@ export default function QandA() {
 
   const levenshtein = (a, b) => {
     const dp = Array.from({ length: a.length + 1 }, () =>
-      Array(b.length + 1).fill(0)
+      Array(b.length + 1).fill(0),
     );
 
     for (let i = 0; i <= a.length; i++) dp[i][0] = i;
@@ -239,63 +240,53 @@ export default function QandA() {
     return dp[a.length][b.length];
   };
 
-const isCloseEnough = (userAnswer, correctAnswer) => {
-  const userClean = cleanAnswer(userAnswer);
-  const correctClean = cleanAnswer(correctAnswer);
+  const isCloseEnough = (userAnswer, correctAnswer) => {
+    const userClean = cleanAnswer(userAnswer);
+    const correctClean = cleanAnswer(correctAnswer);
 
-  if (!userClean || !correctClean) return false;
+    if (!userClean || !correctClean) return false;
 
-  if (userClean === correctClean) return true;
+    if (userClean === correctClean) return true;
 
-  // exact phrase contained
-  if (
-    correctClean.includes(userClean) &&
-    userClean.length >= 8
-  ) {
-    return true;
-  }
+    // exact phrase contained
+    if (correctClean.includes(userClean) && userClean.length >= 8) {
+      return true;
+    }
 
-  const userWords = userClean.split(" ").filter(Boolean);
-  const correctWords = correctClean.split(" ").filter(Boolean);
+    const userWords = userClean.split(" ").filter(Boolean);
+    const correctWords = correctClean.split(" ").filter(Boolean);
 
-  const matchingWords = userWords.filter((word) =>
-    correctWords.includes(word)
-  );
+    const matchingWords = userWords.filter((word) =>
+      correctWords.includes(word),
+    );
 
-  const wordRatio =
-    matchingWords.length /
-    Math.max(userWords.length, correctWords.length);
+    const wordRatio =
+      matchingWords.length / Math.max(userWords.length, correctWords.length);
 
-  // enough important words matched
-  if (
-    matchingWords.length >= 3 &&
-    wordRatio >= 0.35
-  ) {
-    return true;
-  }
+    // enough important words matched
+    if (matchingWords.length >= 3 && wordRatio >= 0.35) {
+      return true;
+    }
 
-  const distance = levenshtein(userClean, correctClean);
+    const distance = levenshtein(userClean, correctClean);
 
-  const maxLength = Math.max(
-    userClean.length,
-    correctClean.length
-  );
+    const maxLength = Math.max(userClean.length, correctClean.length);
 
-  const similarity = 1 - distance / maxLength;
+    const similarity = 1 - distance / maxLength;
 
-  return similarity >= 0.75;
-};
+    return similarity >= 0.75;
+  };
 
   async function saveQuizAttempt(finalScore) {
     const metadata = getPracticeResultMetadata(
       practiceSession,
-      isDeckMode ? "deck" : "lesson"
+      isDeckMode ? "deck" : "lesson",
     );
 
     try {
       await fetch(`${API_BASE}/saveQuizAttempt.php`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...lessonAuthHeaders() },
         credentials: "include",
         body: JSON.stringify({
           source: metadata.source,
@@ -314,10 +305,11 @@ const isCloseEnough = (userAnswer, correctAnswer) => {
   }
 
   async function finishQuiz(finalScore, finalResults, returnToDeck = false) {
-    await saveQuizAttempt(finalScore);
-
     const resultPayload = {
-      ...getPracticeResultMetadata(practiceSession, isDeckMode ? "deck" : "lesson"),
+      ...getPracticeResultMetadata(
+        practiceSession,
+        isDeckMode ? "deck" : "lesson",
+      ),
       quizMode: "qna",
       deckId: toNumericId(deckId),
       lessonId: lessonId || null,
@@ -331,7 +323,7 @@ const isCloseEnough = (userAnswer, correctAnswer) => {
     if (isDeckMode) {
       saveAccountQuizResult(
         `deckQuizResults_${deckId}`,
-        JSON.stringify(resultPayload)
+        JSON.stringify(resultPayload),
       );
     }
 
@@ -339,14 +331,16 @@ const isCloseEnough = (userAnswer, correctAnswer) => {
       returnToDeck && isDeckMode
         ? `/deck/${deckId}`
         : isDeckMode
-        ? `/review/deck/${deckId}`
-        : getPracticeReviewPath(practiceSession, { lessonId, deckId })
+          ? `/review/deck/${deckId}`
+          : getPracticeReviewPath(practiceSession, { lessonId, deckId }),
     );
   }
 
   function repeatCheckpointQuestions() {
     const repeatedResults = userResults.slice(0, checkpointStartIndex);
-    const repeatedScore = repeatedResults.filter((result) => result.isCorrect).length;
+    const repeatedScore = repeatedResults.filter(
+      (result) => result.isCorrect,
+    ).length;
 
     setUserResults(repeatedResults);
     setScore(repeatedScore);
@@ -371,11 +365,11 @@ const isCloseEnough = (userAnswer, correctAnswer) => {
 
     const isCorrect = isCloseEnough(
       inputValue,
-      questions[current].correctAnswer
+      questions[current].correctAnswer,
     );
 
     setNotifImage(
-      isCorrect ? "/images/correct_answer.png" : "/images/wrong_answer.png"
+      isCorrect ? "/images/correct_answer.png" : "/images/wrong_answer.png",
     );
     setNotifOpen(true);
 
@@ -402,7 +396,7 @@ const isCloseEnough = (userAnswer, correctAnswer) => {
       {
         question: questions[current].q,
         answer: questions[current].correctAnswer,
-      }
+      },
     );
 
     setTimeout(() => {
@@ -442,46 +436,46 @@ const isCloseEnough = (userAnswer, correctAnswer) => {
 
   if (loading) return <LoadingState />;
 
-if (questions.length === 0) {
-  return (
-    <div className={styles.emptyWrapper}>
-      <div className={styles.emptyCard}>
-        <img
-          src="/images/404.png"
-          alt="No Q&A"
-          className={styles.emptyImage}
-        />
+  if (questions.length === 0) {
+    return (
+      <div className={styles.emptyWrapper}>
+        <div className={styles.emptyCard}>
+          <img
+            src="/images/404.png"
+            alt="No Q&A"
+            className={styles.emptyImage}
+          />
 
-        <h2 className={styles.emptyTitle}>No Q&A Quiz Yet</h2>
+          <h2 className={styles.emptyTitle}>No Q&A Quiz Yet</h2>
 
-        <p className={styles.emptyText}>
-          No Q&A questions are available for this lesson.
-        </p>
+          <p className={styles.emptyText}>
+            No Q&A questions are available for this lesson.
+          </p>
 
-        <button
-          type="button"
-          className={styles.emptyBtn}
-          onClick={() =>
-            navigate(
-              isDeckMode
-                ? `/review/deck/${deckId}`
-                : getPracticeBackPath(practiceSession, { lessonId, deckId })
-            )
-          }
-        >
-          Go Back
-        </button>
+          <button
+            type="button"
+            className={styles.emptyBtn}
+            onClick={() =>
+              navigate(
+                isDeckMode
+                  ? `/review/deck/${deckId}`
+                  : getPracticeBackPath(practiceSession, { lessonId, deckId }),
+              )
+            }
+          >
+            Go Back
+          </button>
+        </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
   const progressWidth = ((current + 1) / questions.length) * 100;
   const checkpointEndIndex = checkpointOpen
     ? checkpointReviewEndIndex
     : Math.min(current + 1, questions.length);
   const checkpointQuestions = questions.slice(
     checkpointStartIndex,
-    checkpointEndIndex
+    checkpointEndIndex,
   );
   const checkpointProgress = questions.length
     ? (checkpointEndIndex / questions.length) * 100
@@ -489,7 +483,6 @@ if (questions.length === 0) {
 
   return (
     <div className={styles.wrapper}>
-
       {notifOpen && (
         <div className={styles.slideNotif}>
           <img
@@ -633,51 +626,51 @@ if (questions.length === 0) {
         </div>
       ) : (
         <>
-      <div className={styles.header}>
-        <h1 className={styles.title}>
-          {isLessonMode ? lesson?.title || "Lesson Q&A" : deckTitle}
-        </h1>
+          <div className={styles.header}>
+            <h1 className={styles.title}>
+              {isLessonMode ? lesson?.title || "Lesson Q&A" : deckTitle}
+            </h1>
 
-        <div className={styles.counter}>
-          Question {current + 1} of {questions.length}
-        </div>
+            <div className={styles.counter}>
+              Question {current + 1} of {questions.length}
+            </div>
 
-        <div className={styles.progressContainer}>
-          <div
-            className={styles.progressBar}
-            style={{ width: `${progressWidth}%` }}
-          />
-        </div>
-      </div>
+            <div className={styles.progressContainer}>
+              <div
+                className={styles.progressBar}
+                style={{ width: `${progressWidth}%` }}
+              />
+            </div>
+          </div>
 
-      <div className={styles.questionBox}>
-        <div className={styles.questionRow}>
-          {ttsEnabled && (
-            <button
-              type="button"
-              className={styles.audioIconBtn}
-              onClick={() => speakText(questions[current].q)}
-            >
-              <i className="bx bx-volume-full"></i>
-            </button>
-          )}
+          <div className={styles.questionBox}>
+            <div className={styles.questionRow}>
+              {ttsEnabled && (
+                <button
+                  type="button"
+                  className={styles.audioIconBtn}
+                  onClick={() => speakText(questions[current].q)}
+                >
+                  <i className="bx bx-volume-full"></i>
+                </button>
+              )}
 
-          <p className={styles.question}>{questions[current].q}</p>
-        </div>
+              <p className={styles.question}>{questions[current].q}</p>
+            </div>
 
-        <div className={styles.typingContainer}>
-          <input
-            ref={inputRef}
-            type="text"
-            className={`${styles.input} ${status}`}
-            placeholder="Type your answer"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyDown={handleKeyDown}
-            disabled={notifOpen}
-          />
-        </div>
-      </div>
+            <div className={styles.typingContainer}>
+              <input
+                ref={inputRef}
+                type="text"
+                className={`${styles.input} ${status}`}
+                placeholder="Type your answer"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyDown={handleKeyDown}
+                disabled={notifOpen}
+              />
+            </div>
+          </div>
         </>
       )}
     </div>

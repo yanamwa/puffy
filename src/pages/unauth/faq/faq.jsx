@@ -1,7 +1,12 @@
 import PublicNavbar from "../../../components/landing/PublicNavbar.jsx";
 import React, { useState } from "react";
 import styles from "./faq.module.css";
-import { FaChevronDown, FaInstagram, FaFacebookF, FaEnvelope } from "react-icons/fa";
+import {
+  FaChevronDown,
+  FaInstagram,
+  FaFacebookF,
+  FaEnvelope,
+} from "react-icons/fa";
 
 const FAQ = () => {
   const faqsData = [
@@ -38,10 +43,14 @@ const FAQ = () => {
   ];
 
   // Initialize state with `active` property
-  const [faqs, setFaqs] = useState(faqsData.map(f => ({ ...f, active: false })));
+  const [faqs, setFaqs] = useState(
+    faqsData.map((f) => ({ ...f, active: false })),
+  );
 
   const toggleFAQ = (index) => {
-    setFaqs(faqs.map((f, i) => i === index ? { ...f, active: !f.active } : f));
+    setFaqs(
+      faqs.map((f, i) => (i === index ? { ...f, active: !f.active } : f)),
+    );
   };
 
   return (
@@ -70,7 +79,8 @@ const FAQ = () => {
       <section className={styles.questionsSection}>
         <h1>Still have questions?</h1>
         <p>
-          If you cannot find answer to your question in our FAQ’s, you can always contact us. We will answer you shortly!
+          If you cannot find answer to your question in our FAQ’s, you can
+          always contact us. We will answer you shortly!
         </p>
       </section>
 
@@ -83,9 +93,15 @@ const FAQ = () => {
           <a href="/contact">Contact Us</a>
         </div>
         <div className={styles.socialIcons}>
-          <a href="#"><FaInstagram /></a>
-          <a href="#"><FaFacebookF /></a>
-          <a href="mailto:example@gmail.com"><FaEnvelope /></a>
+          <a href="#">
+            <FaInstagram />
+          </a>
+          <a href="#">
+            <FaFacebookF />
+          </a>
+          <a href="mailto:example@gmail.com">
+            <FaEnvelope />
+          </a>
         </div>
       </footer>
 

@@ -3,7 +3,7 @@
   margin: 20px auto 0;
   box-sizing: border-box;
   text-align: left;
-  left: 30px
+  left: 30px;
 }
 
 .bar button {
@@ -17,5 +17,10 @@
   color: white;
   font-weight: 600;
 }
-.bar button:hover { background: #87a4c2; }
-.bar button:focus-visible { outline: 3px solid #4f6174; outline-offset: 4px; }
+.bar button:hover {
+  background: #87a4c2;
+}
+.bar button:focus-visible {
+  outline: 3px solid #4f6174;
+  outline-offset: 4px;
+}

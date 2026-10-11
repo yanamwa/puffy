@@ -63,7 +63,7 @@ function buildPracticeRoute(route, source, id) {
   }
 
   return `${cleanRoute}/${source === "deck" ? "deck" : "lesson"}/${encodeURIComponent(
-    id
+    id,
   )}`;
 }
 
@@ -139,7 +139,10 @@ export default function QuizModesModal({
     };
 
     if (modeKind === "timed") {
-      localStorage.setItem("timedQuizSeconds", String(calculateTimedQuizSeconds()));
+      localStorage.setItem(
+        "timedQuizSeconds",
+        String(calculateTimedQuizSeconds()),
+      );
     } else {
       localStorage.removeItem("timedQuizSeconds");
     }
@@ -178,7 +181,10 @@ export default function QuizModesModal({
 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
-      <div className={styles.modalBox} onClick={(event) => event.stopPropagation()}>
+      <div
+        className={styles.modalBox}
+        onClick={(event) => event.stopPropagation()}
+      >
         <div className={styles.modalHeader}>
           <h2 className={styles.modalTitle}>Choose Quiz Type</h2>
           <button

@@ -61,18 +61,18 @@ export default function TimedQuiz() {
   }, []);
 
   useEffect(() => {
-  const countdown = setInterval(() => {
-    setTimeLeft((prev) => {
-      if (prev <= 0) {
-        return 120;
-      }
+    const countdown = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 0) {
+          return 120;
+        }
 
-      return prev - 1;
-    });
-  }, 1000);
+        return prev - 1;
+      });
+    }, 1000);
 
-  return () => clearInterval(countdown);
-}, []);
+    return () => clearInterval(countdown);
+  }, []);
 
   useEffect(() => {
     const slide = setInterval(() => {
@@ -143,9 +143,9 @@ export default function TimedQuiz() {
             <div className={styles.demoHeader}>Quiz Tutorial</div>
             <div className={styles.timerBox}>
               <div className={styles.timer}>
-              {String(Math.floor(timeLeft / 60)).padStart(2, "0")}:
-              {String(timeLeft % 60).padStart(2, "0")}
-            </div>
+                {String(Math.floor(timeLeft / 60)).padStart(2, "0")}:
+                {String(timeLeft % 60).padStart(2, "0")}
+              </div>
             </div>
 
             <p className={styles.question}>
@@ -161,8 +161,8 @@ export default function TimedQuiz() {
                     option.className === "correct"
                       ? styles.correct
                       : option.className === "wrong"
-                      ? styles.wrong
-                      : ""
+                        ? styles.wrong
+                        : ""
                   }`}
                   disabled
                 >

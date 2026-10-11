@@ -20,7 +20,12 @@ function saveMemorizedCards(cards) {
   }
 }
 
-export async function updateDeckCardMemorized(isDeckMode, cardId, isCorrect, card = {}) {
+export async function updateDeckCardMemorized(
+  isDeckMode,
+  cardId,
+  isCorrect,
+  card = {},
+) {
   if (!isDeckMode || !cardId) return null;
 
   const memorizedCards = readMemorizedCards();
@@ -46,7 +51,7 @@ export function syncDeckCardMemorizationFromAnswers(isDeckMode, answers = []) {
       {
         question: answer.question,
         answer: answer.correctAnswer || answer.answer,
-      }
+      },
     );
   });
 

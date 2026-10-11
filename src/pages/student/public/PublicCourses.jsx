@@ -1,3 +1,4 @@
+import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import Swal from "sweetalert2";
 
@@ -49,10 +50,7 @@ function getStoredToken() {
 
 function getCourseTitle(course) {
   return (
-    course.title ||
-    course.courseName ||
-    course.course_name ||
-    "Untitled course"
+    course.title || course.courseName || course.course_name || "Untitled course"
   );
 }
 
@@ -64,12 +62,14 @@ function getCourseKey(course) {
       course?.code ||
       course?.courseCode ||
       course?.course_code ||
-      ""
+      "",
   ).trim();
 }
 
 function normalizeEnrollmentStatus(value) {
-  const status = String(value || "").trim().toLowerCase();
+  const status = String(value || "")
+    .trim()
+    .toLowerCase();
 
   if (["approved", "enrolled", "active"].includes(status)) {
     return "enrolled";
@@ -110,7 +110,7 @@ function getCourseEnrollmentState(course, enrolledCourseKeys) {
       course.requestStatus ||
       course.request_status ||
       course.enrollmentRequestStatus ||
-      course.enrollment_request_status
+      course.enrollment_request_status,
   );
 
   if (status) {
@@ -172,11 +172,7 @@ function normalizeCourse(course) {
       course.courseCode ||
       course.course_code,
 
-    code:
-      course.code ||
-      course.courseCode ||
-      course.course_code ||
-      "COURSE",
+    code: course.code || course.courseCode || course.course_code || "COURSE",
 
     title:
       course.title ||
@@ -188,6 +184,7 @@ function normalizeCourse(course) {
 }
 
 export default function PublicCourses() {
+  const navigate = useNavigate();
   const [joinModalOpen, setJoinModalOpen] = useState(false);
   const [courseCode, setCourseCode] = useState("");
 
@@ -204,7 +201,7 @@ export default function PublicCourses() {
 
   const enrolledCourseKeys = useMemo(
     () => new Set(enrolledCourses.map(getCourseKey).filter(Boolean)),
-    [enrolledCourses]
+    [enrolledCourses],
   );
 
   const visiblePublicCourses = useMemo(() => {
@@ -232,7 +229,7 @@ export default function PublicCourses() {
 
           return (
             getCourseTitle(firstCourse).localeCompare(
-              getCourseTitle(secondCourse)
+              getCourseTitle(secondCourse),
             ) * direction
           );
         }
@@ -240,24 +237,17 @@ export default function PublicCourses() {
         const direction = dateSort === "Recent" ? -1 : 1;
 
         const timestampDifference =
-          getCourseTimestamp(firstCourse) -
-          getCourseTimestamp(secondCourse);
+          getCourseTimestamp(firstCourse) - getCourseTimestamp(secondCourse);
 
         if (timestampDifference !== 0) {
           return timestampDifference * direction;
         }
 
         return getCourseTitle(firstCourse).localeCompare(
-          getCourseTitle(secondCourse)
+          getCourseTitle(secondCourse),
         );
       });
-  }, [
-    activeSort,
-    dateSort,
-    publicCourses,
-    searchQuery,
-    titleSort,
-  ]);
+  }, [activeSort, dateSort, publicCourses, searchQuery, titleSort]);
 
   const loadEnrolledCourses = async () => {
     try {
@@ -276,15 +266,13 @@ export default function PublicCourses() {
             Accept: "application/json",
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       const data = await response.json().catch(() => ({}));
 
       if (!response.ok) {
-        throw new Error(
-          data.message || "Could not load enrolled courses."
-        );
+        throw new Error(data.message || "Could not load enrolled courses.");
       }
 
       const loadedCourses = Array.isArray(data.courses)
@@ -316,9 +304,7 @@ export default function PublicCourses() {
       } catch (error) {
         if (active) {
           setPublicCourses([]);
-          setErrorMessage(
-            error.message || "Could not load public courses."
-          );
+          setErrorMessage(error.message || "Could not load public courses.");
         }
       } finally {
         if (active) {
@@ -340,10 +326,7 @@ export default function PublicCourses() {
 
     return () => {
       active = false;
-      window.removeEventListener(
-        PROFESSOR_COURSES_EVENT,
-        handleRefresh
-      );
+      window.removeEventListener(PROFESSOR_COURSES_EVENT, handleRefresh);
       window.removeEventListener("storage", handleRefresh);
     };
   }, []);
@@ -364,8 +347,8 @@ export default function PublicCourses() {
       courses.map((currentCourse) =>
         getCourseKey(currentCourse) === courseKey
           ? withRequestedEnrollment(currentCourse)
-          : currentCourse
-      )
+          : currentCourse,
+      ),
     );
   };
 
@@ -397,48 +380,34 @@ export default function PublicCourses() {
       const token = getStoredToken();
 
       if (!token) {
-        throw new Error(
-          "You must be logged in to send an enrollment request."
-        );
+        throw new Error("You must be logged in to send an enrollment request.");
       }
 
-      const courseId =
-        course.id ||
-        course.courseId ||
-        course.course_id;
+      const courseId = course.id || course.courseId || course.course_id;
 
       const selectedCourseCode =
-        course.code ||
-        course.courseCode ||
-        course.course_code ||
-        "";
+        course.code || course.courseCode || course.course_code || "";
 
       if (!courseId && !selectedCourseCode) {
         throw new Error("Unable to identify this course.");
       }
 
-      const response = await fetch(
-        `${API_BASE_URL}/courses/enroll`,
-        {
-          method: "POST",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            courseId,
-            courseCode: selectedCourseCode,
-          }),
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/courses/enroll`, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          courseId,
+          courseCode: selectedCourseCode,
+        }),
+      });
 
       const data = await response.json().catch(() => ({}));
 
-      if (
-        response.status === 409 &&
-        data.status === "pending"
-      ) {
+      if (response.status === 409 && data.status === "pending") {
         markCourseRequested(course);
 
         await Swal.fire({
@@ -456,15 +425,10 @@ export default function PublicCourses() {
         return false;
       }
 
-      if (
-        response.status === 409 &&
-        data.status === "approved"
-      ) {
+      if (response.status === 409 && data.status === "approved") {
         await Swal.fire({
           title: "Already enrolled",
-          text:
-            data.message ||
-            `You are already enrolled in ${courseTitle}.`,
+          text: data.message || `You are already enrolled in ${courseTitle}.`,
           imageUrl: "/images/success.png",
           imageWidth: 160,
           imageHeight: 160,
@@ -477,10 +441,7 @@ export default function PublicCourses() {
       }
 
       if (!response.ok) {
-        throw new Error(
-          data.message ||
-            "Could not send enrollment request."
-        );
+        throw new Error(data.message || "Could not send enrollment request.");
       }
 
       markCourseRequested(course);
@@ -533,8 +494,7 @@ export default function PublicCourses() {
         return;
       }
 
-      const course =
-        await findJoinableCourseByCodeAsync(trimmedCode);
+      const course = await findJoinableCourseByCodeAsync(trimmedCode);
 
       if (!course) {
         await Swal.fire({
@@ -604,18 +564,13 @@ export default function PublicCourses() {
             </div>
           </section>
 
-          <section
-            className="public-courses-grid"
-            aria-label="Public courses"
-          >
+          <section className="public-courses-grid" aria-label="Public courses">
             {loading ? (
               <div className="student-empty-state">
                 Loading public courses...
               </div>
             ) : errorMessage ? (
-              <div className="student-empty-state">
-                {errorMessage}
-              </div>
+              <div className="student-empty-state">{errorMessage}</div>
             ) : visiblePublicCourses.length === 0 ? (
               <div className="student-empty-state">
                 {publicCourses.length === 0
@@ -626,7 +581,7 @@ export default function PublicCourses() {
               visiblePublicCourses.map((course) => {
                 const enrollmentState = getCourseEnrollmentState(
                   course,
-                  enrolledCourseKeys
+                  enrolledCourseKeys,
                 );
                 const courseEnrolled = enrollmentState === "enrolled";
                 const courseRequested = enrollmentState === "requested";
@@ -645,26 +600,36 @@ export default function PublicCourses() {
 
                 return (
                   <article
-                    key={
-                      course.id ||
-                      course.course_id ||
-                      course.code
+                    key={course.id || course.course_id || course.code}
+                    className={`course-folder public-course-folder ${courseEnrolled ? "public-course-folder-clickable" : ""}`}
+                    onClick={
+                      courseEnrolled
+                        ? (event) => {
+                            if (event.target.closest("button, a")) return;
+                            navigate(
+                              `/student/enrolled-courses/${encodeURIComponent(getCourseKey(course))}`,
+                            );
+                          }
+                        : undefined
                     }
-                    className="course-folder public-course-folder"
                   >
                     <button
                       type="button"
                       className={`add-course-button ${statusClass}`}
                       aria-label={
                         courseEnrolled
-                          ? `Already enrolled in ${getCourseTitle(course)}`
+                          ? `Open ${getCourseTitle(course)}`
                           : courseRequested
                             ? `Enrollment requested for ${getCourseTitle(course)}`
                             : `Add ${getCourseTitle(course)}`
                       }
-                      disabled={courseLocked}
+                      disabled={courseRequested}
                       onClick={() => {
-                        if (!courseLocked) {
+                        if (courseEnrolled) {
+                          navigate(
+                            `/student/enrolled-courses/${encodeURIComponent(getCourseKey(course))}`,
+                          );
+                        } else if (!courseRequested) {
                           confirmEnrollment(course);
                         }
                       }}
@@ -673,7 +638,18 @@ export default function PublicCourses() {
                     </button>
 
                     <div className="course-card-body">
-                      <h2>{getCourseTitle(course)}</h2>
+                      <h2>
+                        {courseEnrolled ? (
+                          <Link
+                            className="public-enrolled-course-link"
+                            to={`/student/enrolled-courses/${encodeURIComponent(getCourseKey(course))}`}
+                          >
+                            {getCourseTitle(course)}
+                          </Link>
+                        ) : (
+                          getCourseTitle(course)
+                        )}
+                      </h2>
                     </div>
 
                     <div className="course-card-footer">
@@ -683,31 +659,29 @@ export default function PublicCourses() {
                           course.professor_profile_image
                             ? resolveProfileImage(
                                 course.professorProfileImage ||
-                                  course.professor_profile_image
+                                  course.professor_profile_image,
                               )
                             : undefined
                         }
-                        alt={`${
-                          course.instructor || "Professor"
-                        }'s profile`}
+                        alt={`${course.instructor || "Professor"}'s profile`}
                       />
 
                       <div className="public-course-meta">
-                        <span>
-                          {course.instructor || "Professor"}
-                        </span>
+                        <span>{course.instructor || "Professor"}</span>
 
-                        <small>
-                          {getProfessorDepartment(course)}
-                        </small>
+                        <small>{getProfessorDepartment(course)}</small>
                       </div>
 
                       <button
                         type="button"
                         className={`start-learning-button ${statusClass}`}
-                        disabled={courseLocked}
+                        disabled={courseRequested}
                         onClick={() => {
-                          if (!courseLocked) {
+                          if (courseEnrolled) {
+                            navigate(
+                              `/student/enrolled-courses/${encodeURIComponent(getCourseKey(course))}`,
+                            );
+                          } else if (!courseRequested) {
                             confirmEnrollment(course);
                           }
                         }}

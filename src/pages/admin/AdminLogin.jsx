@@ -20,101 +20,101 @@ function AdminLogin() {
     }
   }, [navigate]);
 
-const handleLogin = async () => {
-  if (!username.trim() || !password.trim()) {
-    Swal.fire({
-      imageUrl: "/images/error.png",
-      imageWidth: 170,
-      imageHeight: 170,
-      title: "Missing Information",
-      text: "Please enter both username and password.",
-    });
-    return;
-  }
-
-  try {
-    const res = await fetch(`${API_BASE}/AdminLogin.php`, {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        username: username.trim(),
-        password: password.trim(),
-      }),
-    });
-
-    const text = await res.text();
-    console.log("RAW ADMIN LOGIN RESPONSE:", text);
-
-    let data;
-
-    try {
-      data = JSON.parse(text);
-    } catch {
+  const handleLogin = async () => {
+    if (!username.trim() || !password.trim()) {
       Swal.fire({
         imageUrl: "/images/error.png",
         imageWidth: 170,
         imageHeight: 170,
-        title: "PHP/JSON Error",
-        html: `<pre style="text-align:left;white-space:pre-wrap;font-size:12px;">${text}</pre>`,
+        title: "Missing Information",
+        text: "Please enter both username and password.",
       });
       return;
     }
 
-    if (data.success) {
-      const adminData = data.admin || {};
-      const adminId =
-        data.admin_id ||
-        adminData.id ||
-        adminData.AdminID ||
-        adminData.admin_id;
+    try {
+      const res = await fetch(`${API_BASE}/AdminLogin.php`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: username.trim(),
+          password: password.trim(),
+        }),
+      });
 
-      if (!adminId) {
+      const text = await res.text();
+      console.log("RAW ADMIN LOGIN RESPONSE:", text);
+
+      let data;
+
+      try {
+        data = JSON.parse(text);
+      } catch {
         Swal.fire({
           imageUrl: "/images/error.png",
           imageWidth: 170,
           imageHeight: 170,
-          title: "Login Storage Error",
-          text: "Login succeeded, but admin ID was missing from PHP response.",
+          title: "PHP/JSON Error",
+          html: `<pre style="text-align:left;white-space:pre-wrap;font-size:12px;">${text}</pre>`,
         });
         return;
       }
 
-      localStorage.setItem("admin", JSON.stringify(adminData));
-      localStorage.setItem("admin_id", String(adminId));
+      if (data.success) {
+        const adminData = data.admin || {};
+        const adminId =
+          data.admin_id ||
+          adminData.id ||
+          adminData.AdminID ||
+          adminData.admin_id;
 
-      Swal.fire({
-        imageUrl: "/images/success.png",
-        imageWidth: 170,
-        imageHeight: 170,
-        title: "Successfully Logged In",
-        text: data.message || "Welcome back, admin!",
-      }).then(() => {
-        navigate("/admin/dashboard", { replace: true });
-      });
-    } else {
+        if (!adminId) {
+          Swal.fire({
+            imageUrl: "/images/error.png",
+            imageWidth: 170,
+            imageHeight: 170,
+            title: "Login Storage Error",
+            text: "Login succeeded, but admin ID was missing from PHP response.",
+          });
+          return;
+        }
+
+        localStorage.setItem("admin", JSON.stringify(adminData));
+        localStorage.setItem("admin_id", String(adminId));
+
+        Swal.fire({
+          imageUrl: "/images/success.png",
+          imageWidth: 170,
+          imageHeight: 170,
+          title: "Successfully Logged In",
+          text: data.message || "Welcome back, admin!",
+        }).then(() => {
+          navigate("/admin/dashboard", { replace: true });
+        });
+      } else {
+        Swal.fire({
+          imageUrl: "/images/error.png",
+          imageWidth: 170,
+          imageHeight: 170,
+          title: "Login Failed",
+          text: data.message || "Invalid username or password.",
+        });
+      }
+    } catch (err) {
       Swal.fire({
         imageUrl: "/images/error.png",
         imageWidth: 170,
         imageHeight: 170,
-        title: "Login Failed",
-        text: data.message || "Invalid username or password.",
+        title: "Server Error",
+        text: err.message,
       });
-    }
-  } catch (err) {
-    Swal.fire({
-      imageUrl: "/images/error.png",
-      imageWidth: 170,
-      imageHeight: 170,
-      title: "Server Error",
-      text: err.message,
-    });
 
-    console.error(err);
-  }
-};
+      console.error(err);
+    }
+  };
   return (
     <div className={styles.wrapper}>
       <section className={styles.container}>

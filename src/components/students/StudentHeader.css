@@ -26,7 +26,6 @@
   overflow: visible;
 }
 
-
 /* =====================================================
    SEARCH
 ===================================================== */
@@ -59,9 +58,7 @@
 .student-header-search:focus-within {
   border-color: #25714e;
 
-  box-shadow:
-    0 0 0 3px
-    rgba(37, 113, 78, 0.1);
+  box-shadow: 0 0 0 3px rgba(37, 113, 78, 0.1);
 }
 
 .student-header-search input {
@@ -104,7 +101,6 @@
   stroke-linecap: round;
 }
 
-
 /* =====================================================
    RIGHT SIDE
 ===================================================== */
@@ -125,7 +121,6 @@
   overflow: visible;
 }
 
-
 /* =====================================================
    JOIN COURSE
 ===================================================== */
@@ -142,9 +137,7 @@
   background: #25714e;
   color: #ffffff;
 
-  box-shadow:
-    4px 5px 0
-    rgba(23, 25, 39, 0.26);
+  box-shadow: 4px 5px 0 rgba(23, 25, 39, 0.26);
 
   cursor: pointer;
 
@@ -165,7 +158,6 @@
 .student-join-course-button:active {
   transform: translateY(1px);
 }
-
 
 /* =====================================================
    NOTIFICATION
@@ -219,7 +211,6 @@
   stroke-linejoin: round;
 }
 
-
 /* BADGE */
 
 .notification-badge {
@@ -249,7 +240,6 @@
 
   box-sizing: border-box;
 }
-
 
 /* =====================================================
    NOTIFICATION DROPDOWN
@@ -284,20 +274,15 @@
   from {
     opacity: 0;
 
-    transform:
-      translateY(-6px)
-      scale(0.98);
+    transform: translateY(-6px) scale(0.98);
   }
 
   to {
     opacity: 1;
 
-    transform:
-      translateY(0)
-      scale(1);
+    transform: translateY(0) scale(1);
   }
 }
-
 
 /* =====================================================
    NOTIFICATION HEADER
@@ -368,7 +353,6 @@
   background: #edf6f1;
 }
 
-
 /* =====================================================
    NOTIFICATION TABS
 ===================================================== */
@@ -411,7 +395,6 @@
   color: #25714e;
 }
 
-
 /* =====================================================
    NOTIFICATION LIST
 ===================================================== */
@@ -425,7 +408,7 @@
 
   scrollbar-width: thin;
 
-    display: flex;
+  display: flex;
   flex-direction: column;
   gap: 8px;
 }
@@ -474,7 +457,6 @@
   background: #e5f1e9;
 }
 
-
 /* NOTIFICATION ICON */
 
 .notification-item-icon {
@@ -516,7 +498,6 @@
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-
 
 /* NOTIFICATION TEXT */
 
@@ -574,7 +555,6 @@
 
   background: #2d7b58;
 }
-
 
 /* =====================================================
    EMPTY NOTIFICATION
@@ -660,7 +640,6 @@
   background: #f2f7f4;
 }
 
-
 /* =====================================================
    PROFILE
 ===================================================== */
@@ -696,7 +675,6 @@
 
   cursor: pointer;
 }
-
 
 /* PROFILE IMAGE */
 
@@ -742,7 +720,6 @@
   background: #2ea86b;
 }
 
-
 /* USER NAME */
 
 .profile-user-info {
@@ -764,7 +741,6 @@
 .profile-user-info small {
   display: none;
 }
-
 
 /* =====================================================
    PROFILE THREE DOT BUTTON
@@ -803,7 +779,6 @@
   fill: currentColor;
 }
 
-
 /* =====================================================
    PROFILE DROPDOWN
 ===================================================== */
@@ -838,20 +813,15 @@
   from {
     opacity: 0;
 
-    transform:
-      translateY(-6px)
-      scale(0.98);
+    transform: translateY(-6px) scale(0.98);
   }
 
   to {
     opacity: 1;
 
-    transform:
-      translateY(0)
-      scale(1);
+    transform: translateY(0) scale(1);
   }
 }
-
 
 /* PROFILE DROPDOWN HEADER */
 
@@ -916,7 +886,6 @@
   background: #e7e9ed;
 }
 
-
 /* =====================================================
    PROFILE MENU OPTIONS
 ===================================================== */
@@ -973,20 +942,16 @@
   stroke-linejoin: round;
 }
 
-
 /* LOGOUT */
 
-.profile-dropdown-menu
-  .profile-logout-option {
+.profile-dropdown-menu .profile-logout-option {
   color: #b34c4c;
 }
 
-.profile-dropdown-menu
-  .profile-logout-option:hover {
+.profile-dropdown-menu .profile-logout-option:hover {
   background: #fff0f0;
   color: #9d3030;
 }
-
 
 /* =====================================================
    RESPONSIVE
@@ -1014,8 +979,7 @@
 
     width: auto;
 
-    max-height:
-      calc(100vh - 82px);
+    max-height: calc(100vh - 82px);
   }
 
   .profile-user-info {

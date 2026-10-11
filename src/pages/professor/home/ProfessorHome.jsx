@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   FiArrowRight,
   FiBookOpen,
@@ -7,45 +7,53 @@ import {
   FiFileText,
   FiLayers,
   FiUsers,
-} from 'react-icons/fi';
-import { useAuth } from '../../../context/AuthContext.jsx';
+} from "react-icons/fi";
+import { useAuth } from "../../../context/AuthContext.jsx";
 import {
   PROFESSOR_COURSES_EVENT,
   readProfessorCourses,
-} from '../professorData.js';
-import { fetchCourses } from '../../../services/courseApi.js';
-import { fetchCourseMonitoring } from '../../../services/monitoringApi.js';
-import '../layout/ProfessorLayout.css';
+} from "../professorData.js";
+import { fetchCourses } from "../../../services/courseApi.js";
+import { fetchCourseMonitoring } from "../../../services/monitoringApi.js";
+import "../layout/ProfessorLayout.css";
 
 const coursePerformanceSeed = {};
-const fallbackSections = ['BSIT 1A', 'BSIT 2B', 'BSCS 3A', 'BSIT 4A'];
+const fallbackSections = ["BSIT 1A", "BSIT 2B", "BSCS 3A", "BSIT 4A"];
 
 function getProfessorName(user) {
   const rawName =
     user?.displayName ||
     user?.display_name ||
     user?.name ||
-    localStorage.getItem('username') ||
-    'Professor';
+    localStorage.getItem("username") ||
+    "Professor";
 
-  return rawName.trim() || 'Professor';
+  return rawName.trim() || "Professor";
 }
 
 function getCourseId(course, index) {
-  return String(course.id || course.course_id || course.code || `course-${index}`);
+  return String(
+    course.id || course.course_id || course.code || `course-${index}`,
+  );
 }
 
 function getCourseCode(course, index) {
-  return course.code || course.course_code || `CRS${String(index + 1).padStart(3, '0')}`;
+  return (
+    course.code ||
+    course.course_code ||
+    `CRS${String(index + 1).padStart(3, "0")}`
+  );
 }
 
 function getCourseTitle(course) {
-  return course.title || course.courseName || course.course_name || 'Untitled course';
+  return (
+    course.title || course.courseName || course.course_name || "Untitled course"
+  );
 }
 
 function getManageCoursePath(course) {
   const id = course.id || course.course_id;
-  return id ? `/professor/courses/edit/${id}` : '/professor/courses';
+  return id ? `/professor/courses/edit/${id}` : "/professor/courses";
 }
 
 function clampPercent(value) {
@@ -60,10 +68,17 @@ function createFallbackPerformance(course, index) {
   const proficient = Math.max(0, students - advanced - developing - beginning);
 
   return {
-    section: course.section || fallbackSections[index % fallbackSections.length],
-    averageQuizScore: clampPercent(course.averageQuizScore || course.quizAverage || 0),
-    completionRate: clampPercent(course.completionRate || course.completion || course.progress || 0),
-    averageMastery: clampPercent(course.averageMastery || course.masteryAverage || 0),
+    section:
+      course.section || fallbackSections[index % fallbackSections.length],
+    averageQuizScore: clampPercent(
+      course.averageQuizScore || course.quizAverage || 0,
+    ),
+    completionRate: clampPercent(
+      course.completionRate || course.completion || course.progress || 0,
+    ),
+    averageMastery: clampPercent(
+      course.averageMastery || course.masteryAverage || 0,
+    ),
     mastery: {
       Advanced: advanced,
       Proficient: proficient,
@@ -78,10 +93,10 @@ function normalizeDashboardCourse(course, index) {
   const performance =
     coursePerformanceSeed[code] || createFallbackPerformance(course, index);
   const modules = Number(
-    course.modules || course.moduleCount || course.lessonPages?.length || 0
+    course.modules || course.moduleCount || course.lessonPages?.length || 0,
   );
   const publishedQuizzes = Number(
-    course.quizzes || course.publishedQuizzes || course.quizItems?.length || 0
+    course.quizzes || course.publishedQuizzes || course.quizItems?.length || 0,
   );
 
   return {
@@ -98,32 +113,33 @@ function normalizeDashboardCourse(course, index) {
         course.average_quiz_score ??
         course.quizAverage ??
         course.quiz_average ??
-        performance.averageQuizScore
+        performance.averageQuizScore,
     ),
     completionRate: clampPercent(
       course.completionRate ??
         course.completion_rate ??
         course.completion ??
         course.progress ??
-        performance.completionRate
+        performance.completionRate,
     ),
     averageMastery: clampPercent(
       course.averageMastery ??
         course.average_mastery ??
         course.masteryAverage ??
         course.mastery_average ??
-        performance.averageMastery
+        performance.averageMastery,
     ),
-    mastery: course.masteryDistribution || course.mastery || performance.mastery,
+    mastery:
+      course.masteryDistribution || course.mastery || performance.mastery,
     support: [],
     managePath: getManageCoursePath(course),
   };
 }
 function readPercent(...values) {
   for (const value of values) {
-    if (value === null || value === undefined || value === '') continue;
+    if (value === null || value === undefined || value === "") continue;
 
-    const percent = Number(String(value).replace('%', ''));
+    const percent = Number(String(value).replace("%", ""));
     if (Number.isFinite(percent)) return clampPercent(percent);
   }
 
@@ -136,17 +152,23 @@ function averagePercents(values) {
   if (!cleanValues.length) return null;
 
   return clampPercent(
-    cleanValues.reduce((sum, value) => sum + value, 0) / cleanValues.length
+    cleanValues.reduce((sum, value) => sum + value, 0) / cleanValues.length,
   );
 }
 
 function getCourseMonitoringKey(course) {
-  return String(course?.id || course?.course_id || course?.code || course?.course_code || '');
+  return String(
+    course?.id ||
+      course?.course_id ||
+      course?.code ||
+      course?.course_code ||
+      "",
+  );
 }
 
 function getCourseMonitoringRequestIds(course) {
   return [course?.id, course?.course_id, course?.code, course?.course_code]
-    .map((value) => String(value || '').trim())
+    .map((value) => String(value || "").trim())
     .filter(Boolean)
     .filter((value, index, values) => values.indexOf(value) === index);
 }
@@ -170,7 +192,7 @@ function getStudentName(student) {
     student?.full_name ||
     student?.username ||
     student?.email ||
-    'Unnamed student'
+    "Unnamed student"
   );
 }
 
@@ -182,7 +204,7 @@ function getStudentScore(student) {
     student?.averageScore,
     student?.average_score,
     student?.quizScore,
-    student?.quiz_score
+    student?.quiz_score,
   );
 }
 
@@ -194,29 +216,30 @@ function getStudentCompletion(student) {
     student?.module_progress,
     student?.progress_percent,
     student?.completionRate,
-    student?.completion_rate
+    student?.completion_rate,
   );
 }
 
 function getStudentConcern(student, completion, score) {
   if (student?.concern) return student.concern;
   if (student?.weakestTopic) return `Needs support in ${student.weakestTopic}`;
-  if (student?.weakest_topic) return `Needs support in ${student.weakest_topic}`;
-  if (completion !== null && completion < 55) return 'Incomplete modules';
-  if (score !== null && score < 60) return 'Low mastery';
+  if (student?.weakest_topic)
+    return `Needs support in ${student.weakest_topic}`;
+  if (completion !== null && completion < 55) return "Incomplete modules";
+  if (score !== null && score < 60) return "Low mastery";
 
-  return 'Needs review';
+  return "Needs review";
 }
 
 function studentNeedsAttention(student) {
-  const status = String(student?.status || '').toLowerCase();
+  const status = String(student?.status || "").toLowerCase();
   const score = getStudentScore(student);
   const completion = getStudentCompletion(student);
 
   return (
-    status.includes('risk') ||
-    status.includes('review') ||
-    status.includes('attention') ||
+    status.includes("risk") ||
+    status.includes("review") ||
+    status.includes("attention") ||
     (score !== null && score < 75) ||
     (completion !== null && completion < 78)
   );
@@ -226,12 +249,14 @@ function buildMasteryDistribution(scores, fallbackMastery) {
   const cleanScores = scores.filter((score) => Number.isFinite(score));
 
   if (!cleanScores.length) {
-    return fallbackMastery || {
-      Advanced: 0,
-      Proficient: 0,
-      Developing: 0,
-      Beginning: 0,
-    };
+    return (
+      fallbackMastery || {
+        Advanced: 0,
+        Proficient: 0,
+        Developing: 0,
+        Beginning: 0,
+      }
+    );
   }
 
   return cleanScores.reduce(
@@ -248,7 +273,7 @@ function buildMasteryDistribution(scores, fallbackMastery) {
       Proficient: 0,
       Developing: 0,
       Beginning: 0,
-    }
+    },
   );
 }
 
@@ -263,17 +288,17 @@ function applyMonitoringToCourse(course, monitoring) {
   const topicAverage = averagePercents(
     getMonitoringTopics(monitoring)
       .map((topic) => readPercent(topic.average, topic.score, topic.value))
-      .filter((value) => value !== null)
+      .filter((value) => value !== null),
   );
   const quizAverage = averagePercents(
     getMonitoringAssessments(monitoring)
       .filter((assessment) =>
-        String(assessment.label || assessment.name || '')
+        String(assessment.label || assessment.name || "")
           .toLowerCase()
-          .includes('quiz')
+          .includes("quiz"),
       )
       .map((assessment) => readPercent(assessment.value, assessment.average))
-      .filter((value) => value !== null)
+      .filter((value) => value !== null),
   );
   const averageScore = averagePercents(studentScores);
   const completionRate = averagePercents(studentCompletions);
@@ -315,7 +340,7 @@ function buildStudentsNeedingAttention(courses, monitoringByCourse) {
 }
 
 function getActivityTime(value) {
-  if (!value) return 'Recently';
+  if (!value) return "Recently";
 
   const rawValue = String(value);
   const relativeTimePattern = /(today|yesterday|ago|week|month|tomorrow)/i;
@@ -326,9 +351,9 @@ function getActivityTime(value) {
   if (Number.isNaN(date.getTime())) return rawValue;
 
   return date.toLocaleDateString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
+    month: "short",
+    day: "numeric",
+    year: "numeric",
   });
 }
 
@@ -380,13 +405,13 @@ function buildActivityItems(courses, monitoringByCourse) {
         .filter(Boolean);
 
       const updatedAt = getCourseUpdatedAt(course);
-      const status = String(course.status || '').toLowerCase();
-      const courseAction = status === 'published' ? 'published' : 'updated';
+      const status = String(course.status || "").toLowerCase();
+      const courseAction = status === "published" ? "published" : "updated";
 
       return [
         ...studentItems,
         {
-          icon: status === 'published' ? FiCheckCircle : FiLayers,
+          icon: status === "published" ? FiCheckCircle : FiLayers,
           sortValue: getActivitySortValue(updatedAt),
           time: getActivityTime(updatedAt),
           text: `${course.title} was ${courseAction}.`,
@@ -399,7 +424,7 @@ function buildActivityItems(courses, monitoringByCourse) {
 export default function ProfessorHome() {
   const { user } = useAuth();
   const [storedCourses, setStoredCourses] = useState(() =>
-    readProfessorCourses().filter((course) => !course.archived)
+    readProfessorCourses().filter((course) => !course.archived),
   );
   const [monitoringByCourse, setMonitoringByCourse] = useState({});
 
@@ -414,7 +439,7 @@ export default function ProfessorHome() {
           setStoredCourses(courses.filter((course) => !course.archived));
         }
       } catch (error) {
-        console.error('Professor dashboard course load error:', error);
+        console.error("Professor dashboard course load error:", error);
       }
     };
 
@@ -464,17 +489,22 @@ export default function ProfessorHome() {
           }
 
           if (lastError) {
-            console.error('Professor dashboard monitoring load error:', lastError);
+            console.error(
+              "Professor dashboard monitoring load error:",
+              lastError,
+            );
           }
 
           return [key, null];
-        })
+        }),
       );
 
       if (!active) return;
 
       setMonitoringByCourse(
-        Object.fromEntries(entries.filter(([key, monitoring]) => key && monitoring))
+        Object.fromEntries(
+          entries.filter(([key, monitoring]) => key && monitoring),
+        ),
       );
     };
 
@@ -489,54 +519,54 @@ export default function ProfessorHome() {
     return normalizedCourses.map((course) =>
       applyMonitoringToCourse(
         course,
-        monitoringByCourse[getCourseMonitoringKey(course)]
-      )
+        monitoringByCourse[getCourseMonitoringKey(course)],
+      ),
     );
   }, [normalizedCourses, monitoringByCourse]);
 
   const overviewCourses = dashboardCourses.slice(0, 4);
   const studentsNeedingAttention = useMemo(
     () => buildStudentsNeedingAttention(dashboardCourses, monitoringByCourse),
-    [dashboardCourses, monitoringByCourse]
+    [dashboardCourses, monitoringByCourse],
   );
   const activityItems = useMemo(
     () => buildActivityItems(dashboardCourses, monitoringByCourse),
-    [dashboardCourses, monitoringByCourse]
+    [dashboardCourses, monitoringByCourse],
   );
   const professorName = getProfessorName(user);
   const professorGreeting =
-    professorName.toLowerCase() === 'professor'
-      ? 'Good morning, Professor'
+    professorName.toLowerCase() === "professor"
+      ? "Good morning, Professor"
       : `Good morning, Prof. ${professorName}`;
   const totalStudents = dashboardCourses.reduce(
     (sum, course) => sum + Number(course.students || 0),
-    0
+    0,
   );
   const publishedQuizzes = dashboardCourses.reduce(
     (sum, course) => sum + Number(course.publishedQuizzes || 0),
-    0
+    0,
   );
 
   const summaryCards = [
     {
-      label: 'Active Courses',
+      label: "Active Courses",
       value: dashboardCourses.length,
-      href: '/professor/courses',
-      link: 'View courses',
+      href: "/professor/courses",
+      link: "View courses",
       icon: FiBookOpen,
     },
     {
-      label: 'Total Students',
+      label: "Total Students",
       value: totalStudents,
-      href: '/professor/students',
-      link: 'View students',
+      href: "/professor/students",
+      link: "View students",
       icon: FiUsers,
     },
     {
-      label: 'Published Quizzes',
+      label: "Published Quizzes",
       value: publishedQuizzes,
-      href: '/professor/courses',
-      link: 'Review quizzes',
+      href: "/professor/courses",
+      link: "Review quizzes",
       icon: FiFileText,
     },
   ];
@@ -547,7 +577,9 @@ export default function ProfessorHome() {
         <div>
           <span className="dashboard-eyebrow">Professor Dashboard</span>
           <h1>{professorGreeting}</h1>
-          <p>Manage your courses and monitor your students' learning progress.</p>
+          <p>
+            Manage your courses and monitor your students' learning progress.
+          </p>
         </div>
       </div>
 
@@ -619,7 +651,10 @@ export default function ProfessorHome() {
                       </span>
                     </td>
                     <td>
-                      <Link className="dashboard-table-action" to={course.managePath}>
+                      <Link
+                        className="dashboard-table-action"
+                        to={course.managePath}
+                      >
                         Manage Course
                       </Link>
                     </td>
@@ -636,7 +671,10 @@ export default function ProfessorHome() {
           <div className="dashboard-section-header">
             <div>
               <h2>Students Needing Attention</h2>
-              <p>Support signals from recent scores, module progress, and activity.</p>
+              <p>
+                Support signals from recent scores, module progress, and
+                activity.
+              </p>
             </div>
             <Link to="/professor/students">
               View Monitoring
@@ -662,13 +700,22 @@ export default function ProfessorHome() {
                   </tr>
                 ) : (
                   studentsNeedingAttention.map((student) => (
-                    <tr key={`${student.courseId}-${student.id || student.name}`}>
+                    <tr
+                      key={`${student.courseId}-${student.id || student.name}`}
+                    >
                       <td>{student.name}</td>
                       <td>{student.courseTitle}</td>
                       <td>{student.concern}</td>
-                      <td>{student.latestScore === null ? 'No score' : `${student.latestScore}%`}</td>
                       <td>
-                        <Link className="dashboard-table-action" to="/professor/students">
+                        {student.latestScore === null
+                          ? "No score"
+                          : `${student.latestScore}%`}
+                      </td>
+                      <td>
+                        <Link
+                          className="dashboard-table-action"
+                          to="/professor/students"
+                        >
                           View Progress
                         </Link>
                       </td>
@@ -700,7 +747,10 @@ export default function ProfessorHome() {
               activityItems.map((activity) => {
                 const Icon = activity.icon;
                 return (
-                  <div className="dashboard-timeline-item" key={`${activity.time}-${activity.text}`}>
+                  <div
+                    className="dashboard-timeline-item"
+                    key={`${activity.time}-${activity.text}`}
+                  >
                     <span>
                       <Icon />
                     </span>
@@ -718,5 +768,3 @@ export default function ProfessorHome() {
     </section>
   );
 }
-
-

@@ -109,12 +109,7 @@
   border-bottom: 1px solid #e4e8e5;
 
   background:
-    linear-gradient(
-      135deg,
-      rgba(37, 113, 78, 0.06),
-      transparent 58%
-    ),
-    #ffffff;
+    linear-gradient(135deg, rgba(37, 113, 78, 0.06), transparent 58%), #ffffff;
 }
 
 .professor-password-card-icon {
@@ -758,8 +753,7 @@
 .professor-password-settings-card::before,
 .professor-password-card::before {
   background:
-    linear-gradient(135deg, rgba(127, 168, 214, 0.12), transparent 58%),
-    #ffffff;
+    linear-gradient(135deg, rgba(127, 168, 214, 0.12), transparent 58%), #ffffff;
 }
 
 .professor-settings-eyebrow,

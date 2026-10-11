@@ -24,7 +24,7 @@ export default function MatchingType() {
   const isDeckMode = Boolean(deckId);
   const practiceSession = useMemo(
     () => getStoredPracticeSession({ lessonId, deckId }),
-    [lessonId, deckId]
+    [lessonId, deckId],
   );
 
   const [lesson, setLesson] = useState(null);
@@ -86,7 +86,7 @@ export default function MatchingType() {
         if (isLessonMode) {
           const res = await fetch(
             `${API_BASE}/getLessonsById.php?id=${lessonId}`,
-            { credentials: "include" }
+            { credentials: "include" },
           );
 
           const data = normalizeLessonData(await res.json());
@@ -102,7 +102,7 @@ export default function MatchingType() {
         if (isDeckMode) {
           const deckRes = await fetch(
             `${API_BASE}/getDeckById.php?deckId=${deckId}`,
-            { credentials: "include" }
+            { credentials: "include" },
           );
 
           const deckData = await deckRes.json();
@@ -110,7 +110,7 @@ export default function MatchingType() {
 
           const cardsRes = await fetch(
             `${API_BASE}/getCardsByDeck.php?deckId=${deckId}`,
-            { credentials: "include" }
+            { credentials: "include" },
           );
 
           const cardsData = await cardsRes.json();
@@ -178,7 +178,8 @@ export default function MatchingType() {
     if (!rawQuiz) return [];
 
     try {
-      const parsed = typeof rawQuiz === "string" ? JSON.parse(rawQuiz) : rawQuiz;
+      const parsed =
+        typeof rawQuiz === "string" ? JSON.parse(rawQuiz) : rawQuiz;
 
       if (!Array.isArray(parsed)) return [];
 
@@ -219,10 +220,12 @@ export default function MatchingType() {
 
   const roundPairs = useMemo(
     () => matchingPairs.slice(checkpointStartIndex, checkpointStartIndex + 10),
-    [matchingPairs, checkpointStartIndex]
+    [matchingPairs, checkpointStartIndex],
   );
   const roundEndIndex = checkpointStartIndex + roundPairs.length;
-  const roundScore = roundPairs.filter(item => firstAttempts[item.id]?.isCorrect).length;
+  const roundScore = roundPairs.filter(
+    (item) => firstAttempts[item.id]?.isCorrect,
+  ).length;
   const isLastRound = roundEndIndex >= matchingPairs.length;
 
   const leftCards = useMemo(() => {
@@ -230,7 +233,7 @@ export default function MatchingType() {
       roundPairs.map((item) => ({
         id: item.id,
         text: item.question,
-      }))
+      })),
     );
   }, [roundPairs]);
 
@@ -239,7 +242,7 @@ export default function MatchingType() {
       roundPairs.map((item) => ({
         id: item.id,
         text: item.answer,
-      }))
+      })),
     );
   }, [roundPairs]);
 
@@ -255,19 +258,19 @@ export default function MatchingType() {
     const completedSet = completedIds ? new Set(completedIds) : null;
     const metadata = getPracticeResultMetadata(
       practiceSession,
-      isDeckMode ? "deck" : "lesson"
+      isDeckMode ? "deck" : "lesson",
     );
 
     const answers = matchingPairs
       .filter((item) => !completedSet || completedSet.has(item.id))
       .map((item) => ({
-      cardId: item.cardId,
-      question: item.question,
-      userAnswer: firstAttempts[item.id]?.answer || item.answer,
-      correctAnswer: item.answer,
-      explanation: item.answer,
-      isCorrect: Boolean(firstAttempts[item.id]?.isCorrect),
-    }));
+        cardId: item.cardId,
+        question: item.question,
+        userAnswer: firstAttempts[item.id]?.answer || item.answer,
+        correctAnswer: item.answer,
+        explanation: item.answer,
+        isCorrect: Boolean(firstAttempts[item.id]?.isCorrect),
+      }));
 
     const resultPayload = {
       ...metadata,
@@ -284,14 +287,18 @@ export default function MatchingType() {
     if (isDeckMode) {
       saveAccountQuizResult(
         `deckQuizResults_${deckId}`,
-        JSON.stringify(resultPayload)
+        JSON.stringify(resultPayload),
       );
     }
   };
 
-  const finishMatching = (finalMatchedIds = matchedIds, returnToDeck = false) => {
-    const finalScore = matchingPairs.filter(item =>
-      finalMatchedIds.includes(item.id) && firstAttempts[item.id]?.isCorrect
+  const finishMatching = (
+    finalMatchedIds = matchedIds,
+    returnToDeck = false,
+  ) => {
+    const finalScore = matchingPairs.filter(
+      (item) =>
+        finalMatchedIds.includes(item.id) && firstAttempts[item.id]?.isCorrect,
     ).length;
     saveMatchingResult(finalScore, finalMatchedIds);
 
@@ -300,18 +307,20 @@ export default function MatchingType() {
         returnToDeck && isDeckMode
           ? `/deck/${deckId}`
           : isDeckMode
-          ? `/review/deck/${deckId}`
-          : getPracticeReviewPath(practiceSession, { lessonId, deckId })
+            ? `/review/deck/${deckId}`
+            : getPracticeReviewPath(practiceSession, { lessonId, deckId }),
       );
     }, 300);
   };
 
   const repeatCheckpointPairs = () => {
-    const roundIds = new Set(roundPairs.map(item => item.id));
-    setMatchedIds(prev => prev.filter(id => !roundIds.has(id)));
-    setFirstAttempts(prev => Object.fromEntries(
-      Object.entries(prev).filter(([id]) => !roundIds.has(id))
-    ));
+    const roundIds = new Set(roundPairs.map((item) => item.id));
+    setMatchedIds((prev) => prev.filter((id) => !roundIds.has(id)));
+    setFirstAttempts((prev) =>
+      Object.fromEntries(
+        Object.entries(prev).filter(([id]) => !roundIds.has(id)),
+      ),
+    );
     setFirstCard(null);
     setWrongPair([]);
     setCheckpointOpen(false);
@@ -325,19 +334,29 @@ export default function MatchingType() {
   };
 
   const handleCardClick = async (card, side) => {
-    if (checkpointOpen || clickPending.current || wrongPair.length || matchedIds.includes(card.id)) return;
+    if (
+      checkpointOpen ||
+      clickPending.current ||
+      wrongPair.length ||
+      matchedIds.includes(card.id)
+    )
+      return;
     if (!firstCard || firstCard.side === side) {
       setFirstCard({ ...card, side });
       return;
     }
-    const questionCard = side === 'left' ? card : firstCard;
-    const answerCard = side === 'right' ? card : firstCard;
-    const expected = roundPairs.find(item => item.id === questionCard.id);
+    const questionCard = side === "left" ? card : firstCard;
+    const answerCard = side === "right" ? card : firstCard;
+    const expected = roundPairs.find((item) => item.id === questionCard.id);
     const isCorrect = questionCard.id === answerCard.id;
-    setFirstAttempts(prev => prev[questionCard.id] ? prev : {
-      ...prev,
-      [questionCard.id]: { isCorrect, answer: answerCard.text },
-    });
+    setFirstAttempts((prev) =>
+      prev[questionCard.id]
+        ? prev
+        : {
+            ...prev,
+            [questionCard.id]: { isCorrect, answer: answerCard.text },
+          },
+    );
     if (isCorrect) {
       clickPending.current = true;
       try {
@@ -348,7 +367,8 @@ export default function MatchingType() {
         const updated = [...matchedIds, questionCard.id];
         setMatchedIds(updated);
         setFirstCard(null);
-        if (roundPairs.every(item => updated.includes(item.id))) setCheckpointOpen(true);
+        if (roundPairs.every((item) => updated.includes(item.id)))
+          setCheckpointOpen(true);
       } finally {
         clickPending.current = false;
       }
@@ -363,43 +383,42 @@ export default function MatchingType() {
     return <LoadingState />;
   }
 
-if (matchingPairs.length === 0) {
-  return (
-    <div className={styles.emptyWrapper}>
-      <div className={styles.emptyCard}>
-        <img
-          src="/images/404.png"
-          alt="No matching"
-          className={styles.emptyImage}
-        />
+  if (matchingPairs.length === 0) {
+    return (
+      <div className={styles.emptyWrapper}>
+        <div className={styles.emptyCard}>
+          <img
+            src="/images/404.png"
+            alt="No matching"
+            className={styles.emptyImage}
+          />
 
-        <h2 className={styles.emptyTitle}>No Matching Quiz Yet</h2>
+          <h2 className={styles.emptyTitle}>No Matching Quiz Yet</h2>
 
-        <p className={styles.emptyText}>
-          No matching quiz questions are available for this lesson.
-        </p>
+          <p className={styles.emptyText}>
+            No matching quiz questions are available for this lesson.
+          </p>
 
-        <button
-          type="button"
-          className={styles.emptyBtn}
-          onClick={() =>
-            navigate(
-              isDeckMode
-                ? `/review/deck/${deckId}`
-                : getPracticeBackPath(practiceSession, { lessonId, deckId })
-            )
-          }
-        >
-          Go Back
-        </button>
+          <button
+            type="button"
+            className={styles.emptyBtn}
+            onClick={() =>
+              navigate(
+                isDeckMode
+                  ? `/review/deck/${deckId}`
+                  : getPracticeBackPath(practiceSession, { lessonId, deckId }),
+              )
+            }
+          >
+            Go Back
+          </button>
+        </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
   return (
     <div className={styles.wrapper}>
-
       <button
         type="button"
         className={styles.settingsBtn}
@@ -476,27 +495,62 @@ if (matchingPairs.length === 0) {
 
       {checkpointOpen && (
         <div className={styles.roundOverlay}>
-          <section className={styles.roundModal} role="dialog" aria-modal="true" aria-labelledby="matching-round-title">
-            <h2 id="matching-round-title">{isLastRound ? 'Matching Quiz Complete' : 'Set Complete'}</h2>
+          <section
+            className={styles.roundModal}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="matching-round-title"
+          >
+            <h2 id="matching-round-title">
+              {isLastRound ? "Matching Quiz Complete" : "Set Complete"}
+            </h2>
             <div className={styles.roundStats}>
               <div className={styles.correctStat}>
-                <span className={styles.statIcon} aria-hidden="true">✓</span>
+                <span className={styles.statIcon} aria-hidden="true">
+                  ✓
+                </span>
                 <strong>{roundScore}</strong>
                 <span>Correct answers</span>
               </div>
               <div className={styles.incorrectStat}>
-                <span className={styles.statIcon} aria-hidden="true">×</span>
+                <span className={styles.statIcon} aria-hidden="true">
+                  ×
+                </span>
                 <strong>{roundPairs.length - roundScore}</strong>
                 <span>Incorrect answers</span>
               </div>
             </div>
-            <p className={styles.remainingCards}>Remaining cards: <strong>{matchingPairs.length - roundEndIndex}</strong></p>
-            <p className={styles.scoringNote}>Based on your first attempt for each question.</p>
+            <p className={styles.remainingCards}>
+              Remaining cards:{" "}
+              <strong>{matchingPairs.length - roundEndIndex}</strong>
+            </p>
+            <p className={styles.scoringNote}>
+              Based on your first attempt for each question.
+            </p>
             <div className={styles.checkpointActions}>
-              <button type="button" className={styles.repeatCardsBtn} onClick={repeatCheckpointPairs}>Repeat Cards</button>
-              <button type="button" className={styles.doneCardsBtn} onClick={() => finishMatching(matchedIds)}>Done</button>
+              <button
+                type="button"
+                className={styles.repeatCardsBtn}
+                onClick={repeatCheckpointPairs}
+              >
+                Repeat Cards
+              </button>
+              <button
+                type="button"
+                className={styles.doneCardsBtn}
+                onClick={() => finishMatching(matchedIds)}
+              >
+                Done
+              </button>
               {!isLastRound && (
-                <button autoFocus type="button" className={styles.nextCardsBtn} onClick={continueAfterCheckpoint}>Continue</button>
+                <button
+                  autoFocus
+                  type="button"
+                  className={styles.nextCardsBtn}
+                  onClick={continueAfterCheckpoint}
+                >
+                  Continue
+                </button>
               )}
             </div>
           </section>
@@ -507,9 +561,16 @@ if (matchingPairs.length === 0) {
           <h1 className={styles.courseTitle}>
             {lesson.title || "Matching Quiz"}
           </h1>
-          <p>Set {Math.floor(checkpointStartIndex / 10) + 1} · {roundPairs.length} questions · {matchedIds.filter(id => roundPairs.some(item => item.id === id)).length}/{roundPairs.length} matched</p>
-
-
+          <p>
+            Set {Math.floor(checkpointStartIndex / 10) + 1} ·{" "}
+            {roundPairs.length} questions ·{" "}
+            {
+              matchedIds.filter((id) =>
+                roundPairs.some((item) => item.id === id),
+              ).length
+            }
+            /{roundPairs.length} matched
+          </p>
         </header>
 
         <main className={styles.quizAppContainer}>

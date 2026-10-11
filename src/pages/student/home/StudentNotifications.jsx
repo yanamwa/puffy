@@ -1,9 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import {
   FiBell,
@@ -19,15 +14,12 @@ import StudentHeader from "../../../components/students/StudentHeader";
 
 import "./StudentNotifications.css";
 
-
 /* =====================================================
    API
 ===================================================== */
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_URL ||
-  "http://localhost:5000/api";
-
+  import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 /* =====================================================
    TABS
@@ -48,7 +40,6 @@ const tabs = [
   },
 ];
 
-
 /* =====================================================
    GET TOKEN
 ===================================================== */
@@ -65,7 +56,6 @@ function getStoredToken() {
   );
 }
 
-
 /* =====================================================
    FORMAT TIME
 ===================================================== */
@@ -79,66 +69,45 @@ function formatNotificationTime(value) {
     return "";
   }
 
-  const difference =
-    Date.now() - date.getTime();
+  const difference = Date.now() - date.getTime();
 
-  const minutes =
-    Math.floor(difference / 60000);
+  const minutes = Math.floor(difference / 60000);
 
   if (minutes < 1) {
     return "Just now";
   }
 
   if (minutes < 60) {
-    return `${minutes} ${
-      minutes === 1
-        ? "minute"
-        : "minutes"
-    } ago`;
+    return `${minutes} ${minutes === 1 ? "minute" : "minutes"} ago`;
   }
 
-  const hours =
-    Math.floor(minutes / 60);
+  const hours = Math.floor(minutes / 60);
 
   if (hours < 24) {
-    return `${hours} ${
-      hours === 1
-        ? "hour"
-        : "hours"
-    } ago`;
+    return `${hours} ${hours === 1 ? "hour" : "hours"} ago`;
   }
 
-  const days =
-    Math.floor(hours / 24);
+  const days = Math.floor(hours / 24);
 
   if (days < 7) {
-    return `${days} ${
-      days === 1
-        ? "day"
-        : "days"
-    } ago`;
+    return `${days} ${days === 1 ? "day" : "days"} ago`;
   }
 
-  return date.toLocaleDateString(
-    undefined,
-    {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    }
-  );
+  return date.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
-
 
 /* =====================================================
    NOTIFICATION ICON TYPE
 ===================================================== */
 
 function getNotificationIconType(type = "") {
-  const normalizedType =
-    String(type || "")
-      .trim()
-      .toLowerCase();
+  const normalizedType = String(type || "")
+    .trim()
+    .toLowerCase();
 
   if (
     normalizedType === "enrollment_request" ||
@@ -150,15 +119,12 @@ function getNotificationIconType(type = "") {
     return "course";
   }
 
-  if (
-    normalizedType === "announcement"
-  ) {
+  if (normalizedType === "announcement") {
     return "announcement";
   }
 
   return "system";
 }
-
 
 /* =====================================================
    ICON
@@ -180,14 +146,11 @@ function getIcon(type) {
   return <FiBell />;
 }
 
-
 /* =====================================================
    ESCAPE HTML
 ===================================================== */
 
-function escapeNotificationHtml(
-  value = ""
-) {
+function escapeNotificationHtml(value = "") {
   return String(value)
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -196,54 +159,38 @@ function escapeNotificationHtml(
     .replace(/'/g, "&#039;");
 }
 
-
 /* =====================================================
    SWEETALERT ICON
 ===================================================== */
 
 function getSweetAlertIcon(type = "") {
-  const normalizedType =
-    String(type || "")
-      .trim()
-      .toLowerCase();
+  const normalizedType = String(type || "")
+    .trim()
+    .toLowerCase();
 
   if (
-    normalizedType ===
-      "enrollment_declined" ||
-    normalizedType ===
-      "student_unenrolled" ||
-    normalizedType ===
-      "course_unenrollment"
+    normalizedType === "enrollment_declined" ||
+    normalizedType === "student_unenrolled" ||
+    normalizedType === "course_unenrollment"
   ) {
     return "warning";
   }
 
-  if (
-    normalizedType ===
-    "enrollment_approved"
-  ) {
+  if (normalizedType === "enrollment_approved") {
     return "success";
   }
 
   return "info";
 }
 
-
 /* =====================================================
    NORMALIZE NOTIFICATION
 ===================================================== */
 
-function normalizeNotification(
-  notification
-) {
-  const isRead =
-    notification.isRead ??
-    notification.is_read ??
-    false;
+function normalizeNotification(notification) {
+  const isRead = notification.isRead ?? notification.is_read ?? false;
 
-  const type =
-    notification.type ||
-    "notification";
+  const type = notification.type || "notification";
 
   return {
     ...notification,
@@ -258,25 +205,17 @@ function normalizeNotification(
       notification.notification_id ??
       notification.id,
 
-    title:
-      notification.title ||
-      "Notification",
+    title: notification.title || "Notification",
 
-    message:
-      notification.message ||
-      "",
+    message: notification.message || "",
 
     type,
 
-    iconType:
-      getNotificationIconType(type),
+    iconType: getNotificationIconType(type),
 
-    unread:
-      notification.unread ??
-      !Boolean(isRead),
+    unread: notification.unread ?? !Boolean(isRead),
 
-    isRead:
-      Boolean(isRead),
+    isRead: Boolean(isRead),
 
     course:
       notification.course ||
@@ -286,106 +225,66 @@ function normalizeNotification(
 
     time:
       notification.time ||
-      formatNotificationTime(
-        notification.createdAt ||
-        notification.created_at
-      ),
+      formatNotificationTime(notification.createdAt || notification.created_at),
   };
 }
-
 
 /* =====================================================
    STUDENT NOTIFICATIONS PAGE
 ===================================================== */
 
 export default function StudentNotifications() {
-  const [
-    activeTab,
-    setActiveTab,
-  ] = useState("all");
+  const [activeTab, setActiveTab] = useState("all");
 
-  const [
-    notifications,
-    setNotifications,
-  ] = useState([]);
+  const [notifications, setNotifications] = useState([]);
 
-  const [
-    isLoading,
-    setIsLoading,
-  ] = useState(true);
-
+  const [isLoading, setIsLoading] = useState(true);
 
   /* ===================================================
      LOAD NOTIFICATIONS
   =================================================== */
 
-  const loadNotifications =
-    useCallback(async () => {
-      const token =
-        getStoredToken();
+  const loadNotifications = useCallback(async () => {
+    const token = getStoredToken();
 
-      if (!token) {
-        setNotifications([]);
-        setIsLoading(false);
-        return;
+    if (!token) {
+      setNotifications([]);
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/notifications`, {
+        method: "GET",
+
+        headers: {
+          Accept: "application/json",
+
+          Authorization: `Bearer ${token}`,
+        },
+
+        credentials: "include",
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(data?.message || "Failed to fetch notifications.");
       }
 
-      try {
-        const response =
-          await fetch(
-            `${API_BASE_URL}/notifications`,
-            {
-              method: "GET",
+      const incoming = Array.isArray(data?.notifications)
+        ? data.notifications
+        : [];
 
-              headers: {
-                Accept:
-                  "application/json",
+      setNotifications(incoming.map(normalizeNotification));
+    } catch (error) {
+      console.error("Unable to load student notifications:", error);
 
-                Authorization:
-                  `Bearer ${token}`,
-              },
-
-              credentials:
-                "include",
-            }
-          );
-
-        const data =
-          await response
-            .json()
-            .catch(() => ({}));
-
-        if (!response.ok) {
-          throw new Error(
-            data?.message ||
-              "Failed to fetch notifications."
-          );
-        }
-
-        const incoming =
-          Array.isArray(
-            data?.notifications
-          )
-            ? data.notifications
-            : [];
-
-        setNotifications(
-          incoming.map(
-            normalizeNotification
-          )
-        );
-      } catch (error) {
-        console.error(
-          "Unable to load student notifications:",
-          error
-        );
-
-        setNotifications([]);
-      } finally {
-        setIsLoading(false);
-      }
-    }, []);
-
+      setNotifications([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   /* ===================================================
      AUTO REFRESH
@@ -394,251 +293,173 @@ export default function StudentNotifications() {
   useEffect(() => {
     loadNotifications();
 
-    const intervalId =
-      window.setInterval(
-        loadNotifications,
-        30000
-      );
+    const intervalId = window.setInterval(loadNotifications, 30000);
 
     return () => {
-      window.clearInterval(
-        intervalId
-      );
+      window.clearInterval(intervalId);
     };
   }, [loadNotifications]);
-
 
   /* ===================================================
      FILTER
   =================================================== */
 
-  const visibleNotifications =
-    useMemo(() => {
-      if (activeTab === "all") {
-        return notifications;
-      }
-
-      if (activeTab === "unread") {
-        return notifications.filter(
-          (notification) =>
-            notification.unread
-        );
-      }
-
-      if (
-        activeTab === "announcement"
-      ) {
-        return notifications.filter(
-          (notification) =>
-            notification.type ===
-            "announcement"
-        );
-      }
-
+  const visibleNotifications = useMemo(() => {
+    if (activeTab === "all") {
       return notifications;
-    }, [
-      activeTab,
-      notifications,
-    ]);
+    }
 
+    if (activeTab === "unread") {
+      return notifications.filter((notification) => notification.unread);
+    }
+
+    if (activeTab === "announcement") {
+      return notifications.filter(
+        (notification) => notification.type === "announcement",
+      );
+    }
+
+    return notifications;
+  }, [activeTab, notifications]);
 
   /* ===================================================
      UNREAD COUNT
   =================================================== */
 
-  const unreadCount =
-    notifications.filter(
-      (notification) =>
-        notification.unread
-    ).length;
-
+  const unreadCount = notifications.filter(
+    (notification) => notification.unread,
+  ).length;
 
   /* ===================================================
      MARK ALL READ
   =================================================== */
 
-  const markAllRead =
-    async () => {
-      if (unreadCount === 0) {
-        return;
-      }
+  const markAllRead = async () => {
+    if (unreadCount === 0) {
+      return;
+    }
 
-      const token =
-        getStoredToken();
+    const token = getStoredToken();
 
-      if (!token) return;
+    if (!token) return;
 
-      try {
-        const response =
-          await fetch(
-            `${API_BASE_URL}/notifications/read-all`,
-            {
-              method: "PATCH",
+    try {
+      const response = await fetch(`${API_BASE_URL}/notifications/read-all`, {
+        method: "PATCH",
 
-              headers: {
-                Accept:
-                  "application/json",
+        headers: {
+          Accept: "application/json",
 
-                Authorization:
-                  `Bearer ${token}`,
-              },
+          Authorization: `Bearer ${token}`,
+        },
 
-              credentials:
-                "include",
-            }
-          );
+        credentials: "include",
+      });
 
-        const data =
-          await response
-            .json()
-            .catch(() => ({}));
+      const data = await response.json().catch(() => ({}));
 
-        if (!response.ok) {
-          throw new Error(
-            data?.message ||
-              "Failed to mark notifications as read."
-          );
-        }
-
-        setNotifications(
-          (current) =>
-            current.map(
-              (notification) => ({
-                ...notification,
-                unread: false,
-                isRead: true,
-                is_read: true,
-              })
-            )
-        );
-      } catch (error) {
-        console.error(
-          "Unable to mark all notifications as read:",
-          error
+      if (!response.ok) {
+        throw new Error(
+          data?.message || "Failed to mark notifications as read.",
         );
       }
-    };
 
+      setNotifications((current) =>
+        current.map((notification) => ({
+          ...notification,
+          unread: false,
+          isRead: true,
+          is_read: true,
+        })),
+      );
+    } catch (error) {
+      console.error("Unable to mark all notifications as read:", error);
+    }
+  };
 
   /* ===================================================
      OPEN NOTIFICATION
   =================================================== */
 
-  const openNotification =
-    async (notification) => {
-      if (!notification) return;
+  const openNotification = async (notification) => {
+    if (!notification) return;
 
-      /* MARK ONE AS READ */
+    /* MARK ONE AS READ */
 
-      if (notification.unread) {
-        const token =
-          getStoredToken();
+    if (notification.unread) {
+      const token = getStoredToken();
 
-        if (token) {
-          try {
-            const notificationId =
-              notification.notificationId ||
-              notification.id;
+      if (token) {
+        try {
+          const notificationId = notification.notificationId || notification.id;
 
-            const response =
-              await fetch(
-                `${API_BASE_URL}/notifications/${notificationId}/read`,
-                {
-                  method: "PATCH",
+          const response = await fetch(
+            `${API_BASE_URL}/notifications/${notificationId}/read`,
+            {
+              method: "PATCH",
 
-                  headers: {
-                    Accept:
-                      "application/json",
+              headers: {
+                Accept: "application/json",
 
-                    Authorization:
-                      `Bearer ${token}`,
-                  },
+                Authorization: `Bearer ${token}`,
+              },
 
-                  credentials:
-                    "include",
-                }
-              );
+              credentials: "include",
+            },
+          );
 
-            const data =
-              await response
-                .json()
-                .catch(() => ({}));
+          const data = await response.json().catch(() => ({}));
 
-            if (!response.ok) {
-              throw new Error(
-                data?.message ||
-                  "Failed to mark notification as read."
-              );
-            }
-
-            setNotifications(
-              (current) =>
-                current.map(
-                  (item) =>
-                    item.id ===
-                    notification.id
-                      ? {
-                          ...item,
-                          unread: false,
-                          isRead: true,
-                          is_read: true,
-                        }
-                      : item
-                )
-            );
-          } catch (error) {
-            console.error(
-              "Unable to mark notification as read:",
-              error
+          if (!response.ok) {
+            throw new Error(
+              data?.message || "Failed to mark notification as read.",
             );
           }
+
+          setNotifications((current) =>
+            current.map((item) =>
+              item.id === notification.id
+                ? {
+                    ...item,
+                    unread: false,
+                    isRead: true,
+                    is_read: true,
+                  }
+                : item,
+            ),
+          );
+        } catch (error) {
+          console.error("Unable to mark notification as read:", error);
         }
       }
+    }
 
-
-      /* ===============================================
+    /* ===============================================
          SEPARATE REASON FROM MESSAGE
       =============================================== */
 
-      const fullMessage =
-        String(
-          notification.message || ""
-        ).trim();
+    const fullMessage = String(notification.message || "").trim();
 
-      let mainMessage =
-        fullMessage;
+    let mainMessage = fullMessage;
 
-      let reason = "";
+    let reason = "";
 
-      const reasonMatch =
-        fullMessage.match(
-          /(?:^|\s)Reason:\s*(.*)$/i
-        );
+    const reasonMatch = fullMessage.match(/(?:^|\s)Reason:\s*(.*)$/i);
 
-      if (reasonMatch) {
-        reason =
-          reasonMatch[1].trim();
+    if (reasonMatch) {
+      reason = reasonMatch[1].trim();
 
-        mainMessage =
-          fullMessage
-            .replace(
-              /(?:^|\s)Reason:\s*.*$/i,
-              ""
-            )
-            .trim();
-      }
+      mainMessage = fullMessage.replace(/(?:^|\s)Reason:\s*.*$/i, "").trim();
+    }
 
-
-      /* ===============================================
+    /* ===============================================
          SWEETALERT
       =============================================== */
 
-      await Swal.fire({
-        title:
-          notification.title ||
-          "Notification",
+    await Swal.fire({
+      title: notification.title || "Notification",
 
-        html: `
+      html: `
           <div style="
             text-align: left;
             padding: 4px 6px;
@@ -650,9 +471,7 @@ export default function StudentNotifications() {
               font-size: 15px;
               line-height: 1.7;
             ">
-              ${escapeNotificationHtml(
-                mainMessage
-              )}
+              ${escapeNotificationHtml(mainMessage)}
             </p>
 
             ${
@@ -696,9 +515,7 @@ export default function StudentNotifications() {
                       font-size: 14px;
                       line-height: 1.6;
                     ">
-                      ${escapeNotificationHtml(
-                        reason
-                      )}
+                      ${escapeNotificationHtml(reason)}
                     </div>
 
                   </div>
@@ -720,9 +537,7 @@ export default function StudentNotifications() {
 
                     font-size: 13px;
                   ">
-                    ${escapeNotificationHtml(
-                      notification.time
-                    )}
+                    ${escapeNotificationHtml(notification.time)}
                   </div>
                 `
                 : ""
@@ -731,247 +546,175 @@ export default function StudentNotifications() {
           </div>
         `,
 
-        icon:
-          getSweetAlertIcon(
-            notification.type
-          ),
+      icon: getSweetAlertIcon(notification.type),
 
-        confirmButtonText:
-          "Okay",
+      confirmButtonText: "Okay",
 
-        confirmButtonColor:
-          "#4f67d8",
+      confirmButtonColor: "#4f67d8",
 
-        width: 480,
+      width: 480,
 
-        showCloseButton: true,
-      });
-    };
-
+      showCloseButton: true,
+    });
+  };
 
   /* ===================================================
      PAGE
   =================================================== */
-return (
-  <div className="student-notifications-layout">
+  return (
+    <div className="student-notifications-layout">
+      {/* SIDEBAR */}
+      <StudentSidebar />
 
-    {/* SIDEBAR */}
-    <StudentSidebar />
+      {/* MAIN AREA */}
+      <div className="student-notifications-main-area">
+        {/* HEADER */}
+        <StudentHeader searchPlaceholder="Search notifications" />
 
-    {/* MAIN AREA */}
-    <div className="student-notifications-main-area">
+        {/* PAGE BODY */}
+        <main className="student-notifications-body">
+          <section className="student-notifications-page">
+            {/* PAGE HEADING */}
+            <div className="student-notifications-heading">
+              <div>
+                <p className="student-notifications-eyebrow">Student</p>
 
-      {/* HEADER */}
-      <StudentHeader
-        searchPlaceholder="Search notifications"
-      />
+                <h1>Notifications</h1>
 
-      {/* PAGE BODY */}
-      <main className="student-notifications-body">
-
-        <section className="student-notifications-page">
-
-          {/* PAGE HEADING */}
-          <div className="student-notifications-heading">
-            <div>
-              <p className="student-notifications-eyebrow">
-                Student
-              </p>
-
-              <h1>Notifications</h1>
-
-              <p className="student-notifications-description">
-                Review your course, enrollment, and platform notifications.
-              </p>
-            </div>
-
-            {unreadCount > 0 && (
-              <div className="student-notifications-summary">
-                <FiBell />
-
-                <div>
-                  <strong>{unreadCount}</strong>
-                  <span>
-                    {unreadCount === 1
-                      ? "Unread notification"
-                      : "Unread notifications"}
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* TOOLBAR */}
-          <div className="student-notification-toolbar">
-
-            <div className="student-notification-tabs">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.value}
-                  type="button"
-                  className={
-                    activeTab === tab.value
-                      ? "active"
-                      : ""
-                  }
-                  onClick={() =>
-                    setActiveTab(tab.value)
-                  }
-                >
-                  {tab.label}
-
-                  {tab.value === "unread" &&
-                    unreadCount > 0 && (
-                      <span className="student-tab-count">
-                        {unreadCount}
-                      </span>
-                    )}
-                </button>
-              ))}
-            </div>
-
-            <button
-              type="button"
-              className="student-mark-read"
-              onClick={markAllRead}
-              disabled={unreadCount === 0}
-            >
-              Mark all as read ({unreadCount})
-            </button>
-
-          </div>
-
-          {/* NOTIFICATIONS */}
-          <div className="student-notification-list">
-
-            {isLoading && notifications.length === 0 ? (
-
-              <div className="student-notification-empty">
-                <span className="student-empty-icon">
-                  <FiBell />
-                </span>
-
-                <strong>
-                  Loading notifications...
-                </strong>
-              </div>
-
-            ) : visibleNotifications.length === 0 ? (
-
-              <div className="student-notification-empty">
-
-                <span className="student-empty-icon">
-                  <FiBell />
-                </span>
-
-                <strong>
-                  No notifications found
-                </strong>
-
-                <p>
-                  New updates will appear here.
+                <p className="student-notifications-description">
+                  Review your course, enrollment, and platform notifications.
                 </p>
-
               </div>
 
-            ) : (
+              {unreadCount > 0 && (
+                <div className="student-notifications-summary">
+                  <FiBell />
 
-              visibleNotifications.map((notification) => {
-                const iconType =
-                  notification.iconType || "system";
+                  <div>
+                    <strong>{unreadCount}</strong>
+                    <span>
+                      {unreadCount === 1
+                        ? "Unread notification"
+                        : "Unread notifications"}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
 
-                return (
-                  <article
-                    key={notification.id}
-                    className={`student-notification-item ${
-                      notification.unread
-                        ? "unread"
-                        : ""
-                    }`}
-                    role="button"
-                    tabIndex={0}
-                    onClick={() =>
-                      openNotification(notification)
-                    }
-                    onKeyDown={(event) => {
-                      if (
-                        event.key === "Enter" ||
-                        event.key === " "
-                      ) {
-                        event.preventDefault();
-
-                        openNotification(
-                          notification
-                        );
-                      }
-                    }}
+            {/* TOOLBAR */}
+            <div className="student-notification-toolbar">
+              <div className="student-notification-tabs">
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.value}
+                    type="button"
+                    className={activeTab === tab.value ? "active" : ""}
+                    onClick={() => setActiveTab(tab.value)}
                   >
+                    {tab.label}
 
-                    {/* ICON */}
-                    <div
-                      className={`student-notification-icon ${iconType}`}
+                    {tab.value === "unread" && unreadCount > 0 && (
+                      <span className="student-tab-count">{unreadCount}</span>
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                type="button"
+                className="student-mark-read"
+                onClick={markAllRead}
+                disabled={unreadCount === 0}
+              >
+                Mark all as read ({unreadCount})
+              </button>
+            </div>
+
+            {/* NOTIFICATIONS */}
+            <div className="student-notification-list">
+              {isLoading && notifications.length === 0 ? (
+                <div className="student-notification-empty">
+                  <span className="student-empty-icon">
+                    <FiBell />
+                  </span>
+
+                  <strong>Loading notifications...</strong>
+                </div>
+              ) : visibleNotifications.length === 0 ? (
+                <div className="student-notification-empty">
+                  <span className="student-empty-icon">
+                    <FiBell />
+                  </span>
+
+                  <strong>No notifications found</strong>
+
+                  <p>New updates will appear here.</p>
+                </div>
+              ) : (
+                visibleNotifications.map((notification) => {
+                  const iconType = notification.iconType || "system";
+
+                  return (
+                    <article
+                      key={notification.id}
+                      className={`student-notification-item ${
+                        notification.unread ? "unread" : ""
+                      }`}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => openNotification(notification)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
+
+                          openNotification(notification);
+                        }
+                      }}
                     >
-                      {getIcon(iconType)}
-                    </div>
-
-                    {/* CONTENT */}
-                    <div className="student-notification-content">
-
-                      <h2>
-                        {notification.title}
-                      </h2>
-
-                      <p>
-                        {notification.message}
-                      </p>
-
-                      <div className="student-notification-meta">
-
-                        {notification.course && (
-                          <span>
-                            {notification.course}
-                          </span>
-                        )}
-
-                        <span>
-                          {notification.time}
-                        </span>
-
+                      {/* ICON */}
+                      <div className={`student-notification-icon ${iconType}`}>
+                        {getIcon(iconType)}
                       </div>
 
-                    </div>
+                      {/* CONTENT */}
+                      <div className="student-notification-content">
+                        <h2>{notification.title}</h2>
 
-                    {/* TYPE */}
-                    <div
-                      className={`student-notification-type ${iconType}`}
-                    >
-                      {String(
-                        notification.type ||
-                        "notification"
-                      ).replace(/_/g, " ")}
-                    </div>
+                        <p>{notification.message}</p>
 
-                    {/* UNREAD */}
-                    {notification.unread && (
-                      <span
-                        className="student-notification-unread-dot"
-                        aria-label="Unread"
-                      />
-                    )}
+                        <div className="student-notification-meta">
+                          {notification.course && (
+                            <span>{notification.course}</span>
+                          )}
 
-                  </article>
-                );
-              })
+                          <span>{notification.time}</span>
+                        </div>
+                      </div>
 
-            )}
+                      {/* TYPE */}
+                      <div className={`student-notification-type ${iconType}`}>
+                        {String(notification.type || "notification").replace(
+                          /_/g,
+                          " ",
+                        )}
+                      </div>
 
-          </div>
-
-        </section>
-
-      </main>
-
+                      {/* UNREAD */}
+                      {notification.unread && (
+                        <span
+                          className="student-notification-unread-dot"
+                          aria-label="Unread"
+                        />
+                      )}
+                    </article>
+                  );
+                })
+              )}
+            </div>
+          </section>
+        </main>
+      </div>
     </div>
-  </div>
-);
+  );
 }

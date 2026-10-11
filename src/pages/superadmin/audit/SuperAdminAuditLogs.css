@@ -7,7 +7,6 @@
   gap: 18px;
 }
 
-
 /* =====================================================
    HEADER
 ===================================================== */
@@ -29,7 +28,6 @@
   box-shadow: 5px 5px 0 var(--admin-shadow);
 }
 
-
 .audit-log-kicker {
   display: inline-flex;
   align-items: center;
@@ -46,7 +44,6 @@
   text-transform: uppercase;
 }
 
-
 .audit-log-header h1 {
   margin: 0 0 7px;
 
@@ -55,7 +52,6 @@
   font-size: 28px;
   font-weight: 950;
 }
-
 
 .audit-log-header p {
   max-width: 700px;
@@ -69,7 +65,6 @@
 
   line-height: 1.5;
 }
-
 
 .audit-refresh-button {
   display: inline-flex;
@@ -96,11 +91,9 @@
   cursor: pointer;
 }
 
-
 .audit-refresh-button:hover {
   background: #f8f9fa;
 }
-
 
 /* =====================================================
    TOOLBAR
@@ -112,7 +105,6 @@
 
   gap: 12px;
 }
-
 
 .audit-search,
 .audit-filter {
@@ -131,11 +123,9 @@
   border-radius: 9px;
 }
 
-
 .audit-search {
   flex: 1;
 }
-
 
 .audit-search svg,
 .audit-filter svg {
@@ -143,7 +133,6 @@
 
   color: var(--admin-muted);
 }
-
 
 .audit-search input,
 .audit-filter select {
@@ -161,16 +150,13 @@
   font-weight: 800;
 }
 
-
 .audit-filter {
   min-width: 210px;
 }
 
-
 .audit-filter select {
   cursor: pointer;
 }
-
 
 /* =====================================================
    RESULT SUMMARY
@@ -189,11 +175,9 @@
   font-weight: 800;
 }
 
-
 .audit-result-summary strong {
   color: var(--admin-ink);
 }
-
 
 /* =====================================================
    TABLE CARD
@@ -210,20 +194,17 @@
   box-shadow: 5px 5px 0 var(--admin-shadow);
 }
 
-
 .audit-table-wrap {
   width: 100%;
 
   overflow-x: auto;
 }
 
-
 .audit-table {
   width: 100%;
 
   border-collapse: collapse;
 }
-
 
 .audit-table th,
 .audit-table td {
@@ -234,7 +215,6 @@
   text-align: left;
   vertical-align: middle;
 }
-
 
 .audit-table th {
   background: #f8f9fa;
@@ -247,7 +227,6 @@
   white-space: nowrap;
 }
 
-
 .audit-table td {
   color: var(--admin-ink);
 
@@ -255,12 +234,10 @@
   font-weight: 800;
 }
 
-
 .audit-table td strong,
 .audit-table td span {
   display: block;
 }
-
 
 .audit-table td > span:not(.audit-category):not(.audit-status) {
   margin-top: 3px;
@@ -269,7 +246,6 @@
 
   font-size: 9px;
 }
-
 
 .audit-table code {
   padding: 4px 6px;
@@ -282,7 +258,6 @@
 
   font-size: 9px;
 }
-
 
 /* =====================================================
    CATEGORY
@@ -303,7 +278,6 @@
   font-weight: 950;
 }
 
-
 /* =====================================================
    STATUS
 ===================================================== */
@@ -321,13 +295,11 @@
   font-weight: 950;
 }
 
-
 .audit-status.is-success {
   background: #e9f7ef;
 
   color: #198754;
 }
-
 
 .audit-status.is-failed {
   background: #fdecec;
@@ -335,13 +307,11 @@
   color: #c0392b;
 }
 
-
 .audit-status.is-warning {
   background: #fff4df;
 
   color: #a86a00;
 }
-
 
 /* =====================================================
    EMPTY STATE
@@ -354,7 +324,6 @@
 
   text-align: center !important;
 }
-
 
 /* =====================================================
    PAGINATION
@@ -370,14 +339,12 @@
   padding: 13px 15px;
 }
 
-
 .audit-pagination span {
   color: var(--admin-muted);
 
   font-size: 10px;
   font-weight: 900;
 }
-
 
 .audit-pagination button {
   min-height: 32px;
@@ -398,18 +365,15 @@
   cursor: pointer;
 }
 
-
 .audit-pagination button:hover:not(:disabled) {
   background: #f8f9fa;
 }
-
 
 .audit-pagination button:disabled {
   cursor: not-allowed;
 
   opacity: 0.45;
 }
-
 
 /* =====================================================
    RESPONSIVE

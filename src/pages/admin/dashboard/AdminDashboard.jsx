@@ -87,7 +87,8 @@ export default function AdminDashboard() {
   });
 
   const adminImage =
-    admin.profile_image && !admin.profile_image.includes("temporary profile.jpg")
+    admin.profile_image &&
+    !admin.profile_image.includes("temporary profile.jpg")
       ? admin.profile_image.startsWith("http")
         ? admin.profile_image
         : `${API_BASE}/${admin.profile_image.replace(/^\/+/, "")}`
@@ -285,11 +286,13 @@ export default function AdminDashboard() {
       ? true
       : String(u.username || u.Username || "")
           .toLowerCase()
-          .includes(q)
+          .includes(q),
   );
 
   const filteredDecks = decks.filter((d) =>
-    !q ? true : `${d.username || ""} ${d.title || ""}`.toLowerCase().includes(q)
+    !q
+      ? true
+      : `${d.username || ""} ${d.title || ""}`.toLowerCase().includes(q),
   );
 
   return (
@@ -355,8 +358,8 @@ export default function AdminDashboard() {
             </div>
 
             {filteredDecks.length > 0 ? (
-            filteredDecks.slice(0, 5).map((d) => (     
-             <div className={styles.listItem} key={d.deck_id}>
+              filteredDecks.slice(0, 5).map((d) => (
+                <div className={styles.listItem} key={d.deck_id}>
                   <div className={styles.listAvatar}>
                     <BookOpen size={18} />
                   </div>
@@ -394,8 +397,8 @@ export default function AdminDashboard() {
             </div>
 
             {filteredUsers.length > 0 ? (
-          filteredUsers.slice(0, 5).map((u) => (       
-           <div className={styles.listItem} key={u.id || u.user_id}>
+              filteredUsers.slice(0, 5).map((u) => (
+                <div className={styles.listItem} key={u.id || u.user_id}>
                   <div className={styles.listAvatar}>
                     <User size={18} />
                   </div>

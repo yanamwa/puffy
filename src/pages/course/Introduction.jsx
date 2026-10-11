@@ -7,11 +7,7 @@ import {
   useNavigate,
 } from "react-router-dom";
 
-import {
-  useState,
-  useEffect,
-  useMemo,
-} from "react";
+import { useState, useEffect, useMemo } from "react";
 
 import LoadingState from "../../components/LoadingState.jsx";
 
@@ -20,23 +16,20 @@ import {
   getCourseContentModules,
 } from "./courseContent.js";
 
-
 const cleanObjective = (value) => {
   return String(value || "")
     .replace(/^[-•]\s*/, "")
     .replace(/^\d+[.)]\s*/, "")
     .replace(
       /^Upon completing this module,\s*you will be able to:\s*-?\s*/i,
-      ""
+      "",
     )
     .trim();
 };
 
-
 const hasObjectiveText = (value) => {
   return Boolean(value) && !/^\d+[.)]?$/.test(value);
 };
-
 
 const splitReadableText = (value) => {
   const text = String(value || "").trim();
@@ -49,21 +42,15 @@ const splitReadableText = (value) => {
     .filter(Boolean);
 
   if (lines.length > 1) {
-    return lines
-      .map(cleanObjective)
-      .filter(hasObjectiveText);
+    return lines.map(cleanObjective).filter(hasObjectiveText);
   }
 
   return (
-    text
-      .match(/[^.!?]+[.!?]+|[^.!?]+$/g)
-      ?.map((item) => item.trim()) || [text]
+    text.match(/[^.!?]+[.!?]+|[^.!?]+$/g)?.map((item) => item.trim()) || [text]
   );
 };
 
-
 function Introduction() {
-
   const { lessonId } = useParams();
 
   const [searchParams] = useSearchParams();
@@ -72,120 +59,79 @@ function Introduction() {
 
   const [lesson, setLesson] = useState(null);
 
-
   /* ========================================
      USERNAME
      ======================================== */
 
-  const username =
-    localStorage.getItem("username") ||
-    "user";
-
+  const username = localStorage.getItem("username") || "user";
 
   /* ========================================
      FETCH COURSE
      ======================================== */
 
   useEffect(() => {
-
     let active = true;
 
     fetchCourseContent(lessonId)
-
       .then((content) => {
-
         if (active) {
           setLesson(content);
         }
-
       })
 
       .catch((err) => {
-
-        console.error(
-          "Introduction content error:",
-          err
-        );
+        console.error("Introduction content error:", err);
 
         if (active) {
           setLesson(null);
         }
-
       });
-
 
     return () => {
       active = false;
     };
-
   }, [lessonId]);
-
 
   /* ========================================
      MODULES
      ======================================== */
 
-  const modules = useMemo(
-    () => getCourseContentModules(lesson),
-    [lesson]
-  );
+  const modules = useMemo(() => getCourseContentModules(lesson), [lesson]);
 
-
-  const requestedModuleIndex = Number(
-    searchParams.get("module") || 0
-  );
-
+  const requestedModuleIndex = Number(searchParams.get("module") || 0);
 
   const moduleIndex = Math.min(
-
     Math.max(
-      Number.isInteger(requestedModuleIndex)
-        ? requestedModuleIndex
-        : 0,
-      0
+      Number.isInteger(requestedModuleIndex) ? requestedModuleIndex : 0,
+      0,
     ),
 
-    Math.max(modules.length - 1, 0)
-
+    Math.max(modules.length - 1, 0),
   );
 
-
-  const activeModule =
-    modules[moduleIndex] || null;
+  const activeModule = modules[moduleIndex] || null;
 
   const moduleNumber = moduleIndex + 1;
 
-  const moduleTitle =
-    activeModule?.title || lesson?.title || "Untitled module";
+  const moduleTitle = activeModule?.title || lesson?.title || "Untitled module";
 
-
-  const moduleQuery =
-    `?module=${moduleIndex}`;
-
+  const moduleQuery = `?module=${moduleIndex}`;
 
   /* ========================================
      LEARNING OBJECTIVES
      ======================================== */
 
   const learningObjectives =
-
     activeModule?.learningObjectives ||
-
     lesson?.learning_objectives ||
-
     "No learning objectives yet.";
 
-
   const objectives = useMemo(() => {
-
     return splitReadableText(learningObjectives)
-
       .map(cleanObjective)
 
       .filter(hasObjectiveText);
-
   }, [learningObjectives]);
-
 
   /* ========================================
      LOADING
@@ -195,95 +141,53 @@ function Introduction() {
     return <LoadingState />;
   }
 
-
   /* ========================================
      PAGE
      ======================================== */
 
   return (
-
     <div className={styles.wrapper}>
-
-
       {/* BACK BUTTON */}
 
       <button
         type="button"
         className={styles.backButton}
-        onClick={() =>
-          navigate(
-            `/student/enrolled-courses/${lessonId}`
-          )
-        }
+        onClick={() => navigate(`/student/enrolled-courses/${lessonId}`)}
       >
         ← Back to homepage
       </button>
 
-
-
       {/* FOLDER */}
 
-      <div
-        className={`${styles.content} ${styles.introductionPage}`}
-      >
-
-
+      <div className={`${styles.content} ${styles.introductionPage}`}>
         <div className={styles.ribbon}></div>
-
-
 
         {/* =================================
             TABS
             ================================= */}
 
         <div className={styles.tabs}>
-
-
-          <Link
-            to={`/introduction/${lessonId}${moduleQuery}`}
-          >
-
-            <button
-              type="button"
-              className={styles.welcomeactive}
-            >
+          <Link to={`/introduction/${lessonId}${moduleQuery}`}>
+            <button type="button" className={styles.welcomeactive}>
               Introduction
             </button>
-
           </Link>
 
-
-
-          <Link
-            to={`/lesson/${lessonId}${moduleQuery}`}
-          >
-
-            <button
-              type="button"
-              className={styles.howitworks}
-            >
+          <Link to={`/lesson/${lessonId}${moduleQuery}`}>
+            <button type="button" className={styles.howitworks}>
               Lesson
             </button>
-
           </Link>
-
         </div>
-
-
 
         {/* =================================
             INTRODUCTION CONTENT
             ================================= */}
 
         <div className={styles.introductionContent}>
-
-
           {/* HELLO USER */}
 
-          <h1 className={styles.introGreeting}>
-            Hi there, @{username}!
-          </h1>
-
+          <h1 className={styles.introGreeting}>Hi there, @{username}!</h1>
 
           {/* MODULE TITLE */}
 
@@ -291,71 +195,33 @@ function Introduction() {
             Module {moduleNumber}: {moduleTitle}
           </h2>
 
-
-
           {/* LEARNING OBJECTIVES */}
 
-          <h2 className={styles.introSectionTitle}>
-            Learning Objectives
-          </h2>
-
-
+          <h2 className={styles.introSectionTitle}>Learning Objectives</h2>
 
           <p className={styles.introDescription}>
             Upon completing this module, you will be able to:
           </p>
 
-
-
           <ul className={styles.introObjectivesList}>
-
-            {objectives.map(
-              (objective, index) => (
-
-                <li
-                  key={`${objective}-${index}`}
-                >
-                  {objective}
-                </li>
-
-              )
-            )}
-
+            {objectives.map((objective, index) => (
+              <li key={`${objective}-${index}`}>{objective}</li>
+            ))}
           </ul>
-
-
 
           {/* NEXT BUTTON */}
 
           <div className={styles.introNavigation}>
-
-            <Link
-              to={`/lesson/${lessonId}${moduleQuery}`}
-            >
-
-              <button
-                type="button"
-                className={styles.button}
-              >
+            <Link to={`/lesson/${lessonId}${moduleQuery}`}>
+              <button type="button" className={styles.button}>
                 Next
               </button>
-
             </Link>
-
           </div>
-
-
         </div>
-
-
       </div>
-
-
     </div>
-
   );
-
 }
-
 
 export default Introduction;

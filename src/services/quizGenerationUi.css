@@ -1,109 +1,450 @@
-.quizGeneratorPopup { 
-    font-family: Arial, sans-serif !important; 
-    border-radius: 16px !important; 
-    color: #294765 !important; 
+.quizGeneratorPopup {
+  font-family: Arial, sans-serif !important;
+  border-radius: 16px !important;
+  color: #294765 !important;
 }
 
-.quizGeneratorPopup .swal2-title { 
-    font-size: 25px !important; 
-    color: #294765 !important; 
+.quizGeneratorPopup .swal2-title {
+  font-size: 25px !important;
+  color: #294765 !important;
 }
-.quizGeneratorIntro { 
-    color: #6b7d90; 
-    font-size: 20px; 
-    line-height: 1.6; 
-    margin: 0 0 20px; 
+.quizGeneratorIntro {
+  color: #6b7d90;
+  font-size: 20px;
+  line-height: 1.6;
+  margin: 0 0 20px;
 }
 .quizGeneratorFields {
-    display: grid; 
-    gap: 12px; 
-    text-align: left; 
+  display: grid;
+  gap: 12px;
+  text-align: left;
 }
-.quizGeneratorFields h3 { margin: 8px 0; font-size: 20px; color: #375675; }
-.quizGeneratorFields hr { width: 100%; border: 0; border-top: 1px solid #d2deeb; }
-.quizGeneratorLevels { margin: -12px 0 8px; font-size: 15px; color: #6b7d90; }
-.quizGeneratorPopup:not(.swal2-toast) { max-height: calc(100dvh - 32px); overflow-y: auto; }
-.quizGeneratorFields label { 
-    font-size: 20px; 
-    font-weight: 600; 
-    color: #375675; 
+.quizGeneratorFields h3 {
+  margin: 8px 0;
+  font-size: 20px;
+  color: #375675;
 }
-.quizGeneratorFields input, .quizGeneratorFields select { 
-    width: 100%; 
-    min-height: 56px; 
-    padding: 10px 12px; 
-    margin: 0 0 9px; 
-    box-sizing: border-box; 
-    border: 1px solid #d2deeb; 
-    border-radius: 9px; 
-    font: 20px Arial, sans-serif; 
-    background: #f9fbfe; 
-    color: #294765; 
+.quizGeneratorFields hr {
+  width: 100%;
+  border: 0;
+  border-top: 1px solid #d2deeb;
 }
-.quizGeneratorFields input:focus, .quizGeneratorFields select:focus { 
-    outline: 3px solid #b9d5f344; 
-    border-color: #7fa6d2; 
+.quizGeneratorLevels {
+  margin: -12px 0 8px;
+  font-size: 15px;
+  color: #6b7d90;
 }
-.quizGeneratorHint { 
-    margin: -3px 0 12px; 
-    padding: 10px 12px; 
-    border-radius: 8px; 
-    background: #edf4fc; 
-    color: #587697; 
-    font-size: 20px; 
+.quizGeneratorPopup:not(.swal2-toast) {
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
 }
-.quizGeneratorConfirm, .quizGeneratorCancel { 
-    min-height: 52px; 
-    padding: 10px 20px; 
-    margin: 0 5px; 
-    border-radius: 9px; 
-    border: 1px solid #d1deec; 
-    font: 600 20px Arial, sans-serif; 
-    cursor: pointer; 
+.quizGeneratorFields label {
+  font-size: 20px;
+  font-weight: 600;
+  color: #375675;
 }
-.quizGeneratorConfirm { 
-    background: #7199c6; 
-    border-color: #7199c6; 
-    color: #fff; 
+.quizGeneratorFields input,
+.quizGeneratorFields select {
+  width: 100%;
+  min-height: 56px;
+  padding: 10px 12px;
+  margin: 0 0 9px;
+  box-sizing: border-box;
+  border: 1px solid #d2deeb;
+  border-radius: 9px;
+  font:
+    20px Arial,
+    sans-serif;
+  background: #f9fbfe;
+  color: #294765;
 }
-.quizGeneratorConfirm:hover { 
-    background: #537eaf; 
+.quizGeneratorFields input:focus,
+.quizGeneratorFields select:focus {
+  outline: 3px solid #b9d5f344;
+  border-color: #7fa6d2;
 }
-.quizGeneratorCancel { 
-    background: #f5f8fc; 
-    color: #496787; 
+.quizGeneratorHint {
+  margin: -3px 0 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #edf4fc;
+  color: #587697;
+  font-size: 20px;
 }
-.quizGeneratorConfirm:focus-visible, .quizGeneratorCancel:focus-visible { 
-    outline: 3px solid #b9d5f3; 
-    outline-offset: 3px; 
+.quizGeneratorConfirm,
+.quizGeneratorCancel {
+  min-height: 52px;
+  padding: 10px 20px;
+  margin: 0 5px;
+  border-radius: 9px;
+  border: 1px solid #d1deec;
+  font:
+    600 20px Arial,
+    sans-serif;
+  cursor: pointer;
+}
+.quizGeneratorConfirm {
+  background: #7199c6;
+  border-color: #7199c6;
+  color: #fff;
+}
+.quizGeneratorConfirm:hover {
+  background: #537eaf;
+}
+.quizGeneratorCancel {
+  background: #f5f8fc;
+  color: #496787;
+}
+.quizGeneratorConfirm:focus-visible,
+.quizGeneratorCancel:focus-visible {
+  outline: 3px solid #b9d5f3;
+  outline-offset: 3px;
 }
 
-.quizGeneratorPopup:not(.swal2-toast) { 
-    width: min(720px, calc(100vw - 32px)) !important; 
-    padding: 30px !important; 
-    box-sizing: border-box; 
+.quizGeneratorPopup:not(.swal2-toast) {
+  width: min(720px, calc(100vw - 32px)) !important;
+  padding: 30px !important;
+  box-sizing: border-box;
 }
 
 .quizGeneratorPopup:not(.swal2-toast) .swal2-html-container {
-     margin: 20px 0 0 !important; 
-    }
-
-.quizGeneratorPopup:not(.swal2-toast) .swal2-actions { 
-    flex-wrap: 
-    wrap; gap: 10px; 
+  margin: 20px 0 0 !important;
 }
 
-.quizGeneratorPopup .swal2-validation-message { 
-    font-size: 20px; 
-    line-height: 1.5; 
+.quizGeneratorPopup:not(.swal2-toast) .swal2-actions {
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
-@media (max-width: 540px) { 
-.quizGeneratorPopup:not(.swal2-toast) { 
-    padding: 22px 18px !important; 
-} 
+.quizGeneratorPopup .swal2-validation-message {
+  font-size: 20px;
+  line-height: 1.5;
+}
 
-.quizGeneratorPopup .swal2-title { 
-    padding: 0 !important; 
-    } 
+@media (max-width: 540px) {
+  .quizGeneratorPopup:not(.swal2-toast) {
+    padding: 22px 18px !important;
+  }
+
+  .quizGeneratorPopup .swal2-title {
+    padding: 0 !important;
+  }
+}
+.practiceGeneratorPopup .swal2-title {
+  text-align: left;
+  padding: 0;
+  font-size: 22px !important;
+}
+.practiceGeneratorPopup .quizGeneratorIntro {
+  text-align: left;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+.practiceGeneratorFields {
+  text-align: left;
+  font-size: 14px;
+}
+.practiceGeneratorFields label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.practiceGeneratorFields input[type="number"] {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #cbd5e1;
+  border-radius: 22px;
+  padding: 10px 16px;
+  font: inherit;
+  color: #294765;
+  background: #f9fbfe;
+  min-height: 42px;
+}
+.practiceGeneratorFields input:focus-visible {
+  outline: 3px solid #b9d5f3;
+  outline-offset: 2px;
+}
+.practiceGeneratorFields section {
+  border-top: 1px solid #e3e9f0;
+  padding-top: 24px;
+  margin-top: 24px;
+}
+.practiceGeneratorFields h3 {
+  font-size: 16px;
+  margin: 0 0 18px;
+}
+.practiceTypeGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.practiceDistributionSummary {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 16px;
+  font-size: 12px;
+  color: #65788b;
+}
+.practiceDistributionSummary strong[data-valid="true"] {
+  color: #168551;
+}
+.practiceDistributionSummary strong[data-valid="false"] {
+  color: #b43b42;
+}
+.practiceSkillHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 16px;
+  font-weight: 600;
+}
+.practiceSkillHeading small {
+  display: block;
+  font-size: 12px;
+  font-weight: 400;
+  margin: 8px 0;
+  color: #65788b;
+}
+.practiceSkillHeading output {
+  font-size: 20px;
+}
+.practiceGeneratorFields input[type="range"] {
+  width: 100%;
+  margin: 12px 0 18px;
+  accent-color: #7199c6;
+  cursor: pointer;
+  height: 24px;
+}
+.practiceCognitiveTrack {
+  background: #9178bf;
+  height: 10px;
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 10px 0;
+}
+.practiceCognitiveTrack i {
+  display: block;
+  height: 100%;
+  background: #5488cb;
+}
+#quiz-cognitive-summary {
+  font-size: 12px;
+  color: #65788b;
+}
+.practiceGeneratorPopup .swal2-actions {
+  width: 100%;
+}
+.practiceGeneratorPopup .quizGeneratorConfirm {
+  flex: 1;
+  border-radius: 24px;
+  font-size: 15px;
+  min-height: 42px;
+}
+.practiceGeneratorPopup .quizGeneratorCancel {
+  font-size: 15px;
+  min-height: 42px;
+  border-radius: 24px;
+}
+@media (max-width: 480px) {
+  .practiceTypeGrid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .practiceDistributionSummary {
+    align-items: flex-start;
+  }
+}
+.mainGeneratorPopup .swal2-title,
+.mainGeneratorPopup .quizGeneratorIntro {
+  text-align: center;
+}
+.mainRequiredScore {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0 20px;
+  padding: 12px;
+  background: #f9fbfe;
+  border-radius: 8px;
+}
+.mainRequiredScore strong {
+  font-size: 25px;
+}
+.mainRequiredScore small,
+.mainAdaptiveNote {
+  color: #65788b;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.mainAdaptiveList {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+}
+.mainAdaptiveList li::before {
+  content: "✓";
+  color: #168551;
+  margin-right: 10px;
+}
+.quizAutoDistributionHint {
+  font-size: 12px;
+  color: #65788b;
+  line-height: 1.5;
+  margin: -6px 0 16px;
+}
+.practiceGeneratorFields input[readonly] {
+  background: #edf4fc;
+  color: #496787;
+  cursor: default;
+}
+
+.quizQuestionLimit {
+  display: block;
+  margin-top: 6px;
+  color: #65788b;
+  font-size: 12px;
+}
+
+/* Shared generation dialog: title bar, scrollable settings, fixed footer. */
+.quizGeneratorPopup.practiceGeneratorPopup:not(.swal2-toast) {
+  width: min(440px, calc(100vw - 32px)) !important;
+  max-height: min(760px, calc(100dvh - 40px));
+  padding: 0 !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  font-family: Arial, sans-serif;
+  background: #fff;
+}
+.quizGeneratorPopup.practiceGeneratorPopup .swal2-title {
+  grid-column: 1;
+  grid-row: 1;
+  margin: 0;
+  padding: 15px 48px !important;
+  background: #7fa8d6;
+  color: #182d42 !important;
+  text-align: center;
+  font-size: 17px !important;
+  font-weight: 500;
+  line-height: 1.4;
+}
+.quizGeneratorPopup.practiceGeneratorPopup .swal2-close {
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: end;
+  z-index: 1;
+  width: 44px;
+  height: 50px;
+  margin: 0;
+  color: #101820;
+  font:
+    32px Arial,
+    sans-serif;
+}
+.quizGeneratorPopup.practiceGeneratorPopup .swal2-close:hover {
+  color: #101820;
+  background: #ffffff30;
+}
+.quizGeneratorPopup.practiceGeneratorPopup .swal2-html-container {
+  grid-column: 1;
+  grid-row: 2;
+  min-height: 0;
+  overflow-y: auto;
+  margin: 0 !important;
+  padding: 20px 22px;
+  overscroll-behavior: contain;
+}
+.quizGeneratorPopup.practiceGeneratorPopup .quizGeneratorIntro {
+  margin: 0 0 18px;
+  text-align: left;
+  line-height: 1.5;
+}
+.quizGeneratorPopup.practiceGeneratorPopup .practiceGeneratorFields {
+  font-size: 13px;
+}
+.quizGeneratorPopup.practiceGeneratorPopup .practiceGeneratorFields h3 {
+  font-size: 14px;
+  margin-bottom: 14px;
+}
+.quizGeneratorPopup.practiceGeneratorPopup .practiceGeneratorFields section {
+  padding-top: 16px;
+  margin-top: 16px;
+}
+.quizGeneratorPopup.practiceGeneratorPopup
+  .practiceGeneratorFields
+  input[type="number"] {
+  border-radius: 7px;
+  padding: 9px 10px;
+  min-height: 38px;
+}
+.quizGeneratorPopup.practiceGeneratorPopup .practiceTypeGrid {
+  gap: 8px;
+}
+.quizGeneratorPopup.practiceGeneratorPopup .practiceTypeGrid label {
+  font-size: 12px;
+  min-height: 30px;
+}
+.quizGeneratorPopup.practiceGeneratorPopup .practiceSkillHeading {
+  font-size: 14px;
+  margin-top: 12px;
+}
+.quizGeneratorPopup.practiceGeneratorPopup .mainAdaptiveList {
+  gap: 8px;
+  line-height: 1.5;
+}
+.quizGeneratorPopup.practiceGeneratorPopup .mainRequiredScore strong {
+  font-size: 20px;
+}
+.quizGeneratorPopup.practiceGeneratorPopup .swal2-validation-message {
+  grid-column: 1;
+  grid-row: 3;
+  margin: 0;
+  font-size: 13px;
+}
+.quizGeneratorPopup.practiceGeneratorPopup .swal2-actions {
+  grid-column: 1;
+  grid-row: 4;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 16px;
+  width: auto;
+  margin: 0;
+  padding: 14px 22px 18px;
+  border-top: 1px solid #e6e9ed;
+  background: #fff;
+}
+.quizGeneratorPopup.practiceGeneratorPopup .quizGeneratorConfirm,
+.quizGeneratorPopup.practiceGeneratorPopup .quizGeneratorCancel {
+  flex: 1;
+  min-width: 0;
+  min-height: 36px;
+  margin: 0;
+  padding: 9px 12px;
+  border-radius: 5px;
+  font:
+    400 13px Arial,
+    sans-serif;
+  color: #101820;
+}
+.quizGeneratorPopup.practiceGeneratorPopup .quizGeneratorConfirm {
+  background: #7fa8d6;
+  border-color: #7fa8d6;
+}
+.quizGeneratorPopup.practiceGeneratorPopup .quizGeneratorConfirm:hover {
+  background: #6c99cc;
+}
+.quizGeneratorPopup.practiceGeneratorPopup .quizGeneratorCancel {
+  background: #fff;
+  border-color: #dfe3e8;
+}
+@media (max-width: 480px) {
+  .quizGeneratorPopup.practiceGeneratorPopup .practiceTypeGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .quizGeneratorPopup.practiceGeneratorPopup .swal2-html-container {
+    padding: 18px 16px;
+  }
 }

@@ -34,7 +34,9 @@ function parseLessonPages(value) {
 
   const parsed = parseJson(text);
   if (Array.isArray(parsed)) {
-    return parsed.map(normalizeLessonPage).filter((page) => page.content.trim());
+    return parsed
+      .map(normalizeLessonPage)
+      .filter((page) => page.content.trim());
   }
 
   return text
@@ -51,9 +53,11 @@ function normalizeQuizItem(item, index) {
     options: Array.isArray(item?.options) ? item.options.filter(Boolean) : [],
     topic: String(item?.topic || item?.category || item?.subject || "").trim(),
     correct_answer: String(
-      item?.correct_answer || item?.correctAnswer || item?.answer || ""
+      item?.correct_answer || item?.correctAnswer || item?.answer || "",
     ).trim(),
-    answer: String(item?.answer || item?.correct_answer || item?.correctAnswer || "").trim(),
+    answer: String(
+      item?.answer || item?.correct_answer || item?.correctAnswer || "",
+    ).trim(),
     explanation: String(item?.explanation || "").trim(),
   };
 }
@@ -129,7 +133,9 @@ function getModuleKeyFromItem(item, fallbackIndex = 0) {
     return `id-${moduleId}`;
   }
 
-  const moduleTitle = String(item?.moduleTitle || item?.module_title || "").trim();
+  const moduleTitle = String(
+    item?.moduleTitle || item?.module_title || "",
+  ).trim();
 
   if (moduleTitle) {
     return `title-${moduleTitle.toLowerCase()}`;
@@ -144,20 +150,22 @@ function getModuleOrder(item, fallbackIndex = 0) {
 }
 
 function normalizeCourseModule(module, index, course = {}) {
-  const title = String(module?.title || module?.moduleTitle || module?.module_title || "").trim();
+  const title = String(
+    module?.title || module?.moduleTitle || module?.module_title || "",
+  ).trim();
   const description = String(
     module?.description ||
       module?.moduleDescription ||
       module?.module_description ||
       module?.summary ||
-      ""
+      "",
   ).trim();
   const learningObjectives = String(
     module?.learningObjectives ||
       module?.learning_objectives ||
       module?.moduleLearningObjectives ||
       module?.module_learning_objectives ||
-      ""
+      "",
   ).trim();
 
   return {
@@ -189,12 +197,14 @@ function buildModulesFromFlatContent(content) {
     if (existing) return existing;
 
     const order = getModuleOrder(item, modules.size);
-    const moduleTitle = String(item?.moduleTitle || item?.module_title || "").trim();
+    const moduleTitle = String(
+      item?.moduleTitle || item?.module_title || "",
+    ).trim();
     const moduleDescription = String(
-      item?.moduleDescription || item?.module_description || ""
+      item?.moduleDescription || item?.module_description || "",
     ).trim();
     const moduleLearningObjectives = String(
-      item?.moduleLearningObjectives || item?.module_learning_objectives || ""
+      item?.moduleLearningObjectives || item?.module_learning_objectives || "",
     ).trim();
     const moduleId = item?.moduleId || item?.module_id;
     const module = {
@@ -205,10 +215,14 @@ function buildModulesFromFlatContent(content) {
       description: moduleDescription,
       learningObjectives:
         moduleLearningObjectives ||
-        String(content?.learningObjectives || content?.learning_objectives || "").trim(),
+        String(
+          content?.learningObjectives || content?.learning_objectives || "",
+        ).trim(),
       learning_objectives:
         moduleLearningObjectives ||
-        String(content?.learningObjectives || content?.learning_objectives || "").trim(),
+        String(
+          content?.learningObjectives || content?.learning_objectives || "",
+        ).trim(),
       lessonPages: [],
       quizItems: [],
       mainQuizSettings: item?.mainQuizSettings || item?.main_quiz_settings,
@@ -239,18 +253,19 @@ function buildModulesFromFlatContent(content) {
 }
 
 export function getCourseContentModules(content) {
-  const nestedModules = [
-    content?.contentModules,
-    content?.content_modules,
-    content?.learningModules,
-    content?.learning_modules,
-  ]
-    .map((value) => parseModuleList(value).filter(Boolean))
-    .find((modules) => modules.length > 0) || [];
+  const nestedModules =
+    [
+      content?.contentModules,
+      content?.content_modules,
+      content?.learningModules,
+      content?.learning_modules,
+    ]
+      .map((value) => parseModuleList(value).filter(Boolean))
+      .find((modules) => modules.length > 0) || [];
 
   if (nestedModules.length) {
     return nestedModules.map((module, index) =>
-      normalizeCourseModule(module, index, content)
+      normalizeCourseModule(module, index, content),
     );
   }
 
@@ -267,7 +282,7 @@ export function getCourseModule(content, moduleIndex = 0) {
   const modules = getCourseContentModules(content);
   const safeIndex = Math.min(
     Math.max(Number(moduleIndex) || 0, 0),
-    Math.max(modules.length - 1, 0)
+    Math.max(modules.length - 1, 0),
   );
 
   return modules[safeIndex] || null;
@@ -277,14 +292,16 @@ export function normalizeCourseContent(source) {
   const lessonPages = getCourseLessonPages(source);
   const quizItems = getCourseQuizItems(source);
   const contentModules = getCourseContentModules(source);
-  const id = source?.id || source?.course_id || source?.lesson_id || source?.module_id;
+  const id =
+    source?.id || source?.course_id || source?.lesson_id || source?.module_id;
   const title =
     source?.title ||
     source?.courseName ||
     source?.course_name ||
     source?.course_title ||
     "Untitled course";
-  const description = source?.summary || source?.description || source?.module_description || "";
+  const description =
+    source?.summary || source?.description || source?.module_description || "";
   const learningObjectives =
     source?.learningObjectives || source?.learning_objectives || "";
 
@@ -314,7 +331,7 @@ export function normalizeCourseContent(source) {
 async function fetchLegacyContent(contentId) {
   const response = await fetch(
     `${API_BASE}/getLessonsById.php?id=${encodeURIComponent(contentId)}`,
-    { credentials: "include" }
+    { credentials: "include" },
   );
 
   const data = await response.json();
@@ -326,9 +343,12 @@ async function fetchLegacyContent(contentId) {
 }
 
 async function fetchModuleContent(contentId) {
-  const response = await fetch(`${API_BASE}/modules/${encodeURIComponent(contentId)}`, {
-    credentials: "include",
-  });
+  const response = await fetch(
+    `${API_BASE}/modules/${encodeURIComponent(contentId)}`,
+    {
+      credentials: "include",
+    },
+  );
 
   const data = await response.json();
   if (!response.ok || data.success === false) {
@@ -339,12 +359,21 @@ async function fetchModuleContent(contentId) {
 }
 
 async function findCourseByIdOrCode(contentId) {
-  const normalizedId = String(contentId || "").trim().toLowerCase();
-  const courses = await fetchCourses({ includeArchived: true, summaryOnly: true });
+  const normalizedId = String(contentId || "")
+    .trim()
+    .toLowerCase();
+  const courses = await fetchCourses({
+    includeArchived: true,
+    summaryOnly: true,
+  });
 
   const matchedCourse = courses.find((course) => {
-    const id = String(course.id || course.course_id || "").trim().toLowerCase();
-    const code = String(course.code || course.courseCode || "").trim().toLowerCase();
+    const id = String(course.id || course.course_id || "")
+      .trim()
+      .toLowerCase();
+    const code = String(course.code || course.courseCode || "")
+      .trim()
+      .toLowerCase();
     return id === normalizedId || code === normalizedId;
   });
 
@@ -399,5 +428,7 @@ export async function fetchCourseContent(contentId) {
 }
 
 export function getCourseSlideCount(content) {
-  return getCourseLessonPages(content).length + getCourseQuizItems(content).length;
+  return (
+    getCourseLessonPages(content).length + getCourseQuizItems(content).length
+  );
 }

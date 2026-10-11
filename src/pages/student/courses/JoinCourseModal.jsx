@@ -1,8 +1,18 @@
-export default function JoinCourseModal({ open, courseCode, onCourseCodeChange, onCancel, onJoin }) {
+export default function JoinCourseModal({
+  open,
+  courseCode,
+  onCourseCodeChange,
+  onCancel,
+  onJoin,
+}) {
   if (!open) return null;
 
   return (
-    <div className="join-course-overlay" role="presentation" onMouseDown={onCancel}>
+    <div
+      className="join-course-overlay"
+      role="presentation"
+      onMouseDown={onCancel}
+    >
       <section
         className="join-course-modal"
         role="dialog"
@@ -15,7 +25,10 @@ export default function JoinCourseModal({ open, courseCode, onCourseCodeChange, 
         </header>
 
         <div className="join-course-body">
-          <p>Ask your professor for the class code, then enter the course code here.</p>
+          <p>
+            Ask your professor for the class code, then enter the course code
+            here.
+          </p>
           <input
             type="text"
             value={courseCode}
@@ -23,14 +36,18 @@ export default function JoinCourseModal({ open, courseCode, onCourseCodeChange, 
             autoFocus
             onChange={(event) => onCourseCodeChange(event.target.value)}
             onKeyDown={(event) => {
-              if (event.key === 'Enter') onJoin();
-              if (event.key === 'Escape') onCancel();
+              if (event.key === "Enter") onJoin();
+              if (event.key === "Escape") onCancel();
             }}
           />
         </div>
 
         <footer className="join-course-actions">
-          <button type="button" className="join-course-cancel" onClick={onCancel}>
+          <button
+            type="button"
+            className="join-course-cancel"
+            onClick={onCancel}
+          >
             Cancel
           </button>
           <button type="button" className="join-course-submit" onClick={onJoin}>

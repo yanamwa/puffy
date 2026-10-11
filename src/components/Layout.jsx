@@ -1,12 +1,15 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
-import { useAuth } from '../context/AuthContext';
-import { requiresStudentPasswordChange } from '../utils/passwordPolicy.js';
+import { useAuth } from "../context/AuthContext";
+import { requiresStudentPasswordChange } from "../utils/passwordPolicy.js";
 
 export default function Layout() {
   const location = useLocation();
   const { user } = useAuth();
 
-  if (requiresStudentPasswordChange(user) && location.pathname !== '/student/settings') {
+  if (
+    requiresStudentPasswordChange(user) &&
+    location.pathname !== "/student/settings"
+  ) {
     return <Navigate to="/student/settings" replace />;
   }
 
@@ -24,26 +27,20 @@ export default function Layout() {
     "/recover-account",
   ].includes(location.pathname);
 
-  const isStudentDashboard =
-    location.pathname.startsWith("/student");
+  const isStudentDashboard = location.pathname.startsWith("/student");
 
-  const isSuperAdminArea =
-    location.pathname.startsWith("/super-admin");
+  const isSuperAdminArea = location.pathname.startsWith("/super-admin");
 
-  const isAdminArea =
-    location.pathname.startsWith("/admin");
+  const isAdminArea = location.pathname.startsWith("/admin");
 
-  const isProfessorArea =
-    location.pathname.startsWith("/professor");
+  const isProfessorArea = location.pathname.startsWith("/professor");
 
   const isCourseArea = [
     "/learning",
     "/introduction",
     "/lesson",
     "/review",
-  ].some((path) =>
-    location.pathname.startsWith(path)
-  );
+  ].some((path) => location.pathname.startsWith(path));
 
   const isQuizArea = [
     "/flashcards-tutorial",
@@ -64,9 +61,7 @@ export default function Layout() {
     "/mixed-mode",
     "/random-modes",
     "/survival",
-  ].some((path) =>
-    location.pathname.startsWith(path)
-  );
+  ].some((path) => location.pathname.startsWith(path));
 
   if (
     isAuthPage ||

@@ -1,122 +1,121 @@
-.wrapper{
-  min-height:100vh;
-  background-image:url("/images/background_notebook.png");
-  background-size:cover;
-  background-position:center;
-  background-repeat:no-repeat;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
+.wrapper {
+  min-height: 100vh;
+  background-image: url("/images/background_notebook.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.wrapper::before{
-  content:"";
-  position:fixed;
-  inset:0;
-  background-image:url("/images/background_notebook.png");
-  background-size:cover;
-  background-position:center;
-  background-repeat:no-repeat;
-  z-index:-1;
+.wrapper::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: url("/images/background_notebook.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: -1;
 }
 
-.header{
-  width:90%;
-  margin-top:10px;
-  padding:5px;
-  text-align:center;
+.header {
+  width: 90%;
+  margin-top: 10px;
+  padding: 5px;
+  text-align: center;
 }
 
-.title{
-  font-family:'Jersey 15', sans-serif;
-  font-size:55px;
-  margin-bottom:10px;
-  font-weight:normal;
-  color: var(--font-color);
-}
-
-.counter{
-  font-size:18px;
-  color: var(--font-color);
-}
-
-.progressContainer{
-  width:70%;
-  height:12px;
-  background:#dcdcdc;
-  border-radius:10px;
-  margin:10px auto 5px;
-  overflow:hidden;
-}
-
-.progressBar{
-  height:100%;
-  width:0%;
-  background:#7fa8d6;
-  border-radius:10px;
-  transition:width 0.6s ease;
-}
-
-.questionBox{
-  width:80%;
-  margin:40px auto;
-  border-radius:25px;
-  padding:10px;
-  text-align:center;
-}
-
-.question{
-  font-size: 25px;
-  padding:25px 25px;
-  border-radius:15px;
-  background:#fff;
-  border:1px solid #989898;
-  text-align:center;
-  width:75%;
-  margin:0 auto 30px auto;
-  font-family: inherit;
+.title {
+  font-family: "Jersey 15", sans-serif;
+  font-size: 55px;
+  margin-bottom: 10px;
   font-weight: normal;
-  font-style: normal;
   color: var(--font-color);
-
 }
 
-.typingContainer{
-  height:150px;
-  display:flex;
-  justify-content:center;
-  align-items:center;
+.counter {
+  font-size: 18px;
+  color: var(--font-color);
 }
 
-.input{
-  padding:10px 20px;
-  width:60%;
-  height:50px;
+.progressContainer {
+  width: 70%;
+  height: 12px;
+  background: #dcdcdc;
+  border-radius: 10px;
+  margin: 10px auto 5px;
+  overflow: hidden;
+}
+
+.progressBar {
+  height: 100%;
+  width: 0%;
+  background: #7fa8d6;
+  border-radius: 10px;
+  transition: width 0.6s ease;
+}
+
+.questionBox {
+  width: 80%;
+  margin: 40px auto;
+  border-radius: 25px;
+  padding: 10px;
+  text-align: center;
+}
+
+.question {
   font-size: 25px;
-  border-radius:15px;
-  border:2px solid #505152;
-  outline:none;
-  transition:0.3s;
-
+  padding: 25px 25px;
+  border-radius: 15px;
+  background: #fff;
+  border: 1px solid #989898;
+  text-align: center;
+  width: 75%;
+  margin: 0 auto 30px auto;
   font-family: inherit;
   font-weight: normal;
   font-style: normal;
   color: var(--font-color);
 }
 
-.input:focus{
-  border-color:#474747;
-  box-shadow:0 0 5px #5a5d5f;
+.typingContainer {
+  height: 150px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.wrong{
-  border-color:rgba(106,4,4,0.7);
-  background-color:rgba(255,16,16,0.24);
+.input {
+  padding: 10px 20px;
+  width: 60%;
+  height: 50px;
+  font-size: 25px;
+  border-radius: 15px;
+  border: 2px solid #505152;
+  outline: none;
+  transition: 0.3s;
+
+  font-family: inherit;
+  font-weight: normal;
+  font-style: normal;
+  color: var(--font-color);
 }
 
-.correct{
-  border-color:#10ff20b3;
-  background-color:rgba(42,180,52,0.24);
+.input:focus {
+  border-color: #474747;
+  box-shadow: 0 0 5px #5a5d5f;
+}
+
+.wrong {
+  border-color: rgba(106, 4, 4, 0.7);
+  background-color: rgba(255, 16, 16, 0.24);
+}
+
+.correct {
+  border-color: #10ff20b3;
+  background-color: rgba(42, 180, 52, 0.24);
 }
 .settingsBtn {
   position: absolute;
@@ -366,7 +365,6 @@
   cursor: not-allowed;
 }
 
-
 .emptyWrapper {
   min-height: 100vh;
   display: flex;
@@ -558,7 +556,6 @@
     font-size: 16px !important;
   }
 }
-
 
 .questionRow {
   position: relative;

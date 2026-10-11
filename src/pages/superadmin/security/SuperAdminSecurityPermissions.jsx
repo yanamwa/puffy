@@ -1,14 +1,8 @@
-import { Link } from 'react-router-dom';
+import { Link } from "react-router-dom";
 
-import {
-  FiClock,
-  FiLock,
-  FiRefreshCw,
-  FiShield,
-} from 'react-icons/fi';
+import { FiClock, FiLock, FiRefreshCw, FiShield } from "react-icons/fi";
 
-import './SuperAdminSecurityPermissions.css';
-
+import "./SuperAdminSecurityPermissions.css";
 
 /* =====================================================
    SECURITY POLICY CARDS
@@ -16,31 +10,30 @@ import './SuperAdminSecurityPermissions.css';
 
 const securityPolicyCards = [
   {
-    label: 'Temporary Password Reset',
-    value: 'Required',
-    status: 'Active',
+    label: "Temporary Password Reset",
+    value: "Required",
+    status: "Active",
     icon: FiRefreshCw,
   },
   {
-    label: 'Professor Approval',
-    value: 'Super Admin review',
-    status: 'Protected',
+    label: "Professor Approval",
+    value: "Super Admin review",
+    status: "Protected",
     icon: FiShield,
   },
   {
-    label: 'Sensitive Actions',
-    value: 'Audit logged',
-    status: 'Tracked',
+    label: "Sensitive Actions",
+    value: "Audit logged",
+    status: "Tracked",
     icon: FiLock,
   },
   {
-    label: 'Registration Requests',
-    value: 'Proof required',
-    status: 'Required',
+    label: "Registration Requests",
+    value: "Proof required",
+    status: "Required",
     icon: FiClock,
   },
 ];
-
 
 /* =====================================================
    ROLE ACCESS MATRIX
@@ -48,31 +41,30 @@ const securityPolicyCards = [
 
 const roleAccessRows = [
   {
-    role: 'Super Admin',
-    access: 'Full access',
+    role: "Super Admin",
+    access: "Full access",
     controls:
-      'Administrators, approvals, roles, backup, audit logs, system settings',
+      "Administrators, approvals, roles, backup, audit logs, system settings",
   },
   {
-    role: 'Admin',
-    access: 'Operational access',
+    role: "Admin",
+    access: "Operational access",
     controls:
-      'Approved professors, students, courses, modules, reports, notifications',
+      "Approved professors, students, courses, modules, reports, notifications",
   },
   {
-    role: 'Professor',
-    access: 'Course access',
+    role: "Professor",
+    access: "Course access",
     controls:
-      'Owned courses, modules, quizzes, enrolled students, class performance',
+      "Owned courses, modules, quizzes, enrolled students, class performance",
   },
   {
-    role: 'Student',
-    access: 'Learning access',
+    role: "Student",
+    access: "Learning access",
     controls:
-      'Enrolled courses, study modules, quizzes, progress, announcements',
+      "Enrolled courses, study modules, quizzes, progress, announcements",
   },
 ];
-
 
 /* =====================================================
    PERMISSION AUDIT
@@ -80,27 +72,24 @@ const roleAccessRows = [
 
 const permissionAuditRows = [
   {
-    event: 'Professor approval rule updated',
-    owner: 'Super Admin',
-    scope: 'Registration approval',
-    time: 'Today',
+    event: "Professor approval rule updated",
+    owner: "Super Admin",
+    scope: "Registration approval",
+    time: "Today",
   },
   {
-    event:
-      'Student temporary password policy enforced',
-    owner: 'System',
-    scope: 'Account requirements',
-    time: 'Today',
+    event: "Student temporary password policy enforced",
+    owner: "System",
+    scope: "Account requirements",
+    time: "Today",
   },
   {
-    event:
-      'Administrator account management restricted',
-    owner: 'Super Admin',
-    scope: 'Role access',
-    time: 'Yesterday',
+    event: "Administrator account management restricted",
+    owner: "Super Admin",
+    scope: "Role access",
+    time: "Yesterday",
   },
 ];
-
 
 /* =====================================================
    PAGE
@@ -109,7 +98,6 @@ const permissionAuditRows = [
 export default function SuperAdminSecurityPermissions() {
   return (
     <div className="admin-page feature-page security-permissions-page">
-
       {/* =============================================
           PAGE HEADER
       ============================================== */}
@@ -119,8 +107,8 @@ export default function SuperAdminSecurityPermissions() {
           <h1>Security and Permissions</h1>
 
           <p>
-            Manage role access, account requirements,
-            password policies, and sensitive actions.
+            Manage role access, account requirements, password policies, and
+            sensitive actions.
           </p>
         </div>
 
@@ -132,7 +120,6 @@ export default function SuperAdminSecurityPermissions() {
         </Link>
       </div>
 
-
       {/* =============================================
           SECURITY POLICY OVERVIEW
       ============================================== */}
@@ -142,10 +129,7 @@ export default function SuperAdminSecurityPermissions() {
           const Icon = card.icon;
 
           return (
-            <section
-              className="security-policy-card"
-              key={card.label}
-            >
+            <section className="security-policy-card" key={card.label}>
               <span>
                 <Icon />
               </span>
@@ -160,29 +144,22 @@ export default function SuperAdminSecurityPermissions() {
         })}
       </div>
 
-
       {/* =============================================
           ROLE ACCESS MATRIX
       ============================================== */}
 
       <section className="feature-card security-role-card">
         <div className="feature-card-body">
-
           <div className="feature-section-top">
             <div>
               <h2>Role Access Matrix</h2>
 
-              <p>
-                Clear ownership boundaries for each
-                PuffyBrain role.
-              </p>
+              <p>Clear ownership boundaries for each PuffyBrain role.</p>
             </div>
           </div>
 
-
           <div className="security-table-wrap">
             <table className="security-table">
-
               <thead>
                 <tr>
                   <th>Role</th>
@@ -204,13 +181,10 @@ export default function SuperAdminSecurityPermissions() {
                   </tr>
                 ))}
               </tbody>
-
             </table>
           </div>
-
         </div>
       </section>
-
 
       {/* =============================================
           PERMISSION AUDIT
@@ -218,22 +192,16 @@ export default function SuperAdminSecurityPermissions() {
 
       <section className="feature-card security-role-card">
         <div className="feature-card-body">
-
           <div className="feature-section-top">
             <div>
               <h2>Permission Audit</h2>
 
-              <p>
-                Recent sensitive actions and
-                permission-related records.
-              </p>
+              <p>Recent sensitive actions and permission-related records.</p>
             </div>
           </div>
 
-
           <div className="security-table-wrap">
             <table className="security-table">
-
               <thead>
                 <tr>
                   <th>Event</th>
@@ -253,13 +221,10 @@ export default function SuperAdminSecurityPermissions() {
                   </tr>
                 ))}
               </tbody>
-
             </table>
           </div>
-
         </div>
       </section>
-
     </div>
   );
 }

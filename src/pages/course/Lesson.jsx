@@ -1,7 +1,14 @@
-import { readAccountQuizResult, saveAccountQuizResult } from "../../utils/quizStorage.js";
+import {
+  readAccountQuizResult,
+  saveAccountQuizResult,
+} from "../../utils/quizStorage.js";
 import styles from "./lesson.module.css";
-import LessonSourceEvidence from '../../components/lesson/LessonSourceEvidence.jsx';
-import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import {
+  Link,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import { useState, useEffect, useMemo } from "react";
 import Swal from "sweetalert2";
 import { API_BASE } from "../../config.js";
@@ -13,7 +20,10 @@ import {
   getCourseLessonPages,
   getCourseQuizItems,
 } from "./courseContent.js";
-import { getStudentProgressStorageKey, saveStudentReadingProgress } from "../student/courses/studentCourseData.js";
+import {
+  getStudentProgressStorageKey,
+  saveStudentReadingProgress,
+} from "../student/courses/studentCourseData.js";
 
 const saveAccountLessonProgress = (baseKey, record) => {
   const key = getStudentProgressStorageKey(baseKey);
@@ -33,7 +43,9 @@ const splitReadableText = (value) => {
 
   if (paragraphs.length > 1) return paragraphs;
 
-  return text.match(/[^.!?]+[.!?]+|[^.!?]+$/g)?.map((item) => item.trim()) || [text];
+  return (
+    text.match(/[^.!?]+[.!?]+|[^.!?]+$/g)?.map((item) => item.trim()) || [text]
+  );
 };
 
 const getLessonPageMedia = (page) => {
@@ -75,8 +87,11 @@ function Lesson() {
   const modules = useMemo(() => getCourseContentModules(lesson), [lesson]);
   const requestedModuleIndex = Number(searchParams.get("module") || 0);
   const moduleIndex = Math.min(
-    Math.max(Number.isInteger(requestedModuleIndex) ? requestedModuleIndex : 0, 0),
-    Math.max(modules.length - 1, 0)
+    Math.max(
+      Number.isInteger(requestedModuleIndex) ? requestedModuleIndex : 0,
+      0,
+    ),
+    Math.max(modules.length - 1, 0),
   );
   const activeModule = modules[moduleIndex] || null;
   const moduleNumber = moduleIndex + 1;
@@ -160,7 +175,9 @@ function Lesson() {
     try {
       const parsed = JSON.parse(savedResults);
 
-      const savedModuleIndex = Number(parsed.moduleIndex ?? parsed.module_index ?? 0);
+      const savedModuleIndex = Number(
+        parsed.moduleIndex ?? parsed.module_index ?? 0,
+      );
 
       if (
         Number(parsed.lessonId) !== Number(lessonId) ||
@@ -173,15 +190,19 @@ function Lesson() {
       }
 
       const savedAnswers = Array.isArray(parsed.answers) ? parsed.answers : [];
-      const visibleQuizSlides = allSlides.filter((slide) => slide.type === "quiz");
+      const visibleQuizSlides = allSlides.filter(
+        (slide) => slide.type === "quiz",
+      );
       const visibleQuizQuestions = new Set(
-        visibleQuizSlides.map((slide) => slide.content.question)
+        visibleQuizSlides.map((slide) => slide.content.question),
       );
       const visibleSavedAnswers = savedAnswers.filter((item) =>
-        visibleQuizQuestions.has(item.question)
+        visibleQuizQuestions.has(item.question),
       );
       const hasCompletedVisibleQuiz = visibleQuizSlides.every((slide) =>
-        visibleSavedAnswers.some((item) => item.question === slide.content.question)
+        visibleSavedAnswers.some(
+          (item) => item.question === slide.content.question,
+        ),
       );
 
       setHasTakenQuiz(hasCompletedVisibleQuiz);
@@ -193,7 +214,7 @@ function Lesson() {
         if (slide.type !== "quiz") return;
 
         const savedAnswer = visibleSavedAnswers.find(
-          (item) => item.question === slide.content.question
+          (item) => item.question === slide.content.question,
         );
 
         if (savedAnswer) {
@@ -219,7 +240,9 @@ function Lesson() {
   const currentItem = allSlides[currentSlide];
   const selectedAnswer = selectedAnswers[currentSlide];
   const currentLessonMedia =
-    currentItem?.type === "lesson" ? getLessonPageMedia(currentItem.content) : null;
+    currentItem?.type === "lesson"
+      ? getLessonPageMedia(currentItem.content)
+      : null;
 
   const saveProgress = async (slideIndexToSave) => {
     const studiedSlides = totalSlides
@@ -230,7 +253,7 @@ function Lesson() {
       : 100;
     const courseProgressToSave = Math.min(
       100,
-      Math.round(((moduleIndex + progressToSave / 100) / moduleCount) * 100)
+      Math.round(((moduleIndex + progressToSave / 100) / moduleCount) * 100),
     );
 
     saveStudentReadingProgress(lessonId, courseProgressToSave, {
@@ -255,14 +278,14 @@ function Lesson() {
 
     saveAccountLessonProgress(
       `lessonProgress_${lessonId}_module_${moduleIndex}`,
-      JSON.stringify(progressRecord)
+      JSON.stringify(progressRecord),
     );
     saveAccountLessonProgress(
       `lessonProgress_${lessonId}`,
       JSON.stringify({
         ...progressRecord,
         progress_percent: courseProgressToSave,
-      })
+      }),
     );
 
     try {
@@ -310,7 +333,7 @@ function Lesson() {
 
     const completedCourseProgress = Math.min(
       100,
-      Math.round(((moduleIndex + 1) / moduleCount) * 100)
+      Math.round(((moduleIndex + 1) / moduleCount) * 100),
     );
     const completedRecord = {
       module_index: moduleIndex,
@@ -324,14 +347,14 @@ function Lesson() {
 
     saveAccountLessonProgress(
       `lessonProgress_${lessonId}_module_${moduleIndex}`,
-      JSON.stringify(completedRecord)
+      JSON.stringify(completedRecord),
     );
     saveAccountLessonProgress(
       `lessonProgress_${lessonId}`,
       JSON.stringify({
         ...completedRecord,
         progress_percent: completedCourseProgress,
-      })
+      }),
     );
 
     setHasTakenQuiz(true);
@@ -364,7 +387,7 @@ function Lesson() {
         nextModuleTitle: nextModule?.title || "",
         scopeTitle: moduleTitle,
         scopeDetail: `${lessonSlides.length} lesson page(s)`,
-      })
+      }),
     );
 
     setQuizModesOpen(true);
@@ -443,6 +466,8 @@ function Lesson() {
     const newResult = {
       question: quiz?.question || "Question not available",
       topic: quiz?.topic || "",
+      cognitive_level: quiz?.cognitive_level || quiz?.cognitiveLevel || "",
+      thinking_skill: quiz?.thinking_skill || quiz?.thinkingSkill || "",
       userAnswer: option,
       correctAnswer,
       explanation,
@@ -547,17 +572,16 @@ function Lesson() {
     currentItem.content.options.length > 0;
 
   return (
-<div className={styles.wrapper}>
+    <div className={styles.wrapper}>
+      <button
+        type="button"
+        className={styles.backButton}
+        onClick={() => navigate(`/student/enrolled-courses/${lessonId}`)}
+      >
+        ← Back to homepage
+      </button>
 
-  <button
-    type="button"
-    className={styles.backButton}
-    onClick={() => navigate(`/student/enrolled-courses/${lessonId}`)}
-  >
-    ← Back to homepage
-  </button>
-
-  <div className={styles.content}>
+      <div className={styles.content}>
         <div className={styles.ribbon}></div>
 
         <div className={styles.tabs}>
@@ -571,20 +595,20 @@ function Lesson() {
             Lesson
           </button>
         </div>
-<div className={styles.greets}>
-  <p className={styles.slideCounter}>
-    Slide {totalSlides > 0 ? currentSlide + 1 : 0} of {totalSlides}
-  </p>
+        <div className={styles.greets}>
+          <p className={styles.slideCounter}>
+            Slide {totalSlides > 0 ? currentSlide + 1 : 0} of {totalSlides}
+          </p>
 
-  <p className={styles.moduleEyebrow}>
-    Module {moduleNumber} of {moduleCount}
-  </p>
+          <p className={styles.moduleEyebrow}>
+            Module {moduleNumber} of {moduleCount}
+          </p>
 
-  <h2>
-    Module {moduleNumber}: {moduleTitle}
-  </h2>
+          <h2>
+            Module {moduleNumber}: {moduleTitle}
+          </h2>
 
-  <div className={styles.progressWrapper}>
+          <div className={styles.progressWrapper}>
             <div className={styles.progressBar}>
               <div
                 className={styles.progressFill}
@@ -609,7 +633,10 @@ function Lesson() {
                     {currentLessonMedia.type.startsWith("video/") ? (
                       <video src={currentLessonMedia.url} controls />
                     ) : (
-                      <img src={currentLessonMedia.url} alt={currentLessonMedia.name} />
+                      <img
+                        src={currentLessonMedia.url}
+                        alt={currentLessonMedia.name}
+                      />
                     )}
 
                     <figcaption>{currentLessonMedia.name}</figcaption>
@@ -620,10 +647,9 @@ function Lesson() {
                   {splitReadableText(currentItem.content.content).map(
                     (paragraph, index) => (
                       <p key={`${paragraph}-${index}`}>{paragraph}</p>
-                    )
+                    ),
                   )}
                 </div>
-                <LessonSourceEvidence page={currentItem.content} />
               </div>
             )}
 
@@ -641,10 +667,40 @@ function Lesson() {
                   </p>
                 )}
 
-                {currentItem.content.type === 'identification' ? (
-                  <form className={styles.optionsContainer} onSubmit={event => { event.preventDefault(); if (identificationAnswer.trim()) handleOptionSelect(currentSlide, identificationAnswer.trim()); }}>
-                    <input className={styles.optionButton} aria-label="Your identification answer" placeholder="Type your answer" maxLength={150} value={identificationAnswer} onChange={event => setIdentificationAnswer(event.target.value)} disabled={hasTakenQuiz || Boolean(selectedAnswer)} />
-                    <button className={styles.button} type="submit" disabled={hasTakenQuiz || Boolean(selectedAnswer) || !identificationAnswer.trim()}>Submit answer</button>
+                {currentItem.content.type === "identification" ? (
+                  <form
+                    className={styles.optionsContainer}
+                    onSubmit={(event) => {
+                      event.preventDefault();
+                      if (identificationAnswer.trim())
+                        handleOptionSelect(
+                          currentSlide,
+                          identificationAnswer.trim(),
+                        );
+                    }}
+                  >
+                    <input
+                      className={styles.optionButton}
+                      aria-label="Your identification answer"
+                      placeholder="Type your answer"
+                      maxLength={150}
+                      value={identificationAnswer}
+                      onChange={(event) =>
+                        setIdentificationAnswer(event.target.value)
+                      }
+                      disabled={hasTakenQuiz || Boolean(selectedAnswer)}
+                    />
+                    <button
+                      className={styles.button}
+                      type="submit"
+                      disabled={
+                        hasTakenQuiz ||
+                        Boolean(selectedAnswer) ||
+                        !identificationAnswer.trim()
+                      }
+                    >
+                      Submit answer
+                    </button>
                   </form>
                 ) : hasOptions ? (
                   <div className={styles.optionsContainer}>

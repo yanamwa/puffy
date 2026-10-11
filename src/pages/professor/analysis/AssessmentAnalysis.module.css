@@ -114,7 +114,7 @@
 
 .courseCard::before,
 .courseCard::after {
-  content: '';
+  content: "";
   position: absolute;
   pointer-events: none;
   background-repeat: no-repeat;
@@ -156,7 +156,7 @@
   margin: 10px 0 8px;
   color: #555f6c;
   font-size: 23px;
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: Georgia, "Times New Roman", serif;
   font-weight: 500;
   line-height: 1.22;
 }

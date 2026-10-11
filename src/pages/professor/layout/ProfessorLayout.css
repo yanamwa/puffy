@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Jersey+15&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Jersey+15&display=swap");
 
 .professor-layout {
   display: grid;
@@ -103,7 +103,9 @@
   font-size: 14px;
   font-weight: 400;
   cursor: pointer;
-  transition: background 0.2s ease, transform 0.2s ease;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
 }
 
 .professor-link svg,
@@ -1208,7 +1210,10 @@
   font-size: 20px;
   font-weight: 400;
   line-height: 1.1;
-  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease;
   white-space: nowrap;
 }
 
@@ -1352,7 +1357,9 @@
   background: transparent;
   color: #8d939b;
   cursor: pointer;
-  transition: color 150ms ease, background 150ms ease;
+  transition:
+    color 150ms ease,
+    background 150ms ease;
 }
 
 .professor-user-more:hover,
@@ -1756,7 +1763,29 @@
 
 /* Compact professor typography */
 #root .professor-layout,
-#root .professor-layout :where(a, button, input, select, textarea, label, p, span, strong, small, li, td, th, h1, h2, h3, h4, h5, h6) {
+#root
+  .professor-layout
+  :where(
+    a,
+    button,
+    input,
+    select,
+    textarea,
+    label,
+    p,
+    span,
+    strong,
+    small,
+    li,
+    td,
+    th,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6
+  ) {
   font-family: "Segoe UI", Arial, system-ui, sans-serif !important;
   letter-spacing: 0;
 }
@@ -1765,7 +1794,22 @@
   font-size: 14px;
 }
 
-#root .professor-layout :where(a, button, input, select, textarea, label, p, span, small, li, td, th) {
+#root
+  .professor-layout
+  :where(
+    a,
+    button,
+    input,
+    select,
+    textarea,
+    label,
+    p,
+    span,
+    small,
+    li,
+    td,
+    th
+  ) {
   font-size: 14px !important;
   line-height: 1.4;
   font-weight: 400;
@@ -2949,8 +2993,7 @@
   background: #f7f7f7;
   color: var(--professor-ink);
 
-  transition:
-    grid-template-columns 220ms ease;
+  transition: grid-template-columns 220ms ease;
 }
 
 /* =========================
@@ -2990,8 +3033,7 @@
 
   color: #ffffff;
 
-  transition:
-    width 220ms ease;
+  transition: width 220ms ease;
 }
 
 .professor-sidebar-collapsed .professor-sidebar {
@@ -3075,10 +3117,7 @@
 .professor-layout .professor-brand-name {
   color: #ffffff;
 
-  font-family:
-    "Jersey 15",
-    system-ui,
-    sans-serif !important;
+  font-family: "Jersey 15", system-ui, sans-serif !important;
   font-size: 22px !important;
   font-weight: 400 !important;
   line-height: 1;
@@ -3100,20 +3139,17 @@
   padding-left: 0;
 }
 
-.professor-sidebar-collapsed
-  .professor-logo-button {
+.professor-sidebar-collapsed .professor-logo-button {
   width: 100%;
   flex-basis: 100%;
 }
 
-.professor-sidebar-collapsed
-  .professor-logo-button img {
+.professor-sidebar-collapsed .professor-logo-button img {
   width: 38px;
   height: 38px;
 }
 
-.professor-sidebar-collapsed
-  .professor-brand-name {
+.professor-sidebar-collapsed .professor-brand-name {
   width: 0;
 
   overflow: hidden;
@@ -3122,8 +3158,7 @@
   pointer-events: none;
 }
 
-.professor-sidebar-collapsed
-  .professor-brand::after {
+.professor-sidebar-collapsed .professor-brand::after {
   right: 10px;
   left: 10px;
 }
@@ -3193,10 +3228,7 @@
 
   color: currentColor;
 
-  font-family:
-    "Jersey 15",
-    system-ui,
-    sans-serif !important;
+  font-family: "Jersey 15", system-ui, sans-serif !important;
   font-size: 15px !important;
   font-weight: 400 !important;
   line-height: 1.15;
@@ -3206,14 +3238,12 @@
 
   opacity: 1;
 
-  transition:
-    opacity 130ms ease;
+  transition: opacity 130ms ease;
 }
 
 /* Normal hover only changes the icon/text */
 
-.professor-layout
-  .professor-link:not(.active):hover {
+.professor-layout .professor-link:not(.active):hover {
   border-color: transparent;
 
   background: transparent;
@@ -3238,8 +3268,7 @@
   box-shadow: none;
 }
 
-.professor-layout
-  .professor-link.active::after {
+.professor-layout .professor-link.active::after {
   content: "";
 
   position: absolute;
@@ -3256,15 +3285,13 @@
    COLLAPSED NAVIGATION
 ========================= */
 
-.professor-sidebar-collapsed
-  .professor-menu {
+.professor-sidebar-collapsed .professor-menu {
   align-items: stretch;
 
   padding: 26px 0 20px 18px;
 }
 
-.professor-sidebar-collapsed
-  .professor-link {
+.professor-sidebar-collapsed .professor-link {
   min-height: 42px;
 
   justify-content: flex-start;
@@ -3273,16 +3300,14 @@
   padding: 0 0 0 18px;
 }
 
-.professor-sidebar-collapsed
-  .professor-link svg {
+.professor-sidebar-collapsed .professor-link svg {
   width: 20px;
   height: 20px;
 
   flex-basis: 20px;
 }
 
-.professor-sidebar-collapsed
-  .professor-nav-label {
+.professor-sidebar-collapsed .professor-nav-label {
   display: none;
 }
 
@@ -3334,28 +3359,22 @@
   color: currentColor;
 }
 
-.professor-layout
-  .professor-logout-label {
-  font-family:
-    "Jersey 15",
-    system-ui,
-    sans-serif !important;
+.professor-layout .professor-logout-label {
+  font-family: "Jersey 15", system-ui, sans-serif !important;
   font-size: 15px !important;
   font-weight: 400 !important;
 
   white-space: nowrap;
 }
 
-.professor-sidebar-collapsed
-  .professor-logout {
+.professor-sidebar-collapsed .professor-logout {
   justify-content: center;
   gap: 0;
 
   padding: 0;
 }
 
-.professor-sidebar-collapsed
-  .professor-logout-label {
+.professor-sidebar-collapsed .professor-logout-label {
   display: none;
 }
 
@@ -3430,12 +3449,10 @@
   box-sizing: border-box;
 }
 
-.professor-layout
-  .professor-search:focus-within {
+.professor-layout .professor-search:focus-within {
   border-color: #25714e;
 
-  box-shadow:
-    0 0 0 3px rgba(37, 113, 78, 0.1);
+  box-shadow: 0 0 0 3px rgba(37, 113, 78, 0.1);
 }
 
 .professor-layout .professor-search input {
@@ -3447,29 +3464,21 @@
   background: transparent;
   color: #707070;
 
-  font-family:
-    "Jersey 15",
-    system-ui,
-    sans-serif !important;
+  font-family: "Jersey 15", system-ui, sans-serif !important;
   font-size: 15px !important;
   font-weight: 400 !important;
 }
 
-.professor-layout
-  .professor-search input::placeholder {
+.professor-layout .professor-search input::placeholder {
   color: #c9c9c9;
   opacity: 1;
 
-  font-family:
-    "Jersey 15",
-    system-ui,
-    sans-serif !important;
+  font-family: "Jersey 15", system-ui, sans-serif !important;
   font-size: 15px !important;
   font-weight: 400 !important;
 }
 
-.professor-layout
-  .professor-search-icon {
+.professor-layout .professor-search-icon {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3479,8 +3488,7 @@
   pointer-events: none;
 }
 
-.professor-layout
-  .professor-search-icon svg {
+.professor-layout .professor-search-icon svg {
   width: 19px;
   height: 19px;
 
@@ -3491,8 +3499,7 @@
    HEADER ACTIONS
 ========================= */
 
-.professor-layout
-  .professor-header-actions {
+.professor-layout .professor-header-actions {
   position: relative;
 
   display: flex;
@@ -3509,22 +3516,17 @@
   HeaderProfileChip dropdowns above page content.
 */
 
-.professor-layout
-  .professor-header-actions > * {
+.professor-layout .professor-header-actions > * {
   position: relative;
 }
 
-.professor-layout
-  .notification-menu-wrapper,
-.professor-layout
-  .profile-menu-wrapper {
+.professor-layout .notification-menu-wrapper,
+.professor-layout .profile-menu-wrapper {
   z-index: 1200;
 }
 
-.professor-layout
-  .notification-dropdown-menu,
-.professor-layout
-  .profile-dropdown-menu {
+.professor-layout .notification-dropdown-menu,
+.professor-layout .profile-dropdown-menu {
   z-index: 1300;
 }
 
@@ -3562,8 +3564,7 @@
     max-width: 520px;
   }
 
-  .professor-layout
-    .professor-header-actions {
+  .professor-layout .professor-header-actions {
     gap: 14px;
   }
 }
@@ -3579,8 +3580,7 @@
   }
 
   .professor-layout .professor-sidebar,
-  .professor-sidebar-collapsed
-    .professor-sidebar {
+  .professor-sidebar-collapsed .professor-sidebar {
     width: 64px;
   }
 
@@ -3591,26 +3591,22 @@
     padding: 10px 0;
   }
 
-  .professor-layout
-    .professor-brand-name {
+  .professor-layout .professor-brand-name {
     display: none;
   }
 
-  .professor-layout
-    .professor-logo-button img {
+  .professor-layout .professor-logo-button img {
     width: 35px;
     height: 35px;
   }
 
   .professor-layout .professor-menu,
-  .professor-sidebar-collapsed
-    .professor-menu {
+  .professor-sidebar-collapsed .professor-menu {
     padding: 18px 0 18px 12px;
   }
 
   .professor-layout .professor-link,
-  .professor-sidebar-collapsed
-    .professor-link {
+  .professor-sidebar-collapsed .professor-link {
     min-height: 42px;
 
     gap: 0;
@@ -3618,21 +3614,18 @@
     padding: 0 0 0 14px;
   }
 
-  .professor-layout
-    .professor-nav-label {
+  .professor-layout .professor-nav-label {
     display: none;
   }
 
   .professor-layout .professor-logout,
-  .professor-sidebar-collapsed
-    .professor-logout {
+  .professor-sidebar-collapsed .professor-logout {
     justify-content: center;
 
     padding: 0;
   }
 
-  .professor-layout
-    .professor-logout-label {
+  .professor-layout .professor-logout-label {
     display: none;
   }
 
@@ -3652,8 +3645,7 @@
     padding-left: 16px;
   }
 
-  .professor-layout
-    .professor-header-actions {
+  .professor-layout .professor-header-actions {
     gap: 8px;
   }
 
@@ -3680,17 +3672,13 @@
 }
 
 /* Keep the logo slightly smaller when collapsed */
-#root
-  .professor-layout.professor-sidebar-collapsed
-  .professor-logo-button {
+#root .professor-layout.professor-sidebar-collapsed .professor-logo-button {
   width: 100%;
   height: 44px;
   flex-basis: 100%;
 }
 
-#root
-  .professor-layout.professor-sidebar-collapsed
-  .professor-logo-button img {
+#root .professor-layout.professor-sidebar-collapsed .professor-logo-button img {
   width: 65px;
   height: 65px;
 }
@@ -3713,10 +3701,7 @@
 }
 
 /* Keep longer labels fully visible on one line */
-#root
-  .professor-layout
-  .professor-link
-  .professor-nav-label {
+#root .professor-layout .professor-link .professor-nav-label {
   display: block;
 
   min-width: 0;
@@ -3726,10 +3711,7 @@
   text-overflow: clip;
   white-space: nowrap;
 
-  font-family:
-    "Jersey 15",
-    system-ui,
-    sans-serif !important;
+  font-family: "Jersey 15", system-ui, sans-serif !important;
 
   font-size: 14px !important;
   font-weight: 400 !important;
@@ -3745,15 +3727,11 @@
 }
 
 /* Preserve the collapsed sidebar alignment */
-#root
-  .professor-layout.professor-sidebar-collapsed
-  .professor-menu {
+#root .professor-layout.professor-sidebar-collapsed .professor-menu {
   padding: 26px 0 20px 18px;
 }
 
-#root
-  .professor-layout.professor-sidebar-collapsed
-  .professor-link {
+#root .professor-layout.professor-sidebar-collapsed .professor-link {
   min-height: 42px;
 
   justify-content: flex-start;
@@ -3762,9 +3740,7 @@
   padding: 0 0 0 18px;
 }
 
-#root
-  .professor-layout.professor-sidebar-collapsed
-  .professor-nav-label {
+#root .professor-layout.professor-sidebar-collapsed .professor-nav-label {
   display: none;
 }
 
@@ -3786,7 +3762,7 @@
   font-size: 14px;
   font-weight: 600;
 
-  transition: .18s;
+  transition: 0.18s;
 }
 
 .professor-create-course:hover {
@@ -3850,7 +3826,11 @@
 /* Force the final professor sidebar text style over older Jersey rules. */
 #root .professor-layout .professor-sidebar .professor-brand-name,
 #root .professor-layout .professor-sidebar .professor-link .professor-nav-label,
-#root .professor-layout .professor-sidebar .professor-logout .professor-logout-label,
+#root
+  .professor-layout
+  .professor-sidebar
+  .professor-logout
+  .professor-logout-label,
 #root .professor-layout .professor-sidebar .professor-link,
 #root .professor-layout .professor-sidebar .professor-logout {
   font-family: Arial, Helvetica, sans-serif !important;

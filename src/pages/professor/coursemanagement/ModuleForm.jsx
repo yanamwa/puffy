@@ -12,7 +12,7 @@ function serializeQuizItems(items) {
         question: String(item.question || "").trim(),
         answer: String(item.answer || "").trim(),
       }))
-      .filter((item) => item.question || item.answer)
+      .filter((item) => item.question || item.answer),
   );
 }
 
@@ -63,9 +63,7 @@ export default function ModuleForm({ mode }) {
 
   const updateQuizItem = (index, field, value) => {
     setQuizItems((prev) =>
-      prev.map((item, i) =>
-        i === index ? { ...item, [field]: value } : item
-      )
+      prev.map((item, i) => (i === index ? { ...item, [field]: value } : item)),
     );
   };
 
@@ -144,58 +142,58 @@ export default function ModuleForm({ mode }) {
   };
 
   const [uploadFile, setUploadFile] = useState(null);
-const [isProcessingFile, setIsProcessingFile] = useState(false);
-const handleFileUpload = async () => {
-  if (!uploadFile) {
-    await Swal.fire({
-      icon: "warning",
-      title: "No File Selected",
-      text: "Please choose a file first.",
-    });
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append("file", uploadFile);
-
-  try {
-    setIsProcessingFile(true);
-
-    const res = await fetch(`${API_BASE}/processLessonFile.php`, {
-      method: "POST",
-      body: formData,
-    });
-
-    const data = await res.json();
-
-    if (data.success) {
-      setSubject(data.subject || "");
-      setLearningObjectives(data.learning_objectives || "");
-      setLessonContent(data.lesson_content || "");
-
+  const [isProcessingFile, setIsProcessingFile] = useState(false);
+  const handleFileUpload = async () => {
+    if (!uploadFile) {
       await Swal.fire({
-        icon: "success",
-        title: "File Processed",
-        text: "The lesson content was extracted successfully.",
+        icon: "warning",
+        title: "No File Selected",
+        text: "Please choose a file first.",
       });
-    } else {
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", uploadFile);
+
+    try {
+      setIsProcessingFile(true);
+
+      const res = await fetch(`${API_BASE}/processLessonFile.php`, {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        setSubject(data.subject || "");
+        setLearningObjectives(data.learning_objectives || "");
+        setLessonContent(data.lesson_content || "");
+
+        await Swal.fire({
+          icon: "success",
+          title: "File Processed",
+          text: "The lesson content was extracted successfully.",
+        });
+      } else {
+        await Swal.fire({
+          icon: "error",
+          title: "Processing Failed",
+          text: data.message || "Could not process file.",
+        });
+      }
+    } catch (err) {
+      console.error(err);
       await Swal.fire({
         icon: "error",
-        title: "Processing Failed",
-        text: data.message || "Could not process file.",
+        title: "Error",
+        text: "Upload failed.",
       });
+    } finally {
+      setIsProcessingFile(false);
     }
-  } catch (err) {
-    console.error(err);
-    await Swal.fire({
-      icon: "error",
-      title: "Error",
-      text: "Upload failed.",
-    });
-  } finally {
-    setIsProcessingFile(false);
-  }
-};
+  };
 
   return (
     <AdminLayout>
@@ -234,25 +232,25 @@ const handleFileUpload = async () => {
           />
         </div>
 
-<div className={styles.popupSection}>
-  <label className={styles.popupLabel}>Upload Lesson File</label>
-  <input
-    type="file"
-    accept=".txt,.pdf,.doc,.docx"
-    onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
-  />
+        <div className={styles.popupSection}>
+          <label className={styles.popupLabel}>Upload Lesson File</label>
+          <input
+            type="file"
+            accept=".txt,.pdf,.doc,.docx"
+            onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
+          />
 
-  <div style={{ marginTop: "10px" }}>
-    <button
-      type="button"
-      className={styles.popupAddBtn}
-      onClick={handleFileUpload}
-      disabled={isProcessingFile}
-    >
-      {isProcessingFile ? "Processing..." : "Upload and Extract"}
-    </button>
-  </div>
-</div>
+          <div style={{ marginTop: "10px" }}>
+            <button
+              type="button"
+              className={styles.popupAddBtn}
+              onClick={handleFileUpload}
+              disabled={isProcessingFile}
+            >
+              {isProcessingFile ? "Processing..." : "Upload and Extract"}
+            </button>
+          </div>
+        </div>
 
         <div className={styles.popupSection}>
           <label className={styles.popupLabel}>Learning Objectives</label>

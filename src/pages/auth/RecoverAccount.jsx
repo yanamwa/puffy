@@ -115,14 +115,14 @@ function RecoverAccount() {
       if (!data.success) {
         showThinkAlert(
           "Verification Failed",
-          data.message || "Invalid verification code."
+          data.message || "Invalid verification code.",
         );
         return;
       }
 
       showSuccessAlert(
         "Account Restored",
-        "Your account has been successfully recovered."
+        "Your account has been successfully recovered.",
       ).then(() => {
         navigate("/login");
       });
@@ -159,7 +159,7 @@ function RecoverAccount() {
       } else {
         showThinkAlert(
           "Resend Failed",
-          data.message || "Could not resend code."
+          data.message || "Could not resend code.",
         );
       }
     } catch (error) {
@@ -184,9 +184,7 @@ function RecoverAccount() {
               Enter the 4-digit code sent to your email
             </p>
 
-            <p className={styles.verifySubtext}>
-              {email || "your email"}
-            </p>
+            <p className={styles.verifySubtext}>{email || "your email"}</p>
 
             <div className={styles.otpWrapper}>
               {[0, 1, 2, 3].map((_, index) => (

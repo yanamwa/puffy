@@ -6,10 +6,7 @@
   overflow-x: hidden;
 
   background-image:
-    linear-gradient(
-      rgba(255,255,255,0.20),
-      rgba(255,255,255,0.20)
-    ),
+    linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2)),
     url("/images/background_notebook.png");
 
   background-size: cover;
@@ -437,7 +434,6 @@
   }
 }
 
-
 .selectedOption {
   background: rgba(160, 160, 160, 0.35) !important;
   border-color: rgba(120, 120, 120, 0.7) !important;
@@ -453,7 +449,6 @@
 .option:disabled:not(.selectedOption) {
   opacity: 0.55;
 }
-
 
 .timedLoadingImage {
   width: 140px;
@@ -502,11 +497,8 @@
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
-    background-image:
-    linear-gradient(
-      rgba(255, 255, 255, 0.12),
-      rgba(255, 255, 255, 0.12)
-    ),
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.12)),
     url("/images/background_notebook.png");
   overflow-x: hidden;
 }

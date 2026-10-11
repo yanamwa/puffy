@@ -15,7 +15,6 @@
   box-sizing: border-box;
 }
 
-
 /* =====================================================
    COLOR VARIABLES
 ===================================================== */
@@ -30,7 +29,6 @@
 
   --analytics-track: #e8eef5;
 }
-
 
 /* =====================================================
    HEADER
@@ -51,7 +49,6 @@
   box-sizing: border-box;
 }
 
-
 .system-analytics-kicker {
   display: inline-flex;
   align-items: center;
@@ -68,24 +65,21 @@
   text-transform: uppercase;
 }
 
-
 .system-analytics-kicker svg {
   width: 16px;
   height: 16px;
 }
-
 
 .system-analytics-header h1 {
   margin: 0 0 8px;
 
   color: var(--admin-ink);
 
-  font-size:30px;
+  font-size: 30px;
   font-weight: 950;
 
   line-height: 1.1;
 }
-
 
 .system-analytics-header p {
   margin: 0;
@@ -98,7 +92,6 @@
   line-height: 1.5;
 }
 
-
 /* =====================================================
    OVERVIEW
 ===================================================== */
@@ -108,12 +101,10 @@
 
   display: grid;
 
-  grid-template-columns:
-    repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 
   gap: 16px;
 }
-
 
 .system-analytics-stat {
   display: flex;
@@ -134,7 +125,6 @@
 
   box-sizing: border-box;
 }
-
 
 /* =====================================================
    OVERVIEW ICON
@@ -158,17 +148,14 @@
   color: var(--analytics-blue-deep);
 }
 
-
 .system-analytics-stat > span svg {
   width: 19px;
   height: 19px;
 }
 
-
 .system-analytics-stat div {
   min-width: 0;
 }
-
 
 .system-analytics-stat p {
   margin: 0 0 5px;
@@ -178,7 +165,6 @@
   font-size: 15px;
   font-weight: 950;
 }
-
 
 .system-analytics-stat strong {
   display: block;
@@ -193,7 +179,6 @@
   line-height: 1;
 }
 
-
 .system-analytics-stat small {
   display: block;
 
@@ -205,7 +190,6 @@
   line-height: 1.35;
 }
 
-
 /* =====================================================
    ANALYTICS GRID
 ===================================================== */
@@ -215,14 +199,12 @@
 
   display: grid;
 
-  grid-template-columns:
-    repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 
   gap: 20px;
 
   align-items: start;
 }
-
 
 /* =====================================================
    ANALYTICS CARD
@@ -244,7 +226,6 @@
   box-sizing: border-box;
 }
 
-
 .system-analytics-card-header {
   display: flex;
   align-items: flex-start;
@@ -253,7 +234,6 @@
 
   margin-bottom: 18px;
 }
-
 
 /* =====================================================
    CARD ICON
@@ -277,12 +257,10 @@
   color: var(--analytics-blue-deep);
 }
 
-
 .system-analytics-card-header > span svg {
   width: 18px;
   height: 18px;
 }
-
 
 .system-analytics-card-header h2 {
   margin: 0 0 5px;
@@ -295,7 +273,6 @@
   line-height: 1.15;
 }
 
-
 .system-analytics-card-header p {
   margin: 0;
 
@@ -307,7 +284,6 @@
   line-height: 1.45;
 }
 
-
 /* =====================================================
    METRICS
 ===================================================== */
@@ -315,14 +291,12 @@
 .system-analytics-metrics {
   display: grid;
 
-  grid-template-columns:
-    repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 
   gap: 11px;
 
   margin-bottom: 21px;
 }
-
 
 .system-analytics-metric {
   display: grid;
@@ -342,7 +316,6 @@
   box-sizing: border-box;
 }
 
-
 .system-analytics-metric span {
   color: var(--admin-muted);
 
@@ -351,7 +324,6 @@
 
   line-height: 1.3;
 }
-
 
 .system-analytics-metric strong {
   align-self: end;
@@ -363,7 +335,6 @@
 
   line-height: 1;
 }
-
 
 /* =====================================================
    METRIC DETAILS
@@ -378,7 +349,6 @@
   line-height: 1.3;
 }
 
-
 /* =====================================================
    PROGRESS BARS
 ===================================================== */
@@ -389,13 +359,11 @@
   gap: 13px;
 }
 
-
 .system-analytics-bar {
   display: grid;
 
   gap: 6px;
 }
-
 
 .system-analytics-bar > div {
   display: flex;
@@ -405,7 +373,6 @@
   gap: 12px;
 }
 
-
 .system-analytics-bar span {
   color: var(--admin-muted);
 
@@ -413,14 +380,12 @@
   font-weight: 900;
 }
 
-
 .system-analytics-bar strong {
   color: var(--analytics-blue-deep);
 
   font-size: 10px;
   font-weight: 950;
 }
-
 
 /* =====================================================
    BAR TRACK
@@ -439,7 +404,6 @@
   border-radius: 999px;
 }
 
-
 /* =====================================================
    BAR VALUE
 ===================================================== */
@@ -456,7 +420,6 @@
   transition: width 0.35s ease;
 }
 
-
 /* =====================================================
    REMOVE WIDTH RESTRICTIONS FROM COMMON ADMIN WRAPPERS
    ONLY WHILE INSIDE SYSTEM ANALYTICS
@@ -470,18 +433,15 @@
   align-self: stretch;
 }
 
-
 /* =====================================================
    RESPONSIVE - LARGE LAPTOP
 ===================================================== */
 
 @media (max-width: 1350px) {
   .system-analytics-overview {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
-
 
 /* =====================================================
    RESPONSIVE - TABLET
@@ -493,7 +453,6 @@
   }
 }
 
-
 /* =====================================================
    RESPONSIVE - MOBILE
 ===================================================== */
@@ -503,22 +462,18 @@
     gap: 16px;
   }
 
-
   .system-analytics-overview,
   .system-analytics-metrics {
     grid-template-columns: 1fr;
   }
 
-
   .system-analytics-header {
     padding: 18px;
   }
 
-
   .system-analytics-card {
     padding: 16px;
   }
-
 
   .system-analytics-stat {
     padding: 15px;

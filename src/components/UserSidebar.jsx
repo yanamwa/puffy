@@ -30,7 +30,9 @@ export default function UserSidebar({
   getDeckId,
 }) {
   return (
-    <aside className={`${styles.sidebar} ${isCollapsed ? styles.collapsed : ""}`}>
+    <aside
+      className={`${styles.sidebar} ${isCollapsed ? styles.collapsed : ""}`}
+    >
       <div className={styles.sidebarTop}>
         <button
           className={styles.sidebarToggle}
@@ -42,8 +44,16 @@ export default function UserSidebar({
         </button>
 
         <div className={styles.logo}>
-          <img className={styles.logoExpanded} src="/images/logo1.png" alt="PuffyBrain" />
-          <img className={styles.logoCollapsed} src="/images/logo_solo.png" alt="PuffyBrain" />
+          <img
+            className={styles.logoExpanded}
+            src="/images/logo1.png"
+            alt="PuffyBrain"
+          />
+          <img
+            className={styles.logoCollapsed}
+            src="/images/logo_solo.png"
+            alt="PuffyBrain"
+          />
         </div>
 
         <div className={styles.divider}></div>
@@ -67,10 +77,15 @@ export default function UserSidebar({
               <li className={styles.sidebarEmptyText}>No courses yet.</li>
             ) : (
               courses.slice(0, 5).map((course) => (
-                <li className={styles.sidebarListItem} key={course.id || course.code}>
+                <li
+                  className={styles.sidebarListItem}
+                  key={course.id || course.code}
+                >
                   <SidebarItem
                     icon="B"
-                    onClick={() => openCourse?.(course.id || course.course_id || course.code)}
+                    onClick={() =>
+                      openCourse?.(course.id || course.course_id || course.code)
+                    }
                   >
                     {course.title || course.code || "Course"}
                   </SidebarItem>
@@ -87,8 +102,13 @@ export default function UserSidebar({
               <li className={styles.sidebarEmptyText}>No decks yet.</li>
             ) : (
               myDecks.slice(0, 5).map((deck) => (
-                <li className={styles.sidebarListItem} key={getDeckId?.(deck) || deck.id}>
-                  <SidebarItem icon="D">{deck.title || deck.name || "Deck"}</SidebarItem>
+                <li
+                  className={styles.sidebarListItem}
+                  key={getDeckId?.(deck) || deck.id}
+                >
+                  <SidebarItem icon="D">
+                    {deck.title || deck.name || "Deck"}
+                  </SidebarItem>
                 </li>
               ))
             )}

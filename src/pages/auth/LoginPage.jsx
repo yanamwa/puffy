@@ -2,11 +2,7 @@ import PublicNavbar from "../../components/landing/PublicNavbar.jsx";
 import styles from "./login.module.css";
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
-import {
-  useNavigate,
-  Link,
-  useLocation,
-} from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { API_BASE } from "../../config.js";
 import LandingNavbar from "../../components/landing/LandingNavbar";
@@ -24,26 +20,20 @@ function Login() {
   const location = useLocation();
   const { user, saveSession, logout } = useAuth();
 
-  const [showPassword, setShowPassword] =
-    useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const [username, setUsername] =
-    useState("");
+  const [username, setUsername] = useState("");
 
-  const [password, setPassword] =
-    useState("");
+  const [password, setPassword] = useState("");
 
-  const [loginAttempts, setLoginAttempts] =
-    useState(0);
+  const [loginAttempts, setLoginAttempts] = useState(0);
 
-  const [isLoggingIn, setIsLoggingIn] =
-    useState(false);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   const MAX_ATTEMPTS = 10;
   const LOGIN_TIMEOUT_MS = 15000;
 
-  const [loginFeedback, setLoginFeedback] =
-    useState(null);
+  const [loginFeedback, setLoginFeedback] = useState(null);
 
   useEffect(() => {
     const role = getUserRole(user);
@@ -52,7 +42,7 @@ function Login() {
       if (isProfessorApprovalRestricted(user)) {
         logout();
         setLoginError(
-          "Your professor registration is pending Super Admin approval."
+          "Your professor registration is pending Super Admin approval.",
         );
         return;
       }
@@ -66,7 +56,7 @@ function Login() {
   useEffect(() => {
     if (location.state?.professorApprovalRequired) {
       setLoginError(
-        "Your professor registration is pending Super Admin approval."
+        "Your professor registration is pending Super Admin approval.",
       );
     }
   }, [location.state]);
@@ -96,9 +86,7 @@ function Login() {
     });
   };
 
-  const handleDeletedAccount = async (
-    data
-  ) => {
+  const handleDeletedAccount = async (data) => {
     const result = await Swal.fire({
       imageUrl: "/images/error.png",
       imageWidth: 170,
@@ -117,33 +105,20 @@ function Login() {
     }
 
     try {
-      const otpRes = await fetch(
-        `${API_BASE}/send-recovery-otp.php`,
-        {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
-          body: JSON.stringify({
-            username:
-              data.username ||
-              username
-                .trim()
-                .toLowerCase(),
-          }),
-        }
-      );
+      const otpRes = await fetch(`${API_BASE}/send-recovery-otp.php`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: data.username || username.trim().toLowerCase(),
+        }),
+      });
 
-      const otpData = await otpRes
-        .json()
-        .catch(() => ({}));
+      const otpData = await otpRes.json().catch(() => ({}));
 
-      console.log(
-        "RECOVERY OTP RESPONSE:",
-        otpData
-      );
+      console.log("RECOVERY OTP RESPONSE:", otpData);
 
       if (!otpRes.ok || !otpData.success) {
         Swal.fire({
@@ -151,62 +126,41 @@ function Login() {
           imageWidth: 170,
           imageHeight: 170,
           title: "Failed",
-          text:
-            otpData.message ||
-            "Could not send verification code.",
+          text: otpData.message || "Could not send verification code.",
         });
 
         return;
       }
 
       await Swal.fire({
-        imageUrl:
-          "/images/success.png",
+        imageUrl: "/images/success.png",
         imageWidth: 170,
         imageHeight: 170,
-        title:
-          "Verification Code Sent",
-        text:
-          "Please check your email for the recovery code.",
+        title: "Verification Code Sent",
+        text: "Please check your email for the recovery code.",
       });
 
       navigate("/recover-account", {
         state: {
-          username:
-            data.username ||
-            username
-              .trim()
-              .toLowerCase(),
+          username: data.username || username.trim().toLowerCase(),
 
-          email:
-            otpData.email ||
-            data.email ||
-            username
-              .trim()
-              .toLowerCase(),
+          email: otpData.email || data.email || username.trim().toLowerCase(),
         },
       });
     } catch (otpError) {
-      console.error(
-        "RECOVERY OTP ERROR:",
-        otpError
-      );
+      console.error("RECOVERY OTP ERROR:", otpError);
 
       Swal.fire({
         imageUrl: "/images/error.png",
         imageWidth: 170,
         imageHeight: 170,
         title: "Server Error",
-        text:
-          "Failed to send verification code.",
+        text: "Failed to send verification code.",
       });
     }
   };
 
-  const redirectUser = async (
-    data,
-    loggedInUser
-  ) => {
+  const redirectUser = async (data, loggedInUser) => {
     const role =
       getUserRole(loggedInUser) ||
       getUserRole(data.user) ||
@@ -214,27 +168,17 @@ function Login() {
       APP_ROLES.STUDENT;
 
     const mustChangePassword =
-      loggedInUser?.mustChangePassword ===
-        true ||
-      loggedInUser?.must_change_password ===
-        true ||
-      Number(
-        loggedInUser?.must_change_password
-      ) === 1;
+      loggedInUser?.mustChangePassword === true ||
+      loggedInUser?.must_change_password === true ||
+      Number(loggedInUser?.must_change_password) === 1;
 
-    if (
-      role === APP_ROLES.STUDENT &&
-      mustChangePassword
-    ) {
+    if (role === APP_ROLES.STUDENT && mustChangePassword) {
       await Swal.fire({
-        imageUrl:
-          "/images/success.png",
+        imageUrl: "/images/success.png",
         imageWidth: 170,
         imageHeight: 170,
-        title:
-          "Password Update Required",
-        text:
-          "Please change your temporary password.",
+        title: "Password Update Required",
+        text: "Please change your temporary password.",
       });
 
       navigate("/student/settings", {
@@ -245,13 +189,11 @@ function Login() {
     }
 
     await Swal.fire({
-      imageUrl:
-        "/images/success.png",
+      imageUrl: "/images/success.png",
       imageWidth: 170,
       imageHeight: 170,
       title: "Welcome back!",
-      text:
-        "Redirecting to your dashboard",
+      text: "Redirecting to your dashboard",
       timer: 1200,
       showConfirmButton: false,
     });
@@ -264,13 +206,10 @@ function Login() {
   const handleLogin = async (event) => {
     event?.preventDefault();
 
-    const email = username
-      .trim()
-      .toLowerCase();
+    const email = username.trim().toLowerCase();
 
     if (!email || !password) {
-      const message =
-        "Please enter email and password";
+      const message = "Please enter email and password";
 
       setLoginError(message);
 
@@ -285,9 +224,7 @@ function Login() {
       return;
     }
 
-    if (
-      loginAttempts >= MAX_ATTEMPTS
-    ) {
+    if (loginAttempts >= MAX_ATTEMPTS) {
       const message =
         "You reached the maximum login attempts. Please try again later.";
 
@@ -315,81 +252,58 @@ function Login() {
         message: "Checking your login...",
       });
 
-      const controller =
-        new AbortController();
+      const controller = new AbortController();
 
-      const timeoutId =
-        window.setTimeout(() => {
-          controller.abort();
-        }, LOGIN_TIMEOUT_MS);
+      const timeoutId = window.setTimeout(() => {
+        controller.abort();
+      }, LOGIN_TIMEOUT_MS);
 
       let res;
       let data;
 
       try {
-        res = await fetch(
-          `${API_BASE}/login`,
-          {
-            method: "POST",
-            credentials: "include",
-            headers: {
-              "Content-Type":
-                "application/json",
-              Accept: "application/json",
-            },
-            body: JSON.stringify({
-              email,
-              password,
-            }),
-            signal: controller.signal,
-          }
-        );
+        res = await fetch(`${API_BASE}/login`, {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({
+            email,
+            password,
+          }),
+          signal: controller.signal,
+        });
 
-        data = await res
-          .json()
-          .catch(() => ({}));
+        data = await res.json().catch(() => ({}));
       } finally {
         window.clearTimeout(timeoutId);
       }
 
-      console.log(
-        "LOGIN RESPONSE:",
-        data
-      );
+      console.log("LOGIN RESPONSE:", data);
 
       if (!res.ok || !data.success) {
         const accountDeleted =
-          data.account_deleted ===
-            true ||
+          data.account_deleted === true ||
           data.account_deleted === 1 ||
-          data.account_deleted ===
-            "1" ||
-          data.account_deleted ===
-            "true";
+          data.account_deleted === "1" ||
+          data.account_deleted === "true";
 
         if (accountDeleted) {
-          await handleDeletedAccount(
-            data
-          );
+          await handleDeletedAccount(data);
 
           return;
         }
 
-        const newAttempts =
-          loginAttempts + 1;
+        const newAttempts = loginAttempts + 1;
 
         setLoginAttempts(newAttempts);
 
-        const attemptsLeft =
-          Math.max(
-            MAX_ATTEMPTS -
-              newAttempts,
-            0
-          );
+        const attemptsLeft = Math.max(MAX_ATTEMPTS - newAttempts, 0);
 
         showLoginError(
-          data.message ||
-            `Invalid credentials. Attempts left: ${attemptsLeft}`
+          data.message || `Invalid credentials. Attempts left: ${attemptsLeft}`,
         );
 
         return;
@@ -398,60 +312,29 @@ function Login() {
       setLoginAttempts(0);
       setLoginFeedback({
         type: "success",
-        message:
-          "Login successful. Redirecting...",
+        message: "Login successful. Redirecting...",
       });
 
-      const token =
-        data.token ||
-        data.accessToken ||
-        data.access_token ||
-        "";
+      const token = data.token || data.accessToken || data.access_token || "";
 
       if (token) {
-        localStorage.setItem(
-          "token",
-          token
-        );
+        localStorage.setItem("token", token);
 
-        localStorage.setItem(
-          "authToken",
-          token
-        );
+        localStorage.setItem("authToken", token);
       }
-      const sessionResult =
-        saveSession(data);
+      const sessionResult = saveSession(data);
 
-      const loggedInUser =
-        sessionResult ||
-        data.user ||
-        null;
+      const loggedInUser = sessionResult || data.user || null;
 
       if (loggedInUser) {
-        localStorage.setItem(
-          "user",
-          JSON.stringify(
-            loggedInUser
-          )
-        );
+        localStorage.setItem("user", JSON.stringify(loggedInUser));
 
-        localStorage.setItem(
-          "currentUser",
-          JSON.stringify(
-            loggedInUser
-          )
-        );
+        localStorage.setItem("currentUser", JSON.stringify(loggedInUser));
       }
 
-      await redirectUser(
-        data,
-        loggedInUser
-      );
+      await redirectUser(data, loggedInUser);
     } catch (error) {
-      console.error(
-        "LOGIN ERROR:",
-        error
-      );
+      console.error("LOGIN ERROR:", error);
 
       const message =
         error.name === "AbortError"
@@ -477,24 +360,14 @@ function Login() {
 
   return (
     <div className={styles.wrapper}>
-      <section
-        className={styles.container}
-      >
-        <div
-          className={styles.background}
-        ></div>
+      <section className={styles.container}>
+        <div className={styles.background}></div>
 
-<PublicNavbar />
+        <PublicNavbar />
 
-        <div
-          className={
-            styles.signupContainer
-          }
-        >
+        <div className={styles.signupContainer}>
           <form
-            className={
-              styles.signupCard
-            }
+            className={styles.signupCard}
             onSubmit={handleLogin}
             noValidate
             aria-busy={isLoggingIn}
@@ -509,61 +382,36 @@ function Login() {
               value={username}
               autoComplete="email"
               disabled={isLoggingIn}
-              onChange={(e) =>
-                {
-                  clearLoginFeedback();
+              onChange={(e) => {
+                clearLoginFeedback();
 
-                  setUsername(
-                    e.target.value
-                  );
-                }
-              }
+                setUsername(e.target.value);
+              }}
             />
 
             <label>Password</label>
 
-            <div
-              className={
-                styles.passwordWrapper
-              }
-            >
+            <div className={styles.passwordWrapper}>
               <input
-                type={
-                  showPassword
-                    ? "text"
-                    : "password"
-                }
+                type={showPassword ? "text" : "password"}
                 placeholder="Enter your password"
                 value={password}
                 autoComplete="current-password"
                 disabled={isLoggingIn}
-                onChange={(e) =>
-                  {
-                    clearLoginFeedback();
+                onChange={(e) => {
+                  clearLoginFeedback();
 
-                    setPassword(
-                      e.target.value
-                    );
-                  }
-                }
+                  setPassword(e.target.value);
+                }}
               />
 
               <button
                 type="button"
-                aria-label={
-                  showPassword
-                    ? "Hide password"
-                    : "Show password"
-                }
+                aria-label={showPassword ? "Hide password" : "Show password"}
                 aria-pressed={showPassword}
                 className={styles.toggleEye}
                 disabled={isLoggingIn}
-                onClick={() =>
-                  setShowPassword(
-                    (current) =>
-                      !current
-                  )
-                }
+                onClick={() => setShowPassword((current) => !current)}
               >
                 {showPassword ? (
                   <FiEyeOff aria-hidden="true" />
@@ -573,24 +421,16 @@ function Login() {
               </button>
             </div>
 
-            <p
-              className={styles.forgot}
-            >
-              <Link to="/forgot">
-                Forgot your password?
-              </Link>
+            <p className={styles.forgot}>
+              <Link to="/forgot">Forgot your password?</Link>
             </p>
 
             <button
               type="submit"
-              className={
-                styles.loginBtn
-              }
+              className={styles.loginBtn}
               disabled={isLoggingIn}
             >
-              {isLoggingIn
-                ? "Logging in..."
-                : "Login"}
+              {isLoggingIn ? "Logging in..." : "Login"}
             </button>
 
             {loginFeedback && (
@@ -598,27 +438,14 @@ function Login() {
                 className={`${styles.validationMessage} ${
                   styles[loginFeedback.type]
                 }`}
-                role={
-                  loginFeedback.type ===
-                  "error"
-                    ? "alert"
-                    : "status"
-                }
+                role={loginFeedback.type === "error" ? "alert" : "status"}
               >
                 {loginFeedback.message}
               </p>
             )}
 
-            <p
-              className={
-                styles.signupText
-              }
-            >
-              Don&apos;t have an
-              account?{" "}
-              <Link to="/signup">
-                Signup
-              </Link>
+            <p className={styles.signupText}>
+              Don&apos;t have an account? <Link to="/signup">Signup</Link>
             </p>
           </form>
         </div>

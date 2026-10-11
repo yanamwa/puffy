@@ -14,10 +14,8 @@
     var(--superadmin-sidebar-expanded)
     minmax(0, 1fr);
 
-  transition:
-    grid-template-columns 220ms ease;
+  transition: grid-template-columns 220ms ease;
 }
-
 
 /* =====================================================
    COLLAPSED LAYOUT
@@ -28,7 +26,6 @@
     var(--superadmin-sidebar-collapsed)
     minmax(0, 1fr);
 }
-
 
 /* =====================================================
    SIDEBAR
@@ -45,10 +42,8 @@
   overflow-x: hidden;
   overflow-y: auto;
 
-  transition:
-    width 220ms ease;
+  transition: width 220ms ease;
 }
-
 
 /* =====================================================
    BRAND
@@ -73,7 +68,6 @@
   box-sizing: border-box;
 }
 
-
 /* Divider */
 
 .superadmin-layout .sidebar-brand::after {
@@ -93,7 +87,6 @@
     left 220ms ease,
     right 220ms ease;
 }
-
 
 /* =====================================================
    LOGO BUTTON
@@ -118,11 +111,9 @@
   cursor: pointer;
 }
 
-
 /* Logo */
 
-.superadmin-layout
-  .superadmin-logo-button img {
+.superadmin-layout .superadmin-logo-button img {
   width: 70px;
   height: 70px;
 
@@ -136,12 +127,9 @@
     height 220ms ease;
 }
 
-
-.superadmin-layout
-  .superadmin-logo-button:hover img {
+.superadmin-layout .superadmin-logo-button:hover img {
   transform: scale(1.07);
 }
-
 
 /* =====================================================
    BRAND NAME
@@ -150,10 +138,7 @@
 .superadmin-layout .superadmin-brand-name {
   color: #ffffff;
 
-  font-family:
-    "Jersey 15",
-    system-ui,
-    sans-serif;
+  font-family: "Jersey 15", system-ui, sans-serif;
 
   font-size: 16px;
   font-weight: 400;
@@ -169,13 +154,11 @@
     opacity 130ms ease;
 }
 
-
 /* =====================================================
    COLLAPSED BRAND
 ===================================================== */
 
-.superadmin-sidebar-collapsed
-  .sidebar-brand {
+.superadmin-sidebar-collapsed .sidebar-brand {
   justify-content: center;
 
   gap: 0;
@@ -184,24 +167,18 @@
   padding-left: 0;
 }
 
-
-.superadmin-sidebar-collapsed
-  .superadmin-logo-button {
+.superadmin-sidebar-collapsed .superadmin-logo-button {
   width: 100%;
 
   flex-basis: 100%;
 }
 
-
-.superadmin-sidebar-collapsed
-  .superadmin-logo-button img {
+.superadmin-sidebar-collapsed .superadmin-logo-button img {
   width: 65px;
   height: 65px;
 }
 
-
-.superadmin-sidebar-collapsed
-  .superadmin-brand-name {
+.superadmin-sidebar-collapsed .superadmin-brand-name {
   width: 0;
 
   overflow: hidden;
@@ -211,13 +188,10 @@
   pointer-events: none;
 }
 
-
-.superadmin-sidebar-collapsed
-  .sidebar-brand::after {
+.superadmin-sidebar-collapsed .sidebar-brand::after {
   right: 10px;
   left: 10px;
 }
-
 
 /* =====================================================
    MENU
@@ -232,15 +206,10 @@
 
   gap: 14px;
 
-  padding:
-    26px
-    0
-    20px
-    30px;
+  padding: 26px 0 20px 30px;
 
   box-sizing: border-box;
 }
-
 
 .superadmin-layout .menu-section {
   display: flex;
@@ -253,22 +222,17 @@
   border: 0;
 }
 
-
-.superadmin-layout
-  .menu-section + .menu-section {
+.superadmin-layout .menu-section + .menu-section {
   padding-top: 0;
 
   border-top: 0;
 }
 
-
 /* Hide old section headings */
 
-.superadmin-layout
-  .menu-section-title {
+.superadmin-layout .menu-section-title {
   display: none;
 }
-
 
 /* =====================================================
    LINKS
@@ -287,20 +251,12 @@
 
   margin: 0;
 
-  padding:
-    0
-    10px
-    0
-    10px;
+  padding: 0 10px 0 10px;
 
   border: 1px solid transparent;
   border-right: 0;
 
-  border-radius:
-    999px
-    0
-    0
-    999px;
+  border-radius: 999px 0 0 999px;
 
   background: transparent;
 
@@ -318,7 +274,6 @@
     border-color 160ms ease;
 }
 
-
 /* Icon */
 
 .superadmin-layout .sidebar-icon {
@@ -332,7 +287,6 @@
   stroke-width: 1.8;
 }
 
-
 /* Text */
 
 .superadmin-layout .sidebar-nav-label {
@@ -345,10 +299,7 @@
 
   color: currentColor;
 
-  font-family:
-    "Jersey 15",
-    system-ui,
-    sans-serif;
+  font-family: "Jersey 15", system-ui, sans-serif;
 
   font-size: 12px;
   font-weight: 400;
@@ -361,7 +312,6 @@
   opacity: 1;
 }
 
-
 /* =====================================================
    NORMAL HOVER
 
@@ -369,8 +319,7 @@
    Only text/icon gets dark.
 ===================================================== */
 
-.superadmin-layout
-  .sidebar-link:not(.active):hover {
+.superadmin-layout .sidebar-link:not(.active):hover {
   border-color: transparent;
 
   background: transparent;
@@ -381,7 +330,6 @@
 
   transform: none;
 }
-
 
 /* =====================================================
    ACTIVE LINK
@@ -402,11 +350,9 @@
   transform: none;
 }
 
-
 /* Connect active item to content */
 
-.superadmin-layout
-  .sidebar-link.active::after {
+.superadmin-layout .sidebar-link.active::after {
   content: "";
 
   position: absolute;
@@ -420,44 +366,29 @@
   background: #ffffff;
 }
 
-
 /* =====================================================
    COLLAPSED MENU
 ===================================================== */
 
-.superadmin-sidebar-collapsed
-  .sidebar-menu {
+.superadmin-sidebar-collapsed .sidebar-menu {
   align-items: stretch;
 
-  padding:
-    26px
-    0
-    20px
-    18px;
+  padding: 26px 0 20px 18px;
 }
 
-
-.superadmin-sidebar-collapsed
-  .sidebar-link {
+.superadmin-sidebar-collapsed .sidebar-link {
   min-height: 42px;
 
   justify-content: flex-start;
 
   gap: 0;
 
-  padding:
-    0
-    0
-    0
-    18px;
+  padding: 0 0 0 18px;
 }
 
-
-.superadmin-sidebar-collapsed
-  .sidebar-nav-label {
+.superadmin-sidebar-collapsed .sidebar-nav-label {
   display: none;
 }
-
 
 /* =====================================================
    LOGOUT
@@ -472,7 +403,6 @@
 
   border: 0;
 }
-
 
 .superadmin-layout .logout-btn {
   width: 100%;
@@ -499,10 +429,7 @@
 
   color: #666666;
 
-  font-family:
-    "Jersey 15",
-    system-ui,
-    sans-serif;
+  font-family: "Jersey 15", system-ui, sans-serif;
 
   font-size: 15px;
   font-weight: 400;
@@ -511,7 +438,6 @@
 
   box-sizing: border-box;
 }
-
 
 /* Hover */
 .superadmin-layout .logout-btn:hover {
@@ -526,7 +452,6 @@
   box-shadow: none;
 }
 
-
 /* Logout icon */
 .superadmin-layout .logout-btn svg {
   width: 18px;
@@ -537,20 +462,15 @@
   color: currentColor;
 }
 
-
 /* Logout text */
 .superadmin-layout .sidebar-logout-label {
-  font-family:
-    "Jersey 15",
-    system-ui,
-    sans-serif;
+  font-family: "Jersey 15", system-ui, sans-serif;
 
   font-size: 15px;
   font-weight: 400;
 
   white-space: nowrap;
 }
-
 
 /* =====================================================
    COLLAPSED LOGOUT
@@ -564,9 +484,7 @@
   padding: 0;
 }
 
-
-.superadmin-sidebar-collapsed
-  .sidebar-logout-label {
+.superadmin-sidebar-collapsed .sidebar-logout-label {
   display: none;
 }
 
@@ -580,16 +498,13 @@
   min-width: 0;
 }
 
-
 /* =====================================================
    SMALL SCREEN
 ===================================================== */
 
 @media (max-width: 640px) {
-
   .superadmin-layout,
   .superadmin-layout.superadmin-sidebar-collapsed {
     grid-template-columns: 1fr;
   }
-
 }

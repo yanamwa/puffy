@@ -78,9 +78,7 @@ function saveUpdatedUser(user) {
     sessionStorage.setItem("currentUser", value);
   }
 
-  window.dispatchEvent(
-    new CustomEvent("puffy-user-updated", { detail: user })
-  );
+  window.dispatchEvent(new CustomEvent("puffy-user-updated", { detail: user }));
 }
 
 function resolveProfileImage(imagePath) {
@@ -114,11 +112,7 @@ function normalizeCourse(course) {
       course.course_id ||
       course.courseCode ||
       course.course_code,
-    code:
-      course.code ||
-      course.courseCode ||
-      course.course_code ||
-      "COURSE",
+    code: course.code || course.courseCode || course.course_code || "COURSE",
     title,
     professorName:
       course.professorName ||
@@ -173,7 +167,7 @@ export default function StudentHome() {
   const [progressPeriod, setProgressPeriod] = useState("week");
 
   const [shownMonth, setShownMonth] = useState(
-    () => new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+    () => new Date(new Date().getFullYear(), new Date().getMonth(), 1),
   );
   const [selectedDate, setSelectedDate] = useState(() => new Date());
 
@@ -257,7 +251,7 @@ export default function StudentHome() {
       currentUser?.profile_image ||
       currentUser?.avatar ||
       currentUser?.image ||
-      ""
+      "",
   );
 
   useEffect(() => {
@@ -272,7 +266,7 @@ export default function StudentHome() {
 
         if (!token) {
           throw new Error(
-            "Your login session was not found. Please log in again."
+            "Your login session was not found. Please log in again.",
           );
         }
 
@@ -284,15 +278,13 @@ export default function StudentHome() {
                 Accept: "application/json",
                 Authorization: `Bearer ${token}`,
               },
-            }
+            },
           );
 
           const data = await response.json().catch(() => ({}));
 
           if (!response.ok) {
-            throw new Error(
-              data.message || "Could not load enrolled courses."
-            );
+            throw new Error(data.message || "Could not load enrolled courses.");
           }
 
           const courses = Array.isArray(data.courses)
@@ -321,15 +313,11 @@ export default function StudentHome() {
 
           if (!response.ok) {
             throw new Error(
-              data.message || "Failed to load your account information."
+              data.message || "Failed to load your account information.",
             );
           }
 
-          const user =
-            data.user ||
-            data.data?.user ||
-            data.data ||
-            data;
+          const user = data.user || data.data?.user || data.data || data;
 
           if (active && user) {
             setCurrentUser(user);
@@ -341,9 +329,7 @@ export default function StudentHome() {
       } catch (error) {
         console.error("Student dashboard loading error:", error);
         if (active) {
-          setDashboardError(
-            error.message || "Could not load your dashboard."
-          );
+          setDashboardError(error.message || "Could not load your dashboard.");
         }
       } finally {
         if (active) setDashboardLoading(false);
@@ -393,7 +379,7 @@ export default function StudentHome() {
           course.professorDepartment,
         ]
           .filter(Boolean)
-          .some((value) => String(value).toLowerCase().includes(query))
+          .some((value) => String(value).toLowerCase().includes(query)),
       )
       .slice(0, 3);
   }, [enrolledCourses, searchQuery]);
@@ -401,11 +387,7 @@ export default function StudentHome() {
   const shiftMonth = (amount) => {
     setShownMonth(
       (current) =>
-        new Date(
-          current.getFullYear(),
-          current.getMonth() + amount,
-          1
-        )
+        new Date(current.getFullYear(), current.getMonth() + amount, 1),
     );
   };
 
@@ -413,18 +395,15 @@ export default function StudentHome() {
     const text = newTodo.trim();
     if (!text) return;
 
-    setTodos((current) => [
-      ...current,
-      { id: Date.now(), text, done: false },
-    ]);
+    setTodos((current) => [...current, { id: Date.now(), text, done: false }]);
     setNewTodo("");
   };
 
   const toggleTodo = (id) => {
     setTodos((current) =>
       current.map((todo) =>
-        todo.id === id ? { ...todo, done: !todo.done } : todo
-      )
+        todo.id === id ? { ...todo, done: !todo.done } : todo,
+      ),
     );
   };
 
@@ -483,10 +462,7 @@ export default function StudentHome() {
       });
 
       const courseId =
-        course.id ||
-        course.courseId ||
-        course.course_id ||
-        course.code;
+        course.id || course.courseId || course.course_id || course.code;
 
       navigate(`/student/enrolled-courses/${courseId}`);
     } catch (error) {
@@ -538,9 +514,7 @@ export default function StudentHome() {
                 </p>
 
                 {dashboardError && (
-                  <p className="dashboard-error-message">
-                    {dashboardError}
-                  </p>
+                  <p className="dashboard-error-message">{dashboardError}</p>
                 )}
               </div>
             </section>
@@ -551,9 +525,7 @@ export default function StudentHome() {
             >
               <div className="home-section-header">
                 <h2 id="continue-quizzes-title">Continue your quizzes</h2>
-                <Link to="/student/enrolled-courses">
-                  See all quizzes →
-                </Link>
+                <Link to="/student/enrolled-courses">See all quizzes →</Link>
               </div>
 
               <div className="home-course-grid">
@@ -583,9 +555,7 @@ export default function StudentHome() {
                       }}
                     >
                       <div className="home-course-card-body">
-                        <span className="home-course-code">
-                          {course.code}
-                        </span>
+                        <span className="home-course-code">{course.code}</span>
                         <h3>{course.title}</h3>
                       </div>
 
@@ -594,7 +564,7 @@ export default function StudentHome() {
                           src={
                             course.professorProfileImage
                               ? resolveProfileImage(
-                                  course.professorProfileImage
+                                  course.professorProfileImage,
                                 )
                               : undefined
                           }
@@ -604,8 +574,7 @@ export default function StudentHome() {
                         <div className="home-course-professor">
                           <span>{course.professorName}</span>
                           <small>
-                            {course.professorDepartment ||
-                              "Department not set"}
+                            {course.professorDepartment || "Department not set"}
                           </small>
                         </div>
                       </div>
@@ -633,17 +602,10 @@ export default function StudentHome() {
 
               <div className="home-progress-grid">
                 {progressData[progressPeriod].map((item) => (
-                  <article
-                    key={item.id}
-                    className="home-progress-card"
-                  >
-                    <span className="home-progress-icon">
-                      {item.accent}
-                    </span>
+                  <article key={item.id} className="home-progress-card">
+                    <span className="home-progress-icon">{item.accent}</span>
                     <strong>{item.value}</strong>
-                    <span className="home-progress-label">
-                      {item.label}
-                    </span>
+                    <span className="home-progress-label">{item.label}</span>
                   </article>
                 ))}
               </div>
@@ -667,10 +629,7 @@ export default function StudentHome() {
                 {studentInformation}
               </span>
 
-              <Link
-                to="/student/profile"
-                className="home-profile-button"
-              >
+              <Link to="/student/profile" className="home-profile-button">
                 Profile
               </Link>
             </div>
@@ -709,17 +668,13 @@ export default function StudentHome() {
               <div className="home-calendar-grid">
                 {calendarDays.map((item) =>
                   item.blank ? (
-                    <span
-                      key={item.key}
-                      className="home-calendar-blank"
-                    />
+                    <span key={item.key} className="home-calendar-blank" />
                   ) : (
                     <button
                       key={item.key}
                       type="button"
                       className={
-                        item.date.toDateString() ===
-                        selectedDate.toDateString()
+                        item.date.toDateString() === selectedDate.toDateString()
                           ? "selected"
                           : ""
                       }
@@ -727,7 +682,7 @@ export default function StudentHome() {
                     >
                       {item.day}
                     </button>
-                  )
+                  ),
                 )}
               </div>
             </section>
@@ -767,9 +722,7 @@ export default function StudentHome() {
                   todos.map((todo) => (
                     <label
                       key={todo.id}
-                      className={`home-todo-item ${
-                        todo.done ? "done" : ""
-                      }`}
+                      className={`home-todo-item ${todo.done ? "done" : ""}`}
                     >
                       <input
                         type="checkbox"

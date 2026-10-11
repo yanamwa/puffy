@@ -118,8 +118,12 @@ export default function UserHeader({
                         </span>
 
                         <span className={styles.notificationItemCopy}>
-                          <strong>{notification.title || "Notification"}</strong>
-                          <span>{notification.message || notification.body || ""}</span>
+                          <strong>
+                            {notification.title || "Notification"}
+                          </strong>
+                          <span>
+                            {notification.message || notification.body || ""}
+                          </span>
                           <small>
                             {notification.time ||
                               notification.created_at ||

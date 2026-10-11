@@ -1,10 +1,13 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { fetchCourses, fetchCourseEnrollmentCount } from '../../../services/courseApi.js';
-import styles from './AssessmentAnalysis.module.css';
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  fetchCourses,
+  fetchCourseEnrollmentCount,
+} from "../../../services/courseApi.js";
+import styles from "./AssessmentAnalysis.module.css";
 
 function formatDate(value) {
-  if (!value) return '0';
+  if (!value) return "0";
 
   const date = new Date(value);
 
@@ -12,8 +15,8 @@ function formatDate(value) {
     return String(value);
   }
 
-  const mm = String(date.getMonth() + 1).padStart(2, '0');
-  const dd = String(date.getDate()).padStart(2, '0');
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
   const yy = String(date.getFullYear()).slice(-2);
 
   return `${mm}-${dd}-${yy}`;
@@ -24,7 +27,7 @@ function getCourseCode(course, index) {
     course.code ||
     course.courseCode ||
     course.course_code ||
-    `CRS${String(course.id || index + 1).padStart(3, '0')}`
+    `CRS${String(course.id || index + 1).padStart(3, "0")}`
   );
 }
 
@@ -32,12 +35,31 @@ function normalizeCourse(course, index) {
   return {
     id: course.id || course.courseId || course.course_id || index + 1,
     code: getCourseCode(course, index),
-    title: course.title || course.courseName || course.course_name || 'Untitled Course',
-    description: course.summary || course.description || course.subject || 'Course details not available',
-    students: course.students || course.studentCount || course.student_count || 0,
+    title:
+      course.title ||
+      course.courseName ||
+      course.course_name ||
+      "Untitled Course",
+    description:
+      course.summary ||
+      course.description ||
+      course.subject ||
+      "Course details not available",
+    students:
+      course.students || course.studentCount || course.student_count || 0,
     modules: course.moduleCount || course.module_count || course.modules || 0,
-    quizzes: course.quizzes || course.quizCount || course.quiz_count || course.quizItems || 0,
-    date: formatDate(course.createdAt || course.created_at || course.dateCreated || course.updatedAt),
+    quizzes:
+      course.quizzes ||
+      course.quizCount ||
+      course.quiz_count ||
+      course.quizItems ||
+      0,
+    date: formatDate(
+      course.createdAt ||
+        course.created_at ||
+        course.dateCreated ||
+        course.updatedAt,
+    ),
     raw: course,
   };
 }
@@ -46,9 +68,9 @@ export default function AssessmentAnalysis() {
   const navigate = useNavigate();
 
   const [courses, setCourses] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -56,7 +78,7 @@ export default function AssessmentAnalysis() {
     async function loadCourses() {
       try {
         setLoading(true);
-        setErrorMessage('');
+        setErrorMessage("");
 
         const loadedCourses = await fetchCourses({}, { fallback: false });
         const coursesWithEnrollments = await Promise.all(
@@ -66,18 +88,16 @@ export default function AssessmentAnalysis() {
               ...normalizedCourse,
               students: await fetchCourseEnrollmentCount(normalizedCourse.id),
             };
-          })
+          }),
         );
 
         if (active) {
-          setCourses(
-            coursesWithEnrollments
-          );
+          setCourses(coursesWithEnrollments);
         }
       } catch (error) {
         if (active) {
           setCourses([]);
-          setErrorMessage(error.message || 'Could not load courses.');
+          setErrorMessage(error.message || "Could not load courses.");
         }
       } finally {
         if (active) {
@@ -100,9 +120,9 @@ export default function AssessmentAnalysis() {
 
     return courses.filter((course) =>
       [course.code, course.title, course.description]
-        .join(' ')
+        .join(" ")
         .toLowerCase()
-        .includes(query)
+        .includes(query),
     );
   }, [courses, searchQuery]);
 
@@ -150,7 +170,9 @@ export default function AssessmentAnalysis() {
                 className={styles.courseCard}
                 onClick={() => openAssessment(course)}
               >
-                <span className={styles.dateText}>Date created: {course.date}</span>
+                <span className={styles.dateText}>
+                  Date created: {course.date}
+                </span>
 
                 <span className={styles.codeText}>
                   <span>Course Code:</span> {course.code}

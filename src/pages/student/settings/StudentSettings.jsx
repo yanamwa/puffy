@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import { useAuth } from '../../../context/AuthContext.jsx';
-import { requiresStudentPasswordChange } from '../../../utils/passwordPolicy.js';
+import { useAuth } from "../../../context/AuthContext.jsx";
+import { requiresStudentPasswordChange } from "../../../utils/passwordPolicy.js";
 
 import StudentSidebar from "../../../components/students/StudentSidebar.jsx";
 import StudentHeader from "../../../components/students/StudentHeader.jsx";
@@ -125,8 +125,7 @@ export default function StudentSettings() {
         icon: "error",
         title: "Unable to Join Course",
         text:
-          error?.message ||
-          "Something went wrong while joining the course.",
+          error?.message || "Something went wrong while joining the course.",
         confirmButtonText: "OK",
         confirmButtonColor: "#7FA8D6",
       });
@@ -160,8 +159,7 @@ export default function StudentSettings() {
     symbol: /[^A-Za-z0-9]/.test(passwordForm.newPassword),
   };
 
-  const passwordIsStrong =
-    Object.values(passwordChecks).every(Boolean);
+  const passwordIsStrong = Object.values(passwordChecks).every(Boolean);
 
   const passwordsMatch =
     passwordForm.confirmPassword.length > 0 &&
@@ -244,28 +242,23 @@ export default function StudentSettings() {
     setIsSubmittingPassword(true);
 
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/users/change-password`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          credentials: "include",
-          body: JSON.stringify({
-            currentPassword: passwordForm.currentPassword,
-            newPassword: passwordForm.newPassword,
-          }),
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/users/change-password`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          currentPassword: passwordForm.currentPassword,
+          newPassword: passwordForm.newPassword,
+        }),
+      });
 
       const data = await response.json().catch(() => ({}));
 
       if (!response.ok || data.success === false) {
-        throw new Error(
-          data.message || "Unable to change your password."
-        );
+        throw new Error(data.message || "Unable to change your password.");
       }
 
       updateUser({
@@ -273,8 +266,8 @@ export default function StudentSettings() {
         ...data.user,
         mustChangePassword: false,
         must_change_password: false,
-        temporaryPassword: '',
-        temporary_password: '',
+        temporaryPassword: "",
+        temporary_password: "",
       });
 
       setPasswordForm(initialPasswordForm);
@@ -287,30 +280,29 @@ export default function StudentSettings() {
 
       setPasswordNotice({
         type: "success",
-        message:
-          data.message ||
-          "Your password was changed successfully.",
+        message: data.message || "Your password was changed successfully.",
       });
 
       await Swal.fire({
         icon: "success",
         title: "Password Updated",
-        text:
-          data.message ||
-          "Your password was changed successfully.",
+        text: data.message || "Your password was changed successfully.",
         confirmButtonText: "OK",
         confirmButtonColor: "#2f855a",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
       });
+      if (passwordChangeRequired) {
+        navigate("/student", { replace: true });
+      }
     } catch (error) {
       const errorMessage =
-        error.message ||
-        "Something went wrong while changing your password.";
+        error.message || "Something went wrong while changing your password.";
 
       setPasswordNotice({
         type: "error",
         message: errorMessage,
       });
-
     } finally {
       setIsSubmittingPassword(false);
     }
@@ -334,8 +326,8 @@ export default function StudentSettings() {
 
               <p>
                 {passwordChangeRequired
-                  ? 'Please change your temporary password to unlock the rest of your account.'
-                  : 'Manage your password and keep your student account secure.'}
+                  ? "Please change your temporary password to unlock the rest of your account."
+                  : "Manage your password and keep your student account secure."}
               </p>
             </div>
           </section>
@@ -346,18 +338,9 @@ export default function StudentSettings() {
           >
             <div className="password-settings-card">
               <div className="password-card-header">
-                <span
-                  className="password-card-icon"
-                  aria-hidden="true"
-                >
+                <span className="password-card-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24">
-                    <rect
-                      x="5"
-                      y="10"
-                      width="14"
-                      height="10"
-                      rx="2"
-                    />
+                    <rect x="5" y="10" width="14" height="10" rx="2" />
                     <path d="M8 10V7a4 4 0 0 1 8 0v3" />
                     <circle cx="12" cy="15" r="1.2" />
                   </svg>
@@ -367,8 +350,7 @@ export default function StudentSettings() {
                   <h2>Change Password</h2>
 
                   <p>
-                    Use a strong password that you do not use on other
-                    accounts.
+                    Use a strong password that you do not use on other accounts.
                   </p>
                 </div>
               </div>
@@ -378,22 +360,16 @@ export default function StudentSettings() {
                 onSubmit={handlePasswordChange}
               >
                 <div className="password-field-group">
-                  <label htmlFor="current-password">
-                    Current Password
-                  </label>
+                  <label htmlFor="current-password">Current Password</label>
 
                   <div className="password-input-wrapper">
                     <input
                       id="current-password"
                       type={
-                        visiblePasswords.currentPassword
-                          ? "text"
-                          : "password"
+                        visiblePasswords.currentPassword ? "text" : "password"
                       }
                       value={passwordForm.currentPassword}
-                      onChange={updatePasswordField(
-                        "currentPassword"
-                      )}
+                      onChange={updatePasswordField("currentPassword")}
                       autoComplete="current-password"
                       placeholder="Enter your current password"
                     />
@@ -402,9 +378,7 @@ export default function StudentSettings() {
                       type="button"
                       className="password-visibility-button"
                       onClick={() =>
-                        togglePasswordVisibility(
-                          "currentPassword"
-                        )
+                        togglePasswordVisibility("currentPassword")
                       }
                       aria-label={
                         visiblePasswords.currentPassword
@@ -412,9 +386,7 @@ export default function StudentSettings() {
                           : "Show current password"
                       }
                     >
-                      {visiblePasswords.currentPassword
-                        ? "Hide"
-                        : "Show"}
+                      {visiblePasswords.currentPassword ? "Hide" : "Show"}
                     </button>
                   </div>
                 </div>
@@ -422,22 +394,14 @@ export default function StudentSettings() {
                 <div className="password-form-divider" />
 
                 <div className="password-field-group">
-                  <label htmlFor="new-password">
-                    New Password
-                  </label>
+                  <label htmlFor="new-password">New Password</label>
 
                   <div className="password-input-wrapper">
                     <input
                       id="new-password"
-                      type={
-                        visiblePasswords.newPassword
-                          ? "text"
-                          : "password"
-                      }
+                      type={visiblePasswords.newPassword ? "text" : "password"}
                       value={passwordForm.newPassword}
-                      onChange={updatePasswordField(
-                        "newPassword"
-                      )}
+                      onChange={updatePasswordField("newPassword")}
                       autoComplete="new-password"
                       placeholder="Create a new password"
                     />
@@ -445,18 +409,14 @@ export default function StudentSettings() {
                     <button
                       type="button"
                       className="password-visibility-button"
-                      onClick={() =>
-                        togglePasswordVisibility("newPassword")
-                      }
+                      onClick={() => togglePasswordVisibility("newPassword")}
                       aria-label={
                         visiblePasswords.newPassword
                           ? "Hide new password"
                           : "Show new password"
                       }
                     >
-                      {visiblePasswords.newPassword
-                        ? "Hide"
-                        : "Show"}
+                      {visiblePasswords.newPassword ? "Hide" : "Show"}
                     </button>
                   </div>
                 </div>
@@ -465,69 +425,42 @@ export default function StudentSettings() {
                   className="password-requirements"
                   aria-label="Password requirements"
                 >
-                  <span
-                    className={
-                      passwordChecks.length ? "met" : ""
-                    }
-                  >
+                  <span className={passwordChecks.length ? "met" : ""}>
                     12 characters
                   </span>
 
-                  <span
-                    className={
-                      passwordChecks.uppercase ? "met" : ""
-                    }
-                  >
+                  <span className={passwordChecks.uppercase ? "met" : ""}>
                     Uppercase
                   </span>
 
-                  <span
-                    className={
-                      passwordChecks.lowercase ? "met" : ""
-                    }
-                  >
+                  <span className={passwordChecks.lowercase ? "met" : ""}>
                     Lowercase
                   </span>
 
-                  <span
-                    className={
-                      passwordChecks.number ? "met" : ""
-                    }
-                  >
+                  <span className={passwordChecks.number ? "met" : ""}>
                     Number
                   </span>
 
-                  <span
-                    className={
-                      passwordChecks.symbol ? "met" : ""
-                    }
-                  >
+                  <span className={passwordChecks.symbol ? "met" : ""}>
                     Symbol
                   </span>
                 </div>
 
                 <div className="password-field-group">
-                  <label htmlFor="confirm-password">
-                    Confirm New Password
-                  </label>
+                  <label htmlFor="confirm-password">Confirm New Password</label>
 
                   <div className="password-input-wrapper">
                     <input
                       id="confirm-password"
                       type={
-                        visiblePasswords.confirmPassword
-                          ? "text"
-                          : "password"
+                        visiblePasswords.confirmPassword ? "text" : "password"
                       }
                       value={passwordForm.confirmPassword}
-                      onChange={updatePasswordField(
-                        "confirmPassword"
-                      )}
+                      onChange={updatePasswordField("confirmPassword")}
                       autoComplete="new-password"
                       placeholder="Re-enter your new password"
                       className={
-                        passwordForm.confirmPassword &&
-                        !passwordsMatch
+                        passwordForm.confirmPassword && !passwordsMatch
                           ? "input-error"
                           : ""
                       }
@@ -537,9 +470,7 @@ export default function StudentSettings() {
                       type="button"
                       className="password-visibility-button"
                       onClick={() =>
-                        togglePasswordVisibility(
-                          "confirmPassword"
-                        )
+                        togglePasswordVisibility("confirmPassword")
                       }
                       aria-label={
                         visiblePasswords.confirmPassword
@@ -547,18 +478,14 @@ export default function StudentSettings() {
                           : "Show confirmed password"
                       }
                     >
-                      {visiblePasswords.confirmPassword
-                        ? "Hide"
-                        : "Show"}
+                      {visiblePasswords.confirmPassword ? "Hide" : "Show"}
                     </button>
                   </div>
 
                   {passwordForm.confirmPassword && (
                     <small
                       className={
-                        passwordsMatch
-                          ? "match-success"
-                          : "match-error"
+                        passwordsMatch ? "match-success" : "match-error"
                       }
                     >
                       {passwordsMatch
@@ -571,11 +498,7 @@ export default function StudentSettings() {
                 {passwordNotice.message && (
                   <div
                     className={`password-notice ${passwordNotice.type}`}
-                    role={
-                      passwordNotice.type === "error"
-                        ? "alert"
-                        : "status"
-                    }
+                    role={passwordNotice.type === "error" ? "alert" : "status"}
                   >
                     {passwordNotice.message}
                   </div>
@@ -596,9 +519,7 @@ export default function StudentSettings() {
                     className="password-save-button"
                     disabled={isSubmittingPassword}
                   >
-                    {isSubmittingPassword
-                      ? "Updating..."
-                      : "Update Password"}
+                    {isSubmittingPassword ? "Updating..." : "Update Password"}
                   </button>
                 </div>
               </form>
@@ -611,8 +532,8 @@ export default function StudentSettings() {
                 <strong>Security reminder</strong>
 
                 <p>
-                  After changing your password, avoid sharing it and
-                  sign out from devices you no longer use.
+                  After changing your password, avoid sharing it and sign out
+                  from devices you no longer use.
                 </p>
               </div>
             </aside>

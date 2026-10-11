@@ -28,7 +28,8 @@ export default function AdminBackupRestore() {
   });
 
   const adminImage =
-    admin.profile_image && !admin.profile_image.includes("temporary profile.jpg")
+    admin.profile_image &&
+    !admin.profile_image.includes("temporary profile.jpg")
       ? admin.profile_image.startsWith("http")
         ? admin.profile_image
         : `${API_BASE}/${admin.profile_image.replace(/^\/+/, "")}`
@@ -83,7 +84,7 @@ export default function AdminBackupRestore() {
 
       const res = await fetch(
         `${API_BASE}/getAdminNotifications.php?admin_id=${adminId || ""}`,
-        { credentials: "include" }
+        { credentials: "include" },
       );
 
       const data = await res.json();
@@ -325,7 +326,9 @@ export default function AdminBackupRestore() {
       <main className={styles.main}>
         <div className={styles.pageHeader}>
           <h1>Backup & Restore</h1>
-          <p>Manage database backups and restore your PuffyBrain system safely.</p>
+          <p>
+            Manage database backups and restore your PuffyBrain system safely.
+          </p>
         </div>
 
         <div className={styles.backupGrid}>

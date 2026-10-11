@@ -45,7 +45,7 @@ function LearningModule() {
   const [myDecks, setMyDecks] = useState([]);
   const [courses, setCourses] = useState([]);
   const [notifications, setNotifications] = useState(() =>
-    mergeManagedNotificationsForRole("student", [])
+    mergeManagedNotificationsForRole("student", []),
   );
 
   const [user, setUser] = useState({
@@ -63,7 +63,7 @@ function LearningModule() {
   });
 
   const notificationCount = notifications.filter(
-    (notif) => notif.status === "unread" || notif.unread
+    (notif) => notif.status === "unread" || notif.unread,
   ).length;
 
   const currentCourse = useMemo(() => {
@@ -155,8 +155,8 @@ function LearningModule() {
       setNotifications(
         mergeManagedNotificationsForRole(
           "student",
-          data.success ? data.notifications || [] : []
-        )
+          data.success ? data.notifications || [] : [],
+        ),
       );
     } catch (err) {
       console.error("Notification fetch error:", err);
@@ -171,7 +171,7 @@ function LearningModule() {
         ...notif,
         unread: false,
         status: "read",
-      }))
+      })),
     );
 
     try {
@@ -188,7 +188,7 @@ function LearningModule() {
             ...notif,
             unread: false,
             status: "read",
-          }))
+          })),
         );
       }
     } catch (err) {
@@ -206,7 +206,7 @@ function LearningModule() {
   useEffect(() => {
     const refreshNotifications = () => {
       setNotifications((currentNotifications) =>
-        mergeManagedNotificationsForRole("student", currentNotifications)
+        mergeManagedNotificationsForRole("student", currentNotifications),
       );
     };
 
@@ -246,7 +246,7 @@ function LearningModule() {
 
         if (homepagePercentRaw !== null && homepagePercentRaw !== undefined) {
           const cleanPercent = Number(
-            String(homepagePercentRaw).replace("%", "")
+            String(homepagePercentRaw).replace("%", ""),
           );
 
           setProgress({
@@ -287,7 +287,7 @@ function LearningModule() {
           `${API_BASE}/getLessonProgress.php?user_id=${user.id}&lesson_id=${lessonId}`,
           {
             credentials: "include",
-          }
+          },
         );
 
         const progressData = await progressRes.json();
@@ -343,7 +343,7 @@ function LearningModule() {
         lesson || {
           id: cleanLessonId,
           title: "Untitled course",
-        }
+        },
       );
 
       if (!addedCourse) {
@@ -572,13 +572,14 @@ function LearningModule() {
 
   const notMemorizedCards = useMemo(() => {
     return filteredQuizzes.filter(
-      (quiz) => !correctQuestions.some((item) => item.question === quiz.question)
+      (quiz) =>
+        !correctQuestions.some((item) => item.question === quiz.question),
     );
   }, [filteredQuizzes, correctQuestions]);
 
-if (loading) {
-  return <LoadingState />;
-}
+  if (loading) {
+    return <LoadingState />;
+  }
   if (!lesson) {
     return <div style={{ padding: "40px" }}>Lesson not found.</div>;
   }
@@ -637,7 +638,9 @@ if (loading) {
                       </button>
                     </div>
 
-                    <div className={styles.cardCount}>{quizzes.length} Cards</div>
+                    <div className={styles.cardCount}>
+                      {quizzes.length} Cards
+                    </div>
                   </div>
 
                   <div className={styles.description}>

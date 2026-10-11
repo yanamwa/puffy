@@ -1,107 +1,305 @@
-import Swal from 'sweetalert2';
-import './quizGenerationUi.css';
+import { distributeQuizQuestions } from "./quizQuestionDistribution.js";
+import { buildPracticeQuizPrompt } from "./practiceQuizPrompt.js";
+import Swal from "sweetalert2";
+import "./quizGenerationUi.css";
 
-export function requestQuizSettings({ assessment = 'practice' } = {}) {
-  if (assessment !== 'main') return requestPracticeQuizSettings();
-  return Swal.fire({ title: 'Generate module quiz',
-    customClass: { popup: 'quizGeneratorPopup', confirmButton: 'quizGeneratorConfirm', cancelButton: 'quizGeneratorCancel' },
-    html: `<p class="quizGeneratorIntro">Create questions grounded in your saved source material.</p>
-      <div class="quizGeneratorFields">
-        <label for="quiz-question-count">Total questions</label>
-        <input id="quiz-question-count" type="number" min="1" max="50" step="1" value="5" />
-        <label for="quiz-identification-count">Identification questions</label>
-        <input id="quiz-identification-count" type="number" min="0" max="5" step="1" value="0" />
-        <p id="quiz-type-summary" class="quizGeneratorHint" aria-live="polite">5 multiple choice · 0 identification</p>
-        <label for="quiz-difficulty">Difficulty</label>
-        <select id="quiz-difficulty"><option value="easy">Easy</option><option value="medium" selected>Medium</option><option value="hard">Hard</option></select>
-      </div>`,
-    showCancelButton: true, confirmButtonText: 'Generate quiz', cancelButtonText: 'Cancel',
-    buttonsStyling: false, focusConfirm: false,
-    didOpen: popup => {
-      popup.parentElement.style.zIndex = '1000000';
-      const total = popup.querySelector('#quiz-question-count'), identification = popup.querySelector('#quiz-identification-count');
+export function requestQuizSettings({ assessment = "practice" } = {}) {
+  if (assessment !== "main") return requestPracticeQuizSettings();
+  return requestMainQuizSettings();
+}
+
+function requestMainQuizSettings() {
+  return Swal.fire({
+    title: "Generate Main Quiz",
+    customClass: {
+      popup: "quizGeneratorPopup practiceGeneratorPopup mainGeneratorPopup",
+      confirmButton: "quizGeneratorConfirm",
+      cancelButton: "quizGeneratorCancel",
+    },
+    html: `<p class="quizGeneratorIntro">Configure your adaptive main assessment.</p><div class="practiceGeneratorFields">
+      <label for="main-total">Total Questions</label><input id="main-total" type="number" min="1" max="100" step="1" value="20" aria-describedby="main-total-hint" required /><small id="main-total-hint" class="quizQuestionLimit">Maximum: 100 questions</small>
+      <section><h3>Question Distribution</h3><p class="quizAutoDistributionHint">Enter the number of each question type. The counts must add up to Total Questions.</p><div class="practiceTypeGrid">
+      <div><label for="main-mc">Multiple Choice</label><input id="main-mc" type="number" min="0" max="100" step="1" value="10" required /></div>
+      <div><label for="main-id">Identification</label><input id="main-id" type="number" min="0" max="100" step="1" value="5" required /></div>
+      <div><label for="main-tf">True/False</label><input id="main-tf" type="number" min="0" max="100" step="1" value="5" required /></div></div>
+      <div class="practiceDistributionSummary" aria-live="polite"><strong id="main-assigned"></strong></div></section>
+      <section><h3>Passing Grade</h3><div class="mainRequiredScore"><span>70% passing grade</span><strong id="main-required" aria-live="polite">14/20</strong><small>Required correct answers to pass, automatically calculated from the total questions.</small></div></section>
+      <section><h3>Adaptive Assessment</h3><ul class="mainAdaptiveList"><li>Practice results personalize questions when available</li><li>Students can start without completing Practice Quiz</li><li>Questions grounded in saved lesson sources</li></ul></section></div>`,
+    showCloseButton: true,
+    closeButtonAriaLabel: "Close Main Quiz generation",
+    showCancelButton: true,
+    confirmButtonText: "Save",
+    cancelButtonText: "Cancel",
+    buttonsStyling: false,
+    focusConfirm: false,
+    didOpen: (popup) => {
+      popup.parentElement.style.zIndex = "1000000";
+      const get = (id) => popup.querySelector("#main-" + id);
       const update = () => {
-        identification.max = total.value;
-        const count = Number(total.value), ids = Number(identification.value);
-        popup.querySelector('#quiz-type-summary').textContent = Number.isInteger(count) && count >= ids && ids >= 0
-          ? `${count - ids} multiple choice · ${ids} identification` : 'Identification count cannot exceed the total.';
+        const total = Number(get("total").value);
+        const assigned = ["mc", "id", "tf"].reduce(
+          (n, id) => n + Number(get(id).value),
+          0,
+        );
+        get("assigned").textContent =
+          `${assigned} of ${total} questions assigned`;
+        get("assigned").dataset.valid = String(
+          get("total").checkValidity() &&
+            ["mc", "id", "tf"].every((id) => get(id).checkValidity()) &&
+            assigned === total,
+        );
+        get("required").textContent = get("total").checkValidity()
+          ? `${Math.ceil((total * 70) / 100)}/${total}`
+          : "—";
       };
-      total.addEventListener('input', update); identification.addEventListener('input', update);
+      get("total").addEventListener("input", () => {
+        if (get("total").checkValidity())
+          distributeQuizQuestions(Number(get("total").value)).forEach(
+            (count, index) => {
+              get(["mc", "id", "tf"][index]).value = count;
+            },
+          );
+        update();
+      });
+      ["mc", "id", "tf"].forEach((id) =>
+        get(id).addEventListener("input", update),
+      );
+      update();
     },
     preConfirm: () => {
-      const popup = Swal.getPopup();
-      const questionCount = Number(popup.querySelector('#quiz-question-count').value);
-      const identificationCount = Number(popup.querySelector('#quiz-identification-count').value);
-      if (!Number.isInteger(questionCount) || questionCount < 1 || questionCount > 50) { Swal.showValidationMessage('Choose 1 to 50 questions.'); return false; }
-      if (!Number.isInteger(identificationCount) || identificationCount < 0 || identificationCount > questionCount) { Swal.showValidationMessage('Identification count must be between 0 and the total.'); return false; }
-      return { questionCount, identificationCount, difficulty: popup.querySelector('#quiz-difficulty').value };
+      const get = (id) => Swal.getPopup().querySelector("#main-" + id);
+      if (["total", "mc", "id", "tf"].some((id) => !get(id).checkValidity())) {
+        Swal.showValidationMessage(
+          "Enter whole question counts (1–100 total).",
+        );
+        return false;
+      }
+      const questionCount = Number(get("total").value),
+        multipleChoiceCount = Number(get("mc").value),
+        identificationCount = Number(get("id").value),
+        trueFalseCount = Number(get("tf").value);
+      if (
+        multipleChoiceCount + identificationCount + trueFalseCount !==
+        questionCount
+      ) {
+        Swal.showValidationMessage(
+          "Question type counts must equal Total Questions.",
+        );
+        return false;
+      }
+      return {
+        assessmentType: "main",
+        questionCount,
+        multipleChoiceCount,
+        identificationCount,
+        trueFalseCount,
+        passingPercentage: 70,
+      };
     },
   });
 }
 
 function requestPracticeQuizSettings() {
-  const fields = [
-    ['question-count', 'Total Questions', 20],
-    ['multiple-choice-count', 'Multiple Choice', 10],
-    ['identification-count', 'Identification', 5],
-    ['true-false-count', 'True or False', 5],
-    ['lots-count', 'LOTS Questions', 12],
-    ['hots-count', 'HOTS Questions', 8],
-  ];
-  const input = ([id, label, value]) => `<label for="quiz-${id}">${label}</label><input id="quiz-${id}" type="number" min="${id === 'question-count' ? 1 : 0}" max="50" step="1" value="${value}" required />`;
   return Swal.fire({
-    title: 'Generate Practice Quiz',
-    customClass: { popup: 'quizGeneratorPopup', confirmButton: 'quizGeneratorConfirm', cancelButton: 'quizGeneratorCancel' },
-    html: `<p class="quizGeneratorIntro">Create questions grounded in your saved source material.</p>
-      <div class="quizGeneratorFields">${input(fields[0])}
-      <h3>Question Distribution</h3>${fields.slice(1, 4).map(input).join('')}
-      <p id="quiz-type-summary" class="quizGeneratorHint" aria-live="polite"></p>
-      <hr /><h3>Cognitive Distribution</h3>${input(fields[4])}
-      <p class="quizGeneratorLevels">Remember • Understand • Apply</p>${input(fields[5])}
-      <p class="quizGeneratorLevels">Analyze • Evaluate • Create</p>
-      <p id="quiz-cognitive-summary" class="quizGeneratorHint" aria-live="polite"></p></div>`,
-    showCancelButton: true, confirmButtonText: 'Generate Quiz', cancelButtonText: 'Cancel',
-    buttonsStyling: false, focusConfirm: false,
-    didOpen: popup => {
-      popup.parentElement.style.zIndex = '1000000';
+    title: "Generate Practice Quiz",
+    customClass: {
+      popup: "quizGeneratorPopup practiceGeneratorPopup",
+      confirmButton: "quizGeneratorConfirm",
+      cancelButton: "quizGeneratorCancel",
+    },
+    html: `<p class="quizGeneratorIntro">Create questions grounded in your saved lesson materials.</p>
+      <div class="practiceGeneratorFields">
+        <label for="quiz-question-count">Total Questions</label><input id="quiz-question-count" type="number" min="1" max="100" step="1" value="20" aria-describedby="quiz-question-count-hint" required /><small id="quiz-question-count-hint" class="quizQuestionLimit">Maximum: 100 questions</small>
+        <section><h3>Question Distribution</h3><div class="practiceTypeGrid">
+          <div><label for="quiz-multiple-choice-count">Multiple Choice</label><input id="quiz-multiple-choice-count" type="number" min="0" max="100" step="1" value="10" required /></div>
+          <div><label for="quiz-identification-count">Identification</label><input id="quiz-identification-count" type="number" min="0" max="100" step="1" value="5" required /></div>
+          <div><label for="quiz-true-false-count">True or False</label><input id="quiz-true-false-count" type="number" min="0" max="100" step="1" value="5" required /></div>
+        </div><div class="practiceDistributionSummary" aria-live="polite"><span id="quiz-type-summary"></span><strong id="quiz-type-total"></strong></div></section>
+        <section><h3>Cognitive Distribution</h3>
+          <div class="practiceSkillHeading"><label for="quiz-lots-count">LOTS Questions<small>Remember • Understand • Apply</small></label></div>
+          <input id="quiz-lots-count" type="number" min="0" max="20" step="1" value="12" required />
+          <div class="practiceSkillHeading"><label for="quiz-hots-count">HOTS Questions<small>Analyze • Evaluate • Create</small></label></div>
+          <input id="quiz-hots-count" type="number" min="0" max="20" step="1" value="8" required />
+          <div class="practiceCognitiveTrack" aria-hidden="true"><i id="quiz-lots-share"></i></div>
+          <p id="quiz-cognitive-summary" aria-live="polite"></p>
+        </section>
+      </div>`,
+    showCloseButton: true,
+    closeButtonAriaLabel: "Close Practice Quiz generation",
+    showCancelButton: true,
+    confirmButtonText: "Save",
+    cancelButtonText: "Cancel",
+    buttonsStyling: false,
+    focusConfirm: false,
+    didOpen: (popup) => {
+      popup.parentElement.style.zIndex = "1000000";
+      const total = popup.querySelector("#quiz-question-count");
+      const lots = popup.querySelector("#quiz-lots-count");
+      const hots = popup.querySelector("#quiz-hots-count");
+      const typeInputs = [
+        "multiple-choice",
+        "identification",
+        "true-false",
+      ].map((type) => popup.querySelector(`#quiz-${type}-count`));
       const update = () => {
-        const [total, mc, ids, tf, lots, hots] = fields.map(([id]) => Number(popup.querySelector(`#quiz-${id}`).value));
-        popup.querySelector('#quiz-type-summary').textContent = `${mc} Multiple Choice • ${ids} Identification • ${tf} True/False${mc + ids + tf === total ? '' : ' — must equal total questions'}`;
-        popup.querySelector('#quiz-cognitive-summary').textContent = `${lots} LOTS • ${hots} HOTS${lots + hots === total ? '' : ' — must equal total questions'}`;
+        const count = Number(total.value);
+        const validTotal = total.checkValidity();
+        lots.max = validTotal ? count : 0;
+        hots.max = validTotal ? count : 0;
+        const low = Number(lots.value),
+          high = Number(hots.value);
+        const [mc, ids, tf] = typeInputs.map((input) => Number(input.value));
+        typeInputs.forEach((input) => {
+          input.max = validTotal ? count : 100;
+        });
+        popup.querySelector("#quiz-type-summary").textContent =
+          `${mc} Multiple Choice • ${ids} Identification • ${tf} True/False`;
+        const sum = popup.querySelector("#quiz-type-total");
+        sum.textContent = `${mc + ids + tf}/${validTotal ? count : "—"}`;
+        sum.dataset.valid = String(
+          validTotal &&
+            typeInputs.every((input) => input.checkValidity()) &&
+            mc + ids + tf === count,
+        );
+        popup.querySelector("#quiz-lots-share").style.width =
+          `${validTotal ? (low / count) * 100 : 0}%`;
+        popup.querySelector("#quiz-cognitive-summary").textContent =
+          `${low} LOTS • ${high} HOTS`;
       };
-      fields.forEach(([id]) => popup.querySelector(`#quiz-${id}`).addEventListener('input', update));
+      total.addEventListener("input", () => {
+        if (total.checkValidity()) {
+          const count = Number(total.value);
+          distributeQuizQuestions(count).forEach((value, index) => {
+            typeInputs[index].value = value;
+          });
+          lots.value = Math.min(count, Math.max(0, Number(lots.value) || 0));
+          hots.value = count - Number(lots.value);
+        }
+        update();
+      });
+      [lots, hots].forEach((input) =>
+        input.addEventListener("input", () => {
+          if (total.checkValidity() && input.checkValidity())
+            (input === lots ? hots : lots).value =
+              Number(total.value) - Number(input.value);
+          update();
+        }),
+      );
+      typeInputs.forEach((input) => input.addEventListener("input", update));
       update();
     },
     preConfirm: () => {
-      const inputs = fields.map(([id]) => Swal.getPopup().querySelector(`#quiz-${id}`));
-      const [questionCount, multipleChoiceCount, identificationCount, trueFalseCount, lotsCount, hotsCount] = inputs.map(input => Number(input.value));
-      if (inputs.some(input => !input.checkValidity())) { Swal.showValidationMessage('Enter whole question counts from 0 to 50, with at least one total question.'); return false; }
-      if (multipleChoiceCount + identificationCount + trueFalseCount !== questionCount) { Swal.showValidationMessage('Question type counts must add up to Total Questions.'); return false; }
-      if (lotsCount + hotsCount !== questionCount) { Swal.showValidationMessage('LOTS and HOTS counts must add up to Total Questions.'); return false; }
-      return { assessmentType: 'practice', questionCount, multipleChoiceCount, identificationCount, trueFalseCount, lotsCount, hotsCount };
+      const popup = Swal.getPopup();
+      const inputs = [
+        "question",
+        "multiple-choice",
+        "identification",
+        "true-false",
+      ].map((type) => popup.querySelector(`#quiz-${type}-count`));
+      const [
+        questionCount,
+        multipleChoiceCount,
+        identificationCount,
+        trueFalseCount,
+      ] = inputs.map((input) => Number(input.value));
+      if (inputs.some((input) => !input.checkValidity())) {
+        Swal.showValidationMessage(
+          "Enter whole question counts from 0 to 100, with at least one total question.",
+        );
+        return false;
+      }
+      if (
+        multipleChoiceCount + identificationCount + trueFalseCount !==
+        questionCount
+      ) {
+        Swal.showValidationMessage(
+          "Question type counts must add up to Total Questions.",
+        );
+        return false;
+      }
+      const lotsCount = Number(popup.querySelector("#quiz-lots-count").value);
+      const hotsCount = Number(popup.querySelector("#quiz-hots-count").value);
+      if (
+        ["lots", "hots"].some(
+          (skill) =>
+            !popup.querySelector(`#quiz-${skill}-count`).checkValidity(),
+        ) ||
+        lotsCount + hotsCount !== questionCount
+      ) {
+        Swal.showValidationMessage(
+          "Enter whole LOTS and HOTS counts that add up to Total Questions.",
+        );
+        return false;
+      }
+      return {
+        assessmentType: "practice",
+        questionCount,
+        multipleChoiceCount,
+        identificationCount,
+        trueFalseCount,
+        lotsCount,
+        hotsCount: questionCount - lotsCount,
+      };
     },
   });
 }
 
-export function quizGenerationFields(settings) {
-  return settings.assessmentType === 'practice' ? {
-    assessment_type: 'practice', question_count: settings.questionCount,
-    multiple_choice_count: settings.multipleChoiceCount, identification_count: settings.identificationCount,
-    true_false_count: settings.trueFalseCount, lots_count: settings.lotsCount, hots_count: settings.hotsCount,
-  } : { question_count: settings.questionCount, identification_count: settings.identificationCount, difficulty: settings.difficulty };
+export function quizGenerationFields(settings, lesson = {}) {
+  return settings.assessmentType === "practice"
+    ? {
+        prompt: buildPracticeQuizPrompt({ ...settings, ...lesson }),
+        assessment_type: "practice",
+        question_count: settings.questionCount,
+        multiple_choice_count: settings.multipleChoiceCount,
+        identification_count: settings.identificationCount,
+        true_false_count: settings.trueFalseCount,
+        lots_count: settings.lotsCount,
+        hots_count: settings.hotsCount,
+      }
+    : {
+        assessment_type: "main",
+        question_count: settings.questionCount,
+        multiple_choice_count: settings.multipleChoiceCount,
+        identification_count: settings.identificationCount,
+        true_false_count: settings.trueFalseCount,
+        passing_percentage: settings.passingPercentage,
+      };
 }
 
 export function quizSourceFields(courseId, lessonId, pages = []) {
-  const ids = [...new Set(pages.flatMap(p => [...(p.source_document_ids || []), ...(p.source_document_id ? [p.source_document_id] : [])]))];
-  return { course_id: Number(courseId), lesson_id: Number.isInteger(Number(lessonId)) && Number(lessonId) > 0 ? Number(lessonId) : null, document_ids: ids };
+  const ids = [
+    ...new Set(
+      pages.flatMap((p) => [
+        ...(p.source_document_ids || []),
+        ...(p.source_document_id ? [p.source_document_id] : []),
+      ]),
+    ),
+  ];
+  return {
+    course_id: Number(courseId),
+    lesson_id:
+      Number.isInteger(Number(lessonId)) && Number(lessonId) > 0
+        ? Number(lessonId)
+        : null,
+    document_ids: ids,
+  };
 }
 
 export function notifyQuizGenerated(count) {
   Swal.close();
-  return Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Quiz generated',
+  return Swal.fire({
+    toast: true,
+    position: "top-end",
+    icon: "success",
+    title: "Quiz generated",
     text: `${count} questions ready. Review the answers and save your changes.`,
-    showConfirmButton: false, showCloseButton: true, timer: 6500, timerProgressBar: true,
-    customClass: { popup: 'quizGeneratorPopup' },
-    didOpen: popup => { popup.parentElement.style.zIndex = '1000000'; },
+    showConfirmButton: false,
+    showCloseButton: true,
+    timer: 6500,
+    timerProgressBar: true,
+    customClass: { popup: "quizGeneratorPopup" },
+    didOpen: (popup) => {
+      popup.parentElement.style.zIndex = "1000000";
+    },
   });
 }

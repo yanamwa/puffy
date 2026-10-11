@@ -39,7 +39,6 @@
     4px 5px 0 rgba(37, 113, 78, 0.08);
 }
 
-
 .super-system-settings-eyebrow {
   display: flex;
   align-items: center;
@@ -59,12 +58,10 @@
   text-transform: uppercase;
 }
 
-
 .super-system-settings-eyebrow svg {
   width: 15px;
   height: 15px;
 }
-
 
 .super-system-settings-heading h1 {
   margin: 0;
@@ -76,7 +73,6 @@
 
   line-height: 1.05;
 }
-
 
 .super-system-settings-heading p {
   max-width: 650px;
@@ -92,7 +88,6 @@
   line-height: 1.5;
 }
 
-
 /* =====================================================
    HEADER ACTIONS
 ===================================================== */
@@ -105,7 +100,6 @@
 
   flex: 0 0 auto;
 }
-
 
 .super-settings-reset-button,
 .super-settings-save-button {
@@ -133,7 +127,6 @@
     opacity 150ms ease;
 }
 
-
 .super-settings-reset-button {
   border: 1px solid #cbd1d5;
 
@@ -141,7 +134,6 @@
 
   color: #646b74;
 }
-
 
 .super-settings-save-button {
   border: 1px solid #2563eb;
@@ -153,17 +145,14 @@
   box-shadow: 3px 4px 0 rgba(23, 25, 39, 0.15);
 }
 
-
 .super-settings-reset-button:hover:not(:disabled),
 .super-settings-save-button:hover:not(:disabled) {
   transform: translateY(-1px);
 }
 
-
 .super-settings-save-button:hover:not(:disabled) {
   background: #1f6746;
 }
-
 
 .super-settings-reset-button:disabled,
 .super-settings-save-button:disabled {
@@ -173,7 +162,6 @@
 
   transform: none;
 }
-
 
 /* =====================================================
    NOTICE
@@ -199,14 +187,12 @@
   font-weight: 650;
 }
 
-
 .super-settings-notice svg {
   width: 17px;
   height: 17px;
 
   flex: 0 0 17px;
 }
-
 
 /* =====================================================
    SETTINGS CARD
@@ -225,7 +211,6 @@
     4px 5px 0 rgba(37, 113, 78, 0.07);
 }
 
-
 /* =====================================================
    CARD HEADER
 ===================================================== */
@@ -241,14 +226,8 @@
   border-bottom: 1px solid #e6eae7;
 
   background:
-    linear-gradient(
-      135deg,
-      rgba(37, 113, 78, 0.05),
-      transparent 60%
-    ),
-    #ffffff;
+    linear-gradient(135deg, rgba(37, 113, 78, 0.05), transparent 60%), #ffffff;
 }
-
 
 .super-settings-card-icon {
   width: 42px;
@@ -266,12 +245,10 @@
   color: #2563eb;
 }
 
-
 .super-settings-card-icon svg {
   width: 19px;
   height: 19px;
 }
-
 
 .super-settings-card-eyebrow {
   display: block;
@@ -289,7 +266,6 @@
   text-transform: uppercase;
 }
 
-
 .super-settings-card-header h2 {
   margin: 0;
 
@@ -298,7 +274,6 @@
   font-size: 20px;
   font-weight: 500;
 }
-
 
 .super-settings-card-header p {
   margin: 5px 0 0;
@@ -312,7 +287,6 @@
   line-height: 1.45;
 }
 
-
 /* =====================================================
    CARD BODY
 ===================================================== */
@@ -320,7 +294,6 @@
 .super-settings-card-body {
   padding: 5px 22px 8px;
 }
-
 
 /* =====================================================
    TOGGLE SETTING
@@ -340,16 +313,13 @@
   border-bottom: 1px solid #edf0ee;
 }
 
-
 .super-setting-row:last-child {
   border-bottom: 0;
 }
 
-
 .super-setting-row-text {
   min-width: 0;
 }
-
 
 .super-setting-row-text strong {
   display: block;
@@ -360,7 +330,6 @@
   font-size: 11px;
   font-weight: 750;
 }
-
 
 .super-setting-row-text p {
   max-width: 720px;
@@ -375,7 +344,6 @@
 
   line-height: 1.45;
 }
-
 
 /* =====================================================
    TOGGLE
@@ -401,7 +369,6 @@
   transition: background 160ms ease;
 }
 
-
 .super-setting-toggle span {
   position: absolute;
 
@@ -420,16 +387,13 @@
   transition: transform 160ms ease;
 }
 
-
 .super-setting-toggle.is-active {
   background: #25714e;
 }
 
-
 .super-setting-toggle.is-active span {
   transform: translateX(20px);
 }
-
 
 /* =====================================================
    GENERAL SETTINGS FORM
@@ -438,21 +402,18 @@
 .super-settings-form-grid {
   display: grid;
 
-  grid-template-columns:
-    repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 
   gap: 16px;
 
   padding: 20px 0;
 }
 
-
 .super-settings-field {
   display: grid;
 
   gap: 7px;
 }
-
 
 .super-settings-field > span {
   color: #555d67;
@@ -461,7 +422,6 @@
   font-size: 10px;
   font-weight: 750;
 }
-
 
 .super-settings-field input,
 .super-settings-field select {
@@ -483,15 +443,12 @@
   font-size: 11px;
 }
 
-
 .super-settings-field input:focus,
 .super-settings-field select:focus {
   border-color: #2563eb;
 
-  box-shadow:
-    0 0 0 3px rgba(37, 113, 78, 0.1);
+  box-shadow: 0 0 0 3px rgba(37, 113, 78, 0.1);
 }
-
 
 /* =====================================================
    MAINTENANCE WARNING
@@ -514,14 +471,12 @@
   color: #8b6b28;
 }
 
-
 .super-settings-warning > svg {
   width: 18px;
   height: 18px;
 
   flex: 0 0 18px;
 }
-
 
 .super-settings-warning strong {
   display: block;
@@ -531,7 +486,6 @@
   font-weight: 800;
 }
 
-
 .super-settings-warning p {
   margin: 4px 0 0;
 
@@ -540,7 +494,6 @@
 
   line-height: 1.45;
 }
-
 
 /* =====================================================
    RESPONSIVE
@@ -553,11 +506,9 @@
   }
 
   .super-settings-form-grid {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
-
 
 @media (max-width: 600px) {
   .super-system-settings-heading {

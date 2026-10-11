@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink } from "react-router-dom";
 
 import {
   FiActivity,
@@ -11,62 +11,62 @@ import {
   FiShield,
   FiSun,
   FiUsers,
-} from 'react-icons/fi';
+} from "react-icons/fi";
 
-import './SuperAdminSidebar.css';
+import "./SuperAdminSidebar.css";
 
 const mainMenuItems = [
   {
-    label: 'Dashboard',
-    path: '/super-admin/dashboard',
+    label: "Dashboard",
+    path: "/super-admin/dashboard",
     icon: FiGrid,
   },
   {
-    label: 'User Management',
-    path: '/super-admin/users',
+    label: "User Management",
+    path: "/super-admin/users",
     icon: FiUsers,
   },
   {
-    label: 'Course Management',
-    path: '/super-admin/courses',
+    label: "Course Management",
+    path: "/super-admin/courses",
     icon: FiBook,
   },
   {
-    label: 'Modes Management',
-    path: '/super-admin/modes',
+    label: "Modes Management",
+    path: "/super-admin/modes",
     icon: FiSun,
-    },
+  },
   {
-    label: 'System Analytics',
-    path: '/super-admin/analytics',
+    label: "System Analytics",
+    path: "/super-admin/analytics",
     icon: FiActivity,
   },
   {
-    label: 'Announcements & Notifications',
-    path: '/super-admin/announcements',
+    label: "Announcements & Notifications",
+    path: "/super-admin/announcements",
     icon: FiBell,
   },
   {
-    label: 'Audit Logs',
-    path: '/super-admin/audit-logs',
+    label: "Audit Logs",
+    path: "/super-admin/audit-logs",
     icon: FiShield,
   },
   {
-    label: 'Backup and Restore',
-    path: '/super-admin/backup',
+    label: "Backup and Restore",
+    path: "/super-admin/backup",
     icon: FiDownload,
   },
 ];
 
 const otherMenuItems = [
   {
-    label: 'System Settings',
-    path: '/super-admin/settings',
+    label: "System Settings",
+    path: "/super-admin/settings",
     icon: FiSettings,
   },
   {
-    label: 'Security and Permissions',
-    path: '/super-admin/security',
+    label: "Security and Permissions",
+    path: "/super-admin/security",
     icon: FiShield,
   },
 ];
@@ -83,19 +83,12 @@ export default function SuperAdminSidebar({
       <NavLink
         key={item.path}
         to={item.path}
-        className={({ isActive }) =>
-          `sidebar-link ${isActive ? 'active' : ''}`
-        }
+        className={({ isActive }) => `sidebar-link ${isActive ? "active" : ""}`}
         title={sidebarCollapsed ? item.label : undefined}
       >
-        <Icon
-          className="sidebar-icon"
-          aria-hidden="true"
-        />
+        <Icon className="sidebar-icon" aria-hidden="true" />
 
-        <span className="sidebar-nav-label">
-          {item.label}
-        </span>
+        <span className="sidebar-nav-label">{item.label}</span>
       </NavLink>
     );
   };
@@ -109,38 +102,22 @@ export default function SuperAdminSidebar({
           onClick={toggleSidebar}
           aria-label={
             sidebarCollapsed
-              ? 'Expand Super Admin sidebar'
-              : 'Collapse Super Admin sidebar'
+              ? "Expand Super Admin sidebar"
+              : "Collapse Super Admin sidebar"
           }
           aria-expanded={!sidebarCollapsed}
-          title={
-            sidebarCollapsed
-              ? 'Expand sidebar'
-              : 'Collapse sidebar'
-          }
+          title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
-          <img
-            src="/images/logo_solo.png"
-            alt="PuffyBrain logo"
-          />
+          <img src="/images/logo_solo.png" alt="PuffyBrain logo" />
         </button>
 
-        <span className="superadmin-brand-name">
-          PuffyBrain
-        </span>
+        <span className="superadmin-brand-name">PuffyBrain</span>
       </div>
 
-      <nav
-        className="sidebar-menu"
-        aria-label="Super Admin navigation"
-      >
-        <div className="menu-section">
-          {mainMenuItems.map(renderMenuItem)}
-        </div>
+      <nav className="sidebar-menu" aria-label="Super Admin navigation">
+        <div className="menu-section">{mainMenuItems.map(renderMenuItem)}</div>
 
-        <div className="menu-section">
-          {otherMenuItems.map(renderMenuItem)}
-        </div>
+        <div className="menu-section">{otherMenuItems.map(renderMenuItem)}</div>
       </nav>
 
       <div className="sidebar-footer">
@@ -148,13 +125,11 @@ export default function SuperAdminSidebar({
           type="button"
           onClick={onLogout}
           className="logout-btn"
-          title={sidebarCollapsed ? 'Logout' : undefined}
+          title={sidebarCollapsed ? "Logout" : undefined}
         >
           <FiLogOut aria-hidden="true" />
 
-          <span className="sidebar-logout-label">
-            Logout
-          </span>
+          <span className="sidebar-logout-label">Logout</span>
         </button>
       </div>
     </aside>

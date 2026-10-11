@@ -388,7 +388,10 @@
   font-size: 18px;
   background: #17192a;
   box-shadow: 0 6px 0 rgba(23, 25, 42, 0.24);
-  transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease;
+  transition:
+    transform 0.16s ease,
+    box-shadow 0.16s ease,
+    filter 0.16s ease;
 }
 
 .postBtn:hover,
@@ -407,7 +410,10 @@
   box-shadow: 0 5px 0 rgba(161, 27, 32, 0.26);
   color: white;
   font-size: 16px;
-  transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease;
+  transition:
+    transform 0.16s ease,
+    box-shadow 0.16s ease,
+    filter 0.16s ease;
 }
 
 .deleteBtn:hover {
@@ -831,7 +837,10 @@
   font-weight: 600 !important;
   line-height: 1;
   padding: 0 16px !important;
-  transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease;
+  transition:
+    transform 0.16s ease,
+    box-shadow 0.16s ease,
+    filter 0.16s ease;
 }
 
 .postBtn,

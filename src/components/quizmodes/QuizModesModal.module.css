@@ -51,7 +51,9 @@
   cursor: pointer;
   color: #172c43;
   z-index: 10000;
-  transition: color 0.16s ease, transform 0.16s ease;
+  transition:
+    color 0.16s ease,
+    transform 0.16s ease;
 }
 
 .closeModal:hover {
@@ -200,4 +202,3 @@
   background: #edf4fc;
   box-shadow: 5px 5px 0 rgba(95, 134, 177, 0.28);
 }
-

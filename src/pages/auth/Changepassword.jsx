@@ -1,11 +1,10 @@
-import styles from './login.module.css';
+import styles from "./login.module.css";
 import { useState } from "react";
 import Swal from "sweetalert2";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { API_BASE } from "../../config.js";
 function ChangePassword() {
-
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -135,16 +134,13 @@ function ChangePassword() {
     }
   };
 
-
   return (
     <div className={styles.wrapper}>
       <section className={styles.container}>
-
         <div className={styles.background}></div>
 
         <div className={styles.signupContainer}>
           <div className={styles.signupCard}>
-
             <h2>Change Password</h2>
 
             <label>New Password</label>
@@ -161,9 +157,7 @@ function ChangePassword() {
               <button
                 type="button"
                 className={styles.toggleEye}
-                aria-label={
-                  showPassword ? "Hide password" : "Show password"
-                }
+                aria-label={showPassword ? "Hide password" : "Show password"}
                 aria-pressed={showPassword}
                 disabled={isSubmitting}
                 onClick={() => setShowPassword((current) => !current)}
@@ -176,12 +170,10 @@ function ChangePassword() {
               </button>
             </div>
 
-
             {/* PASSWORD CHECKLIST */}
 
             {password.length > 0 && (
               <div className={styles.passwordChecklist}>
-
                 <p className={hasLength ? styles.valid : styles.invalid}>
                   {hasLength ? "✓" : "✗"} At least 12 characters
                 </p>
@@ -201,60 +193,56 @@ function ChangePassword() {
                 <p className={hasSymbol ? styles.valid : styles.invalid}>
                   {hasSymbol ? "✓" : "✗"} Has special character (@#$ etc.)
                 </p>
-
               </div>
             )}
 
+            {/* PASSWORD STRENGTH */}
+            {password.length > 0 && (
+              <div
+                className={`${styles.validationMessage} ${
+                  passwordStrength === "strong"
+                    ? styles.success
+                    : passwordStrength === "medium"
+                      ? styles.warning
+                      : styles.error
+                }`}
+              >
+                {passwordStrength === "weak" && "Weak password"}
+                {passwordStrength === "medium" && "Medium strength password"}
+                {passwordStrength === "strong" && "Strong password"}
+              </div>
+            )}
 
-   {/* PASSWORD STRENGTH */}
-{password.length > 0 && (
-  <div
-    className={`${styles.validationMessage} ${
-      passwordStrength === "strong"
-        ? styles.success
-        : passwordStrength === "medium"
-        ? styles.warning
-        : styles.error
-    }`}
-  >
-    {passwordStrength === "weak" && "Weak password"}
-    {passwordStrength === "medium" && "Medium strength password"}
-    {passwordStrength === "strong" && "Strong password"}
-  </div>
-)}
+            <div className={styles.passwordDivider}></div>
+            <label>Confirm New Password</label>
+            <div className={styles.passwordWrapper}>
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                placeholder="Re-type new password"
+                value={confirmPassword}
+                autoComplete="new-password"
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
 
-<div className={styles.passwordDivider}></div>
-<label>Confirm New Password</label>
-<div className={styles.passwordWrapper}>
-  <input
-    type={showConfirmPassword ? "text" : "password"}
-    placeholder="Re-type new password"
-    value={confirmPassword}
-    autoComplete="new-password"
-    onChange={(e) => setConfirmPassword(e.target.value)}
-  />
-
-  <button
-    type="button"
-    className={styles.toggleEye}
-    aria-label={
-      showConfirmPassword
-        ? "Hide confirm password"
-        : "Show confirm password"
-    }
-    aria-pressed={showConfirmPassword}
-    disabled={isSubmitting}
-    onClick={() =>
-      setShowConfirmPassword((current) => !current)
-    }
-  >
-    {showConfirmPassword ? (
-      <FiEyeOff aria-hidden="true" />
-    ) : (
-      <FiEye aria-hidden="true" />
-    )}
-  </button>
-</div>
+              <button
+                type="button"
+                className={styles.toggleEye}
+                aria-label={
+                  showConfirmPassword
+                    ? "Hide confirm password"
+                    : "Show confirm password"
+                }
+                aria-pressed={showConfirmPassword}
+                disabled={isSubmitting}
+                onClick={() => setShowConfirmPassword((current) => !current)}
+              >
+                {showConfirmPassword ? (
+                  <FiEyeOff aria-hidden="true" />
+                ) : (
+                  <FiEye aria-hidden="true" />
+                )}
+              </button>
+            </div>
 
             {/* PASSWORD MATCH CHECK */}
 
@@ -270,19 +258,16 @@ function ChangePassword() {
               </div>
             )}
 
-
-          <button
-            type="button"
-            className={styles.loginBtn}
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "Updating..." : "Update Password"}
-          </button>
-
+            <button
+              type="button"
+              className={styles.loginBtn}
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Updating..." : "Update Password"}
+            </button>
           </div>
         </div>
-
       </section>
     </div>
   );

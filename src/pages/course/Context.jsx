@@ -54,7 +54,9 @@ function Tutorial() {
           </h1>
 
           <p className={styles.greeting1}>
-            {firstPage?.content || lesson?.description || "No lesson content yet."}
+            {firstPage?.content ||
+              lesson?.description ||
+              "No lesson content yet."}
           </p>
 
           <Link to={lessonId ? `/lesson/${lessonId}` : "/lesson"}>

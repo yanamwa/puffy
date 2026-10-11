@@ -5,16 +5,16 @@
   --color-fourth: #7fa8d6;
   --color-fifth: #7fa8d6;
 
-  --font-color: #2F2F2F;
+  --font-color: #2f2f2f;
 
   --card-color1: #7fa8d6;
   --card-color2: #7fa8d6;
   --card-color3: #7fa8d6;
   --card-color4: #cfe2f6;
-  --card-color5: #CF8686;
-  --card-color6: #EECB99;
+  --card-color5: #cf8686;
+  --card-color6: #eecb99;
 
-  --color-shadow: #DDDDDD;
+  --color-shadow: #dddddd;
 
   /* NEW */
   --btn-bg: #7fa8d6;
@@ -32,7 +32,7 @@
   flex-direction: column;
   align-items: center;
 
-  background-image: url('/images/background_notebook.png');
+  background-image: url("/images/background_notebook.png");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -49,7 +49,7 @@
   border-radius: 40px;
   padding: 120px 30px 40px;
   text-align: center;
-  box-shadow: 2px 6px 0px rgba(221, 221, 221, 0.808); 
+  box-shadow: 2px 6px 0px rgba(221, 221, 221, 0.808);
   position: relative;
   overflow: hidden;
 }
@@ -69,7 +69,7 @@
 }
 
 .title {
-  font-family: 'Jersey 15', sans-serif;
+  font-family: "Jersey 15", sans-serif;
   font-size: 45px;
   font-weight: normal;
   font-style: normal;
@@ -85,7 +85,7 @@
   opacity: 0.8;
   margin: 5px 0;
 
-  font-family: 'Jersey 15', sans-serif;
+  font-family: "Jersey 15", sans-serif;
   font-weight: normal;
   font-style: normal;
 }
@@ -124,7 +124,7 @@
 
   transition: 0.2s ease;
 
-  font-family: 'Jersey 15', sans-serif;
+  font-family: "Jersey 15", sans-serif;
   font-weight: normal;
   font-style: normal;
 }
@@ -212,7 +212,7 @@
 
   text-align: center;
 
-  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 
   position: relative;
 
@@ -242,7 +242,7 @@
 .question {
   font-size: 22px;
 
-  font-family: 'Jersey 15', sans-serif;
+  font-family: "Jersey 15", sans-serif;
 
   padding: 15px;
 
@@ -297,7 +297,7 @@
 
   border: 2px solid #7fa8d6;
 
-  font-family: 'Jersey 15', sans-serif;
+  font-family: "Jersey 15", sans-serif;
 
   background: white;
 }
@@ -323,7 +323,7 @@
 
   font-size: 18px;
 
-  font-family: 'Jersey 15', sans-serif;
+  font-family: "Jersey 15", sans-serif;
 
   pointer-events: none;
   user-select: none;
@@ -406,7 +406,7 @@
 
   padding: 30px;
 
-  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 
   position: relative;
 }
@@ -420,7 +420,7 @@
 }
 
 .flashLabel {
-  font-family: 'Jersey 15', sans-serif;
+  font-family: "Jersey 15", sans-serif;
   font-size: 22px;
 
   border-bottom: 4px solid #7fa8d6;
@@ -441,7 +441,7 @@
 
   text-align: center;
 
-  font-family: 'Jersey 15', sans-serif;
+  font-family: "Jersey 15", sans-serif;
 }
 
 .flashButtons {
@@ -475,7 +475,6 @@
 ========================= */
 
 @media (max-width: 768px) {
-
   .headerBox,
   .slideshowBox,
   .flashcard {
@@ -565,7 +564,6 @@
 }
 
 @keyframes growCircle {
-
   0% {
     width: 8px;
     height: 8px;
@@ -592,7 +590,6 @@
 ========================= */
 
 @media (max-width: 768px) {
-
   .headerBox,
   .slideshowBox,
   .flashcard {
@@ -671,7 +668,6 @@
 ========================= */
 
 @media (max-width: 480px) {
-
   .container {
     padding: 14px 10px !important;
   }
@@ -809,9 +805,16 @@
   border-radius: 0;
   box-sizing: border-box;
 }
-.title { margin: 0; }
-.subtitles { margin: 0; }
-.subtitle { margin: 8px 0; padding: 0; }
+.title {
+  margin: 0;
+}
+.subtitles {
+  margin: 0;
+}
+.subtitle {
+  margin: 8px 0;
+  padding: 0;
+}
 .startBtn {
   width: auto;
   min-width: 120px;
@@ -837,7 +840,8 @@
   color: white;
   box-sizing: border-box;
 }
-.question, .prompt {
+.question,
+.prompt {
   width: 100%;
   box-sizing: border-box;
 }
@@ -852,10 +856,27 @@
   margin: 0;
   box-sizing: border-box;
 }
-.qnaPreview input { width: min(100%, 540px); box-sizing: border-box; }
+.qnaPreview input {
+  width: min(100%, 540px);
+  box-sizing: border-box;
+}
 @media (max-width: 600px) {
-  .headerBox { margin-top: 20px; padding-right: 16px; padding-left: 16px; }
-  .headerTop { width: calc(100% + 32px); margin-left: -16px; margin-right: -16px; }
-  .slideshowBox { padding-right: 16px; padding-left: 16px; }
-  .demoHeader { margin-left: -16px; margin-right: -16px; }
+  .headerBox {
+    margin-top: 20px;
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+  .headerTop {
+    width: calc(100% + 32px);
+    margin-left: -16px;
+    margin-right: -16px;
+  }
+  .slideshowBox {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+  .demoHeader {
+    margin-left: -16px;
+    margin-right: -16px;
+  }
 }

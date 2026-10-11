@@ -35,25 +35,20 @@ function ForgotUsername() {
     try {
       setIsSubmitting(true);
 
-      const response = await fetch(
-        `${API_BASE}/forgot-username.php`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email: trimmedEmail,
-          }),
-        }
-      );
+      const response = await fetch(`${API_BASE}/forgot-username.php`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: trimmedEmail,
+        }),
+      });
 
       const data = await response.json();
 
       if (!response.ok || data.success === false) {
-        throw new Error(
-          data.message || "Unable to send your username."
-        );
+        throw new Error(data.message || "Unable to send your username.");
       }
 
       await Swal.fire({
@@ -68,9 +63,7 @@ function ForgotUsername() {
     } catch (error) {
       Swal.fire({
         title: "Request Failed",
-        text:
-          error.message ||
-          "Something went wrong. Please try again later.",
+        text: error.message || "Something went wrong. Please try again later.",
         icon: "error",
       });
     } finally {
@@ -81,10 +74,7 @@ function ForgotUsername() {
   return (
     <div className={styles.wrapper}>
       <section className={styles.container}>
-        <div
-          className={styles.background}
-          aria-hidden="true"
-        />
+        <div className={styles.background} aria-hidden="true" />
 
         {/* Header */}
         <header className={styles.pageHeader}>
@@ -93,15 +83,10 @@ function ForgotUsername() {
 
         {/* Main content */}
         <main className={styles.signupContainer}>
-          <form
-            className={styles.signupCard}
-            onSubmit={handleSubmit}
-          >
+          <form className={styles.signupCard} onSubmit={handleSubmit}>
             <h2>Forgot Username</h2>
 
-            <label htmlFor="forgot-username-email">
-              Email Address
-            </label>
+            <label htmlFor="forgot-username-email">Email Address</label>
 
             <input
               id="forgot-username-email"
@@ -109,9 +94,7 @@ function ForgotUsername() {
               type="email"
               placeholder="Enter your email address"
               value={email}
-              onChange={(event) =>
-                setEmail(event.target.value)
-              }
+              onChange={(event) => setEmail(event.target.value)}
               autoComplete="email"
               required
             />
@@ -126,11 +109,7 @@ function ForgotUsername() {
 
             <p className={styles.forgotText}>
               Already remembered?
-
-              <Link
-                to="/login"
-                className={styles.forgotLoginLink}
-              >
+              <Link to="/login" className={styles.forgotLoginLink}>
                 Login
               </Link>
             </p>

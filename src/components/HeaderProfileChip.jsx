@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import './HeaderProfileChip.css';
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import "./HeaderProfileChip.css";
 
 function MenuIcon({ name }) {
-  if (name === 'settings') {
+  if (name === "settings") {
     return (
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <circle cx="12" cy="12" r="3" />
@@ -12,7 +12,7 @@ function MenuIcon({ name }) {
     );
   }
 
-  if (name === 'logout') {
+  if (name === "logout") {
     return (
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M10 5H5v14h5" />
@@ -33,7 +33,7 @@ function MenuIcon({ name }) {
 export default function HeaderProfileChip({
   username,
   accountLabel,
-  avatarSrc = '/images/temporaryimg.png',
+  avatarSrc = "/images/temporaryimg.png",
   profilePath,
   menuItems = [],
   onLogout,
@@ -41,7 +41,7 @@ export default function HeaderProfileChip({
   const navigate = useNavigate();
   const wrapperRef = useRef(null);
   const [open, setOpen] = useState(false);
-  const handle = username?.replace(/^@+/, '') || 'Professor';
+  const handle = username?.replace(/^@+/, "") || "Professor";
 
   const goTo = (path) => {
     setOpen(false);
@@ -56,17 +56,17 @@ export default function HeaderProfileChip({
     };
 
     const closeWithEscape = (event) => {
-      if (event.key === 'Escape') {
+      if (event.key === "Escape") {
         setOpen(false);
       }
     };
 
-    document.addEventListener('mousedown', closeMenu);
-    document.addEventListener('keydown', closeWithEscape);
+    document.addEventListener("mousedown", closeMenu);
+    document.addEventListener("keydown", closeWithEscape);
 
     return () => {
-      document.removeEventListener('mousedown', closeMenu);
-      document.removeEventListener('keydown', closeWithEscape);
+      document.removeEventListener("mousedown", closeMenu);
+      document.removeEventListener("keydown", closeWithEscape);
     };
   }, []);
 
@@ -92,8 +92,8 @@ export default function HeaderProfileChip({
 
         <button
           type="button"
-          className={`header-profile-dropdown-button ${open ? 'open' : ''}`}
-          aria-label={open ? 'Close profile menu' : 'Open profile menu'}
+          className={`header-profile-dropdown-button ${open ? "open" : ""}`}
+          aria-label={open ? "Close profile menu" : "Open profile menu"}
           aria-expanded={open}
           aria-haspopup="menu"
           onClick={(event) => {
@@ -140,7 +140,9 @@ export default function HeaderProfileChip({
             </button>
           ))}
 
-          {menuItems.length > 0 && <div className="header-profile-dropdown-divider" />}
+          {menuItems.length > 0 && (
+            <div className="header-profile-dropdown-divider" />
+          )}
 
           <button
             type="button"

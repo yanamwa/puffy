@@ -1,5 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Jersey+15&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Qwitcher+Grypen:wght@700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Jersey+15&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Qwitcher+Grypen:wght@700&display=swap");
 
 .enrolled-dashboard {
   --ink: #5f6064;
@@ -79,7 +79,6 @@
   white-space: nowrap;
 }
 
-
 .enrolled-main {
   min-width: 0;
   background: #f7f7f7;
@@ -107,8 +106,6 @@
 .transparent-topbar {
   background: rgba(255, 255, 255, 0.62);
 }
-
-
 
 .home-topbar {
   justify-content: flex-start;
@@ -223,7 +220,6 @@
   align-items: center;
   gap: 31px;
   flex: 0 0 auto;
-
 }
 
 :where(.enrolled-dashboard, .student-home-dashboard) .notification-button {
@@ -242,12 +238,13 @@
   color: #80866e;
   cursor: pointer;
 
-  transition: all .2s ease;
+  transition: all 0.2s ease;
 }
 
-:where(.enrolled-dashboard, .student-home-dashboard) .notification-button:hover {
-  background: rgba(0,0,0,.05);
-  color: #25714E;
+:where(.enrolled-dashboard, .student-home-dashboard)
+  .notification-button:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #25714e;
 }
 
 :where(.enrolled-dashboard, .student-home-dashboard) .notification-button svg {
@@ -265,16 +262,16 @@
   height: 40px;
   border: 0;
   border-radius: 21px;
-  background: #25714E;
+  background: #25714e;
   color: #fff;
   box-shadow: 4px 5px 0 rgba(23, 25, 39, 0.26);
   cursor: pointer;
   font-size: 14px;
   font-weight: 400;
 }
-.primary-button:hover{
-    transform:translateY(-1px);
-    box-shadow: 4px 5px 0 rgba(23, 25, 39, 0.26);
+.primary-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 4px 5px 0 rgba(23, 25, 39, 0.26);
 }
 .join-course-overlay {
   position: fixed;
@@ -397,28 +394,27 @@
 }
 
 .profile-chip {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 
-    background: transparent;
-    border: none;
-    box-shadow: none;
-    height: auto;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  height: auto;
 }
 
-
 .profile-main-button {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 
-    padding: 0;
+  padding: 0;
 
-    border: none;
-    background: transparent;
+  border: none;
+  background: transparent;
 
-    cursor: pointer;
+  cursor: pointer;
 }
 
 .profile-avatar {
@@ -448,11 +444,11 @@
 }
 
 .profile-main-button .anime-avatar {
-    width: 40px;
-    height: 40px;
+  width: 40px;
+  height: 40px;
 
-    border: none;
-    box-shadow: none;
+  border: none;
+  box-shadow: none;
 }
 
 .profile-user-info {
@@ -464,52 +460,52 @@
 }
 
 .profile-user-info strong {
-    font-family: "Jersey 15";
-    font-size: 18px;
-    color: #565656;
+  font-family: "Jersey 15";
+  font-size: 18px;
+  color: #565656;
 }
 
 .profile-user-info small {
-    display: none;
+  display: none;
 }
 
 .profile-dropdown-button {
-    width: 24px;
-    height: 24px;
+  width: 24px;
+  height: 24px;
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-    padding: 0;
-    margin-left: -2px;
+  padding: 0;
+  margin-left: -2px;
 
-    border: none;
-    background: transparent;
+  border: none;
+  background: transparent;
 
-    color: #8d939b;
-    cursor: pointer;
+  color: #8d939b;
+  cursor: pointer;
 
-    transition: color .2s ease;
+  transition: color 0.2s ease;
 }
 
 .profile-dropdown-button svg {
-    width: 18px;
-    height: 18px;
+  width: 18px;
+  height: 18px;
 
-    fill: currentColor;
+  fill: currentColor;
 
-    transition:
-        transform .22s ease,
-        color .22s ease;
+  transition:
+    transform 0.22s ease,
+    color 0.22s ease;
 }
 
 .profile-dropdown-button:hover {
-    color: #25714E;
+  color: #25714e;
 }
 
 .profile-dropdown-button.open svg {
-    transform: rotate(180deg);
+  transform: rotate(180deg);
 }
 
 /* ===========================
@@ -684,8 +680,6 @@
   letter-spacing: 1px;
 }
 
-
-
 .sort-trigger .dropdown-mark {
   margin-left: 0;
 }
@@ -703,8 +697,6 @@
   font-size: 18px;
   font-weight: 400;
 }
-
-
 
 .sort-menu button {
   width: 100%;
@@ -783,8 +775,6 @@
   white-space: nowrap;
 }
 
-
-
 .sort-trigger:hover {
   border-color: #9ea6b1;
   background: #fafbfb;
@@ -800,8 +790,6 @@
   border-color: #25714e;
   box-shadow: 0 0 0 3px rgba(37, 113, 78, 0.1);
 }
-
-
 
 .sort-dropdown.open .sort-chevron {
   transform: rotate(180deg);
@@ -1080,7 +1068,6 @@
   flex-basis: 116px;
   font-size: 14px;
 }
-
 
 .student-course-shell {
   width: min(100%, 1040px);
@@ -1487,7 +1474,10 @@
   text-align: left;
   cursor: pointer;
   box-shadow: 3px 4px 0 rgba(137, 146, 159, 0.18);
-  transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+  transition:
+    transform 0.16s ease,
+    box-shadow 0.16s ease,
+    border-color 0.16s ease;
 }
 
 .practice-scope-option:hover {
@@ -2081,7 +2071,7 @@ a.course-folder:focus-visible {
   border: 0;
   border-radius: 999px;
   background: #0b9512;
-  background-color:#198754;
+  background-color: #198754;
   box-shadow: 2px 3px 0 #0b6b11;
   color: #fff;
   cursor: pointer;
@@ -2175,7 +2165,9 @@ a.course-folder:focus-visible {
   opacity: 0;
   pointer-events: none;
   transform: translateY(-2px);
-  transition: opacity 160ms ease, transform 160ms ease;
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
 }
 
 .course-folder:hover .menu-button,
@@ -2293,8 +2285,6 @@ a.course-folder:focus-visible {
 .home-main {
   min-width: 0;
 }
-
-
 
 .home-content {
   padding: 34px 42px 64px;
@@ -2551,8 +2541,6 @@ a.course-folder:focus-visible {
   font-weight: 700;
 }
 
-
-
 .student-profile-panel > strong {
   margin-top: 12px;
   color: #1f232d;
@@ -2566,7 +2554,6 @@ a.course-folder:focus-visible {
   font-size: 10px;
 }
 
-
 .profile-button {
   width: 110px;
   height: 34px;
@@ -2579,19 +2566,18 @@ a.course-folder:focus-visible {
   border: none;
   border-radius: 999px;
 
-  background: #25714E;
+  background: #25714e;
   color: #fff;
 
   text-decoration: none;
   font-size: 15px;
 
-  transition: all .2s ease;
+  transition: all 0.2s ease;
 }
 
 .profile-button:hover {
   background: #1f5d40;
   transform: translateY(-2px);
-
 }
 
 .profile-button:active {
@@ -2781,7 +2767,7 @@ a.course-folder:focus-visible {
   background:
     linear-gradient(135deg, transparent 45%, #fff 45% 56%, transparent 56%),
     linear-gradient(45deg, transparent 43%, #fff 43% 56%, transparent 56%),
-    #25714e
+    #25714e;
 }
 
 .avatar-face {
@@ -3116,18 +3102,19 @@ a.course-folder:focus-visible {
   }
 }
 
-
 /* ===========================
    NOTIFICATION DROPDOWN
 =========================== */
 
-:where(.enrolled-dashboard, .student-home-dashboard) .notification-menu-wrapper {
+:where(.enrolled-dashboard, .student-home-dashboard)
+  .notification-menu-wrapper {
   position: relative;
   z-index: 70;
   flex: 0 0 auto;
 }
 
-:where(.enrolled-dashboard, .student-home-dashboard) .notification-button.active {
+:where(.enrolled-dashboard, .student-home-dashboard)
+  .notification-button.active {
   color: #25714e;
 }
 
@@ -3156,7 +3143,8 @@ a.course-folder:focus-visible {
   line-height: 1;
 }
 
-:where(.enrolled-dashboard, .student-home-dashboard) .notification-dropdown-menu {
+:where(.enrolled-dashboard, .student-home-dashboard)
+  .notification-dropdown-menu {
   position: absolute;
   top: calc(100% + 10px);
   right: -138px;
@@ -3191,7 +3179,8 @@ a.course-folder:focus-visible {
   }
 }
 
-:where(.enrolled-dashboard, .student-home-dashboard) .notification-dropdown-header {
+:where(.enrolled-dashboard, .student-home-dashboard)
+  .notification-dropdown-header {
   min-height: 76px;
   display: flex;
   align-items: center;
@@ -3200,11 +3189,15 @@ a.course-folder:focus-visible {
   padding: 15px 17px 11px;
 }
 
-:where(.enrolled-dashboard, .student-home-dashboard) .notification-dropdown-header > div {
+:where(.enrolled-dashboard, .student-home-dashboard)
+  .notification-dropdown-header
+  > div {
   min-width: 0;
 }
 
-:where(.enrolled-dashboard, .student-home-dashboard) .notification-dropdown-header h2 {
+:where(.enrolled-dashboard, .student-home-dashboard)
+  .notification-dropdown-header
+  h2 {
   margin: 0;
   color: #242832;
   font-size: 27px;
@@ -3212,7 +3205,9 @@ a.course-folder:focus-visible {
   line-height: 1;
 }
 
-:where(.enrolled-dashboard, .student-home-dashboard) .notification-dropdown-header span {
+:where(.enrolled-dashboard, .student-home-dashboard)
+  .notification-dropdown-header
+  span {
   display: block;
   margin-top: 5px;
   color: #9299a5;
@@ -3234,11 +3229,13 @@ a.course-folder:focus-visible {
   font-weight: 750;
 }
 
-:where(.enrolled-dashboard, .student-home-dashboard) .mark-all-read-button:hover {
+:where(.enrolled-dashboard, .student-home-dashboard)
+  .mark-all-read-button:hover {
   background: #eef6f1;
 }
 
-:where(.enrolled-dashboard, .student-home-dashboard) .notification-dropdown-tabs {
+:where(.enrolled-dashboard, .student-home-dashboard)
+  .notification-dropdown-tabs {
   display: flex;
   align-items: center;
   gap: 7px;
@@ -3246,7 +3243,9 @@ a.course-folder:focus-visible {
   border-bottom: 1px solid #e8eaee;
 }
 
-:where(.enrolled-dashboard, .student-home-dashboard) .notification-dropdown-tabs button {
+:where(.enrolled-dashboard, .student-home-dashboard)
+  .notification-dropdown-tabs
+  button {
   min-width: 56px;
   height: 30px;
   padding: 0 14px;
@@ -3260,8 +3259,12 @@ a.course-folder:focus-visible {
   font-weight: 750;
 }
 
-:where(.enrolled-dashboard, .student-home-dashboard) .notification-dropdown-tabs button:hover,
-:where(.enrolled-dashboard, .student-home-dashboard) .notification-dropdown-tabs button.active {
+:where(.enrolled-dashboard, .student-home-dashboard)
+  .notification-dropdown-tabs
+  button:hover,
+:where(.enrolled-dashboard, .student-home-dashboard)
+  .notification-dropdown-tabs
+  button.active {
   background: #eaf4ee;
   color: #25714e;
 }
@@ -3304,7 +3307,8 @@ a.course-folder:focus-visible {
   background: #eef6f1;
 }
 
-:where(.enrolled-dashboard, .student-home-dashboard) .notification-item.unread:hover {
+:where(.enrolled-dashboard, .student-home-dashboard)
+  .notification-item.unread:hover {
   background: #e5f1e9;
 }
 
@@ -3318,22 +3322,27 @@ a.course-folder:focus-visible {
   color: #68717e;
 }
 
-:where(.enrolled-dashboard, .student-home-dashboard) .notification-item-icon.course {
+:where(.enrolled-dashboard, .student-home-dashboard)
+  .notification-item-icon.course {
   background: #e5f3ea;
   color: #25714e;
 }
 
-:where(.enrolled-dashboard, .student-home-dashboard) .notification-item-icon.announcement {
+:where(.enrolled-dashboard, .student-home-dashboard)
+  .notification-item-icon.announcement {
   background: #edf0f8;
   color: #596a9a;
 }
 
-:where(.enrolled-dashboard, .student-home-dashboard) .notification-item-icon.sparkle {
+:where(.enrolled-dashboard, .student-home-dashboard)
+  .notification-item-icon.sparkle {
   background: #f3ede0;
   color: #9a7428;
 }
 
-:where(.enrolled-dashboard, .student-home-dashboard) .notification-item-icon svg {
+:where(.enrolled-dashboard, .student-home-dashboard)
+  .notification-item-icon
+  svg {
   width: 23px;
   height: 23px;
   fill: none;
@@ -3351,14 +3360,18 @@ a.course-folder:focus-visible {
   font-family: system-ui, sans-serif;
 }
 
-:where(.enrolled-dashboard, .student-home-dashboard) .notification-item-copy strong {
+:where(.enrolled-dashboard, .student-home-dashboard)
+  .notification-item-copy
+  strong {
   color: #2b3039;
   font-size: 12px;
   font-weight: 800;
   line-height: 1.25;
 }
 
-:where(.enrolled-dashboard, .student-home-dashboard) .notification-item-copy > span {
+:where(.enrolled-dashboard, .student-home-dashboard)
+  .notification-item-copy
+  > span {
   display: -webkit-box;
   margin-top: 3px;
   overflow: hidden;
@@ -3370,7 +3383,9 @@ a.course-folder:focus-visible {
   -webkit-line-clamp: 2;
 }
 
-:where(.enrolled-dashboard, .student-home-dashboard) .notification-item-copy small {
+:where(.enrolled-dashboard, .student-home-dashboard)
+  .notification-item-copy
+  small {
   margin-top: 5px;
   color: #25714e;
   font-size: 9px;
@@ -3405,7 +3420,9 @@ a.course-folder:focus-visible {
   color: #6c7a72;
 }
 
-:where(.enrolled-dashboard, .student-home-dashboard) .notification-empty-icon svg {
+:where(.enrolled-dashboard, .student-home-dashboard)
+  .notification-empty-icon
+  svg {
   width: 28px;
   height: 28px;
   fill: none;
@@ -3415,21 +3432,26 @@ a.course-folder:focus-visible {
   stroke-linejoin: round;
 }
 
-:where(.enrolled-dashboard, .student-home-dashboard) .notification-empty-state strong {
+:where(.enrolled-dashboard, .student-home-dashboard)
+  .notification-empty-state
+  strong {
   margin-top: 13px;
   color: #343941;
   font-family: system-ui, sans-serif;
   font-size: 13px;
 }
 
-:where(.enrolled-dashboard, .student-home-dashboard) .notification-empty-state p {
+:where(.enrolled-dashboard, .student-home-dashboard)
+  .notification-empty-state
+  p {
   margin: 5px 0 0;
   color: #9097a2;
   font-family: system-ui, sans-serif;
   font-size: 11px;
 }
 
-:where(.enrolled-dashboard, .student-home-dashboard) .notification-view-all-button {
+:where(.enrolled-dashboard, .student-home-dashboard)
+  .notification-view-all-button {
   width: calc(100% - 14px);
   min-height: 40px;
   margin: 0 7px 7px;
@@ -3444,12 +3466,14 @@ a.course-folder:focus-visible {
   font-weight: 800;
 }
 
-:where(.enrolled-dashboard, .student-home-dashboard) .notification-view-all-button:hover {
+:where(.enrolled-dashboard, .student-home-dashboard)
+  .notification-view-all-button:hover {
   background: #f2f7f4;
 }
 
 @media (max-width: 900px) {
-  :where(.enrolled-dashboard, .student-home-dashboard) .notification-dropdown-menu {
+  :where(.enrolled-dashboard, .student-home-dashboard)
+    .notification-dropdown-menu {
     position: fixed;
     top: 68px;
     right: 14px;
@@ -3479,7 +3503,8 @@ a.course-folder:focus-visible {
 }
 
 /* Notification wrapper */
-:where(.enrolled-dashboard, .student-home-dashboard) .notification-menu-wrapper {
+:where(.enrolled-dashboard, .student-home-dashboard)
+  .notification-menu-wrapper {
   position: relative;
   z-index: 1100;
 }
@@ -3491,7 +3516,8 @@ a.course-folder:focus-visible {
 }
 
 /* Notification popup */
-:where(.enrolled-dashboard, .student-home-dashboard) .notification-dropdown-menu {
+:where(.enrolled-dashboard, .student-home-dashboard)
+  .notification-dropdown-menu {
   z-index: 1200;
 }
 
@@ -3861,7 +3887,6 @@ a.course-folder:focus-visible {
   font-size: 9px;
   font-weight: 800;
 }
-
 
 /* ==================================================
    INFORMATION PANEL
@@ -4426,7 +4451,9 @@ a.course-folder:focus-visible {
   font-family: system-ui, sans-serif;
   font-size: 13px;
   box-sizing: border-box;
-  transition: border-color 160ms ease, box-shadow 160ms ease;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
 }
 
 .password-input-wrapper input::placeholder {
@@ -4505,8 +4532,12 @@ a.course-folder:focus-visible {
   font-weight: 650;
 }
 
-.match-success { color: #25714e; }
-.match-error { color: #b84d4d; }
+.match-success {
+  color: #25714e;
+}
+.match-error {
+  color: #b84d4d;
+}
 
 .password-notice {
   margin-top: 22px;
@@ -4543,7 +4574,9 @@ a.course-folder:focus-visible {
   border-radius: 999px;
   cursor: pointer;
   font-size: 15px;
-  transition: transform 160ms ease, box-shadow 160ms ease;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease;
 }
 
 .password-cancel-button {
@@ -4567,8 +4600,8 @@ a.course-folder:focus-visible {
 .password-cancel-button:disabled,
 .password-save-button:disabled {
   opacity: 0.6;
-}npm
-.student-module-section-description {
+}
+npm .student-module-section-description {
   margin: 5px 0 0;
   color: #7a8290;
   font-family: system-ui, sans-serif;
@@ -4923,8 +4956,7 @@ a.course-folder:focus-visible {
     transform 0.18s ease;
 }
 
-.course-card-wrapper:hover
-  .course-menu-button,
+.course-card-wrapper:hover .course-menu-button,
 .course-menu-button.active {
   opacity: 1;
   visibility: visible;
@@ -4966,8 +4998,7 @@ a.course-folder:focus-visible {
   border: 1px solid #e3e8e4;
   border-radius: 10px;
 
-  box-shadow:
-    0 8px 24px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 
   z-index: 100;
 }
@@ -5080,7 +5111,6 @@ a.course-folder:focus-visible {
   transform: rotate(180deg);
 }
 
-
 /* Dropdown container */
 
 .sidebar-course-dropdown {
@@ -5097,7 +5127,6 @@ a.course-folder:focus-visible {
 
   animation: sidebarDropdownOpen 0.2s ease;
 }
-
 
 /* Individual enrolled course */
 
@@ -5125,7 +5154,6 @@ a.course-folder:focus-visible {
   color: #198754;
 }
 
-
 /* Small green circle */
 
 .sidebar-course-dot {
@@ -5137,7 +5165,6 @@ a.course-folder:focus-visible {
   border-radius: 50%;
   background: #198754;
 }
-
 
 /* Course information */
 
@@ -5172,7 +5199,6 @@ a.course-folder:focus-visible {
   text-overflow: ellipsis;
 }
 
-
 /* Loading / empty state */
 
 .sidebar-course-message {
@@ -5181,7 +5207,6 @@ a.course-folder:focus-visible {
   font-size: 11px;
   color: #89958e;
 }
-
 
 /* Opening animation */
 
@@ -5196,7 +5221,6 @@ a.course-folder:focus-visible {
     transform: translateY(0);
   }
 }
-
 
 /* Hide dropdown when sidebar is collapsed */
 
@@ -5214,7 +5238,6 @@ a.course-folder:focus-visible {
   flex-direction: column;
 }
 
-
 /* Main Enrolled Courses button */
 
 .sidebar-enrolled-toggle {
@@ -5224,7 +5247,6 @@ a.course-folder:focus-visible {
   font-family: inherit;
   text-align: left;
 }
-
 
 /* Dropdown arrow */
 
@@ -5245,11 +5267,9 @@ a.course-folder:focus-visible {
   transition: transform 0.2s ease;
 }
 
-
 .sidebar-dropdown-arrow.open {
   transform: rotate(180deg);
 }
-
 
 /* Container holding enrolled subjects */
 .sidebar-enrolled-list {
@@ -5286,7 +5306,6 @@ a.course-folder:focus-visible {
   box-sizing: border-box;
 }
 
-
 /* HOVER */
 .sidebar-enrolled-course:hover {
   background: #ffffff;
@@ -5297,7 +5316,6 @@ a.course-folder:focus-visible {
 
   border-radius: 999px 0 0 999px;
 }
-
 
 /* Make sure white reaches the RIGHT EDGE */
 .sidebar-enrolled-course:hover::after {
@@ -5313,7 +5331,6 @@ a.course-folder:focus-visible {
   background: #ffffff;
 }
 
-
 /* Course text */
 .sidebar-enrolled-course-text {
   position: relative;
@@ -5326,8 +5343,6 @@ a.course-folder:focus-visible {
   font-size: 13px;
 }
 
-
-
 /* Course text */
 
 .sidebar-enrolled-course-text {
@@ -5339,7 +5354,6 @@ a.course-folder:focus-visible {
   overflow: hidden;
 }
 
-
 .sidebar-enrolled-course-text strong {
   display: block;
 
@@ -5350,7 +5364,6 @@ a.course-folder:focus-visible {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
 
 .sidebar-enrolled-course-text small {
   display: block;
@@ -5367,7 +5380,6 @@ a.course-folder:focus-visible {
   text-overflow: ellipsis;
 }
 
-
 /* Loading / empty message */
 
 .sidebar-enrolled-message {
@@ -5376,7 +5388,6 @@ a.course-folder:focus-visible {
   font-size: 11px;
   color: whitesmoke;
 }
-
 
 /* Opening animation */
 
@@ -5391,7 +5402,6 @@ a.course-folder:focus-visible {
     transform: translateY(0);
   }
 }
-
 
 /* Collapsed sidebar */
 

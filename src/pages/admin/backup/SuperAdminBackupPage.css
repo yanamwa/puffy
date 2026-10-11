@@ -10,7 +10,6 @@
   gap: 22px;
 }
 
-
 /* =====================================================
    PAGE HEADER
 ===================================================== */
@@ -23,10 +22,8 @@
 
   background: #ffffff;
 
-  box-shadow:
-    4px 5px 0 rgba(25, 135, 84, 0.09);
+  box-shadow: 4px 5px 0 rgba(25, 135, 84, 0.09);
 }
-
 
 .superadmin-backup-header h1 {
   margin: 0;
@@ -36,7 +33,6 @@
   font-size: 28px;
   font-weight: 800;
 }
-
 
 .superadmin-backup-header p {
   max-width: 700px;
@@ -51,7 +47,6 @@
   line-height: 1.5;
 }
 
-
 /* =====================================================
    GRID
 ===================================================== */
@@ -59,12 +54,10 @@
 .superadmin-backup-grid {
   display: grid;
 
-  grid-template-columns:
-    repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 
   gap: 20px;
 }
-
 
 /* =====================================================
    CARD
@@ -82,10 +75,8 @@
 
   background: #ffffff;
 
-  box-shadow:
-    5px 5px 0 rgba(25, 135, 84, 0.09);
+  box-shadow: 5px 5px 0 rgba(25, 135, 84, 0.09);
 }
-
 
 .superadmin-backup-card-accent {
   height: 5px;
@@ -93,11 +84,9 @@
   background: #198754;
 }
 
-
 .superadmin-backup-card-body {
   padding: 25px;
 }
-
 
 .superadmin-backup-label {
   display: inline-flex;
@@ -120,7 +109,6 @@
   text-transform: uppercase;
 }
 
-
 .superadmin-backup-card h2 {
   margin: 0 0 8px;
 
@@ -129,7 +117,6 @@
   font-size: 18px;
   font-weight: 900;
 }
-
 
 .superadmin-backup-card p {
   min-height: 42px;
@@ -143,7 +130,6 @@
 
   line-height: 1.6;
 }
-
 
 /* =====================================================
    NOTE
@@ -167,7 +153,6 @@
   line-height: 1.5;
 }
 
-
 /* =====================================================
    FILE INPUT
 ===================================================== */
@@ -180,14 +165,12 @@
   margin-bottom: 12px;
 }
 
-
 .superadmin-restore-file > span {
   color: #606771;
 
   font-size: 10px;
   font-weight: 800;
 }
-
 
 .superadmin-restore-file input {
   width: 100%;
@@ -206,7 +189,6 @@
   font-size: 10px;
 }
 
-
 .superadmin-selected-file {
   margin-bottom: 14px;
 
@@ -223,7 +205,6 @@
 
   overflow-wrap: anywhere;
 }
-
 
 /* =====================================================
    BUTTONS
@@ -252,13 +233,11 @@
     filter 150ms ease;
 }
 
-
 .superadmin-backup-primary {
   background: #198754;
 
   color: #ffffff;
 }
-
 
 .superadmin-backup-restore {
   background: #343a40;
@@ -266,14 +245,12 @@
   color: #ffffff;
 }
 
-
 .superadmin-backup-primary:hover,
 .superadmin-backup-restore:not(:disabled):hover {
   filter: brightness(1.05);
 
   transform: translateY(-1px);
 }
-
 
 .superadmin-backup-restore:disabled {
   background: #c8ccd0;
@@ -283,31 +260,24 @@
   cursor: not-allowed;
 }
 
-
 /* =====================================================
    RESPONSIVE
 ===================================================== */
 
 @media (max-width: 800px) {
-
   .superadmin-backup-grid {
     grid-template-columns: 1fr;
   }
-
 }
 
-
 @media (max-width: 550px) {
-
   .superadmin-backup-header,
   .superadmin-backup-card-body {
     padding: 18px;
   }
 
-
   .superadmin-backup-primary,
   .superadmin-backup-restore {
     width: 100%;
   }
-
 }

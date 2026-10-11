@@ -1,65 +1,59 @@
-import { useEffect, useMemo, useState } from 'react';
-import Swal from 'sweetalert2';
+import { useEffect, useMemo, useState } from "react";
+import Swal from "sweetalert2";
 
 import {
   deleteQuizModeById,
   fetchQuizModes,
   saveQuizMode,
-} from '../../../services/quizModeApi.js';
+} from "../../../services/quizModeApi.js";
 
-import './SuperAdminModesManagement.css';
-
+import "./SuperAdminModesManagement.css";
 
 const emptyForm = {
-  title: '',
-  description: '',
-  route: '',
-  image: '',
+  title: "",
+  description: "",
+  route: "",
+  image: "",
 };
-
 
 /* =====================================================
    MODE CODE
 ===================================================== */
 
 function getModeCode(mode) {
-  return `MD${String(mode.id).padStart(7, '0')}`;
+  return `MD${String(mode.id).padStart(7, "0")}`;
 }
-
 
 /* =====================================================
    SWEETALERT HELPERS
 ===================================================== */
 
-function showSuccess(message, title = 'Success') {
+function showSuccess(message, title = "Success") {
   return Swal.fire({
-    icon: 'success',
+    icon: "success",
     title,
     text: message,
-    confirmButtonText: 'OK',
+    confirmButtonText: "OK",
   });
 }
 
-
-function showError(message, title = 'Error') {
+function showError(message, title = "Error") {
   return Swal.fire({
-    icon: 'error',
+    icon: "error",
     title,
     text: message,
-    confirmButtonText: 'OK',
+    confirmButtonText: "OK",
   });
 }
 
-
-function showWarning(message, title = 'Warning') {
+function showWarning(message, title = "Warning") {
   return Swal.fire({
-    icon: 'warning',
+    icon: "warning",
     title,
     text: message,
-    confirmButtonText: 'OK',
+    confirmButtonText: "OK",
   });
 }
-
 
 /* =====================================================
    COMPONENT
@@ -67,28 +61,21 @@ function showWarning(message, title = 'Warning') {
 
 export default function SuperAdminModesManagement() {
   const [modes, setModes] = useState([]);
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
 
   const [form, setForm] = useState(emptyForm);
 
-  const [editingMode, setEditingMode] =
-    useState(null);
+  const [editingMode, setEditingMode] = useState(null);
 
-  const [viewMode, setViewMode] =
-    useState(null);
+  const [viewMode, setViewMode] = useState(null);
 
-  const [formOpen, setFormOpen] =
-    useState(false);
+  const [formOpen, setFormOpen] = useState(false);
 
-  const [loading, setLoading] =
-    useState(true);
+  const [loading, setLoading] = useState(true);
 
-  const [saving, setSaving] =
-    useState(false);
+  const [saving, setSaving] = useState(false);
 
-  const [deletingModeId, setDeletingModeId] =
-    useState(null);
-
+  const [deletingModeId, setDeletingModeId] = useState(null);
 
   /* =====================================================
      LOAD MODES
@@ -101,29 +88,21 @@ export default function SuperAdminModesManagement() {
       try {
         setLoading(true);
 
-        const loadedModes =
-          await fetchQuizModes();
+        const loadedModes = await fetchQuizModes();
 
         if (active) {
-          setModes(
-            Array.isArray(loadedModes)
-              ? loadedModes
-              : []
-          );
+          setModes(Array.isArray(loadedModes) ? loadedModes : []);
         }
       } catch (error) {
-        console.error(
-          'Load modes error:',
-          error
-        );
+        console.error("Load modes error:", error);
 
         if (active) {
           setModes([]);
 
           await showError(
             error.message ||
-              'Could not load quiz modes. Please make sure the backend server is running.',
-            'Could Not Load Modes'
+              "Could not load quiz modes. Please make sure the backend server is running.",
+            "Could Not Load Modes",
           );
         }
       } finally {
@@ -140,39 +119,27 @@ export default function SuperAdminModesManagement() {
     };
   }, []);
 
-
   /* =====================================================
      SEARCH
   ===================================================== */
 
   const filteredModes = useMemo(() => {
-    const search = query
-      .trim()
-      .toLowerCase();
+    const search = query.trim().toLowerCase();
 
     if (!search) {
       return modes;
     }
 
     return modes.filter((mode) => {
-      const modeCode =
-        getModeCode(mode).toLowerCase();
+      const modeCode = getModeCode(mode).toLowerCase();
 
-      const title = String(
-        mode.title || ''
-      ).toLowerCase();
+      const title = String(mode.title || "").toLowerCase();
 
-      const description = String(
-        mode.description || ''
-      ).toLowerCase();
+      const description = String(mode.description || "").toLowerCase();
 
-      const route = String(
-        mode.route || ''
-      ).toLowerCase();
+      const route = String(mode.route || "").toLowerCase();
 
-      const image = String(
-        mode.image || ''
-      ).toLowerCase();
+      const image = String(mode.image || "").toLowerCase();
 
       return (
         modeCode.includes(search) ||
@@ -183,7 +150,6 @@ export default function SuperAdminModesManagement() {
       );
     });
   }, [modes, query]);
-
 
   /* =====================================================
      OPEN ADD MODE
@@ -199,7 +165,6 @@ export default function SuperAdminModesManagement() {
     setFormOpen(true);
   };
 
-
   /* =====================================================
      OPEN EDIT MODE
   ===================================================== */
@@ -212,15 +177,14 @@ export default function SuperAdminModesManagement() {
     setEditingMode(mode);
 
     setForm({
-      title: mode.title || '',
-      description: mode.description || '',
-      route: mode.route || '',
-      image: mode.image || '',
+      title: mode.title || "",
+      description: mode.description || "",
+      route: mode.route || "",
+      image: mode.image || "",
     });
 
     setFormOpen(true);
   };
-
 
   /* =====================================================
      CLOSE FORM
@@ -236,7 +200,6 @@ export default function SuperAdminModesManagement() {
     setForm(emptyForm);
   };
 
-
   /* =====================================================
      SAVE MODE
   ===================================================== */
@@ -249,52 +212,40 @@ export default function SuperAdminModesManagement() {
     }
 
     const title = form.title.trim();
-    const description =
-      form.description.trim();
+    const description = form.description.trim();
     const route = form.route.trim();
     const image = form.image.trim();
-
 
     /* -------------------------
        VALIDATION
     ------------------------- */
 
     if (!title) {
-      await showWarning(
-        'Mode title is required.',
-        'Missing Title'
-      );
+      await showWarning("Mode title is required.", "Missing Title");
 
       return;
     }
 
     if (!description) {
-      await showWarning(
-        'Mode description is required.',
-        'Missing Description'
-      );
+      await showWarning("Mode description is required.", "Missing Description");
 
       return;
     }
 
     if (!route) {
-      await showWarning(
-        'Mode route is required.',
-        'Missing Route'
-      );
+      await showWarning("Mode route is required.", "Missing Route");
 
       return;
     }
 
-    if (!route.startsWith('/')) {
+    if (!route.startsWith("/")) {
       await showWarning(
         'The route must start with "/". Example: /flashcards',
-        'Invalid Route'
+        "Invalid Route",
       );
 
       return;
     }
-
 
     const payload = {
       title,
@@ -303,7 +254,6 @@ export default function SuperAdminModesManagement() {
       image,
     };
 
-
     /* -------------------------
        SAVE
     ------------------------- */
@@ -311,16 +261,14 @@ export default function SuperAdminModesManagement() {
     try {
       setSaving(true);
 
-      const savedMode =
-        await saveQuizMode(
-          editingMode
-            ? {
-                ...editingMode,
-                ...payload,
-              }
-            : payload
-        );
-
+      const savedMode = await saveQuizMode(
+        editingMode
+          ? {
+              ...editingMode,
+              ...payload,
+            }
+          : payload,
+      );
 
       /* -------------------------
          UPDATE TABLE
@@ -329,18 +277,12 @@ export default function SuperAdminModesManagement() {
       setModes((current) =>
         editingMode
           ? current.map((mode) =>
-              String(mode.id) ===
-              String(savedMode.id)
-                ? savedMode
-                : mode
+              String(mode.id) === String(savedMode.id) ? savedMode : mode,
             )
-          : [savedMode, ...current]
+          : [savedMode, ...current],
       );
 
-
-      const wasEditing =
-        Boolean(editingMode);
-
+      const wasEditing = Boolean(editingMode);
 
       /* -------------------------
          CLOSE MODAL
@@ -350,7 +292,6 @@ export default function SuperAdminModesManagement() {
       setEditingMode(null);
       setForm(emptyForm);
 
-
       /* -------------------------
          SUCCESS FEEDBACK
       ------------------------- */
@@ -359,68 +300,52 @@ export default function SuperAdminModesManagement() {
         wasEditing
           ? `"${savedMode.title}" was updated successfully.`
           : `"${savedMode.title}" was created successfully.`,
-        wasEditing
-          ? 'Mode Updated'
-          : 'Mode Created'
+        wasEditing ? "Mode Updated" : "Mode Created",
       );
     } catch (error) {
-      console.error(
-        'Save mode error:',
-        error
-      );
+      console.error("Save mode error:", error);
 
       await showError(
-        error.message ||
-          'The mode could not be saved.',
-        editingMode
-          ? 'Update Failed'
-          : 'Create Failed'
+        error.message || "The mode could not be saved.",
+        editingMode ? "Update Failed" : "Create Failed",
       );
     } finally {
       setSaving(false);
     }
   };
 
-
   /* =====================================================
      DELETE MODE
   ===================================================== */
 
   const deleteMode = async (mode) => {
-    if (
-      deletingModeId !== null ||
-      saving
-    ) {
+    if (deletingModeId !== null || saving) {
       return;
     }
-
 
     /* -------------------------
        CONFIRMATION
     ------------------------- */
 
     const result = await Swal.fire({
-      icon: 'warning',
+      icon: "warning",
 
-      title: 'Delete Mode?',
+      title: "Delete Mode?",
 
-      text:
-        `Are you sure you want to delete "${mode.title}"?`,
+      text: `Are you sure you want to delete "${mode.title}"?`,
 
       showCancelButton: true,
 
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: "Delete",
+      cancelButtonText: "Cancel",
 
       reverseButtons: true,
       focusCancel: true,
     });
 
-
     if (!result.isConfirmed) {
       return;
     }
-
 
     /* -------------------------
        DELETE
@@ -429,36 +354,23 @@ export default function SuperAdminModesManagement() {
     try {
       setDeletingModeId(mode.id);
 
-      await deleteQuizModeById(
-        mode.id
-      );
-
+      await deleteQuizModeById(mode.id);
 
       /* -------------------------
          REMOVE FROM TABLE
       ------------------------- */
 
       setModes((current) =>
-        current.filter(
-          (item) =>
-            String(item.id) !==
-            String(mode.id)
-        )
+        current.filter((item) => String(item.id) !== String(mode.id)),
       );
-
 
       /* -------------------------
          CLOSE VIEW IF OPEN
       ------------------------- */
 
-      if (
-        viewMode &&
-        String(viewMode.id) ===
-          String(mode.id)
-      ) {
+      if (viewMode && String(viewMode.id) === String(mode.id)) {
         setViewMode(null);
       }
-
 
       /* -------------------------
          SUCCESS
@@ -466,24 +378,19 @@ export default function SuperAdminModesManagement() {
 
       await showSuccess(
         `"${mode.title}" was deleted successfully.`,
-        'Mode Deleted'
+        "Mode Deleted",
       );
     } catch (error) {
-      console.error(
-        'Delete mode error:',
-        error
-      );
+      console.error("Delete mode error:", error);
 
       await showError(
-        error.message ||
-          'The mode could not be deleted.',
-        'Delete Failed'
+        error.message || "The mode could not be deleted.",
+        "Delete Failed",
       );
     } finally {
       setDeletingModeId(null);
     }
   };
-
 
   /* =====================================================
      RENDER
@@ -491,7 +398,6 @@ export default function SuperAdminModesManagement() {
 
   return (
     <div className="admin-page feature-page mode-management-page">
-
       {/* =================================================
           HEADER
       ================================================= */}
@@ -500,10 +406,7 @@ export default function SuperAdminModesManagement() {
         <div>
           <h1>Mode Management</h1>
 
-          <p>
-            Create and manage practice modes
-            for PuffyBrain users.
-          </p>
+          <p>Create and manage practice modes for PuffyBrain users.</p>
         </div>
 
         <button
@@ -516,7 +419,6 @@ export default function SuperAdminModesManagement() {
         </button>
       </div>
 
-
       {/* =================================================
           SEARCH
       ================================================= */}
@@ -524,13 +426,10 @@ export default function SuperAdminModesManagement() {
       <div className="mode-search">
         <input
           value={query}
-          onChange={(event) =>
-            setQuery(event.target.value)
-          }
+          onChange={(event) => setQuery(event.target.value)}
           placeholder="Search by ID, title, description, or route..."
         />
       </div>
-
 
       {/* =================================================
           TABLE
@@ -551,157 +450,95 @@ export default function SuperAdminModesManagement() {
           <tbody>
             {loading ? (
               <tr>
-                <td
-                  className="feature-empty"
-                  colSpan="5"
-                >
+                <td className="feature-empty" colSpan="5">
                   Loading modes...
                 </td>
               </tr>
             ) : filteredModes.length === 0 ? (
               <tr>
-                <td
-                  className="feature-empty"
-                  colSpan="5"
-                >
+                <td className="feature-empty" colSpan="5">
                   {query.trim()
-                    ? 'No modes match your search.'
-                    : 'No modes found.'}
+                    ? "No modes match your search."
+                    : "No modes found."}
                 </td>
               </tr>
             ) : (
-              filteredModes.map(
-                (mode) => {
-                  const deleting =
-                    String(
-                      deletingModeId
-                    ) ===
-                    String(mode.id);
+              filteredModes.map((mode) => {
+                const deleting = String(deletingModeId) === String(mode.id);
 
-                  return (
-                    <tr key={mode.id}>
-                      <td className="mode-id">
-                        {getModeCode(
-                          mode
-                        )}
-                      </td>
+                return (
+                  <tr key={mode.id}>
+                    <td className="mode-id">{getModeCode(mode)}</td>
 
-                      <td>
-                        {mode.title}
-                      </td>
+                    <td>{mode.title}</td>
 
-                      <td>
-                        {mode.description}
-                      </td>
+                    <td>{mode.description}</td>
 
-                      <td>
-                        {mode.route}
-                      </td>
+                    <td>{mode.route}</td>
 
-                      <td>
-                        <div className="mode-actions">
+                    <td>
+                      <div className="mode-actions">
+                        <button
+                          className="view-btn"
+                          type="button"
+                          disabled={deleting}
+                          onClick={() => setViewMode(mode)}
+                        >
+                          View
+                        </button>
 
-                          <button
-                            className="view-btn"
-                            type="button"
-                            disabled={
-                              deleting
-                            }
-                            onClick={() =>
-                              setViewMode(
-                                mode
-                              )
-                            }
-                          >
-                            View
-                          </button>
+                        <button
+                          className="edit-btn"
+                          type="button"
+                          disabled={deleting || saving}
+                          onClick={() => openEdit(mode)}
+                        >
+                          Edit
+                        </button>
 
-                          <button
-                            className="edit-btn"
-                            type="button"
-                            disabled={
-                              deleting ||
-                              saving
-                            }
-                            onClick={() =>
-                              openEdit(
-                                mode
-                              )
-                            }
-                          >
-                            Edit
-                          </button>
-
-                          <button
-                            className="delete-btn"
-                            type="button"
-                            disabled={
-                              deleting
-                            }
-                            onClick={() =>
-                              deleteMode(
-                                mode
-                              )
-                            }
-                          >
-                            {deleting
-                              ? 'Deleting...'
-                              : 'Delete'}
-                          </button>
-
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                }
-              )
+                        <button
+                          className="delete-btn"
+                          type="button"
+                          disabled={deleting}
+                          onClick={() => deleteMode(mode)}
+                        >
+                          {deleting ? "Deleting..." : "Delete"}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>
       </div>
-
 
       {/* =================================================
           ADD / EDIT MODAL
       ================================================= */}
 
       {formOpen && (
-        <div
-          className="feature-modal-backdrop"
-          onClick={closeForm}
-        >
+        <div className="feature-modal-backdrop" onClick={closeForm}>
           <form
             className="feature-modal"
             onSubmit={saveMode}
-            onClick={(event) =>
-              event.stopPropagation()
-            }
+            onClick={(event) => event.stopPropagation()}
           >
-            <h2>
-              {editingMode
-                ? 'Edit Mode'
-                : 'Add New Mode'}
-            </h2>
-
+            <h2>{editingMode ? "Edit Mode" : "Add New Mode"}</h2>
 
             {/* TITLE */}
 
             <label className="feature-field">
-              <span>
-                Title
-              </span>
+              <span>Title</span>
 
               <input
                 value={form.title}
                 onChange={(event) =>
-                  setForm(
-                    (current) => ({
-                      ...current,
-                      title:
-                        event.target
-                          .value,
-                    })
-                  )
+                  setForm((current) => ({
+                    ...current,
+                    title: event.target.value,
+                  }))
                 }
                 placeholder="Mode title"
                 required
@@ -709,27 +546,18 @@ export default function SuperAdminModesManagement() {
               />
             </label>
 
-
             {/* DESCRIPTION */}
 
             <label className="feature-field">
-              <span>
-                Description
-              </span>
+              <span>Description</span>
 
               <textarea
-                value={
-                  form.description
-                }
+                value={form.description}
                 onChange={(event) =>
-                  setForm(
-                    (current) => ({
-                      ...current,
-                      description:
-                        event.target
-                          .value,
-                    })
-                  )
+                  setForm((current) => ({
+                    ...current,
+                    description: event.target.value,
+                  }))
                 }
                 placeholder="Mode description"
                 required
@@ -737,25 +565,18 @@ export default function SuperAdminModesManagement() {
               />
             </label>
 
-
             {/* ROUTE */}
 
             <label className="feature-field">
-              <span>
-                Route
-              </span>
+              <span>Route</span>
 
               <input
                 value={form.route}
                 onChange={(event) =>
-                  setForm(
-                    (current) => ({
-                      ...current,
-                      route:
-                        event.target
-                          .value,
-                    })
-                  )
+                  setForm((current) => ({
+                    ...current,
+                    route: event.target.value,
+                  }))
                 }
                 placeholder="/flashcards-tutorial"
                 required
@@ -763,36 +584,27 @@ export default function SuperAdminModesManagement() {
               />
             </label>
 
-
             {/* IMAGE */}
 
             <label className="feature-field">
-              <span>
-                Image Path
-              </span>
+              <span>Image Path</span>
 
               <input
                 value={form.image}
                 onChange={(event) =>
-                  setForm(
-                    (current) => ({
-                      ...current,
-                      image:
-                        event.target
-                          .value,
-                    })
-                  )
+                  setForm((current) => ({
+                    ...current,
+                    image: event.target.value,
+                  }))
                 }
                 placeholder="/images/flashcard.png"
                 disabled={saving}
               />
             </label>
 
-
             {/* ACTIONS */}
 
             <div className="feature-modal-actions">
-
               <button
                 type="button"
                 className="secondary-feature-btn"
@@ -808,17 +620,15 @@ export default function SuperAdminModesManagement() {
                 disabled={saving}
               >
                 {saving
-                  ? 'Saving...'
+                  ? "Saving..."
                   : editingMode
-                    ? 'Update Mode'
-                    : 'Save Mode'}
+                    ? "Update Mode"
+                    : "Save Mode"}
               </button>
-
             </div>
           </form>
         </div>
       )}
-
 
       {/* =================================================
           VIEW MODAL
@@ -827,92 +637,58 @@ export default function SuperAdminModesManagement() {
       {viewMode && (
         <div
           className="feature-modal-backdrop"
-          onClick={() =>
-            setViewMode(null)
-          }
+          onClick={() => setViewMode(null)}
         >
           <section
             className="feature-modal"
-            onClick={(event) =>
-              event.stopPropagation()
-            }
+            onClick={(event) => event.stopPropagation()}
           >
-            <h2>
-              View Mode
-            </h2>
+            <h2>View Mode</h2>
 
             <dl className="feature-details">
-
               <div>
                 <dt>ID</dt>
 
-                <dd>
-                  {getModeCode(
-                    viewMode
-                  )}
-                </dd>
+                <dd>{getModeCode(viewMode)}</dd>
               </div>
-
 
               <div>
                 <dt>Title</dt>
 
-                <dd>
-                  {viewMode.title}
-                </dd>
+                <dd>{viewMode.title}</dd>
               </div>
-
 
               <div>
-                <dt>
-                  Description
-                </dt>
+                <dt>Description</dt>
 
-                <dd>
-                  {
-                    viewMode.description
-                  }
-                </dd>
+                <dd>{viewMode.description}</dd>
               </div>
-
 
               <div>
                 <dt>Route</dt>
 
-                <dd>
-                  {viewMode.route}
-                </dd>
+                <dd>{viewMode.route}</dd>
               </div>
-
 
               <div>
                 <dt>Image</dt>
 
-                <dd>
-                  {viewMode.image ||
-                    'Default image'}
-                </dd>
+                <dd>{viewMode.image || "Default image"}</dd>
               </div>
-
             </dl>
-
 
             <div className="feature-modal-actions">
               <button
                 type="button"
                 className="primary-feature-btn"
-                onClick={() =>
-                  setViewMode(null)
-                }
+                onClick={() => setViewMode(null)}
               >
                 Close
               </button>
             </div>
-
           </section>
         </div>
       )}
-
     </div>
   );
 }

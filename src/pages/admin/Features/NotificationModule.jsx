@@ -90,7 +90,7 @@ export default function NotificationManagement() {
 
       const res = await fetch(
         `${API_BASE}/getAdminNotifications.php?admin_id=${adminId || ""}`,
-        { credentials: "include" }
+        { credentials: "include" },
       );
 
       const data = await res.json();
@@ -136,7 +136,7 @@ export default function NotificationManagement() {
 
     const handler = (e) => {
       const insideDropdown = e.target.closest(
-        '[class*="notificationWrapper"], [class*="customSort"]'
+        '[class*="notificationWrapper"], [class*="customSort"]',
       );
 
       if (!insideDropdown) {
@@ -389,10 +389,18 @@ export default function NotificationManagement() {
       const q = search.toLowerCase();
 
       return (
-        String(item.title || "").toLowerCase().includes(q) ||
-        String(item.message || "").toLowerCase().includes(q) ||
-        String(item.recipient_type || "").toLowerCase().includes(q) ||
-        String(item.created_by || "").toLowerCase().includes(q)
+        String(item.title || "")
+          .toLowerCase()
+          .includes(q) ||
+        String(item.message || "")
+          .toLowerCase()
+          .includes(q) ||
+        String(item.recipient_type || "")
+          .toLowerCase()
+          .includes(q) ||
+        String(item.created_by || "")
+          .toLowerCase()
+          .includes(q)
       );
     })
     .sort((a, b) => {
@@ -416,12 +424,12 @@ export default function NotificationManagement() {
     });
 
   const totalPages = Math.ceil(
-    filteredNotifications.length / notificationsPerPage
+    filteredNotifications.length / notificationsPerPage,
   );
 
   const paginatedNotifications = filteredNotifications.slice(
     (currentPage - 1) * notificationsPerPage,
-    currentPage * notificationsPerPage
+    currentPage * notificationsPerPage,
   );
 
   return (

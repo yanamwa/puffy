@@ -1,28 +1,30 @@
 import {
   getProfessorCourseOwner,
   readProfessorCourses,
-} from '../../professor/professorData.js';
-import { API_BASE } from '../../../config.js';
-import { fetchCourse, fetchCourses } from '../../../services/courseApi.js';
+} from "../../professor/professorData.js";
+import { API_BASE } from "../../../config.js";
+import { fetchCourse, fetchCourses } from "../../../services/courseApi.js";
 
-export const STUDENT_ENROLLED_COURSES_KEY = 'student-enrolled-courses';
-export const STUDENT_ENROLLED_COURSES_EVENT = 'student-enrolled-courses-updated';
-export const STUDENT_READING_PROGRESS_KEY = 'student-reading-progress';
-export const STUDENT_READING_PROGRESS_EVENT = 'student-reading-progress-updated';
+export const STUDENT_ENROLLED_COURSES_KEY = "student-enrolled-courses";
+export const STUDENT_ENROLLED_COURSES_EVENT =
+  "student-enrolled-courses-updated";
+export const STUDENT_READING_PROGRESS_KEY = "student-reading-progress";
+export const STUDENT_READING_PROGRESS_EVENT =
+  "student-reading-progress-updated";
 
 function getCourseKey(course) {
-  return String(course?.id || course?.course_id || course?.code || '').trim();
+  return String(course?.id || course?.course_id || course?.code || "").trim();
 }
 
 function isEnabled(value) {
-  return value === true || value === 1 || value === '1' || value === 'true';
+  return value === true || value === 1 || value === "1" || value === "true";
 }
 
 function courseMatchesEnrollment(course, enrolledKeys) {
   return (
-    enrolledKeys.has(String(course?.id || '').trim()) ||
-    enrolledKeys.has(String(course?.course_id || '').trim()) ||
-    enrolledKeys.has(String(course?.code || '').trim())
+    enrolledKeys.has(String(course?.id || "").trim()) ||
+    enrolledKeys.has(String(course?.course_id || "").trim()) ||
+    enrolledKeys.has(String(course?.code || "").trim())
   );
 }
 
@@ -33,8 +35,10 @@ function filterCourses(courses, params = {}) {
 
   return courses
     .filter((course) => includeArchived || !course.archived)
-    .filter((course) => !publicOnly || (course.visibility || 'public') === 'public')
-    .filter((course) => !publishedOnly || course.status === 'published');
+    .filter(
+      (course) => !publicOnly || (course.visibility || "public") === "public",
+    )
+    .filter((course) => !publishedOnly || course.status === "published");
 }
 
 async function loadProfessorCourses(params = {}, options = {}) {
@@ -46,7 +50,7 @@ async function loadProfessorCourses(params = {}, options = {}) {
       throw error;
     }
 
-    console.error('Student course API error:', error);
+    console.error("Student course API error:", error);
     return filterCourses(readProfessorCourses(), params);
   }
 }
@@ -54,12 +58,12 @@ async function loadProfessorCourses(params = {}, options = {}) {
 function getStoredUser() {
   try {
     const storedUser =
-      localStorage.getItem('puffy-user') ||
-      localStorage.getItem('user') ||
-      localStorage.getItem('currentUser') ||
-      sessionStorage.getItem('puffy-user') ||
-      sessionStorage.getItem('user') ||
-      sessionStorage.getItem('currentUser');
+      localStorage.getItem("puffy-user") ||
+      localStorage.getItem("user") ||
+      localStorage.getItem("currentUser") ||
+      sessionStorage.getItem("puffy-user") ||
+      sessionStorage.getItem("user") ||
+      sessionStorage.getItem("currentUser");
 
     return storedUser ? JSON.parse(storedUser) : null;
   } catch {
@@ -69,20 +73,26 @@ function getStoredUser() {
 
 function getStoredToken() {
   return (
-    localStorage.getItem('puffy-token') ||
-    localStorage.getItem('token') ||
-    localStorage.getItem('authToken') ||
-    sessionStorage.getItem('puffy-token') ||
-    sessionStorage.getItem('token') ||
-    sessionStorage.getItem('authToken') ||
-    ''
+    localStorage.getItem("puffy-token") ||
+    localStorage.getItem("token") ||
+    localStorage.getItem("authToken") ||
+    sessionStorage.getItem("puffy-token") ||
+    sessionStorage.getItem("token") ||
+    sessionStorage.getItem("authToken") ||
+    ""
   );
 }
 
 function getStoredUserId() {
   const user = getStoredUser() || {};
 
-  return user.id || user.userId || user.user_id || localStorage.getItem('user_id') || null;
+  return (
+    user.id ||
+    user.userId ||
+    user.user_id ||
+    localStorage.getItem("user_id") ||
+    null
+  );
 }
 
 function getStudentEnrollmentStorageKey() {
@@ -90,9 +100,9 @@ function getStudentEnrollmentStorageKey() {
   const accountKey =
     getStoredUserId() ||
     user.email ||
-    localStorage.getItem('user_email') ||
-    localStorage.getItem('email') ||
-    'anonymous';
+    localStorage.getItem("user_email") ||
+    localStorage.getItem("email") ||
+    "anonymous";
 
   return `${STUDENT_ENROLLED_COURSES_KEY}:${String(accountKey).trim().toLowerCase()}`;
 }
@@ -100,7 +110,7 @@ function getStudentEnrollmentStorageKey() {
 function getAuthHeaders() {
   const token = getStoredToken();
   const headers = {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   };
 
   if (token) {
@@ -113,7 +123,7 @@ function getAuthHeaders() {
 async function readJsonResponse(response, fallbackMessage) {
   const data = await response.json().catch(() => ({
     success: false,
-    message: 'Server returned an invalid response.',
+    message: "Server returned an invalid response.",
   }));
 
   if (!response.ok || data.success === false) {
@@ -136,24 +146,27 @@ async function fetchEnrolledCoursesRequest(params = {}) {
   const query = new URLSearchParams();
 
   if (userId) {
-    query.set('userId', userId);
+    query.set("userId", userId);
   }
 
   Object.entries({ summaryOnly: true, ...params }).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== '') {
+    if (value !== undefined && value !== null && value !== "") {
       query.set(key, value);
     }
   });
 
   const response = await fetch(
-    `${API_BASE}/courses/enrolled${query.toString() ? `?${query}` : ''}`,
+    `${API_BASE}/courses/enrolled${query.toString() ? `?${query}` : ""}`,
     {
-      method: 'GET',
-      credentials: 'include',
+      method: "GET",
+      credentials: "include",
       headers: getAuthHeaders(),
-    }
+    },
   );
-  const data = await readJsonResponse(response, 'Could not load enrolled courses.');
+  const data = await readJsonResponse(
+    response,
+    "Could not load enrolled courses.",
+  );
 
   return Array.isArray(data.courses) ? data.courses : [];
 }
@@ -167,17 +180,18 @@ async function enrollCourseRequest(course) {
   }
 
   const response = await fetch(`${API_BASE}/courses/enroll?summaryOnly=true`, {
-    method: 'POST',
-    credentials: 'include',
+    method: "POST",
+    credentials: "include",
     headers: getAuthHeaders(),
     body: JSON.stringify({
       userId,
       courseId: course?.id || course?.course_id || null,
-      courseCode: course?.courseCode || course?.course_code || course?.code || '',
+      courseCode:
+        course?.courseCode || course?.course_code || course?.code || "",
       summaryOnly: true,
     }),
   });
-  const data = await readJsonResponse(response, 'Could not enroll in course.');
+  const data = await readJsonResponse(response, "Could not enroll in course.");
 
   return data.course || null;
 }
@@ -186,7 +200,7 @@ function dispatchEnrollmentUpdate(course) {
   window.dispatchEvent(
     new CustomEvent(STUDENT_ENROLLED_COURSES_EVENT, {
       detail: { course },
-    })
+    }),
   );
 }
 
@@ -196,7 +210,7 @@ function getProfessorCourseDepartment(course) {
     course.professor_department ||
     course.database_professor_department ||
     course.department ||
-    ''
+    ""
   );
 }
 
@@ -207,7 +221,7 @@ function getProfessorCourseProfileImage(course) {
     course.database_professor_profile_image ||
     course.professorAvatar ||
     course.professor_avatar ||
-    ''
+    ""
   );
 }
 
@@ -218,16 +232,24 @@ function clampProgress(value) {
 }
 
 function getProgressKey(contentId) {
-  return String(contentId || '').trim();
+  return String(contentId || "").trim();
 }
 
-export function getStudentProgressStorageKey(baseKey = STUDENT_READING_PROGRESS_KEY) {
+export function getStudentProgressStorageKey(
+  baseKey = STUDENT_READING_PROGRESS_KEY,
+) {
   const user = getStoredUser() || {};
   const userId = getStoredUserId();
-  const email = user.email || localStorage.getItem('user_email') || localStorage.getItem('email');
-  const accountKey = userId != null && String(userId).trim()
-    ? `id:${String(userId).trim()}`
-    : email ? `email:${String(email).trim().toLowerCase()}` : null;
+  const email =
+    user.email ||
+    localStorage.getItem("user_email") ||
+    localStorage.getItem("email");
+  const accountKey =
+    userId != null && String(userId).trim()
+      ? `id:${String(userId).trim()}`
+      : email
+        ? `email:${String(email).trim().toLowerCase()}`
+        : null;
 
   return accountKey ? `${baseKey}:${encodeURIComponent(accountKey)}` : null;
 }
@@ -239,7 +261,9 @@ function readReadingProgressMap() {
     // Shared historical records have no owner and cannot be assigned safely.
     const saved = localStorage.getItem(storageKey);
     const parsed = saved ? JSON.parse(saved) : {};
-    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed)
+      ? parsed
+      : {};
   } catch {
     return {};
   }
@@ -247,7 +271,9 @@ function readReadingProgressMap() {
 
 function getLegacyLessonProgress(contentId) {
   try {
-    const storageKey = getStudentProgressStorageKey(`lessonProgress_${contentId}`);
+    const storageKey = getStudentProgressStorageKey(
+      `lessonProgress_${contentId}`,
+    );
     if (!storageKey) return 0;
     const saved = localStorage.getItem(storageKey);
     const parsed = saved ? JSON.parse(saved) : null;
@@ -259,7 +285,9 @@ function getLegacyLessonProgress(contentId) {
 
 function getLegacyModuleProgress(contentId, moduleIndex) {
   try {
-    const storageKey = getStudentProgressStorageKey(`lessonProgress_${contentId}_module_${moduleIndex}`);
+    const storageKey = getStudentProgressStorageKey(
+      `lessonProgress_${contentId}_module_${moduleIndex}`,
+    );
     if (!storageKey) return 0;
     const saved = localStorage.getItem(storageKey);
     const parsed = saved ? JSON.parse(saved) : null;
@@ -273,7 +301,7 @@ function getSavedModuleProgress(savedProgress, moduleIndex) {
   const moduleKey = String(moduleIndex);
   const moduleRecord = savedProgress?.modules?.[moduleKey];
   const moduleRecordProgress = clampProgress(
-    moduleRecord?.progress ?? moduleRecord?.moduleProgress
+    moduleRecord?.progress ?? moduleRecord?.moduleProgress,
   );
 
   if (moduleRecordProgress > 0) {
@@ -281,12 +309,12 @@ function getSavedModuleProgress(savedProgress, moduleIndex) {
   }
 
   const savedModuleIndex = Number(
-    savedProgress?.moduleIndex ?? savedProgress?.module_index
+    savedProgress?.moduleIndex ?? savedProgress?.module_index,
   );
 
   if (Number.isInteger(savedModuleIndex) && savedModuleIndex === moduleIndex) {
     return clampProgress(
-      savedProgress?.moduleProgress ?? savedProgress?.module_progress
+      savedProgress?.moduleProgress ?? savedProgress?.module_progress,
     );
   }
 
@@ -300,9 +328,7 @@ export function getStudentReadingProgress(contentId) {
   const progressMap = readReadingProgressMap();
   const savedProgress = progressMap[key];
   const progress = clampProgress(
-    typeof savedProgress === 'number'
-      ? savedProgress
-      : savedProgress?.progress
+    typeof savedProgress === "number" ? savedProgress : savedProgress?.progress,
   );
 
   return Math.max(progress, getLegacyLessonProgress(key));
@@ -315,10 +341,12 @@ export function saveStudentReadingProgress(contentId, progress, metadata = {}) {
 
   const progressMap = readReadingProgressMap();
   const currentRecord =
-    progressMap[key] && typeof progressMap[key] === 'object'
+    progressMap[key] && typeof progressMap[key] === "object"
       ? progressMap[key]
       : {};
-  const currentProgress = clampProgress(progressMap[key]?.progress ?? progressMap[key]);
+  const currentProgress = clampProgress(
+    progressMap[key]?.progress ?? progressMap[key],
+  );
   const nextProgress = Math.max(currentProgress, clampProgress(progress));
   const moduleIndex = Number(metadata.moduleIndex ?? metadata.module_index);
   const nextModules = {
@@ -329,15 +357,13 @@ export function saveStudentReadingProgress(contentId, progress, metadata = {}) {
     const moduleKey = String(moduleIndex);
     const currentModuleProgress = clampProgress(
       nextModules[moduleKey]?.progress ??
-        nextModules[moduleKey]?.moduleProgress
+        nextModules[moduleKey]?.moduleProgress,
     );
     const nextModuleProgress = Math.max(
       currentModuleProgress,
       clampProgress(
-        metadata.moduleProgress ??
-          metadata.module_progress ??
-          progress
-      )
+        metadata.moduleProgress ?? metadata.module_progress ?? progress,
+      ),
     );
 
     nextModules[moduleKey] = {
@@ -347,7 +373,7 @@ export function saveStudentReadingProgress(contentId, progress, metadata = {}) {
         metadata.moduleTitle ||
         metadata.module_title ||
         nextModules[moduleKey]?.moduleTitle ||
-        '',
+        "",
       progress: nextModuleProgress,
       updatedAt: new Date().toISOString(),
     };
@@ -369,13 +395,17 @@ export function saveStudentReadingProgress(contentId, progress, metadata = {}) {
   window.dispatchEvent(
     new CustomEvent(STUDENT_READING_PROGRESS_EVENT, {
       detail: { contentId: key, progress: nextProgress },
-    })
+    }),
   );
 
   return nextProgress;
 }
 
-export function getStudentModuleReadingProgress(contentId, moduleIndex, moduleCount) {
+export function getStudentModuleReadingProgress(
+  contentId,
+  moduleIndex,
+  moduleCount,
+) {
   const key = getProgressKey(contentId);
   if (!key) return 0;
 
@@ -383,7 +413,7 @@ export function getStudentModuleReadingProgress(contentId, moduleIndex, moduleCo
   const savedProgress = progressMap[key];
   const exactModuleProgress = Math.max(
     getSavedModuleProgress(savedProgress, moduleIndex),
-    getLegacyModuleProgress(key, moduleIndex)
+    getLegacyModuleProgress(key, moduleIndex),
   );
 
   if (exactModuleProgress > 0) {
@@ -412,26 +442,31 @@ export function readStudentEnrollmentKeys() {
 
 export function saveStudentEnrollmentKeys(keys) {
   const uniqueKeys = [...new Set(keys.map(String).filter(Boolean))];
-  localStorage.setItem(getStudentEnrollmentStorageKey(), JSON.stringify(uniqueKeys));
+  localStorage.setItem(
+    getStudentEnrollmentStorageKey(),
+    JSON.stringify(uniqueKeys),
+  );
   return uniqueKeys;
 }
 
 export function getStudentCourseModules(course) {
-  const lessonPages = Array.isArray(course?.lessonPages) ? course.lessonPages : [];
+  const lessonPages = Array.isArray(course?.lessonPages)
+    ? course.lessonPages
+    : [];
 
   if (lessonPages.length) {
     return lessonPages.map((page, index) => ({
       id: `${getCourseKey(course)}-lesson-${index}`,
       title: page.title || `Lesson Page ${index + 1}`,
-      description: page.content || '',
+      description: page.content || "",
     }));
   }
 
   return [
     {
       id: `${getCourseKey(course)}-overview`,
-      title: 'Module Overview',
-      description: course?.summary || 'Start with the module overview.',
+      title: "Module Overview",
+      description: course?.summary || "Start with the module overview.",
     },
   ];
 }
@@ -442,13 +477,13 @@ export function normalizeStudentCourse(course) {
     course.courseName ||
     course.course_name ||
     course.subject ||
-    'Untitled course';
+    "Untitled course";
   const professorDepartment = getProfessorCourseDepartment(course);
 
   return {
     ...course,
     id: course.id || course.course_id,
-    code: course.code || 'COURSE',
+    code: course.code || "COURSE",
     title,
     courseName: course.courseName || title,
     course_name: course.course_name || title,
@@ -462,17 +497,25 @@ export function normalizeStudentCourse(course) {
 }
 
 export function findCourseByIdOrCode(value) {
-  const normalizedValue = String(value || '').trim().toLowerCase();
+  const normalizedValue = String(value || "")
+    .trim()
+    .toLowerCase();
 
   return readProfessorCourses().find((course) => {
-    const id = String(course.id || '').trim().toLowerCase();
-    const code = String(course.code || '').trim().toLowerCase();
+    const id = String(course.id || "")
+      .trim()
+      .toLowerCase();
+    const code = String(course.code || "")
+      .trim()
+      .toLowerCase();
     return id === normalizedValue || code === normalizedValue;
   });
 }
 
 export async function findCourseByIdOrCodeAsync(value) {
-  const normalizedValue = String(value || '').trim().toLowerCase();
+  const normalizedValue = String(value || "")
+    .trim()
+    .toLowerCase();
 
   if (!normalizedValue) return null;
 
@@ -484,10 +527,17 @@ export async function findCourseByIdOrCodeAsync(value) {
     }
   }
 
-  const courses = await loadProfessorCourses({ includeArchived: true, summaryOnly: true });
+  const courses = await loadProfessorCourses({
+    includeArchived: true,
+    summaryOnly: true,
+  });
   const matchedCourse = courses.find((course) => {
-    const id = String(course.id || course.course_id || '').trim().toLowerCase();
-    const code = String(course.code || '').trim().toLowerCase();
+    const id = String(course.id || course.course_id || "")
+      .trim()
+      .toLowerCase();
+    const code = String(course.code || "")
+      .trim()
+      .toLowerCase();
     return id === normalizedValue || code === normalizedValue;
   });
 
@@ -508,30 +558,44 @@ export async function findCourseByIdOrCodeAsync(value) {
 }
 
 export function findJoinableCourseByCode(code) {
-  const normalizedCode = String(code || '').trim().toLowerCase();
+  const normalizedCode = String(code || "")
+    .trim()
+    .toLowerCase();
 
   if (!normalizedCode) return null;
 
-  return readProfessorCourses().find((course) => (
-    !course.archived &&
-    course.status === 'published' &&
-    String(course.code || '').trim().toLowerCase() === normalizedCode
-  ));
+  return readProfessorCourses().find(
+    (course) =>
+      !course.archived &&
+      course.status === "published" &&
+      String(course.code || "")
+        .trim()
+        .toLowerCase() === normalizedCode,
+  );
 }
 
 export async function findJoinableCourseByCodeAsync(code) {
-  const normalizedCode = String(code || '').trim().toLowerCase();
+  const normalizedCode = String(code || "")
+    .trim()
+    .toLowerCase();
 
   if (!normalizedCode) return null;
 
-  const courses = await loadProfessorCourses({ published: true, summaryOnly: true });
+  const courses = await loadProfessorCourses({
+    published: true,
+    summaryOnly: true,
+  });
 
-  return courses.find((course) => (
-    !course.archived &&
-    course.status === 'published' &&
-    String(course.code || course.courseCode || course.course_code || '').trim().toLowerCase() ===
-      normalizedCode
-  )) || null;
+  return (
+    courses.find(
+      (course) =>
+        !course.archived &&
+        course.status === "published" &&
+        String(course.code || course.courseCode || course.course_code || "")
+          .trim()
+          .toLowerCase() === normalizedCode,
+    ) || null
+  );
 }
 
 export function enrollStudentInCourse(course) {
@@ -553,7 +617,7 @@ export async function enrollStudentInCourseAsync(course) {
     enrolledCourse = (await enrollCourseRequest(course)) || course;
   } catch (error) {
     if (error.status && error.status !== 401) {
-      console.warn('Course enrollment API fallback:', error.message);
+      console.warn("Course enrollment API fallback:", error.message);
     }
   }
 
@@ -594,7 +658,7 @@ export async function loadStudentEnrolledCourses() {
     }
   } catch (error) {
     if (error.status && error.status !== 401) {
-      console.warn('Enrolled courses API fallback:', error.message);
+      console.warn("Enrolled courses API fallback:", error.message);
     }
   }
 
@@ -617,29 +681,22 @@ export async function loadStudentArchivedCourses() {
     const response = await fetch(
       `${API_BASE}/courses/archived?summaryOnly=true`,
       {
-        method: 'GET',
-        credentials: 'include',
+        method: "GET",
+        credentials: "include",
         headers: getAuthHeaders(),
-      }
+      },
     );
 
     const data = await readJsonResponse(
       response,
-      'Could not load archived classes.'
+      "Could not load archived classes.",
     );
 
-    const archivedCourses = Array.isArray(data.courses)
-      ? data.courses
-      : [];
+    const archivedCourses = Array.isArray(data.courses) ? data.courses : [];
 
-    return archivedCourses.map(
-      normalizeStudentCourse
-    );
+    return archivedCourses.map(normalizeStudentCourse);
   } catch (error) {
-    console.error(
-      'Archived courses loading error:',
-      error
-    );
+    console.error("Archived courses loading error:", error);
 
     return [];
   }
@@ -648,8 +705,7 @@ export async function loadStudentArchivedCourses() {
 export function getPublicStudentCourses() {
   return readProfessorCourses()
     .filter((course) => !course.archived)
-    .filter((course) => course.status === 'published')
-    .filter((course) => (course.visibility || 'public') === 'public')
+    .filter((course) => course.status === "published")
     .map(normalizeStudentCourse);
 }
 
@@ -657,12 +713,11 @@ export async function loadPublicStudentCourses() {
   const userId = getStoredUserId();
   const courses = await loadProfessorCourses(
     {
-      public: true,
       published: true,
       summaryOnly: true,
       ...(userId ? { userId } : {}),
     },
-    { fallback: false }
+    { fallback: false },
   );
   return courses.map(normalizeStudentCourse);
 }

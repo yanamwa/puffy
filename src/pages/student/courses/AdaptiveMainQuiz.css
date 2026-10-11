@@ -1,0 +1,52 @@
+.adaptiveMainQuiz {
+  color: #294765;
+  padding: 24px;
+  background: #fff;
+  border: 1px solid #d2deeb;
+  border-radius: 12px;
+}
+.adaptiveMainQuiz p {
+  line-height: 1.6;
+}
+.adaptiveMainQuiz fieldset,
+.adaptiveMainQuiz article {
+  border: 1px solid #d2deeb;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 24px 0;
+}
+.adaptiveMainQuiz legend {
+  padding: 0 8px;
+  font-weight: 600;
+}
+.adaptiveMainQuiz label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  cursor: pointer;
+}
+.adaptiveMainQuiz input:not([type="radio"]) {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  border: 1px solid #b9cadd;
+  border-radius: 8px;
+  font: inherit;
+}
+.adaptiveMainQuiz button {
+  padding: 12px 20px;
+  border: 0;
+  border-radius: 8px;
+  color: white;
+  background: #537eaf;
+  font: inherit;
+  cursor: pointer;
+}
+.adaptiveMainQuiz button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+.adaptiveMainQuiz [role="alert"] {
+  color: #a12635;
+}

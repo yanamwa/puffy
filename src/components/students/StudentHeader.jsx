@@ -40,9 +40,7 @@ function resolveProfileImage(imagePath) {
     return imagePath;
   }
   const serverOrigin = API_BASE_URL.replace(/\/api\/?$/, "");
-  return `${serverOrigin}${
-    imagePath.startsWith("/") ? "" : "/"
-  }${imagePath}`;
+  return `${serverOrigin}${imagePath.startsWith("/") ? "" : "/"}${imagePath}`;
 }
 function getAuthToken() {
   return (
@@ -110,7 +108,7 @@ function normalizeNotification(notification) {
       notification.unread ??
       !(notification.isRead ?? notification.is_read ?? false),
     time: formatNotificationTime(
-      notification.createdAt || notification.created_at
+      notification.createdAt || notification.created_at,
     ),
     icon: getNotificationIcon(notification.type),
     source: notification.source || "user",
@@ -129,8 +127,7 @@ function escapeNotificationHtml(value = "") {
 }
 
 function getSweetAlertIcon(type = "") {
-  const normalizedType =
-    String(type || "").toLowerCase();
+  const normalizedType = String(type || "").toLowerCase();
 
   if (
     normalizedType === "enrollment_declined" ||
@@ -140,9 +137,7 @@ function getSweetAlertIcon(type = "") {
     return "warning";
   }
 
-  if (
-    normalizedType === "enrollment_approved"
-  ) {
+  if (normalizedType === "enrollment_approved") {
     return "success";
   }
 
@@ -158,18 +153,12 @@ export default function StudentHeader({
   showJoinCourse = true,
 }) {
   const navigate = useNavigate();
-  const [currentUser, setCurrentUser] = useState(() =>
-    getStoredUser()
-  );
-  const [notificationMenuOpen, setNotificationMenuOpen] =
-    useState(false);
-  const [profileMenuOpen, setProfileMenuOpen] =
-    useState(false);
-  const [notificationFilter, setNotificationFilter] =
-    useState("all");
+  const [currentUser, setCurrentUser] = useState(() => getStoredUser());
+  const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [notificationFilter, setNotificationFilter] = useState("all");
   const [notifications, setNotifications] = useState([]);
-  const [notificationsLoading, setNotificationsLoading] =
-    useState(false);
+  const [notificationsLoading, setNotificationsLoading] = useState(false);
   /* =====================================================
      LOAD NOTIFICATIONS FROM BACKEND
   ===================================================== */
@@ -215,20 +204,13 @@ export default function StudentHeader({
   ===================================================== */
   useEffect(() => {
     const handleUserUpdated = (event) => {
-      const updatedUser =
-        event.detail || getStoredUser();
+      const updatedUser = event.detail || getStoredUser();
       if (updatedUser) {
         setCurrentUser(updatedUser);
       }
     };
     const handleStorageUpdate = (event) => {
-      if (
-        ![
-          "puffy-user",
-          "user",
-          "currentUser",
-        ].includes(event.key)
-      ) {
+      if (!["puffy-user", "user", "currentUser"].includes(event.key)) {
         return;
       }
       const updatedUser = getStoredUser();
@@ -236,23 +218,11 @@ export default function StudentHeader({
         setCurrentUser(updatedUser);
       }
     };
-    window.addEventListener(
-      "puffy-user-updated",
-      handleUserUpdated
-    );
-    window.addEventListener(
-      "storage",
-      handleStorageUpdate
-    );
+    window.addEventListener("puffy-user-updated", handleUserUpdated);
+    window.addEventListener("storage", handleStorageUpdate);
     return () => {
-      window.removeEventListener(
-        "puffy-user-updated",
-        handleUserUpdated
-      );
-      window.removeEventListener(
-        "storage",
-        handleStorageUpdate
-      );
+      window.removeEventListener("puffy-user-updated", handleUserUpdated);
+      window.removeEventListener("storage", handleStorageUpdate);
     };
   }, []);
   /* =====================================================
@@ -260,18 +230,10 @@ export default function StudentHeader({
   ===================================================== */
   useEffect(() => {
     const closeDropdowns = (event) => {
-      if (
-        !event.target.closest(
-          ".notification-menu-wrapper"
-        )
-      ) {
+      if (!event.target.closest(".notification-menu-wrapper")) {
         setNotificationMenuOpen(false);
       }
-      if (
-        !event.target.closest(
-          ".profile-menu-wrapper"
-        )
-      ) {
+      if (!event.target.closest(".profile-menu-wrapper")) {
         setProfileMenuOpen(false);
       }
     };
@@ -281,23 +243,11 @@ export default function StudentHeader({
         setProfileMenuOpen(false);
       }
     };
-    document.addEventListener(
-      "mousedown",
-      closeDropdowns
-    );
-    document.addEventListener(
-      "keydown",
-      closeWithEscape
-    );
+    document.addEventListener("mousedown", closeDropdowns);
+    document.addEventListener("keydown", closeWithEscape);
     return () => {
-      document.removeEventListener(
-        "mousedown",
-        closeDropdowns
-      );
-      document.removeEventListener(
-        "keydown",
-        closeWithEscape
-      );
+      document.removeEventListener("mousedown", closeDropdowns);
+      document.removeEventListener("keydown", closeWithEscape);
     };
   }, []);
   /* =====================================================
@@ -312,8 +262,7 @@ export default function StudentHeader({
     currentUser?.username ||
     "Student";
   const profileHandle = displayName.replace(/^@/, "");
-  const accountLabel =
-    currentUser?.email || "Student account";
+  const accountLabel = currentUser?.email || "Student account";
   const profileImage = useMemo(
     () =>
       resolveProfileImage(
@@ -321,42 +270,36 @@ export default function StudentHeader({
           currentUser?.profile_image ||
           currentUser?.avatar ||
           currentUser?.image ||
-          ""
+          "",
       ),
-    [currentUser]
+    [currentUser],
   );
   /* =====================================================
      NOTIFICATIONS
   ===================================================== */
-  const unreadNotificationCount =
-    notifications.filter(
-      (notification) => notification.unread
-    ).length;
+  const unreadNotificationCount = notifications.filter(
+    (notification) => notification.unread,
+  ).length;
   const visibleNotifications =
     notificationFilter === "unread"
-      ? notifications.filter(
-          (notification) => notification.unread
-        )
+      ? notifications.filter((notification) => notification.unread)
       : notifications;
   const markAllNotificationsAsRead = async () => {
     const token = getAuthToken();
     if (!token) return;
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/notifications/read-all`,
-        {
-          method: "PATCH",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: "application/json",
-          },
-          credentials: "include",
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/notifications/read-all`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+        credentials: "include",
+      });
       const data = await response.json();
       if (!response.ok) {
         throw new Error(
-          data?.message || "Failed to mark notifications as read."
+          data?.message || "Failed to mark notifications as read.",
         );
       }
       setNotifications((current) =>
@@ -365,105 +308,92 @@ export default function StudentHeader({
           unread: false,
           isRead: true,
           is_read: true,
-        }))
+        })),
       );
     } catch (error) {
       console.error("Unable to mark all notifications as read:", error);
     }
   };
-  
-  const openNotification = async (notification) => {
-  if (!notification) return;
 
-  /* =========================================
+  const openNotification = async (notification) => {
+    if (!notification) return;
+
+    /* =========================================
      MARK NOTIFICATION AS READ
   ========================================= */
 
-  if (notification.unread) {
-    const token = getAuthToken();
+    if (notification.unread) {
+      const token = getAuthToken();
 
-    if (token) {
-      try {
-        const notificationId =
-          notification.notificationId ||
-          notification.notification_id ||
-          notification.id;
+      if (token) {
+        try {
+          const notificationId =
+            notification.notificationId ||
+            notification.notification_id ||
+            notification.id;
 
-        const response = await fetch(
-          `${API_BASE_URL}/notifications/${notificationId}/read`,
-          {
-            method: "PATCH",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              Accept: "application/json",
+          const response = await fetch(
+            `${API_BASE_URL}/notifications/${notificationId}/read`,
+            {
+              method: "PATCH",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                Accept: "application/json",
+              },
+              credentials: "include",
             },
-            credentials: "include",
-          }
-        );
-
-        const data = await response
-          .json()
-          .catch(() => ({}));
-
-        if (!response.ok) {
-          throw new Error(
-            data?.message ||
-              "Failed to mark notification as read."
           );
-        }
 
-        setNotifications((current) =>
-          current.map((item) =>
-            item.id === notification.id
-              ? {
-                  ...item,
-                  unread: false,
-                  isRead: true,
-                  is_read: true,
-                }
-              : item
-          )
-        );
-      } catch (error) {
-        console.error(
-          "Unable to mark notification as read:",
-          error
-        );
+          const data = await response.json().catch(() => ({}));
+
+          if (!response.ok) {
+            throw new Error(
+              data?.message || "Failed to mark notification as read.",
+            );
+          }
+
+          setNotifications((current) =>
+            current.map((item) =>
+              item.id === notification.id
+                ? {
+                    ...item,
+                    unread: false,
+                    isRead: true,
+                    is_read: true,
+                  }
+                : item,
+            ),
+          );
+        } catch (error) {
+          console.error("Unable to mark notification as read:", error);
+        }
       }
     }
-  }
 
-  /* =========================================
+    /* =========================================
      CLOSE NOTIFICATION DROPDOWN
   ========================================= */
 
-  setNotificationMenuOpen(false);
+    setNotificationMenuOpen(false);
 
-
-  /* =========================================
+    /* =========================================
      SHOW NOTIFICATION DETAILS
   ========================================= */
 
-  const notificationTitle =
-    notification.title ||
-    'Notification';
+    const notificationTitle = notification.title || "Notification";
 
-  const notificationMessage =
-    notification.message ||
-    'No additional information available.';
+    const notificationMessage =
+      notification.message || "No additional information available.";
 
-  const notificationReason =
-    notification.reason ||
-    notification.declineReason ||
-    notification.decline_reason ||
-    '';
+    const notificationReason =
+      notification.reason ||
+      notification.declineReason ||
+      notification.decline_reason ||
+      "";
 
-  const notificationTime =
-    notification.time ||
-    '';
+    const notificationTime = notification.time || "";
 
-
-  let html = `
+    let html = `
     <div style="
       text-align: left;
       line-height: 1.6;
@@ -475,9 +405,8 @@ export default function StudentHeader({
       </p>
   `;
 
-
-  if (notificationReason) {
-    html += `
+    if (notificationReason) {
+      html += `
       <div style="
         margin-top: 14px;
         padding: 12px 14px;
@@ -490,11 +419,10 @@ export default function StudentHeader({
         </div>
       </div>
     `;
-  }
+    }
 
-
-  if (notificationTime) {
-    html += `
+    if (notificationTime) {
+      html += `
       <div style="
         margin-top: 14px;
         color: #7b8189;
@@ -503,21 +431,19 @@ export default function StudentHeader({
         ${notificationTime}
       </div>
     `;
-  }
+    }
 
+    html += `</div>`;
 
-  html += `</div>`;
+    await Swal.fire({
+      title: notificationTitle,
+      html,
+      confirmButtonText: "Close",
+      confirmButtonColor: "#7fa9d6",
+    });
+  };
 
-
-  await Swal.fire({
-    title: notificationTitle,
-    html,
-    confirmButtonText: 'Close',
-    confirmButtonColor: '#7fa9d6',
-  });
-};
-
-/* =====================================================
+  /* =====================================================
      LOGOUT
   ===================================================== */
   const handleLogout = () => {
@@ -537,13 +463,9 @@ export default function StudentHeader({
       "section_name",
       "school_name",
     ].forEach((key) => localStorage.removeItem(key));
-    [
-      "token",
-      "authToken",
-      "puffy-token",
-      "user",
-      "currentUser",
-    ].forEach((key) => sessionStorage.removeItem(key));
+    ["token", "authToken", "puffy-token", "user", "currentUser"].forEach(
+      (key) => sessionStorage.removeItem(key),
+    );
     navigate("/login", {
       replace: true,
     });
@@ -566,16 +488,9 @@ export default function StudentHeader({
               }
             }}
           />
-          <span
-            className="student-header-search-icon"
-            aria-hidden="true"
-          >
+          <span className="student-header-search-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24">
-              <circle
-                cx="10.5"
-                cy="10.5"
-                r="5.5"
-              />
+              <circle cx="10.5" cy="10.5" r="5.5" />
               <path d="m15 15 4 4" />
             </svg>
           </span>
@@ -595,23 +510,16 @@ export default function StudentHeader({
             onClick={(event) => {
               event.stopPropagation();
               setProfileMenuOpen(false);
-              setNotificationMenuOpen(
-                (current) => !current
-              );
+              setNotificationMenuOpen((current) => !current);
             }}
           >
-            <svg
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M6.6 17.4h10.8l-.9-1.6v-4.5a4.5 4.5 0 0 0-9 0v4.5l-.9 1.6Z" />
               <path d="M10 19.2h4" />
             </svg>
             {unreadNotificationCount > 0 && (
               <span className="notification-badge">
-                {unreadNotificationCount > 9
-                  ? "9+"
-                  : unreadNotificationCount}
+                {unreadNotificationCount > 9 ? "9+" : unreadNotificationCount}
               </span>
             )}
           </button>
@@ -621,9 +529,7 @@ export default function StudentHeader({
               className="notification-dropdown-menu"
               role="dialog"
               aria-label="Notifications"
-              onClick={(event) =>
-                event.stopPropagation()
-              }
+              onClick={(event) => event.stopPropagation()}
             >
               <div className="notification-dropdown-header">
                 <div>
@@ -638,9 +544,7 @@ export default function StudentHeader({
                   <button
                     type="button"
                     className="mark-all-read-button"
-                    onClick={
-                      markAllNotificationsAsRead
-                    }
+                    onClick={markAllNotificationsAsRead}
                   >
                     Mark all as read
                   </button>
@@ -650,27 +554,15 @@ export default function StudentHeader({
               <div className="notification-dropdown-tabs">
                 <button
                   type="button"
-                  className={
-                    notificationFilter === "all"
-                      ? "active"
-                      : ""
-                  }
-                  onClick={() =>
-                    setNotificationFilter("all")
-                  }
+                  className={notificationFilter === "all" ? "active" : ""}
+                  onClick={() => setNotificationFilter("all")}
                 >
                   All
                 </button>
                 <button
                   type="button"
-                  className={
-                    notificationFilter === "unread"
-                      ? "active"
-                      : ""
-                  }
-                  onClick={() =>
-                    setNotificationFilter("unread")
-                  }
+                  className={notificationFilter === "unread" ? "active" : ""}
+                  onClick={() => setNotificationFilter("unread")}
                 >
                   Unread
                 </button>
@@ -684,80 +576,59 @@ export default function StudentHeader({
                 ) : visibleNotifications.length === 0 ? (
                   <div className="notification-empty-state">
                     <span className="notification-empty-icon">
-                      <svg
-                        viewBox="0 0 24 24"
-                        aria-hidden="true"
-                      >
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
                         <path d="M6.6 17.4h10.8l-.9-1.6v-4.5a4.5 4.5 0 0 0-9 0v4.5l-.9 1.6Z" />
                         <path d="M10 19.2h4" />
                       </svg>
                     </span>
-                    <strong>
-                      No notifications
-                    </strong>
-                    <p>
-                      New updates will appear here.
-                    </p>
+                    <strong>No notifications</strong>
+                    <p>New updates will appear here.</p>
                   </div>
                 ) : (
-                  visibleNotifications.map(
-                    (notification) => (
-                      <button
-                        key={notification.id}
-                        type="button"
-                        className={`notification-item ${
-                          notification.unread
-                            ? "unread"
-                            : ""
-                        }`}
-                        onClick={() =>
-                          openNotification(notification)
-                        }
+                  visibleNotifications.map((notification) => (
+                    <button
+                      key={notification.id}
+                      type="button"
+                      className={`notification-item ${
+                        notification.unread ? "unread" : ""
+                      }`}
+                      onClick={() => openNotification(notification)}
+                    >
+                      {/* ICON */}
+                      <span
+                        className={`notification-item-icon ${notification.icon}`}
+                        aria-hidden="true"
                       >
-                        {/* ICON */}
-                        <span
-                          className={`notification-item-icon ${notification.icon}`}
-                          aria-hidden="true"
-                        >
-                          {notification.icon ===
-                          "course" ? (
-                            <svg viewBox="0 0 24 24">
-                              <path d="m3.5 8.2 8.5-4.7 8.5 4.7-8.5 4.7-8.5-4.7Z" />
-                              <path d="M6.5 10.2v5c0 1.3 2.5 3 5.5 3s5.5-1.7 5.5-3v-5" />
-                            </svg>
-                          ) : notification.icon ===
-                            "announcement" ? (
-                            <svg viewBox="0 0 24 24">
-                              <path d="M4 11v2h3l7 4V7l-7 4H4Z" />
-                              <path d="m17 9 3-2M17 12h3M17 15l3 2" />
-                            </svg>
-                          ) : (
-                            <svg viewBox="0 0 24 24">
-                              <path d="m12 3 1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5L12 3Z" />
-                            </svg>
-                          )}
-                        </span>
-                        {/* COPY */}
-                        <span className="notification-item-copy">
-                          <strong>
-                            {notification.title}
-                          </strong>
-                          <span>
-                            {notification.message}
-                          </span>
-                          <small>
-                            {notification.time}
-                          </small>
-                        </span>
-                        {notification.unread && (
-                          <span
-                            className="notification-unread-dot"
-                            aria-label="Unread"
-                          />
+                        {notification.icon === "course" ? (
+                          <svg viewBox="0 0 24 24">
+                            <path d="m3.5 8.2 8.5-4.7 8.5 4.7-8.5 4.7-8.5-4.7Z" />
+                            <path d="M6.5 10.2v5c0 1.3 2.5 3 5.5 3s5.5-1.7 5.5-3v-5" />
+                          </svg>
+                        ) : notification.icon === "announcement" ? (
+                          <svg viewBox="0 0 24 24">
+                            <path d="M4 11v2h3l7 4V7l-7 4H4Z" />
+                            <path d="m17 9 3-2M17 12h3M17 15l3 2" />
+                          </svg>
+                        ) : (
+                          <svg viewBox="0 0 24 24">
+                            <path d="m12 3 1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5L12 3Z" />
+                          </svg>
                         )}
-                      </button>
-                    )
-                  )
+                      </span>
+                      {/* COPY */}
+                      <span className="notification-item-copy">
+                        <strong>{notification.title}</strong>
+                        <span>{notification.message}</span>
+                        <small>{notification.time}</small>
+                      </span>
+                      {notification.unread && (
+                        <span
+                          className="notification-unread-dot"
+                          aria-label="Unread"
+                        />
+                      )}
+                    </button>
+                  ))
                 )}
               </div>
               <button
@@ -765,9 +636,7 @@ export default function StudentHeader({
                 className="notification-view-all-button"
                 onClick={() => {
                   setNotificationMenuOpen(false);
-                  navigate(
-                    "/student/notifications"
-                  );
+                  navigate("/student/notifications");
                 }}
               >
                 See all notifications
@@ -795,9 +664,7 @@ export default function StudentHeader({
             <button
               type="button"
               className="profile-main-button"
-              onClick={() =>
-                navigate("/student/profile")
-              }
+              onClick={() => navigate("/student/profile")}
             >
               <span className="profile-avatar">
                 <img
@@ -805,8 +672,7 @@ export default function StudentHeader({
                   alt={`${displayName}'s profile`}
                   className="profile-header-image"
                   onError={(event) => {
-                    event.currentTarget.src =
-                      DEFAULT_PROFILE_IMAGE;
+                    event.currentTarget.src = DEFAULT_PROFILE_IMAGE;
                   }}
                 />
                 <span className="profile-status-dot" />
@@ -827,15 +693,10 @@ export default function StudentHeader({
               onClick={(event) => {
                 event.stopPropagation();
                 setNotificationMenuOpen(false);
-                setProfileMenuOpen(
-                  (current) => !current
-                );
+                setProfileMenuOpen((current) => !current);
               }}
             >
-              <svg
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-              >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
                 <circle cx="12" cy="5" r="1.6" />
                 <circle cx="12" cy="12" r="1.6" />
                 <circle cx="12" cy="19" r="1.6" />
@@ -847,9 +708,7 @@ export default function StudentHeader({
             <div
               className="profile-dropdown-menu"
               role="menu"
-              onClick={(event) =>
-                event.stopPropagation()
-              }
+              onClick={(event) => event.stopPropagation()}
             >
               <div className="profile-dropdown-header">
                 <img
@@ -857,8 +716,7 @@ export default function StudentHeader({
                   alt={`${displayName}'s profile`}
                   className="profile-dropdown-image"
                   onError={(event) => {
-                    event.currentTarget.src =
-                      DEFAULT_PROFILE_IMAGE;
+                    event.currentTarget.src = DEFAULT_PROFILE_IMAGE;
                   }}
                 />
                 <div>
@@ -875,15 +733,8 @@ export default function StudentHeader({
                   navigate("/student/profile");
                 }}
               >
-                <svg
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                >
-                  <circle
-                    cx="12"
-                    cy="8"
-                    r="4"
-                  />
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <circle cx="12" cy="8" r="4" />
                   <path d="M5 20c.8-4 3.2-6 7-6s6.2 2 7 6" />
                 </svg>
                 <span>View profile</span>
@@ -896,15 +747,8 @@ export default function StudentHeader({
                   navigate("/student/settings");
                 }}
               >
-                <svg
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                >
-                  <circle
-                    cx="12"
-                    cy="12"
-                    r="3"
-                  />
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <circle cx="12" cy="12" r="3" />
                   <path d="M19 13.5v-3l-2-.6a7 7 0 0 0-.7-1.6l1-1.8-2.1-2.1-1.8 1a7 7 0 0 0-1.6-.7L11.5 3h-3l-.6 2a7 7 0 0 0-1.6.7l-1.8-1-2.1 2.1 1 1.8a7 7 0 0 0-.7 1.6L1 10.5v3l2 .6a7 7 0 0 0 .7 1.6l-1 1.8 2.1 2.1 1.8-1a7 7 0 0 0 1.6.7l.6 2h3l.6-2a7 7 0 0 0 1.6-.7l1.8 1 2.1-2.1-1-1.8a7 7 0 0 0 .7-1.6Z" />
                 </svg>
                 <span>Settings</span>
@@ -916,10 +760,7 @@ export default function StudentHeader({
                 className="profile-logout-option"
                 onClick={handleLogout}
               >
-                <svg
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M10 5H5v14h5" />
                   <path d="m14 8 4 4-4 4" />
                   <path d="M18 12H9" />

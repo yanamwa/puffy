@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   FiArchive,
   FiCheck,
@@ -18,76 +18,75 @@ import {
   FiUserPlus,
   FiUsers,
   FiX,
-} from 'react-icons/fi';
-import { API_BASE } from '../../../config';
-import './SuperAdminUserManagementPage.css';
-import Swal from 'sweetalert2';
+} from "react-icons/fi";
+import { API_BASE } from "../../../config";
+import "./SuperAdminUserManagementPage.css";
+import Swal from "sweetalert2";
 
 const USER_TABS = [
-  { id: 'all', label: 'All Users' },
-  { id: 'approvals', label: 'Professor Approvals' },
-  { id: 'students', label: 'Students' },
-  { id: 'professors', label: 'Professors' },
-  { id: 'admins', label: 'Administrators' },
-  { id: 'archived', label: 'Archived Accounts' },
+  { id: "all", label: "All Users" },
+  { id: "approvals", label: "Professor Approvals" },
+  { id: "students", label: "Students" },
+  { id: "professors", label: "Professors" },
+  { id: "admins", label: "Administrators" },
+  { id: "archived", label: "Archived Accounts" },
 ];
 
 const VALID_USER_TAB_IDS = USER_TABS.map((tab) => tab.id);
 
 const ACCOUNT_TYPE_OPTIONS = [
-  { value: 'temporary', label: 'Temporary account' },
-  { value: 'permanent', label: 'Permanent account' },
+  { value: "temporary", label: "Temporary account" },
+  { value: "permanent", label: "Permanent account" },
 ];
 
 const TEMPORARY_DURATION_OPTIONS = [
-  { value: '7', label: '7 days' },
-  { value: '14', label: '14 days' },
-  { value: '30', label: '30 days' },
-  { value: '90', label: '90 days' },
-  { value: '180', label: '180 days' },
-  { value: '365', label: '1 year' },
+  { value: "7", label: "7 days" },
+  { value: "14", label: "14 days" },
+  { value: "30", label: "30 days" },
+  { value: "90", label: "90 days" },
+  { value: "180", label: "180 days" },
+  { value: "365", label: "1 year" },
 ];
 
 const initialStudentForm = {
-  name: '',
-  email: '',
-  studentId: '',
-  gender: '',
-  yearLevel: '',
-  sectionName: '',
+  name: "",
+  email: "",
+  studentId: "",
+  gender: "",
+  yearLevel: "",
+  sectionName: "",
 };
 
 const initialAdminForm = {
-  name: '',
-  email: '',
-  accountType: 'temporary',
-  temporaryDurationDays: '30',
+  name: "",
+  email: "",
+  accountType: "temporary",
+  temporaryDurationDays: "30",
 };
 
 const initialProfessorForm = {
-  name: '',
-  email: '',
-  facultyId: '',
-  department: '',
+  name: "",
+  email: "",
+  facultyId: "",
+  department: "",
   employmentProof: null,
 };
 
-const STUDENT_IMPORT_ACCEPT =
-  '.csv,.xlsx';
+const STUDENT_IMPORT_ACCEPT = ".csv,.xlsx";
 const PROFESSOR_PROOF_ACCEPT =
-  '.jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp';
+  ".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp";
 
 const initialStudentImportStatus = {
-  state: 'idle',
-  fileName: '',
+  state: "idle",
+  fileName: "",
   fileSize: 0,
-  message: '',
-  detail: '',
+  message: "",
+  detail: "",
 };
 
 function getRoleGroup(role) {
-  const value = String(role || '').toLowerCase();
-  return value === 'super_admin' || value === 'admin' ? 'admin' : value;
+  const value = String(role || "").toLowerCase();
+  return value === "super_admin" || value === "admin" ? "admin" : value;
 }
 
 function isTemporaryExpired(user) {
@@ -108,40 +107,44 @@ function isTemporaryExpired(user) {
 }
 
 function getStatusFromUser(user) {
-  const role = user.role || 'student';
+  const role = user.role || "student";
   const archived =
     user.isArchived === true ||
     user.is_archived === 1 ||
     user.is_archived === true ||
-    user.status === 'Archived';
+    user.status === "Archived";
 
-  if (archived) return 'Archived';
-  if (isTemporaryExpired(user)) return 'Expired';
+  if (archived) return "Archived";
+  if (isTemporaryExpired(user)) return "Expired";
 
   const verificationStatus = String(
-    user.verificationStatus || user.verification_status || ''
+    user.verificationStatus || user.verification_status || "",
   ).toLowerCase();
-  const currentStatus = String(user.status || '').toLowerCase();
+  const currentStatus = String(user.status || "").toLowerCase();
 
   if (
-    role === 'professor' &&
-    (verificationStatus === 'pending' || currentStatus === 'pending')
+    role === "professor" &&
+    (verificationStatus === "pending" || currentStatus === "pending")
   ) {
-    return 'Approving';
+    return "Approving";
   }
-  if (verificationStatus === 'declined') return 'Declined';
+  if (verificationStatus === "declined") return "Declined";
 
-  return user.status || 'Active';
+  return user.status || "Active";
 }
 
 function normalizeUser(user) {
   const displayName =
-    user.name || user.displayName || user.display_name || user.username || 'Unnamed User';
-  const role = user.role || 'student';
+    user.name ||
+    user.displayName ||
+    user.display_name ||
+    user.username ||
+    "Unnamed User";
+  const role = user.role || "student";
   const verificationStatus =
     user.verificationStatus ||
     user.verification_status ||
-    (role === 'professor' ? 'pending' : 'approved');
+    (role === "professor" ? "pending" : "approved");
   const isTemporary =
     user.isTemporary === true ||
     user.is_temporary === 1 ||
@@ -151,7 +154,7 @@ function normalizeUser(user) {
     user.temporary_expires_at ||
     user.expiresAt ||
     user.expires_at ||
-    '';
+    "";
   const temporaryExpired =
     user.temporaryExpired === true ||
     user.temporary_expired === 1 ||
@@ -161,34 +164,25 @@ function normalizeUser(user) {
   return {
     id: user.id || user.userId || user.user_id || user.UserID || displayName,
     name: displayName,
-    email: user.email || 'No email found',
+    email: user.email || "No email found",
     role,
     status: getStatusFromUser(user),
     verificationStatus,
-    joined: user.joined || user.created_at || user.createdAt || '',
-    studentId: user.studentId || user.student_id || '',
-    professorId: user.professorId || user.professor_id || '',
+    joined: user.joined || user.created_at || user.createdAt || "",
+    studentId: user.studentId || user.student_id || "",
+    professorId: user.professorId || user.professor_id || "",
     professorFacultyId:
-      user.professorFacultyId || user.professor_faculty_id || '',
+      user.professorFacultyId || user.professor_faculty_id || "",
     professorDepartment:
-      user.professorDepartment ||
-      user.professor_department ||
-      '',
+      user.professorDepartment || user.professor_department || "",
 
-    professorPosition:
-      user.professorPosition ||
-      user.professor_position ||
-      '',
+    professorPosition: user.professorPosition || user.professor_position || "",
 
     professorSpecialization:
-      user.professorSpecialization ||
-      user.professor_specialization ||
-      '',
+      user.professorSpecialization || user.professor_specialization || "",
 
     professorEmploymentProof:
-      user.professorEmploymentProof ||
-      user.professor_employment_proof ||
-      '',
+      user.professorEmploymentProof || user.professor_employment_proof || "",
     verified:
       user.verified === true ||
       user.is_verified === 1 ||
@@ -198,7 +192,7 @@ function normalizeUser(user) {
       user.isArchived === true ||
       user.is_archived === 1 ||
       user.is_archived === true ||
-      user.status === 'Archived',
+      user.status === "Archived",
     mustChangePassword:
       user.mustChangePassword === true ||
       user.must_change_password === 1 ||
@@ -210,40 +204,40 @@ function normalizeUser(user) {
 }
 
 function formatDate(value) {
-  if (!value) return 'No date';
+  if (!value) return "No date";
 
   const date = new Date(value);
 
-  if (Number.isNaN(date.getTime())) return 'No date';
+  if (Number.isNaN(date.getTime())) return "No date";
 
-  return date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: '2-digit',
-    year: 'numeric',
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
   });
 }
 
 function titleCase(value) {
-  return String(value || '')
-    .replace(/[-_]/g, ' ')
+  return String(value || "")
+    .replace(/[-_]/g, " ")
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
 function getInitials(name) {
   return String(name)
-    .split(' ')
+    .split(" ")
     .filter(Boolean)
     .slice(0, 2)
     .map((part) => part.charAt(0).toUpperCase())
-    .join('');
+    .join("");
 }
 
 function getAuthToken() {
   return (
-    localStorage.getItem('puffy-token') ||
-    localStorage.getItem('token') ||
-    localStorage.getItem('authToken') ||
-    ''
+    localStorage.getItem("puffy-token") ||
+    localStorage.getItem("token") ||
+    localStorage.getItem("authToken") ||
+    ""
   );
 }
 
@@ -251,7 +245,7 @@ function getAuthHeaders() {
   const token = getAuthToken();
 
   return {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
 }
@@ -263,11 +257,13 @@ function getMultipartAuthHeaders() {
 }
 
 function getTemporaryPayload(form) {
-  const isTemporary = form.accountType === 'temporary';
+  const isTemporary = form.accountType === "temporary";
 
   return {
     isTemporary,
-    temporaryDurationDays: isTemporary ? form.temporaryDurationDays || '30' : '',
+    temporaryDurationDays: isTemporary
+      ? form.temporaryDurationDays || "30"
+      : "",
   };
 }
 
@@ -279,23 +275,24 @@ function withTemporaryAccountFields(payload) {
 }
 
 function getAccountSecurityLabel(user) {
-  if (user.temporaryExpired) return 'Temporary expired';
-  if (user.isTemporary) return `Temporary until ${formatDate(user.temporaryExpiresAt)}`;
-  if (user.mustChangePassword) return 'Temporary password';
-  return user.verified ? 'Email verified' : 'Email pending';
+  if (user.temporaryExpired) return "Temporary expired";
+  if (user.isTemporary)
+    return `Temporary until ${formatDate(user.temporaryExpiresAt)}`;
+  if (user.mustChangePassword) return "Temporary password";
+  return user.verified ? "Email verified" : "Email pending";
 }
 
 function isUrl(value) {
-  return /^(https?:\/\/|\/)/i.test(String(value || '').trim());
+  return /^(https?:\/\/|\/)/i.test(String(value || "").trim());
 }
 
 const IMAGE_PROOF_PATTERN = /\.(avif|bmp|gif|jpe?g|png|svg|webp)(?:[?#].*)?$/i;
 
 function getProofSource(value) {
-  const proof = String(value || '').trim();
+  const proof = String(value || "").trim();
 
-  if (!proof) return '';
-  if (/^https?:\/\//i.test(proof) || proof.startsWith('/')) return proof;
+  if (!proof) return "";
+  if (/^https?:\/\//i.test(proof) || proof.startsWith("/")) return proof;
   if (/^api\//i.test(proof)) return `/${proof}`;
   if (/^uploads\//i.test(proof)) return `${API_BASE}/${proof}`;
 
@@ -303,7 +300,7 @@ function getProofSource(value) {
 }
 
 function isImageProof(value) {
-  const proof = String(value || '').trim();
+  const proof = String(value || "").trim();
 
   return IMAGE_PROOF_PATTERN.test(proof) || /\/api\/uploads\//i.test(proof);
 }
@@ -317,59 +314,64 @@ function formatFileSize(bytes) {
 }
 
 function validateProfessorProofFile(file) {
-  if (!file) return 'Please upload a clear photo of the faculty or employee ID.';
+  if (!file)
+    return "Please upload a clear photo of the faculty or employee ID.";
 
-  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+  const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
   if (!allowedTypes.includes(file.type)) {
-    return 'Please upload a JPG, PNG, or WEBP image.';
+    return "Please upload a JPG, PNG, or WEBP image.";
   }
 
   if (file.size > 5 * 1024 * 1024) {
-    return 'The uploaded ID photo must not exceed 5 MB.';
+    return "The uploaded ID photo must not exceed 5 MB.";
   }
 
-  return '';
+  return "";
 }
 
 function UserAvatar({ user, large = false }) {
-  const initials = getInitials(user.name) || '?';
-  return <span className={large ? 'users-modal-avatar' : 'users-avatar'}>{initials}</span>;
+  const initials = getInitials(user.name) || "?";
+  return (
+    <span className={large ? "users-modal-avatar" : "users-avatar"}>
+      {initials}
+    </span>
+  );
 }
 
-function showSuccess(message, title = 'Success') {
+function showSuccess(message, title = "Success") {
   return Swal.fire({
-    icon: 'success',
+    icon: "success",
     title,
     text: message,
-    confirmButtonText: 'OK',
+    confirmButtonText: "OK",
   });
 }
 
-function showError(message, title = 'Error') {
+function showError(message, title = "Error") {
   return Swal.fire({
-    icon: 'error',
+    icon: "error",
     title,
     text: message,
-    confirmButtonText: 'OK',
+    confirmButtonText: "OK",
   });
 }
 
-function showWarning(message, title = 'Warning') {
+function showWarning(message, title = "Warning") {
   return Swal.fire({
-    icon: 'warning',
+    icon: "warning",
     title,
     text: message,
-    confirmButtonText: 'OK',
+    confirmButtonText: "OK",
   });
 }
 
-function showInfo(message, title = 'Information') {
+function showInfo(message, title = "Information") {
   return Swal.fire({
-    icon: 'info',
+    icon: "info",
     title,
     text: message,
-    confirmButtonText: 'OK',
+    confirmButtonText: "OK",
   });
 }
 
@@ -378,37 +380,40 @@ export default function SuperAdminUserManagementPage() {
   const fileInputRef = useRef(null);
   const [users, setUsers] = useState([]);
   const [activeTab, setActiveTab] = useState(() => {
-    const requestedTab = searchParams.get('tab');
-    return VALID_USER_TAB_IDS.includes(requestedTab) ? requestedTab : 'all';
+    const requestedTab = searchParams.get("tab");
+    return VALID_USER_TAB_IDS.includes(requestedTab) ? requestedTab : "all";
   });
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState(null);
   const [adminModalOpen, setAdminModalOpen] = useState(false);
   const [adminForm, setAdminForm] = useState(initialAdminForm);
   const [professorModalOpen, setProfessorModalOpen] = useState(false);
   const [professorForm, setProfessorForm] = useState(initialProfessorForm);
-  const [professorProofPreview, setProfessorProofPreview] = useState('');
+  const [professorProofPreview, setProfessorProofPreview] = useState("");
   const [creatingProfessor, setCreatingProfessor] = useState(false);
   const [studentModalOpen, setStudentModalOpen] = useState(false);
   const [studentForm, setStudentForm] = useState(initialStudentForm);
-  const [studentImportStatus, setStudentImportStatus] = useState(initialStudentImportStatus);
+  const [studentImportStatus, setStudentImportStatus] = useState(
+    initialStudentImportStatus,
+  );
   const [credentialResults, setCredentialResults] = useState([]);
-  const [busyUserId, setBusyUserId] = useState('');
+  const [busyUserId, setBusyUserId] = useState("");
   const studentImportBusy =
-    studentImportStatus.state === 'reading' || studentImportStatus.state === 'importing';
+    studentImportStatus.state === "reading" ||
+    studentImportStatus.state === "importing";
 
   const loadUsers = async () => {
     try {
       setLoading(true);
       const response = await fetch(`${API_BASE}/users`, {
-        method: 'GET',
+        method: "GET",
         headers: getAuthHeaders(),
-        credentials: 'include',
+        credentials: "include",
       });
 
       if (!response.ok) {
-        throw new Error('User API unavailable.');
+        throw new Error("User API unavailable.");
       }
 
       const data = await response.json();
@@ -417,7 +422,11 @@ export default function SuperAdminUserManagementPage() {
       setUsers(nextUsers.map(normalizeUser));
     } catch (error) {
       setUsers([]);
-      showError(error.message || 'Could not load users from the database. Please make sure MySQL and the backend server are running.', 'Could Not Load Users');
+      showError(
+        error.message ||
+          "Could not load users from the database. Please make sure MySQL and the backend server are running.",
+        "Could Not Load Users",
+      );
     } finally {
       setLoading(false);
     }
@@ -442,7 +451,10 @@ export default function SuperAdminUserManagementPage() {
   }, [professorProofPreview]);
 
   useEffect(() => {
-    if (studentImportStatus.state !== 'success' && studentImportStatus.state !== 'partial') {
+    if (
+      studentImportStatus.state !== "success" &&
+      studentImportStatus.state !== "partial"
+    ) {
       return undefined;
     }
 
@@ -453,35 +465,34 @@ export default function SuperAdminUserManagementPage() {
     return () => window.clearTimeout(timeoutId);
   }, [studentImportStatus.state]);
 
-  
-
   useEffect(() => {
-    const requestedAction = searchParams.get('action');
+    const requestedAction = searchParams.get("action");
 
     if (
-      requestedAction !== 'add-student' &&
-      requestedAction !== 'add-professor' &&
-      requestedAction !== 'add-admin'
-    ) return;
+      requestedAction !== "add-student" &&
+      requestedAction !== "add-professor" &&
+      requestedAction !== "add-admin"
+    )
+      return;
 
     const nextParams = new URLSearchParams(searchParams);
-    nextParams.delete('action');
+    nextParams.delete("action");
 
-    if (requestedAction === 'add-student') {
-      nextParams.set('tab', 'students');
-      setActiveTab('students');
+    if (requestedAction === "add-student") {
+      nextParams.set("tab", "students");
+      setActiveTab("students");
       setStudentModalOpen(true);
     }
 
-    if (requestedAction === 'add-admin') {
-      nextParams.set('tab', 'admins');
-      setActiveTab('admins');
+    if (requestedAction === "add-admin") {
+      nextParams.set("tab", "admins");
+      setActiveTab("admins");
       setAdminModalOpen(true);
     }
 
-    if (requestedAction === 'add-professor') {
-      nextParams.set('tab', 'professors');
-      setActiveTab('professors');
+    if (requestedAction === "add-professor") {
+      nextParams.set("tab", "professors");
+      setActiveTab("professors");
       setProfessorModalOpen(true);
     }
 
@@ -491,40 +502,33 @@ export default function SuperAdminUserManagementPage() {
   const handleTabChange = (tabId) => {
     setActiveTab(tabId);
   };
-  
 
   const userGroups = useMemo(() => {
     const all = users;
 
     const approvals = users.filter(
       (user) =>
-        user.role === 'professor' &&
-        String(user.verificationStatus).toLowerCase() === 'pending' &&
-        !user.isArchived
+        user.role === "professor" &&
+        String(user.verificationStatus).toLowerCase() === "pending" &&
+        !user.isArchived,
     );
 
     const students = users.filter(
-      (user) =>
-        user.role === 'student' &&
-        !user.isArchived
+      (user) => user.role === "student" && !user.isArchived,
     );
 
     const professors = users.filter(
       (user) =>
-        user.role === 'professor' &&
-        String(user.verificationStatus).toLowerCase() === 'approved' &&
-        !user.isArchived
+        user.role === "professor" &&
+        String(user.verificationStatus).toLowerCase() === "approved" &&
+        !user.isArchived,
     );
 
     const admins = users.filter(
-      (user) =>
-        user.role === 'admin' &&
-        !user.isArchived
+      (user) => user.role === "admin" && !user.isArchived,
     );
 
-    const archived = users.filter(
-      (user) => user.isArchived
-    );
+    const archived = users.filter((user) => user.isArchived);
 
     return {
       all,
@@ -551,41 +555,53 @@ export default function SuperAdminUserManagementPage() {
         user.professorFacultyId,
         user.professorDepartment,
       ]
-        .map((value) => String(value || '').toLowerCase())
+        .map((value) => String(value || "").toLowerCase())
         .some((value) => value.includes(search));
     });
   }, [activeTab, query, userGroups]);
 
   const stats = useMemo(
     () => [
-      { label: 'All Users', value: users.length, icon: FiUsers },
-      { label: 'Temporary Accounts', value: users.filter((user) => user.isTemporary).length, icon: FiClock },
-      { label: 'Students', value: userGroups.students.length, icon: FiUser },
-      { label: 'Administrators', value: userGroups.admins.length, icon: FiShield },
+      { label: "All Users", value: users.length, icon: FiUsers },
+      {
+        label: "Temporary Accounts",
+        value: users.filter((user) => user.isTemporary).length,
+        icon: FiClock,
+      },
+      { label: "Students", value: userGroups.students.length, icon: FiUser },
+      {
+        label: "Administrators",
+        value: userGroups.admins.length,
+        icon: FiShield,
+      },
     ],
-    [userGroups, users.length]
+    [userGroups, users.length],
   );
 
   const updateUserInList = (nextUser) => {
     const normalized = normalizeUser(nextUser);
     setUsers((currentUsers) =>
-      currentUsers.map((user) => (user.id === normalized.id ? normalized : user))
+      currentUsers.map((user) =>
+        user.id === normalized.id ? normalized : user,
+      ),
     );
     setSelectedUser((currentUser) =>
-      currentUser && currentUser.id === normalized.id ? normalized : currentUser
+      currentUser && currentUser.id === normalized.id
+        ? normalized
+        : currentUser,
     );
   };
 
   const removeUserFromList = (userId) => {
     setUsers((currentUsers) =>
-      currentUsers.filter((user) => Number(user.id) !== Number(userId))
+      currentUsers.filter((user) => Number(user.id) !== Number(userId)),
     );
     setSelectedUser(null);
   };
 
   const resetProfessorForm = () => {
     setProfessorForm(initialProfessorForm);
-    setProfessorProofPreview('');
+    setProfessorProofPreview("");
   };
 
   const closeProfessorModal = () => {
@@ -609,19 +625,19 @@ export default function SuperAdminUserManagementPage() {
         ...currentForm,
         employmentProof: null,
       }));
-      setProfessorProofPreview('');
+      setProfessorProofPreview("");
       return;
     }
 
     const fileError = validateProfessorProofFile(file);
 
     if (fileError) {
-      event.target.value = '';
+      event.target.value = "";
       setProfessorForm((currentForm) => ({
         ...currentForm,
         employmentProof: null,
       }));
-      setProfessorProofPreview('');
+      setProfessorProofPreview("");
       showWarning(fileError);
       return;
     }
@@ -638,7 +654,7 @@ export default function SuperAdminUserManagementPage() {
       ...currentForm,
       employmentProof: null,
     }));
-    setProfessorProofPreview('');
+    setProfessorProofPreview("");
   };
 
   const renderAccountTypeFields = (form, setForm) => (
@@ -653,8 +669,8 @@ export default function SuperAdminUserManagementPage() {
               accountType: event.target.value,
             }))
           }
-          required  
-            >
+          required
+        >
           {ACCOUNT_TYPE_OPTIONS.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
@@ -663,7 +679,7 @@ export default function SuperAdminUserManagementPage() {
         </select>
       </label>
 
-      {form.accountType === 'temporary' && (
+      {form.accountType === "temporary" && (
         <label>
           Expires After
           <select
@@ -689,23 +705,26 @@ export default function SuperAdminUserManagementPage() {
   const handleProfessorDecision = async (user, status) => {
     try {
       setBusyUserId(`${user.id}-${status}`);
-      const response = await fetch(`${API_BASE}/users/${user.id}/registration`, {
-        method: 'PATCH',
-        headers: getAuthHeaders(),
-        body: JSON.stringify({ status }),
-      });
+      const response = await fetch(
+        `${API_BASE}/users/${user.id}/registration`,
+        {
+          method: "PATCH",
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ status }),
+        },
+      );
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.message || 'Could not update registration.');
+        throw new Error(data.message || "Could not update registration.");
       }
 
       updateUserInList(data.user);
       showSuccess(data.message);
     } catch (error) {
-      showError(error.message || 'Could not update registration.');
+      showError(error.message || "Could not update registration.");
     } finally {
-      setBusyUserId('');
+      setBusyUserId("");
     }
   };
 
@@ -715,38 +734,39 @@ export default function SuperAdminUserManagementPage() {
     try {
       setBusyUserId(`${user.id}-archive`);
       const response = await fetch(`${API_BASE}/users/${user.id}/archive`, {
-        method: 'PATCH',
+        method: "PATCH",
         headers: getAuthHeaders(),
         body: JSON.stringify({ archive }),
       });
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.message || 'Could not update account.');
+        throw new Error(data.message || "Could not update account.");
       }
 
       updateUserInList(data.user);
       showSuccess(data.message);
     } catch (error) {
-      showError(
-          error.message || 'Could not update account.'
-        );
+      showError(error.message || "Could not update account.");
     } finally {
-      setBusyUserId('');
+      setBusyUserId("");
     }
   };
 
   const handleResetCredentials = async (user) => {
     try {
       setBusyUserId(`${user.id}-credentials`);
-      const response = await fetch(`${API_BASE}/users/${user.id}/reset-credentials`, {
-        method: 'POST',
-        headers: getAuthHeaders(),
-      });
+      const response = await fetch(
+        `${API_BASE}/users/${user.id}/reset-credentials`,
+        {
+          method: "POST",
+          headers: getAuthHeaders(),
+        },
+      );
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.message || 'Could not generate credentials.');
+        throw new Error(data.message || "Could not generate credentials.");
       }
 
       setCredentialResults([
@@ -757,22 +777,22 @@ export default function SuperAdminUserManagementPage() {
           temporaryExpiresAt: user.temporaryExpiresAt,
         },
       ]);
-      showSuccess('Temporary credentials generated.');
+      showSuccess("Temporary credentials generated.");
     } catch (error) {
-      showError(error.message || 'Could not generate credentials.');
+      showError(error.message || "Could not generate credentials.");
     } finally {
-      setBusyUserId('');
+      setBusyUserId("");
     }
   };
 
   const handlePermanentRemove = async (user) => {
     const result = await Swal.fire({
-      icon: 'warning',
-      title: 'Permanently Delete Account?',
+      icon: "warning",
+      title: "Permanently Delete Account?",
       text: `${user.name} will be permanently removed. This action cannot be undone.`,
       showCancelButton: true,
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: "Delete",
+      cancelButtonText: "Cancel",
       reverseButtons: true,
       focusCancel: true,
     });
@@ -783,41 +803,38 @@ export default function SuperAdminUserManagementPage() {
       setBusyUserId(`${user.id}-delete`);
 
       const response = await fetch(`${API_BASE}/users/${user.id}/archived`, {
-        method: 'DELETE',
+        method: "DELETE",
         headers: getAuthHeaders(),
       });
 
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.message || 'Could not remove account.');
+        throw new Error(data.message || "Could not remove account.");
       }
 
       removeUserFromList(user.id);
       showSuccess(
-        data.message || 'The account was permanently removed.',
-        'Account Deleted'
+        data.message || "The account was permanently removed.",
+        "Account Deleted",
       );
     } catch (error) {
-      showError(
-        error.message || 'Could not remove account.',
-        'Delete Failed'
-      );
+      showError(error.message || "Could not remove account.", "Delete Failed");
     } finally {
-      setBusyUserId('');
+      setBusyUserId("");
     }
   };
 
   const createStudent = async (payload) => {
     const response = await fetch(`${API_BASE}/users/student`, {
-      method: 'POST',
+      method: "POST",
       headers: getAuthHeaders(),
       body: JSON.stringify(withTemporaryAccountFields(payload)),
     });
     const data = await response.json();
 
     if (!response.ok || !data.success) {
-      throw new Error(data.message || 'Could not create student account.');
+      throw new Error(data.message || "Could not create student account.");
     }
 
     return data;
@@ -841,7 +858,7 @@ export default function SuperAdminUserManagementPage() {
       setStudentModalOpen(false);
       showSuccess(data.message);
     } catch (error) {
-      showError(error.message || 'Could not create student account.');
+      showError(error.message || "Could not create student account.");
     }
   };
 
@@ -850,14 +867,14 @@ export default function SuperAdminUserManagementPage() {
 
     try {
       const response = await fetch(`${API_BASE}/users/admin`, {
-        method: 'POST',
+        method: "POST",
         headers: getAuthHeaders(),
         body: JSON.stringify(withTemporaryAccountFields(adminForm)),
       });
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.message || 'Could not create admin account.');
+        throw new Error(data.message || "Could not create admin account.");
       }
 
       setUsers((currentUsers) => [normalizeUser(data.user), ...currentUsers]);
@@ -873,7 +890,7 @@ export default function SuperAdminUserManagementPage() {
       setAdminModalOpen(false);
       showSuccess(data.message);
     } catch (error) {
-      showError(error.message || 'Could not create admin account.');
+      showError(error.message || "Could not create admin account.");
     }
   };
 
@@ -886,30 +903,32 @@ export default function SuperAdminUserManagementPage() {
     const cleanEmail = professorForm.email.trim().toLowerCase();
     const cleanFacultyId = professorForm.facultyId.trim();
     const cleanDepartment = professorForm.department.trim();
-    const proofError = validateProfessorProofFile(professorForm.employmentProof);
+    const proofError = validateProfessorProofFile(
+      professorForm.employmentProof,
+    );
 
     if (!cleanName) {
-      showWarning('Professor full name is required.');
+      showWarning("Professor full name is required.");
       return;
     }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
-      showWarning('Please enter a valid professor email address.');
+      showWarning("Please enter a valid professor email address.");
       return;
     }
 
     if (!cleanFacultyId) {
-      showWarning('Employee or faculty ID is required.');
+      showWarning("Employee or faculty ID is required.");
       return;
     }
 
     if (cleanFacultyId.length > 100) {
-      showWarning('Employee or faculty ID must be 100 characters or fewer.');
+      showWarning("Employee or faculty ID must be 100 characters or fewer.");
       return;
     }
 
     if (!cleanDepartment) {
-      showWarning('Department is required.');
+      showWarning("Department is required.");
       return;
     }
 
@@ -919,24 +938,24 @@ export default function SuperAdminUserManagementPage() {
     }
 
     const formData = new FormData();
-    formData.append('name', cleanName);
-    formData.append('email', cleanEmail);
-    formData.append('facultyId', cleanFacultyId);
-    formData.append('department', cleanDepartment);
-    formData.append('employmentProof', professorForm.employmentProof);
+    formData.append("name", cleanName);
+    formData.append("email", cleanEmail);
+    formData.append("facultyId", cleanFacultyId);
+    formData.append("department", cleanDepartment);
+    formData.append("employmentProof", professorForm.employmentProof);
 
     try {
       setCreatingProfessor(true);
 
       const response = await fetch(`${API_BASE}/users/professor`, {
-        method: 'POST',
+        method: "POST",
         headers: getMultipartAuthHeaders(),
         body: formData,
       });
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.message || 'Could not create professor account.');
+        throw new Error(data.message || "Could not create professor account.");
       }
 
       setUsers((currentUsers) => [normalizeUser(data.user), ...currentUsers]);
@@ -950,15 +969,15 @@ export default function SuperAdminUserManagementPage() {
       ]);
       resetProfessorForm();
       setProfessorModalOpen(false);
-      showSuccess('Professor account created.');
+      showSuccess("Professor account created.");
     } catch (error) {
-      showError(error.message || 'Could not create professor account.');
+      showError(error.message || "Could not create professor account.");
     } finally {
       setCreatingProfessor(false);
     }
   };
 
-    /* =====================================================
+  /* =====================================================
      STUDENT BULK IMPORT
      Supports: CSV + XLSX
 
@@ -972,12 +991,11 @@ export default function SuperAdminUserManagementPage() {
   ===================================================== */
 
   const normalizeImportHeader = (value) =>
-    String(value || '')
-      .replace(/^\ufeff/, '')
+    String(value || "")
+      .replace(/^\ufeff/, "")
       .trim()
       .toLowerCase()
-      .replace(/[^a-z0-9]/g, '');
-
+      .replace(/[^a-z0-9]/g, "");
 
   /* =====================================================
      CSV PARSER
@@ -987,7 +1005,7 @@ export default function SuperAdminUserManagementPage() {
     const rows = [];
 
     let row = [];
-    let cell = '';
+    let cell = "";
     let inQuotes = false;
 
     for (let index = 0; index < text.length; index += 1) {
@@ -1005,26 +1023,20 @@ export default function SuperAdminUserManagementPage() {
         continue;
       }
 
-      if (character === ',' && !inQuotes) {
+      if (character === "," && !inQuotes) {
         row.push(cell);
-        cell = '';
+        cell = "";
         continue;
       }
 
-      if (
-        (character === '\n' || character === '\r') &&
-        !inQuotes
-      ) {
+      if ((character === "\n" || character === "\r") && !inQuotes) {
         row.push(cell);
         rows.push(row);
 
         row = [];
-        cell = '';
+        cell = "";
 
-        if (
-          character === '\r' &&
-          nextCharacter === '\n'
-        ) {
+        if (character === "\r" && nextCharacter === "\n") {
           index += 1;
         }
 
@@ -1040,85 +1052,81 @@ export default function SuperAdminUserManagementPage() {
     return rows;
   };
 
-
   /* =====================================================
      NORMALIZE GENDER
   ===================================================== */
 
   const normalizeImportedGender = (value) => {
-    const gender = String(value || '')
+    const gender = String(value || "")
       .trim()
       .toLowerCase();
 
-    if (gender === 'male') {
-      return 'Male';
+    if (gender === "male") {
+      return "Male";
     }
 
-    if (gender === 'female') {
-      return 'Female';
+    if (gender === "female") {
+      return "Female";
     }
 
-    return '';
+    return "";
   };
-
 
   /* =====================================================
      NORMALIZE YEAR LEVEL
   ===================================================== */
 
   const normalizeImportedYearLevel = (value) => {
-    const year = String(value || '')
+    const year = String(value || "")
       .trim()
       .toLowerCase();
 
     const yearMap = {
-      '1': '1st Year',
-      '1st': '1st Year',
-      '1styear': '1st Year',
-      '1st year': '1st Year',
-      'first': '1st Year',
-      'firstyear': '1st Year',
-      'first year': '1st Year',
+      1: "1st Year",
+      "1st": "1st Year",
+      "1styear": "1st Year",
+      "1st year": "1st Year",
+      first: "1st Year",
+      firstyear: "1st Year",
+      "first year": "1st Year",
 
-      '2': '2nd Year',
-      '2nd': '2nd Year',
-      '2ndyear': '2nd Year',
-      '2nd year': '2nd Year',
-      'second': '2nd Year',
-      'secondyear': '2nd Year',
-      'second year': '2nd Year',
+      2: "2nd Year",
+      "2nd": "2nd Year",
+      "2ndyear": "2nd Year",
+      "2nd year": "2nd Year",
+      second: "2nd Year",
+      secondyear: "2nd Year",
+      "second year": "2nd Year",
 
-      '3': '3rd Year',
-      '3rd': '3rd Year',
-      '3rdyear': '3rd Year',
-      '3rd year': '3rd Year',
-      'third': '3rd Year',
-      'thirdyear': '3rd Year',
-      'third year': '3rd Year',
+      3: "3rd Year",
+      "3rd": "3rd Year",
+      "3rdyear": "3rd Year",
+      "3rd year": "3rd Year",
+      third: "3rd Year",
+      thirdyear: "3rd Year",
+      "third year": "3rd Year",
 
-      '4': '4th Year',
-      '4th': '4th Year',
-      '4thyear': '4th Year',
-      '4th year': '4th Year',
-      'fourth': '4th Year',
-      'fourthyear': '4th Year',
-      'fourth year': '4th Year',
+      4: "4th Year",
+      "4th": "4th Year",
+      "4thyear": "4th Year",
+      "4th year": "4th Year",
+      fourth: "4th Year",
+      fourthyear: "4th Year",
+      "fourth year": "4th Year",
     };
 
-    return yearMap[year] || '';
+    return yearMap[year] || "";
   };
-
 
   /* =====================================================
      NORMALIZE SECTION
   ===================================================== */
 
   const normalizeImportedSection = (value) =>
-    String(value || '')
+    String(value || "")
       .trim()
       .toUpperCase()
-      .replace(/\s+/g, '');
-
+      .replace(/\s+/g, "");
 
   /* =====================================================
      GET EXPECTED YEAR NUMBER
@@ -1129,11 +1137,10 @@ export default function SuperAdminUserManagementPage() {
   ===================================================== */
 
   const getImportedYearNumber = (yearLevel) => {
-    const match = String(yearLevel || '').match(/^([1-4])/);
+    const match = String(yearLevel || "").match(/^([1-4])/);
 
-    return match ? match[1] : '';
+    return match ? match[1] : "";
   };
-
 
   /* =====================================================
      NORMALIZE IMPORTED ROWS
@@ -1148,181 +1155,120 @@ export default function SuperAdminUserManagementPage() {
           return row;
         }
 
-        if (row && typeof row === 'object') {
+        if (row && typeof row === "object") {
           return Object.values(row);
         }
 
         return [row];
       })
-      .map((row) =>
-        row.map((cell) =>
-          String(cell ?? '').trim()
-        )
-      )
+      .map((row) => row.map((cell) => String(cell ?? "").trim()))
       .filter((row) => row.some(Boolean));
 
     if (cleanedRows.length === 0) {
       return [];
     }
 
-    const header =
-      cleanedRows[0].map(normalizeImportHeader);
+    const header = cleanedRows[0].map(normalizeImportHeader);
 
     const headerAliases = [
-      'email',
-      'emailaddress',
-      'studentemail',
+      "email",
+      "emailaddress",
+      "studentemail",
 
-      'name',
-      'fullname',
-      'studentname',
+      "name",
+      "fullname",
+      "studentname",
 
-      'studentid',
-      'studentnumber',
-      'studentno',
+      "studentid",
+      "studentnumber",
+      "studentno",
 
-      'gender',
-      'sex',
+      "gender",
+      "sex",
 
-      'year',
-      'yearlevel',
+      "year",
+      "yearlevel",
 
-      'section',
-      'sectionname',
+      "section",
+      "sectionname",
     ];
 
-    const hasHeader = header.some((cell) =>
-      headerAliases.includes(cell)
-    );
+    const hasHeader = header.some((cell) => headerAliases.includes(cell));
 
-    const dataRows = hasHeader
-      ? cleanedRows.slice(1)
-      : cleanedRows;
+    const dataRows = hasHeader ? cleanedRows.slice(1) : cleanedRows;
 
-    const headerCells = hasHeader
-      ? header
-      : [];
+    const headerCells = hasHeader ? header : [];
 
-      const indexOf = (names, fallback) => {
-        if (!hasHeader) {
-          return fallback;
-        }
+    const indexOf = (names, fallback) => {
+      if (!hasHeader) {
+        return fallback;
+      }
 
-        const normalizedNames = names.map((name) =>
-          normalizeImportHeader(name)
-        );
+      const normalizedNames = names.map((name) => normalizeImportHeader(name));
 
-        const index = headerCells.findIndex((cell) =>
-          normalizedNames.includes(
-            normalizeImportHeader(cell)
-          )
-        );
+      const index = headerCells.findIndex((cell) =>
+        normalizedNames.includes(normalizeImportHeader(cell)),
+      );
 
-        return index >= 0 ? index : fallback;
-      };
+      return index >= 0 ? index : fallback;
+    };
 
     return dataRows
       .map((row, rowIndex) => {
-        const rawGender =
-          row[
-            indexOf(
-              ['gender', 'sex'],
-              3
-            )
-          ] || '';
+        const rawGender = row[indexOf(["gender", "sex"], 3)] || "";
 
         const rawYearLevel =
           row[
             indexOf(
-              [
-                'year',
-                'yearlevel',
-                'studentyear',
-                'grade',
-                'gradelevel',
-              ],
-              4
+              ["year", "yearlevel", "studentyear", "grade", "gradelevel"],
+              4,
             )
-          ] || '';
+          ] || "";
 
         const rawSection =
           row[
-            indexOf(
-              [
-                'section',
-                'sectionname',
-                'studentsection',
-                'block',
-              ],
-              5
-            )
-          ] || '';
+            indexOf(["section", "sectionname", "studentsection", "block"], 5)
+          ] || "";
 
         return {
-          sourceRow:
-            rowIndex + (hasHeader ? 2 : 1),
+          sourceRow: rowIndex + (hasHeader ? 2 : 1),
 
-          name:
-            row[
-              indexOf(
-                [
-                  'name',
-                  'fullname',
-                  'studentname',
-                ],
-                0
-              )
-            ] || '',
+          name: row[indexOf(["name", "fullname", "studentname"], 0)] || "",
 
           email:
-            row[
-              indexOf(
-                [
-                  'email',
-                  'emailaddress',
-                  'studentemail',
-                ],
-                1
-              )
-            ] || '',
+            row[indexOf(["email", "emailaddress", "studentemail"], 1)] || "",
 
           studentId: String(
             row[
               indexOf(
                 [
-                  'studentid',
-                  'student id',
-                  'student_id',
-                  'studentnumber',
-                  'student number',
-                  'studentno',
-                  'student no',
-                  'id',
-                  'idnumber',
-                  'id number',
-                  'schoolid',
-                  'school id',
+                  "studentid",
+                  "student id",
+                  "student_id",
+                  "studentnumber",
+                  "student number",
+                  "studentno",
+                  "student no",
+                  "id",
+                  "idnumber",
+                  "id number",
+                  "schoolid",
+                  "school id",
                 ],
-                2
+                2,
               )
-            ] ?? ''
+            ] ?? "",
           ).trim(),
 
-          gender: normalizeImportedGender(
-            rawGender
-          ),
+          gender: normalizeImportedGender(rawGender),
 
           rawGender,
 
-          yearLevel: normalizeImportedYearLevel(
-            rawYearLevel
-          ),
+          yearLevel: normalizeImportedYearLevel(rawYearLevel),
 
           rawYearLevel,
 
-          sectionName: normalizeImportedSection(
-            rawSection
-          ),
+          sectionName: normalizeImportedSection(rawSection),
 
           rawSection,
         };
@@ -1334,43 +1280,31 @@ export default function SuperAdminUserManagementPage() {
           student.studentId ||
           student.rawGender ||
           student.rawYearLevel ||
-          student.rawSection
+          student.rawSection,
       );
   };
-
 
   /* =====================================================
      PARSE CSV
   ===================================================== */
 
   const parseStudentCsv = (text) => {
-    return normalizeStudentImportRows(
-      parseCsvRows(text)
-    );
+    return normalizeStudentImportRows(parseCsvRows(text));
   };
-
 
   /* =====================================================
      PARSE CSV / XLSX FILE
   ===================================================== */
 
   const parseStudentImportFile = async (file) => {
-    const extension = file.name
-      .split('.')
-      .pop()
-      ?.toLowerCase();
+    const extension = file.name.split(".").pop()?.toLowerCase();
 
-    if (extension === 'xlsx') {
-      const readXlsxFile = (
-        await import('read-excel-file/browser')
-      ).default;
+    if (extension === "xlsx") {
+      const readXlsxFile = (await import("read-excel-file/browser")).default;
 
       const result = await readXlsxFile(file);
 
-      console.log(
-        '===== RAW EXCEL RESULT =====',
-        result
-      );
+      console.log("===== RAW EXCEL RESULT =====", result);
 
       /*
         Some versions/configurations return:
@@ -1391,25 +1325,18 @@ export default function SuperAdminUserManagementPage() {
         Array.isArray(result) &&
         result.length > 0 &&
         result[0] &&
-        typeof result[0] === 'object' &&
+        typeof result[0] === "object" &&
         !Array.isArray(result[0]) &&
         Array.isArray(result[0].data)
       ) {
         rows = result[0].data;
       }
 
-      console.log(
-        '===== EXTRACTED EXCEL ROWS =====',
-        rows
-      );
+      console.log("===== EXTRACTED EXCEL ROWS =====", rows);
 
-      const normalizedStudents =
-        normalizeStudentImportRows(rows);
+      const normalizedStudents = normalizeStudentImportRows(rows);
 
-      console.log(
-        '===== NORMALIZED STUDENTS =====',
-        normalizedStudents
-      );
+      console.log("===== NORMALIZED STUDENTS =====", normalizedStudents);
 
       return normalizedStudents;
     }
@@ -1419,108 +1346,65 @@ export default function SuperAdminUserManagementPage() {
     return parseStudentCsv(text);
   };
 
-
   /* =====================================================
      SUPPORTED FILE CHECK
   ===================================================== */
 
   const isSupportedStudentImportFile = (file) => {
-    const extension = file.name
-      .split('.')
-      .pop()
-      ?.toLowerCase();
+    const extension = file.name.split(".").pop()?.toLowerCase();
 
-    return (
-      extension === 'csv' ||
-      extension === 'xlsx'
-    );
+    return extension === "csv" || extension === "xlsx";
   };
-
 
   /* =====================================================
      FORMAT BACKEND FAILURE
   ===================================================== */
 
-  const formatStudentImportFailure = (
-    student,
-    fallbackMessage
-  ) => {
-    const email = String(
-      student.email || ''
-    ).trim();
+  const formatStudentImportFailure = (student, fallbackMessage) => {
+    const email = String(student.email || "").trim();
 
-    const message = String(
-      fallbackMessage || ''
-    ).trim();
+    const message = String(fallbackMessage || "").trim();
 
-    const normalizedMessage =
-      message.toLowerCase();
+    const normalizedMessage = message.toLowerCase();
 
-    if (
-      normalizedMessage.includes(
-        'email is already registered'
-      )
-    ) {
+    if (normalizedMessage.includes("email is already registered")) {
       return `- Row ${student.sourceRow}: Email "${email}" is already registered.`;
     }
 
-    if (
-      normalizedMessage.includes(
-        'student id is already registered'
-      )
-    ) {
+    if (normalizedMessage.includes("student id is already registered")) {
       return `- Row ${student.sourceRow}: Student ID "${student.studentId}" is already registered.`;
     }
 
     return (
       `- Row ${student.sourceRow}: ` +
-      (message ||
-        'This student could not be imported.')
+      (message || "This student could not be imported.")
     );
   };
-
 
   /* =====================================================
      VALIDATE ONE IMPORTED STUDENT
   ===================================================== */
 
   const validateImportedStudent = (student) => {
-    const name = String(
-      student.name || ''
-    ).trim();
+    const name = String(student.name || "").trim();
 
-    const email = String(
-      student.email || ''
-    )
+    const email = String(student.email || "")
       .trim()
       .toLowerCase();
 
-    const studentId = String(
-      student.studentId || ''
-    ).trim();
+    const studentId = String(student.studentId || "").trim();
 
-    const rawGender = String(
-      student.rawGender || ''
-    ).trim();
+    const rawGender = String(student.rawGender || "").trim();
 
-    const rawYearLevel = String(
-      student.rawYearLevel || ''
-    ).trim();
+    const rawYearLevel = String(student.rawYearLevel || "").trim();
 
-    const rawSection = String(
-      student.rawSection || ''
-    ).trim();
+    const rawSection = String(student.rawSection || "").trim();
 
-    const gender =
-      normalizeImportedGender(rawGender);
+    const gender = normalizeImportedGender(rawGender);
 
-    const yearLevel =
-      normalizeImportedYearLevel(
-        rawYearLevel
-      );
+    const yearLevel = normalizeImportedYearLevel(rawYearLevel);
 
-    const sectionName =
-      normalizeImportedSection(rawSection);
+    const sectionName = normalizeImportedSection(rawSection);
 
     /* -------------------------
        REQUIRED FIELDS
@@ -1529,68 +1413,55 @@ export default function SuperAdminUserManagementPage() {
     if (!name) {
       return {
         valid: false,
-        message:
-          `Row ${student.sourceRow}: Student name is required.`,
+        message: `Row ${student.sourceRow}: Student name is required.`,
       };
     }
 
     if (!email) {
       return {
         valid: false,
-        message:
-          `Row ${student.sourceRow}: Student email is required.`,
+        message: `Row ${student.sourceRow}: Student email is required.`,
       };
     }
 
     if (!studentId) {
       return {
         valid: false,
-        message:
-          `Row ${student.sourceRow}: Student ID is required.`,
+        message: `Row ${student.sourceRow}: Student ID is required.`,
       };
     }
 
     if (!rawGender) {
       return {
         valid: false,
-        message:
-          `Row ${student.sourceRow}: Gender is required.`,
+        message: `Row ${student.sourceRow}: Gender is required.`,
       };
     }
 
     if (!rawYearLevel) {
       return {
         valid: false,
-        message:
-          `Row ${student.sourceRow}: Year level is required.`,
+        message: `Row ${student.sourceRow}: Year level is required.`,
       };
     }
 
     if (!rawSection) {
       return {
         valid: false,
-        message:
-          `Row ${student.sourceRow}: Section is required.`,
+        message: `Row ${student.sourceRow}: Section is required.`,
       };
     }
-
 
     /* -------------------------
        EMAIL
     ------------------------- */
 
-    if (
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
-        email
-      )
-    ) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return {
         valid: false,
-        message:
-          `Row ${student.sourceRow}: "${email}" is not a valid email address.`,
+        message: `Row ${student.sourceRow}: "${email}" is not a valid email address.`,
       };
     }
-
 
     /* -------------------------
        GENDER
@@ -1599,11 +1470,9 @@ export default function SuperAdminUserManagementPage() {
     if (!gender) {
       return {
         valid: false,
-        message:
-          `Row ${student.sourceRow}: Gender must be Male or Female.`,
+        message: `Row ${student.sourceRow}: Gender must be Male or Female.`,
       };
     }
-
 
     /* -------------------------
        YEAR LEVEL
@@ -1612,18 +1481,15 @@ export default function SuperAdminUserManagementPage() {
     if (!yearLevel) {
       return {
         valid: false,
-        message:
-          `Row ${student.sourceRow}: Year level must be 1st Year, 2nd Year, 3rd Year, or 4th Year.`,
+        message: `Row ${student.sourceRow}: Year level must be 1st Year, 2nd Year, 3rd Year, or 4th Year.`,
       };
     }
-
 
     /* -------------------------
        SECTION
     ------------------------- */
 
-    const yearNumber =
-      getImportedYearNumber(yearLevel);
+    const yearNumber = getImportedYearNumber(yearLevel);
 
     const allowedSections = [
       `${yearNumber}A`,
@@ -1634,16 +1500,12 @@ export default function SuperAdminUserManagementPage() {
       `${yearNumber}F`,
     ];
 
-    if (
-      !allowedSections.includes(sectionName)
-    ) {
+    if (!allowedSections.includes(sectionName)) {
       return {
         valid: false,
-        message:
-          `Row ${student.sourceRow}: Section must be ${yearNumber}A-${yearNumber}F for ${yearLevel}.`,
+        message: `Row ${student.sourceRow}: Section must be ${yearNumber}A-${yearNumber}F for ${yearLevel}.`,
       };
     }
-
 
     /* -------------------------
        NORMALIZED STUDENT
@@ -1665,12 +1527,11 @@ export default function SuperAdminUserManagementPage() {
           same account behavior as the
           Add Student form.
         */
-        accountType: 'permanent',
-        temporaryDurationDays: '',
+        accountType: "permanent",
+        temporaryDurationDays: "",
       },
     };
   };
-
 
   /* =====================================================
      IMPORT BUTTON
@@ -1687,7 +1548,6 @@ export default function SuperAdminUserManagementPage() {
     fileInputRef.current?.click();
   };
 
-
   /* =====================================================
      CLOSE STUDENT MODAL
   ===================================================== */
@@ -1700,7 +1560,6 @@ export default function SuperAdminUserManagementPage() {
     setStudentModalOpen(false);
   };
 
-
   /* =====================================================
      DISMISS IMPORT STATUS
   ===================================================== */
@@ -1710,115 +1569,93 @@ export default function SuperAdminUserManagementPage() {
       return;
     }
 
-    setStudentImportStatus(
-      initialStudentImportStatus
-    );
+    setStudentImportStatus(initialStudentImportStatus);
   };
-
 
   /* =====================================================
      BULK IMPORT
   ===================================================== */
-const logBulkStudentImport = async ({
-  fileName,
-  importedCount,
-  failedCount,
-  totalCount,
-}) => {
-  try {
-    const response = await fetch(
-      `${API_BASE}/users/student/bulk-import-audit`,
-      {
-        method: 'POST',
-        headers: getAuthHeaders({
-          'Content-Type': 'application/json',
-        }),
-        body: JSON.stringify({
-          fileName,
-          importedCount,
-          failedCount,
-          totalCount,
-        }),
-      }
-    );
-
-    const data = await response.json();
-
-    if (!response.ok || !data.success) {
-      throw new Error(
-        data.message ||
-          'Could not record bulk import audit.'
+  const logBulkStudentImport = async ({
+    fileName,
+    importedCount,
+    failedCount,
+    totalCount,
+  }) => {
+    try {
+      const response = await fetch(
+        `${API_BASE}/users/student/bulk-import-audit`,
+        {
+          method: "POST",
+          headers: getAuthHeaders({
+            "Content-Type": "application/json",
+          }),
+          body: JSON.stringify({
+            fileName,
+            importedCount,
+            failedCount,
+            totalCount,
+          }),
+        },
       );
-    }
-  } catch (error) {
-    /*
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Could not record bulk import audit.");
+      }
+    } catch (error) {
+      /*
       Audit failure should NOT make the actual
       student import appear to have failed.
     */
-    console.error(
-      'Bulk import audit error:',
-      error
-    );
-  }
-};
+      console.error("Bulk import audit error:", error);
+    }
+  };
   const handleBulkImport = async (event) => {
-    const file =
-      event.target.files?.[0];
+    const file = event.target.files?.[0];
 
     /*
       Allow selecting the same file again
       after an import.
     */
-    event.target.value = '';
+    event.target.value = "";
 
     if (!file) {
       return;
     }
 
-
     /* -------------------------
        FILE TYPE
     ------------------------- */
 
-    if (
-      !isSupportedStudentImportFile(file)
-    ) {
+    if (!isSupportedStudentImportFile(file)) {
       setStudentImportStatus({
-        state: 'error',
+        state: "error",
         fileName: file.name,
         fileSize: file.size,
-        message:
-          'This file type is not supported.',
-        detail:
-          '- Only .csv and .xlsx Excel files can be imported.',
+        message: "This file type is not supported.",
+        detail: "- Only .csv and .xlsx Excel files can be imported.",
       });
 
-      showError(
-        'Only CSV and XLSX files can be imported.',
-        'Unsupported File'
-      );
+      showError("Only CSV and XLSX files can be imported.", "Unsupported File");
 
       return;
     }
-
 
     /* -------------------------
        READING
     ------------------------- */
 
     setStudentImportStatus({
-      state: 'reading',
+      state: "reading",
       fileName: file.name,
       fileSize: file.size,
-      message:
-        'Reading student file...',
-      detail: '',
+      message: "Reading student file...",
+      detail: "",
     });
 
     try {
-      const students =
-        await parseStudentImportFile(file);
-
+      const students = await parseStudentImportFile(file);
 
       /* -------------------------
          EMPTY FILE
@@ -1826,23 +1663,18 @@ const logBulkStudentImport = async ({
 
       if (students.length === 0) {
         setStudentImportStatus({
-          state: 'error',
+          state: "error",
           fileName: file.name,
           fileSize: file.size,
-          message:
-            'No student records found in this file.',
+          message: "No student records found in this file.",
           detail:
-            'Required columns: Name, Email, Student ID, Gender, Year Level, Section.',
+            "Required columns: Name, Email, Student ID, Gender, Year Level, Section.",
         });
 
-        showError(
-          'Import file has no student records.',
-          'Import Failed'
-        );
+        showError("Import file has no student records.", "Import Failed");
 
         return;
       }
-
 
       /* -------------------------
          RESULTS
@@ -1859,84 +1691,63 @@ const logBulkStudentImport = async ({
       const seenEmails = new Set();
       const seenStudentIds = new Set();
 
-
       /* =================================================
          PROCESS EACH STUDENT
       ================================================= */
 
-      for (
-        let index = 0;
-        index < students.length;
-        index += 1
-      ) {
+      for (let index = 0; index < students.length; index += 1) {
         const student = students[index];
 
         setStudentImportStatus({
-          state: 'importing',
+          state: "importing",
           fileName: file.name,
           fileSize: file.size,
 
-          message:
-            `Importing ${index + 1} of ${students.length} student records...`,
+          message: `Importing ${index + 1} of ${students.length} student records...`,
 
           detail:
             `${createdUsers.length} imported, ` +
             `${failures.length} failed so far.`,
         });
 
-
         /* -------------------------
            VALIDATION
         ------------------------- */
 
-        const validation =
-          validateImportedStudent(student);
+        const validation = validateImportedStudent(student);
 
         if (!validation.valid) {
-          failures.push(
-            `- ${validation.message}`
-          );
+          failures.push(`- ${validation.message}`);
 
           continue;
         }
 
-        const normalizedStudent =
-          validation.student;
-
+        const normalizedStudent = validation.student;
 
         /* -------------------------
            DUPLICATE EMAIL IN FILE
         ------------------------- */
 
-        const emailKey =
-          normalizedStudent.email
-            .toLowerCase();
+        const emailKey = normalizedStudent.email.toLowerCase();
 
         if (seenEmails.has(emailKey)) {
           failures.push(
-            `- Row ${student.sourceRow}: Email "${normalizedStudent.email}" appears more than once in the file.`
+            `- Row ${student.sourceRow}: Email "${normalizedStudent.email}" appears more than once in the file.`,
           );
 
           continue;
         }
-
 
         /* -------------------------
            DUPLICATE STUDENT ID
            IN FILE
         ------------------------- */
 
-        const studentIdKey =
-          normalizedStudent.studentId
-            .toLowerCase();
+        const studentIdKey = normalizedStudent.studentId.toLowerCase();
 
-        if (
-          seenStudentIds.has(
-            studentIdKey
-          )
-        ) {
+        if (seenStudentIds.has(studentIdKey)) {
           failures.push(
-            `- Row ${student.sourceRow}: Student ID "${normalizedStudent.studentId}" appears more than once in the file.`
+            `- Row ${student.sourceRow}: Student ID "${normalizedStudent.studentId}" appears more than once in the file.`,
           );
 
           continue;
@@ -1945,28 +1756,20 @@ const logBulkStudentImport = async ({
         seenEmails.add(emailKey);
         seenStudentIds.add(studentIdKey);
 
-
         /* -------------------------
            CREATE ACCOUNT
         ------------------------- */
 
         try {
-          const data =
-            await createStudent(
-              normalizedStudent
-            );
+          const data = await createStudent(normalizedStudent);
 
-          createdUsers.push(
-            normalizeUser(data.user)
-          );
+          createdUsers.push(normalizeUser(data.user));
 
           credentials.push({
             name: data.user.name,
             email: data.user.email,
-            temporaryPassword:
-              data.temporaryPassword,
-            temporaryExpiresAt:
-              data.user.temporaryExpiresAt,
+            temporaryPassword: data.temporaryPassword,
+            temporaryExpiresAt: data.user.temporaryExpiresAt,
           });
         } catch (error) {
           failures.push(
@@ -1975,43 +1778,34 @@ const logBulkStudentImport = async ({
                 ...student,
                 ...normalizedStudent,
               },
-              error.message ||
-                'Could not create student.'
-            )
+              error.message || "Could not create student.",
+            ),
           );
         }
       }
-
 
       /* =================================================
          NOTHING IMPORTED
       ================================================= */
 
       if (createdUsers.length === 0) {
-        const detail = failures
-          .slice(0, 5)
-          .join('\n');
+        const detail = failures.slice(0, 5).join("\n");
 
         setStudentImportStatus({
-          state: 'error',
+          state: "error",
           fileName: file.name,
           fileSize: file.size,
-          message:
-            'No student accounts were imported.',
-          detail:
-            detail ||
-            'Please check the student records and try again.',
+          message: "No student accounts were imported.",
+          detail: detail || "Please check the student records and try again.",
         });
 
         showError(
-          detail ||
-            'No student accounts were imported.',
-          'Import Failed'
+          detail || "No student accounts were imported.",
+          "Import Failed",
         );
 
         return;
       }
-
 
       /* =================================================
          SUCCESS / PARTIAL SUCCESS
@@ -2021,17 +1815,11 @@ const logBulkStudentImport = async ({
         failures.length > 0
           ? `${createdUsers.length} imported, ${failures.length} failed.`
           : `${createdUsers.length} student account${
-              createdUsers.length === 1
-                ? ''
-                : 's'
+              createdUsers.length === 1 ? "" : "s"
             } imported successfully.`;
 
-
       setStudentImportStatus({
-        state:
-          failures.length > 0
-            ? 'partial'
-            : 'success',
+        state: failures.length > 0 ? "partial" : "success",
 
         fileName: file.name,
         fileSize: file.size,
@@ -2039,53 +1827,40 @@ const logBulkStudentImport = async ({
 
         detail:
           failures.length > 0
-            ? failures
-                .slice(0, 5)
-                .join('\n')
+            ? failures.slice(0, 5).join("\n")
             : `${createdUsers.length} student account${
-                createdUsers.length === 1
-                  ? ''
-                  : 's'
+                createdUsers.length === 1 ? "" : "s"
               } created.`,
       });
-
 
       /* -------------------------
          UPDATE USER TABLE
       ------------------------- */
 
-      setUsers((currentUsers) => [
-        ...createdUsers,
-        ...currentUsers,
-      ]);
-
+      setUsers((currentUsers) => [...createdUsers, ...currentUsers]);
 
       /* -------------------------
          TEMPORARY CREDENTIALS
       ------------------------- */
 
-      setCredentialResults(
-        credentials
-      );
+      setCredentialResults(credentials);
 
       /* -------------------------
           BULK IMPORT AUDIT
         ------------------------- */
 
-        await logBulkStudentImport({
-          fileName: file.name,
-          importedCount: createdUsers.length,
-          failedCount: failures.length,
-          totalCount: students.length,
-        });
-
+      await logBulkStudentImport({
+        fileName: file.name,
+        importedCount: createdUsers.length,
+        failedCount: failures.length,
+        totalCount: students.length,
+      });
 
       /* -------------------------
          CLOSE ADD STUDENT MODAL
       ------------------------- */
 
       setStudentModalOpen(false);
-
 
       /* -------------------------
          PAGE NOTICE
@@ -2094,35 +1869,24 @@ const logBulkStudentImport = async ({
       if (failures.length === 0) {
         showSuccess(
           `${createdUsers.length} student account${
-            createdUsers.length === 1
-              ? ''
-              : 's'
+            createdUsers.length === 1 ? "" : "s"
           } successfully imported.`,
-          'Import Complete'
+          "Import Complete",
         );
       }
     } catch (error) {
-      console.error(
-        'Bulk student import error:',
-        error
-      );
+      console.error("Bulk student import error:", error);
 
       setStudentImportStatus({
-        state: 'error',
+        state: "error",
         fileName: file.name,
         fileSize: file.size,
-        message:
-          'Could not import this file.',
+        message: "Could not import this file.",
         detail:
-          error.message ||
-          'Please check the CSV or Excel file and try again.',
+          error.message || "Please check the CSV or Excel file and try again.",
       });
 
-      showError(
-        error.message ||
-          'Could not import students.',
-        'Import Failed'
-      );
+      showError(error.message || "Could not import students.", "Import Failed");
     }
   };
 
@@ -2131,27 +1895,24 @@ const logBulkStudentImport = async ({
       .map((item) => {
         const expiry = item.temporaryExpiresAt
           ? `expires ${formatDate(item.temporaryExpiresAt)}`
-          : 'permanent account';
+          : "permanent account";
 
         return `${item.name}, ${item.email}, ${item.temporaryPassword}, ${expiry}`;
       })
-      .join('\n');
+      .join("\n");
 
     try {
       await navigator.clipboard.writeText(text);
 
       await Swal.fire({
-        icon: 'success',
-        title: 'Credentials Copied',
-        text: 'Temporary credentials were copied to the clipboard.',
+        icon: "success",
+        title: "Credentials Copied",
+        text: "Temporary credentials were copied to the clipboard.",
         timer: 1800,
         showConfirmButton: false,
       });
     } catch {
-      showError(
-        'Could not copy temporary credentials.',
-        'Copy Failed'
-      );
+      showError("Could not copy temporary credentials.", "Copy Failed");
     }
   };
 
@@ -2159,16 +1920,21 @@ const logBulkStudentImport = async ({
     const proof = user.professorEmploymentProof;
     const proofSrc = getProofSource(proof);
 
-    if (!proofSrc) return 'Not submitted';
+    if (!proofSrc) return "Not submitted";
 
     if (isUrl(proofSrc) && isImageProof(proofSrc)) {
       if (compact) {
         return (
-          <a className="users-proof-cell" href={proofSrc} target="_blank" rel="noreferrer">
+          <a
+            className="users-proof-cell"
+            href={proofSrc}
+            target="_blank"
+            rel="noreferrer"
+          >
             <img
               className="users-proof-thumb"
               src={proofSrc}
-              alt={`${user.name || 'Professor'} proof thumbnail`}
+              alt={`${user.name || "Professor"} proof thumbnail`}
               loading="lazy"
             />
             <span>View proof</span>
@@ -2177,11 +1943,16 @@ const logBulkStudentImport = async ({
       }
 
       return (
-        <a className="users-proof-preview" href={proofSrc} target="_blank" rel="noreferrer">
+        <a
+          className="users-proof-preview"
+          href={proofSrc}
+          target="_blank"
+          rel="noreferrer"
+        >
           <img
             className="users-proof-image"
             src={proofSrc}
-            alt={`${user.name || 'Professor'} employment proof`}
+            alt={`${user.name || "Professor"} employment proof`}
             loading="lazy"
           />
         </a>
@@ -2201,73 +1972,67 @@ const logBulkStudentImport = async ({
 
   const renderApprovalActions = (user) => (
     <div className="users-action-group">
-  <button
-    className="users-icon-btn users-view-btn"
-    type="button"
-    onClick={() => setSelectedUser(user)}
-    title="Review account"
-  >
-    <FiEye />
-    <span>View</span>
-  </button>
-
-  {user.role !== 'super_admin' && (
-    <>
       <button
-        className="users-icon-btn users-reset-btn"
+        className="users-icon-btn users-view-btn"
         type="button"
-        onClick={() => handleResetCredentials(user)}
-        disabled={busyUserId === `${user.id}-credentials`}
-        title="Reset account credentials"
+        onClick={() => setSelectedUser(user)}
+        title="Review account"
       >
-        <FiRefreshCw />
-        <span>
-          {busyUserId === `${user.id}-credentials`
-            ? 'Resetting...'
-            : 'Reset'}
-        </span>
+        <FiEye />
+        <span>View</span>
       </button>
 
-      <button
-        className="users-icon-btn users-archive-btn"
-        type="button"
-        onClick={() => handleArchiveToggle(user)}
-        disabled={busyUserId === `${user.id}-archive`}
-        title={user.isArchived ? 'Restore account' : 'Archive account'}
-      >
-        <FiArchive />
-        <span>
-          {user.isArchived ? 'Restore' : 'Archive'}
-        </span>
-      </button>
-    </>
-  )}
-</div>
+      {user.role !== "super_admin" && (
+        <>
+          <button
+            className="users-icon-btn users-reset-btn"
+            type="button"
+            onClick={() => handleResetCredentials(user)}
+            disabled={busyUserId === `${user.id}-credentials`}
+            title="Reset account credentials"
+          >
+            <FiRefreshCw />
+            <span>
+              {busyUserId === `${user.id}-credentials`
+                ? "Resetting..."
+                : "Reset"}
+            </span>
+          </button>
+
+          <button
+            className="users-icon-btn users-archive-btn"
+            type="button"
+            onClick={() => handleArchiveToggle(user)}
+            disabled={busyUserId === `${user.id}-archive`}
+            title={user.isArchived ? "Restore account" : "Archive account"}
+          >
+            <FiArchive />
+            <span>{user.isArchived ? "Restore" : "Archive"}</span>
+          </button>
+        </>
+      )}
+    </div>
   );
 
   const renderApprovalStatus = (user) => {
-      const verificationStatus = String(
-        user.verificationStatus || ''
-      ).toLowerCase();
+    const verificationStatus = String(
+      user.verificationStatus || "",
+    ).toLowerCase();
 
-      let label = 'Pending';
+    let label = "Pending";
 
-      if (verificationStatus === 'approved') {
-        label = 'Approved';
-      } else if (verificationStatus === 'declined') {
-        label = 'Declined';
-      } else if (verificationStatus === 'pending') {
-        label = 'Pending';
-      }
+    if (verificationStatus === "approved") {
+      label = "Approved";
+    } else if (verificationStatus === "declined") {
+      label = "Declined";
+    } else if (verificationStatus === "pending") {
+      label = "Pending";
+    }
 
-      return (
-        <span
-          className={`users-status is-${label.toLowerCase()}`}
-        >
-          {label}
-        </span>
-      );
-    };
+    return (
+      <span className={`users-status is-${label.toLowerCase()}`}>{label}</span>
+    );
+  };
 
   const renderGenericRows = (rows) =>
     rows.map((user) => {
@@ -2285,26 +2050,39 @@ const logBulkStudentImport = async ({
             </div>
           </td>
           <td>{user.email}</td>
-          <td><span className="users-role">{titleCase(user.role)}</span></td>
-          <td><span className={`users-status is-${status}`}>{titleCase(user.status)}</span></td>
+          <td>
+            <span className="users-role">{titleCase(user.role)}</span>
+          </td>
+          <td>
+            <span className={`users-status is-${status}`}>
+              {titleCase(user.status)}
+            </span>
+          </td>
           <td>{formatDate(user.joined)}</td>
           <td>{getAccountSecurityLabel(user)}</td>
           <td>
             <div className="users-action-group">
-              <button className="users-icon-btn users-view-btn" type="button" onClick={() => setSelectedUser(user)} title="Review account">
+              <button
+                className="users-icon-btn users-view-btn"
+                type="button"
+                onClick={() => setSelectedUser(user)}
+                title="Review account"
+              >
                 <FiEye />
                 <span>View</span>
               </button>
-              {user.role !== 'super_admin' && (
+              {user.role !== "super_admin" && (
                 <button
                   className="users-icon-btn users-archive-btn"
                   type="button"
                   onClick={() => handleArchiveToggle(user)}
                   disabled={busyUserId === `${user.id}-archive`}
-                  title={user.isArchived ? 'Restore account' : 'Archive account'}
+                  title={
+                    user.isArchived ? "Restore account" : "Archive account"
+                  }
                 >
                   <FiArchive />
-                  <span>{user.isArchived ? 'Restore' : 'Archive'}</span>
+                  <span>{user.isArchived ? "Restore" : "Archive"}</span>
                 </button>
               )}
             </div>
@@ -2317,7 +2095,11 @@ const logBulkStudentImport = async ({
     if (loading) {
       return (
         <tbody>
-          <tr><td className="users-empty" colSpan="8">Loading users...</td></tr>
+          <tr>
+            <td className="users-empty" colSpan="8">
+              Loading users...
+            </td>
+          </tr>
         </tbody>
       );
     }
@@ -2325,20 +2107,26 @@ const logBulkStudentImport = async ({
     if (visibleUsers.length === 0) {
       return (
         <tbody>
-          <tr><td className="users-empty" colSpan="8">No records found.</td></tr>
+          <tr>
+            <td className="users-empty" colSpan="8">
+              No records found.
+            </td>
+          </tr>
         </tbody>
       );
     }
 
-    if (activeTab === 'approvals') {
+    if (activeTab === "approvals") {
       return (
         <tbody>
           {visibleUsers.map((user) => (
             <tr key={user.id}>
-              <td><strong>{user.name}</strong></td>
+              <td>
+                <strong>{user.name}</strong>
+              </td>
               <td>{user.email}</td>
-              <td>{user.professorFacultyId || 'Not submitted'}</td>
-              <td>{user.professorDepartment || 'Not submitted'}</td>
+              <td>{user.professorFacultyId || "Not submitted"}</td>
+              <td>{user.professorDepartment || "Not submitted"}</td>
               <td>{renderProof(user, { compact: true })}</td>
               <td>{formatDate(user.joined)}</td>
               <td>{renderApprovalStatus(user)}</td>
@@ -2349,7 +2137,7 @@ const logBulkStudentImport = async ({
       );
     }
 
-    if (activeTab === 'students') {
+    if (activeTab === "students") {
       return (
         <tbody>
           {visibleUsers.map((user) => (
@@ -2359,17 +2147,28 @@ const logBulkStudentImport = async ({
                   <UserAvatar user={user} />
                   <div>
                     <strong>{user.name}</strong>
-                    <small>{user.studentId || 'No student ID'}</small>
+                    <small>{user.studentId || "No student ID"}</small>
                   </div>
                 </div>
               </td>
               <td>{user.email}</td>
               <td>{getAccountSecurityLabel(user)}</td>
-              <td><span className={`users-status is-${String(user.status).toLowerCase()}`}>{titleCase(user.status)}</span></td>
+              <td>
+                <span
+                  className={`users-status is-${String(user.status).toLowerCase()}`}
+                >
+                  {titleCase(user.status)}
+                </span>
+              </td>
               <td>{formatDate(user.joined)}</td>
               <td>
                 <div className="users-action-group">
-                  <button className="users-icon-btn users-view-btn" type="button" onClick={() => setSelectedUser(user)} title="Review student">
+                  <button
+                    className="users-icon-btn users-view-btn"
+                    type="button"
+                    onClick={() => setSelectedUser(user)}
+                    title="Review student"
+                  >
                     <FiEye />
                     <span>View</span>
                   </button>
@@ -2388,10 +2187,12 @@ const logBulkStudentImport = async ({
                     type="button"
                     onClick={() => handleArchiveToggle(user)}
                     disabled={busyUserId === `${user.id}-archive`}
-                    title={user.isArchived ? 'Restore account' : 'Archive account'}
+                    title={
+                      user.isArchived ? "Restore account" : "Archive account"
+                    }
                   >
                     <FiArchive />
-                    <span>{user.isArchived ? 'Restore' : 'Archive'}</span>
+                    <span>{user.isArchived ? "Restore" : "Archive"}</span>
                   </button>
                 </div>
               </td>
@@ -2401,22 +2202,34 @@ const logBulkStudentImport = async ({
       );
     }
 
-    if (activeTab === 'archived') {
+    if (activeTab === "archived") {
       return (
         <tbody>
           {visibleUsers.map((user) => (
             <tr key={user.id}>
-              <td><strong>{user.name}</strong></td>
+              <td>
+                <strong>{user.name}</strong>
+              </td>
               <td>{user.email}</td>
               <td>{titleCase(user.role)}</td>
               <td>{formatDate(user.joined)}</td>
               <td>
                 <div className="users-action-group">
-                  <button className="users-icon-btn users-archive-btn" type="button" onClick={() => handleArchiveToggle(user)} title="Restore account">
+                  <button
+                    className="users-icon-btn users-archive-btn"
+                    type="button"
+                    onClick={() => handleArchiveToggle(user)}
+                    title="Restore account"
+                  >
                     <FiArchive />
                     <span>Restore</span>
                   </button>
-                  <button className="users-icon-btn users-decline-btn" type="button" onClick={() => handlePermanentRemove(user)} title="Permanently remove">
+                  <button
+                    className="users-icon-btn users-decline-btn"
+                    type="button"
+                    onClick={() => handlePermanentRemove(user)}
+                    title="Permanently remove"
+                  >
                     <FiTrash2 />
                     <span>Delete</span>
                   </button>
@@ -2432,28 +2245,38 @@ const logBulkStudentImport = async ({
   };
 
   const tableHeaders =
-    activeTab === 'approvals'
-      ? ['Full Name', 'Email Address', 'Employee or Faculty ID', 'Department', 'Submitted Proof', 'Registration Date', 'Status', 'Actions']
-      : activeTab === 'students'
-      ? ['Student', 'Email', 'Credentials', 'Status', 'Registered', 'Actions']
-      : activeTab === 'archived'
-      ? ['Account', 'Email', 'Role', 'Registration Date', 'Actions']
-      : ['User', 'Email', 'Role', 'Status', 'Joined', 'Security', 'Action'];
+    activeTab === "approvals"
+      ? [
+          "Full Name",
+          "Email Address",
+          "Employee or Faculty ID",
+          "Department",
+          "Submitted Proof",
+          "Registration Date",
+          "Status",
+          "Actions",
+        ]
+      : activeTab === "students"
+        ? ["Student", "Email", "Credentials", "Status", "Registered", "Actions"]
+        : activeTab === "archived"
+          ? ["Account", "Email", "Role", "Registration Date", "Actions"]
+          : ["User", "Email", "Role", "Status", "Joined", "Security", "Action"];
 
   const studentImportPopupTitle =
-    studentImportStatus.state === 'reading'
-      ? 'Uploading file'
-      : studentImportStatus.state === 'importing'
-      ? 'Importing students'
-      : studentImportStatus.state === 'success' || studentImportStatus.state === 'partial'
-      ? 'Done'
-      : studentImportStatus.state === 'error'
-      ? 'Import failed'
-      : '';
+    studentImportStatus.state === "reading"
+      ? "Uploading file"
+      : studentImportStatus.state === "importing"
+        ? "Importing students"
+        : studentImportStatus.state === "success" ||
+            studentImportStatus.state === "partial"
+          ? "Done"
+          : studentImportStatus.state === "error"
+            ? "Import failed"
+            : "";
 
   return (
     <div className="users-page">
-      {studentImportStatus.state !== 'idle' && (
+      {studentImportStatus.state !== "idle" && (
         <aside
           className={`student-import-popup is-${studentImportStatus.state}`}
           role="status"
@@ -2461,11 +2284,11 @@ const logBulkStudentImport = async ({
           aria-atomic="true"
         >
           <span className="student-import-popup-icon">
-            {studentImportStatus.state === 'success' ? (
+            {studentImportStatus.state === "success" ? (
               <FiCheck />
-            ) : studentImportStatus.state === 'error' ? (
+            ) : studentImportStatus.state === "error" ? (
               <FiX />
-            ) : studentImportStatus.state === 'partial' ? (
+            ) : studentImportStatus.state === "partial" ? (
               <FiFileText />
             ) : (
               <FiClock />
@@ -2476,10 +2299,13 @@ const logBulkStudentImport = async ({
             <p>{studentImportStatus.message}</p>
             {studentImportStatus.fileName && (
               <span>
-                {studentImportStatus.fileName} - {formatFileSize(studentImportStatus.fileSize)}
+                {studentImportStatus.fileName} -{" "}
+                {formatFileSize(studentImportStatus.fileSize)}
               </span>
             )}
-            {studentImportStatus.detail && <small>{studentImportStatus.detail}</small>}
+            {studentImportStatus.detail && (
+              <small>{studentImportStatus.detail}</small>
+            )}
           </div>
           {!studentImportBusy && (
             <button
@@ -2497,19 +2323,34 @@ const logBulkStudentImport = async ({
       <div className="users-page-header">
         <div>
           <h1>User Management</h1>
-          <p>Manage accounts, professor approvals, student credentials, and archived users.</p>
+          <p>
+            Manage accounts, professor approvals, student credentials, and
+            archived users.
+          </p>
         </div>
 
         <div className="users-header-actions">
-          <button className="users-create-btn" type="button" onClick={() => setAdminModalOpen(true)}>
+          <button
+            className="users-create-btn"
+            type="button"
+            onClick={() => setAdminModalOpen(true)}
+          >
             <FiShield />
             Add Admin
           </button>
-          <button className="users-create-btn" type="button" onClick={() => setProfessorModalOpen(true)}>
+          <button
+            className="users-create-btn"
+            type="button"
+            onClick={() => setProfessorModalOpen(true)}
+          >
             <FiUserPlus />
             Add Professor
           </button>
-          <button className="users-create-btn" type="button" onClick={() => setStudentModalOpen(true)}>
+          <button
+            className="users-create-btn"
+            type="button"
+            onClick={() => setStudentModalOpen(true)}
+          >
             <FiPlus />
             Add Student
           </button>
@@ -2521,7 +2362,9 @@ const logBulkStudentImport = async ({
           const Icon = stat.icon;
           return (
             <div className="users-stat-card" key={stat.label}>
-              <div className="users-stat-icon"><Icon /></div>
+              <div className="users-stat-icon">
+                <Icon />
+              </div>
               <span>{stat.label}</span>
               <strong>{stat.value}</strong>
             </div>
@@ -2530,12 +2373,15 @@ const logBulkStudentImport = async ({
       </div>
 
       <section className="users-panel">
-        <div className="user-management-tabs" aria-label="User management sections">
+        <div
+          className="user-management-tabs"
+          aria-label="User management sections"
+        >
           {USER_TABS.map((tab) => (
             <button
               key={tab.id}
               type="button"
-              className={activeTab === tab.id ? 'active' : ''}
+              className={activeTab === tab.id ? "active" : ""}
               onClick={() => handleTabChange(tab.id)}
             >
               {tab.label}
@@ -2546,7 +2392,10 @@ const logBulkStudentImport = async ({
         <div className="users-panel-top">
           <div>
             <h2>{USER_TABS.find((tab) => tab.id === activeTab)?.label}</h2>
-            <p>{visibleUsers.length} record{visibleUsers.length === 1 ? '' : 's'} shown</p>
+            <p>
+              {visibleUsers.length} record{visibleUsers.length === 1 ? "" : "s"}{" "}
+              shown
+            </p>
           </div>
 
           <label className="users-search">
@@ -2560,11 +2409,14 @@ const logBulkStudentImport = async ({
           </label>
         </div>
 
-
         <div className="users-table-wrap">
           <table className="users-table">
             <thead>
-              <tr>{tableHeaders.map((header) => <th key={header}>{header}</th>)}</tr>
+              <tr>
+                {tableHeaders.map((header) => (
+                  <th key={header}>{header}</th>
+                ))}
+              </tr>
             </thead>
             {renderUserTable()}
           </table>
@@ -2572,34 +2424,59 @@ const logBulkStudentImport = async ({
       </section>
 
       {credentialResults.length > 0 && (
-        <div className="users-modal-backdrop" onClick={() => setCredentialResults([])}>
-          <section className="users-modal" onClick={(event) => event.stopPropagation()}>
-            <button className="users-modal-close" type="button" onClick={() => setCredentialResults([])} aria-label="Close credentials">
+        <div
+          className="users-modal-backdrop"
+          onClick={() => setCredentialResults([])}
+        >
+          <section
+            className="users-modal"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              className="users-modal-close"
+              type="button"
+              onClick={() => setCredentialResults([])}
+              aria-label="Close credentials"
+            >
               x
             </button>
             <div className="users-modal-profile">
-              <span className="users-modal-avatar"><FiKey /></span>
+              <span className="users-modal-avatar">
+                <FiKey />
+              </span>
               <div>
                 <h2>Temporary Credentials</h2>
-                <p>Share these with users. Temporary accounts stop working after their expiry date.</p>
+                <p>
+                  Share these with users. Temporary accounts stop working after
+                  their expiry date.
+                </p>
               </div>
             </div>
 
             <div className="credential-result-list">
               {credentialResults.map((item) => (
-                <div className="users-temp-box" key={`${item.email}-${item.temporaryPassword}`}>
-                  <span>{item.name} - {item.email}</span>
+                <div
+                  className="users-temp-box"
+                  key={`${item.email}-${item.temporaryPassword}`}
+                >
+                  <span>
+                    {item.name} - {item.email}
+                  </span>
                   <code>{item.temporaryPassword}</code>
                   <span>
                     {item.temporaryExpiresAt
                       ? `Temporary account expires ${formatDate(item.temporaryExpiresAt)}`
-                      : 'Permanent account'}
+                      : "Permanent account"}
                   </span>
                 </div>
               ))}
             </div>
 
-            <button className="users-submit-btn" type="button" onClick={copyCredentials}>
+            <button
+              className="users-submit-btn"
+              type="button"
+              onClick={copyCredentials}
+            >
               Copy Credentials
             </button>
           </section>
@@ -2607,29 +2484,67 @@ const logBulkStudentImport = async ({
       )}
 
       {adminModalOpen && (
-        <div className="users-modal-backdrop" onClick={() => setAdminModalOpen(false)}>
-          <section className="users-modal" onClick={(event) => event.stopPropagation()}>
-            <button className="users-modal-close" type="button" onClick={() => setAdminModalOpen(false)} aria-label="Close admin form">
+        <div
+          className="users-modal-backdrop"
+          onClick={() => setAdminModalOpen(false)}
+        >
+          <section
+            className="users-modal"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              className="users-modal-close"
+              type="button"
+              onClick={() => setAdminModalOpen(false)}
+              aria-label="Close admin form"
+            >
               x
             </button>
             <div className="users-modal-profile">
-              <span className="users-modal-avatar"><FiShield /></span>
+              <span className="users-modal-avatar">
+                <FiShield />
+              </span>
               <div>
                 <h2>Add Administrator</h2>
-                <p>Create an admin account with generated credentials and optional expiry.</p>
+                <p>
+                  Create an admin account with generated credentials and
+                  optional expiry.
+                </p>
               </div>
             </div>
             <form className="users-student-form" onSubmit={handleCreateAdmin}>
               <label>
                 Admin Name
-                <input type="text" value={adminForm.name} onChange={(event) => setAdminForm((form) => ({ ...form, name: event.target.value }))} required />
+                <input
+                  type="text"
+                  value={adminForm.name}
+                  onChange={(event) =>
+                    setAdminForm((form) => ({
+                      ...form,
+                      name: event.target.value,
+                    }))
+                  }
+                  required
+                />
               </label>
               <label>
                 Admin Email
-                <input type="email" value={adminForm.email} onChange={(event) => setAdminForm((form) => ({ ...form, email: event.target.value }))} required />
+                <input
+                  type="email"
+                  value={adminForm.email}
+                  onChange={(event) =>
+                    setAdminForm((form) => ({
+                      ...form,
+                      email: event.target.value,
+                    }))
+                  }
+                  required
+                />
               </label>
               {renderAccountTypeFields(adminForm, setAdminForm)}
-              <button className="users-submit-btn" type="submit">Create Admin Account</button>
+              <button className="users-submit-btn" type="submit">
+                Create Admin Account
+              </button>
             </form>
           </section>
         </div>
@@ -2637,7 +2552,10 @@ const logBulkStudentImport = async ({
 
       {professorModalOpen && (
         <div className="users-modal-backdrop" onClick={closeProfessorModal}>
-          <section className="users-modal" onClick={(event) => event.stopPropagation()}>
+          <section
+            className="users-modal"
+            onClick={(event) => event.stopPropagation()}
+          >
             <button
               className="users-modal-close"
               type="button"
@@ -2648,10 +2566,15 @@ const logBulkStudentImport = async ({
               x
             </button>
             <div className="users-modal-profile">
-              <span className="users-modal-avatar"><FiFileText /></span>
+              <span className="users-modal-avatar">
+                <FiFileText />
+              </span>
               <div>
                 <h2>Add Professor</h2>
-                <p>Fill in the same professor registration details and upload their school ID.</p>
+                <p>
+                  Fill in the same professor registration details and upload
+                  their school ID.
+                </p>
               </div>
             </div>
             <form
@@ -2663,7 +2586,7 @@ const logBulkStudentImport = async ({
                 <input
                   type="text"
                   value={professorForm.name}
-                  onChange={handleProfessorFieldChange('name')}
+                  onChange={handleProfessorFieldChange("name")}
                   placeholder="Enter professor full name"
                   disabled={creatingProfessor}
                   autoComplete="name"
@@ -2676,7 +2599,7 @@ const logBulkStudentImport = async ({
                 <input
                   type="email"
                   value={professorForm.email}
-                  onChange={handleProfessorFieldChange('email')}
+                  onChange={handleProfessorFieldChange("email")}
                   placeholder="Enter professor email"
                   disabled={creatingProfessor}
                   autoComplete="email"
@@ -2689,7 +2612,7 @@ const logBulkStudentImport = async ({
                 <input
                   type="text"
                   value={professorForm.facultyId}
-                  onChange={handleProfessorFieldChange('facultyId')}
+                  onChange={handleProfessorFieldChange("facultyId")}
                   placeholder="Enter employee or faculty ID"
                   disabled={creatingProfessor}
                   maxLength={100}
@@ -2701,7 +2624,7 @@ const logBulkStudentImport = async ({
                 Department
                 <select
                   value={professorForm.department}
-                  onChange={handleProfessorFieldChange('department')}
+                  onChange={handleProfessorFieldChange("department")}
                   disabled={creatingProfessor}
                   required
                 >
@@ -2724,20 +2647,21 @@ const logBulkStudentImport = async ({
                 </label>
 
                 <p className="professor-proof-description">
-                  Upload a clear photo of the front of their valid school faculty
-                  or employee ID. Accepted formats are JPG, PNG, and WEBP, up to 5 MB.
+                  Upload a clear photo of the front of their valid school
+                  faculty or employee ID. Accepted formats are JPG, PNG, and
+                  WEBP, up to 5 MB.
                 </p>
 
                 <div className="professor-proof-upload-area">
                   <input
-                      id="superadmin-professor-proof"
-                      type="file"
-                      accept={PROFESSOR_PROOF_ACCEPT}
-                      className="professor-proof-file-input"
-                      disabled={creatingProfessor}
-                      onChange={handleProfessorProofUpload}
-                      required
-                    />
+                    id="superadmin-professor-proof"
+                    type="file"
+                    accept={PROFESSOR_PROOF_ACCEPT}
+                    className="professor-proof-file-input"
+                    disabled={creatingProfessor}
+                    onChange={handleProfessorProofUpload}
+                    required
+                  />
 
                   <label
                     className="users-secondary-btn professor-proof-upload-btn"
@@ -2745,8 +2669,8 @@ const logBulkStudentImport = async ({
                   >
                     <FiUpload />
                     {professorForm.employmentProof
-                      ? 'Change ID Photo'
-                      : 'Choose ID Photo'}
+                      ? "Change ID Photo"
+                      : "Choose ID Photo"}
                   </label>
 
                   {professorForm.employmentProof && (
@@ -2781,8 +2705,8 @@ const logBulkStudentImport = async ({
                 disabled={creatingProfessor}
               >
                 {creatingProfessor
-                  ? 'Creating Professor...'
-                  : 'Create Professor Account'}
+                  ? "Creating Professor..."
+                  : "Create Professor Account"}
               </button>
             </form>
           </section>
@@ -2791,7 +2715,10 @@ const logBulkStudentImport = async ({
 
       {studentModalOpen && (
         <div className="users-modal-backdrop" onClick={closeStudentModal}>
-          <section className="users-modal" onClick={(event) => event.stopPropagation()}>
+          <section
+            className="users-modal"
+            onClick={(event) => event.stopPropagation()}
+          >
             <button
               className="users-modal-close"
               type="button"
@@ -2802,16 +2729,23 @@ const logBulkStudentImport = async ({
               x
             </button>
             <div className="users-modal-profile">
-              <span className="users-modal-avatar"><FiUser /></span>
+              <span className="users-modal-avatar">
+                <FiUser />
+              </span>
               <div>
                 <h2>Add Student</h2>
-                <p>Create a permanent student account with generated credentials.</p>
+                <p>
+                  Create a permanent student account with generated credentials.
+                </p>
               </div>
             </div>
             <div className="student-import-panel">
               <div>
                 <strong>Bulk Import Students</strong>
-                <p>Upload a CSV or Excel file with name, email, student ID, year level, and section columns.</p>
+                <p>
+                  Upload a CSV or Excel file with name, email, student ID, year
+                  level, and section columns.
+                </p>
               </div>
               <button
                 className="users-secondary-btn"
@@ -2940,9 +2874,20 @@ const logBulkStudentImport = async ({
       )}
 
       {selectedUser && (
-        <div className="users-modal-backdrop" onClick={() => setSelectedUser(null)}>
-          <section className="users-modal" onClick={(event) => event.stopPropagation()}>
-            <button className="users-modal-close" type="button" onClick={() => setSelectedUser(null)} aria-label="Close user details">
+        <div
+          className="users-modal-backdrop"
+          onClick={() => setSelectedUser(null)}
+        >
+          <section
+            className="users-modal"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              className="users-modal-close"
+              type="button"
+              onClick={() => setSelectedUser(null)}
+              aria-label="Close user details"
+            >
               x
             </button>
             <div className="users-modal-profile">
@@ -2953,16 +2898,54 @@ const logBulkStudentImport = async ({
               </div>
             </div>
             <dl className="users-detail-grid">
-              <div><dt>User ID</dt><dd>{selectedUser.id}</dd></div>
-              <div><dt>Role</dt><dd>{titleCase(selectedUser.role)}</dd></div>
-              <div><dt>Status</dt><dd>{titleCase(selectedUser.status)}</dd></div>
-              <div><dt>Registered</dt><dd>{formatDate(selectedUser.joined)}</dd></div>
-              <div><dt>Faculty ID</dt><dd>{selectedUser.professorFacultyId || 'None'}</dd></div>
-              <div><dt>Department</dt><dd>{selectedUser.professorDepartment || 'None'}</dd></div>
-              <div className="users-proof-detail"><dt>Proof</dt><dd>{renderProof(selectedUser)}</dd></div>
-              <div><dt>Account Type</dt><dd>{selectedUser.isTemporary ? 'Temporary' : 'Permanent'}</dd></div>
-              <div><dt>Expires</dt><dd>{selectedUser.isTemporary ? formatDate(selectedUser.temporaryExpiresAt) : 'Never'}</dd></div>
-              <div><dt>Password</dt><dd>{selectedUser.mustChangePassword ? 'Temporary' : 'User managed'}</dd></div>
+              <div>
+                <dt>User ID</dt>
+                <dd>{selectedUser.id}</dd>
+              </div>
+              <div>
+                <dt>Role</dt>
+                <dd>{titleCase(selectedUser.role)}</dd>
+              </div>
+              <div>
+                <dt>Status</dt>
+                <dd>{titleCase(selectedUser.status)}</dd>
+              </div>
+              <div>
+                <dt>Registered</dt>
+                <dd>{formatDate(selectedUser.joined)}</dd>
+              </div>
+              <div>
+                <dt>Faculty ID</dt>
+                <dd>{selectedUser.professorFacultyId || "None"}</dd>
+              </div>
+              <div>
+                <dt>Department</dt>
+                <dd>{selectedUser.professorDepartment || "None"}</dd>
+              </div>
+              <div className="users-proof-detail">
+                <dt>Proof</dt>
+                <dd>{renderProof(selectedUser)}</dd>
+              </div>
+              <div>
+                <dt>Account Type</dt>
+                <dd>{selectedUser.isTemporary ? "Temporary" : "Permanent"}</dd>
+              </div>
+              <div>
+                <dt>Expires</dt>
+                <dd>
+                  {selectedUser.isTemporary
+                    ? formatDate(selectedUser.temporaryExpiresAt)
+                    : "Never"}
+                </dd>
+              </div>
+              <div>
+                <dt>Password</dt>
+                <dd>
+                  {selectedUser.mustChangePassword
+                    ? "Temporary"
+                    : "User managed"}
+                </dd>
+              </div>
             </dl>
           </section>
         </div>

@@ -1,3 +1,8 @@
+import {
+  fetchCourseContent,
+  getCourseQuizItems,
+} from "../../../course/courseContent.js";
+import { lessonAuthHeaders } from "../../../../services/lessonAuth.js";
 import { saveAccountQuizResult } from "../../../../utils/quizStorage.js";
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -24,7 +29,7 @@ export default function Quiz() {
   const isDeckMode = Boolean(deckId);
   const practiceSession = useMemo(
     () => getStoredPracticeSession({ lessonId, deckId }),
-    [lessonId, deckId]
+    [lessonId, deckId],
   );
 
   const [title, setTitle] = useState("Multiple Choice");
@@ -58,7 +63,9 @@ export default function Quiz() {
   };
 
   const cleanOptionText = (text = "") => {
-    return String(text).replace(/^[A-D]\.\s*/i, "").trim();
+    return String(text)
+      .replace(/^[A-D]\.\s*/i, "")
+      .trim();
   };
 
   const addLetterPrefix = (option, index) => {
@@ -86,7 +93,9 @@ export default function Quiz() {
   };
 
   const isSameText = (a, b) => {
-    return cleanOptionText(a).toLowerCase() === cleanOptionText(b).toLowerCase();
+    return (
+      cleanOptionText(a).toLowerCase() === cleanOptionText(b).toLowerCase()
+    );
   };
 
   const getUniqueOptions = (options) => {
@@ -134,7 +143,11 @@ export default function Quiz() {
     ].filter(Boolean);
   };
 
-  const generateWrongOptions = async (question, correctAnswer, cardId = null) => {
+  const generateWrongOptions = async (
+    question,
+    correctAnswer,
+    cardId = null,
+  ) => {
     try {
       const res = await fetch(`${API_BASE}/generate-options.php`, {
         method: "POST",
@@ -162,7 +175,7 @@ export default function Quiz() {
         .filter((opt) => !isSameText(opt, correctAnswer))
         .filter(
           (opt) =>
-            !["true", "false"].includes(cleanOptionText(opt).toLowerCase())
+            !["true", "false"].includes(cleanOptionText(opt).toLowerCase()),
         )
         .slice(0, 3);
 
@@ -224,17 +237,55 @@ export default function Quiz() {
         if (practiceSession) {
           setTitle(getPracticeTitle(practiceSession, "Practice Quiz"));
 
+          let answerItems = practiceSession.items;
+          if (practiceSession.scope?.courseId) {
+            try {
+              const course = await fetchCourseContent(
+                practiceSession.scope.courseId,
+              );
+              answerItems = [...answerItems, ...getCourseQuizItems(course)];
+            } catch (error) {
+              console.warn("Could not load other saved quiz answers.", error);
+            }
+          }
+          const answerPool = answerItems.map(getQuizItemAnswer);
           const practiceQuestions = practiceSession.items
             .map((item) => {
               const rawQuestionText = getQuizItemQuestion(item);
               const { questionOnly, extractedOptions } =
                 splitQuestionAndOptions(rawQuestionText);
               const correctAnswer = getQuizItemAnswer(item);
-              if (item.type === 'identification' && String(correctAnswer).trim()) {
-                return { type: 'identification', cardId: item.cardId || item.id || null, q: questionOnly, options: [], correctAnswer, explanation: item.explanation || correctAnswer };
+              if (
+                item.type === "identification" &&
+                String(correctAnswer).trim()
+              ) {
+                const pool =
+                  typeof answerPool !== "undefined"
+                    ? answerPool
+                    : parsed.map(getQuizItemAnswer);
+                const wrongOptions = shuffleArray(getUniqueOptions(pool))
+                  .filter(
+                    (answer) =>
+                      !isSameText(answer, correctAnswer) &&
+                      !["true", "false"].includes(
+                        cleanOptionText(answer).toLowerCase(),
+                      ),
+                  )
+                  .slice(0, 3);
+                if (wrongOptions.length < 3) return null;
+                return {
+                  type: "multiple_choice",
+                  cardId: item.cardId || item.id || null,
+                  q: questionOnly,
+                  options: shuffleArray([correctAnswer, ...wrongOptions]),
+                  correctAnswer,
+                  explanation: item.explanation || correctAnswer,
+                };
               }
               const answerLower = String(correctAnswer).trim().toLowerCase();
-              const questionLower = String(rawQuestionText).trim().toLowerCase();
+              const questionLower = String(rawQuestionText)
+                .trim()
+                .toLowerCase();
 
               if (
                 item.type === "true_false" ||
@@ -247,15 +298,17 @@ export default function Quiz() {
 
               const rawOptions =
                 Array.isArray(item.options) && item.options.length > 0
-                  ? item.options.filter((opt) => opt && String(opt).trim() !== "")
+                  ? item.options.filter(
+                      (opt) => opt && String(opt).trim() !== "",
+                    )
                   : extractedOptions.length > 0
-                  ? extractedOptions
-                  : getSavedOptions(item);
+                    ? extractedOptions
+                    : getSavedOptions(item);
 
-              const options = getUniqueOptions([correctAnswer, ...rawOptions]).slice(
-                0,
-                4
-              );
+              const options = getUniqueOptions([
+                correctAnswer,
+                ...rawOptions,
+              ]).slice(0, 4);
 
               if (options.length < 4) return null;
 
@@ -276,7 +329,7 @@ export default function Quiz() {
         if (isLessonMode) {
           const res = await fetch(
             `${API_BASE}/getLessonsById.php?id=${lessonId}`,
-            { credentials: "include" }
+            { credentials: "include" },
           );
 
           const lessonData = normalizeLessonData(await res.json());
@@ -302,10 +355,34 @@ export default function Quiz() {
             const correctAnswer =
               item.correct_answer || item.correctAnswer || item.answer || "";
 
-            if (item.type === 'identification' && String(correctAnswer).trim()) {
-                return { type: 'identification', cardId: item.cardId || item.id || null, q: questionOnly, options: [], correctAnswer, explanation: item.explanation || correctAnswer };
-              }
-              const answerLower = String(correctAnswer).trim().toLowerCase();
+            if (
+              item.type === "identification" &&
+              String(correctAnswer).trim()
+            ) {
+              const pool =
+                typeof answerPool !== "undefined"
+                  ? answerPool
+                  : parsed.map(getQuizItemAnswer);
+              const wrongOptions = shuffleArray(getUniqueOptions(pool))
+                .filter(
+                  (answer) =>
+                    !isSameText(answer, correctAnswer) &&
+                    !["true", "false"].includes(
+                      cleanOptionText(answer).toLowerCase(),
+                    ),
+                )
+                .slice(0, 3);
+              if (wrongOptions.length < 3) return null;
+              return {
+                type: "multiple_choice",
+                cardId: item.cardId || item.id || null,
+                q: questionOnly,
+                options: shuffleArray([correctAnswer, ...wrongOptions]),
+                correctAnswer,
+                explanation: item.explanation || correctAnswer,
+              };
+            }
+            const answerLower = String(correctAnswer).trim().toLowerCase();
             const questionLower = String(rawQuestionText).trim().toLowerCase();
 
             if (
@@ -341,7 +418,7 @@ export default function Quiz() {
         if (isDeckMode) {
           const deckRes = await fetch(
             `${API_BASE}/getDeckById.php?deckId=${deckId}`,
-            { credentials: "include" }
+            { credentials: "include" },
           );
 
           const deckData = await deckRes.json();
@@ -358,7 +435,7 @@ export default function Quiz() {
 
           const cardsRes = await fetch(
             `${API_BASE}/getCardsByDeck.php?deckId=${deckId}`,
-            { credentials: "include" }
+            { credentials: "include" },
           );
 
           const cardsData = await cardsRes.json();
@@ -376,7 +453,9 @@ export default function Quiz() {
               const cardId = card.cardId || card.card_id || card.id || null;
 
               const answerLower = String(correctAnswer).trim().toLowerCase();
-              const questionLower = String(rawQuestionText).trim().toLowerCase();
+              const questionLower = String(rawQuestionText)
+                .trim()
+                .toLowerCase();
 
               if (
                 answerLower === "true" ||
@@ -398,13 +477,13 @@ export default function Quiz() {
                 options = getUniqueOptions(extractedOptions).slice(0, 4);
               } else if (savedOptions.length >= 3) {
                 options = shuffleArray(
-                  getUniqueOptions([correctAnswer, ...savedOptions])
+                  getUniqueOptions([correctAnswer, ...savedOptions]),
                 ).slice(0, 4);
               } else {
                 const generated = await generateWrongOptions(
                   questionOnly,
                   correctAnswer,
-                  cardId
+                  cardId,
                 );
 
                 if (generated.wrongOptions.length < 3) {
@@ -414,7 +493,7 @@ export default function Quiz() {
                 explanation = generated.explanation || correctAnswer;
 
                 options = shuffleArray(
-                  getUniqueOptions([correctAnswer, ...generated.wrongOptions])
+                  getUniqueOptions([correctAnswer, ...generated.wrongOptions]),
                 ).slice(0, 4);
               }
 
@@ -427,7 +506,7 @@ export default function Quiz() {
                 correctAnswer,
                 explanation,
               };
-            })
+            }),
           );
 
           const deckQuestions = deckQuestionsRaw.filter(Boolean);
@@ -453,7 +532,7 @@ export default function Quiz() {
   const question = questions[current];
 
   const cleanOptions = (question?.options || []).filter(
-    (opt) => opt && String(opt).trim() !== ""
+    (opt) => opt && String(opt).trim() !== "",
   );
 
   const visibleOptions = cleanOptions
@@ -465,7 +544,7 @@ export default function Quiz() {
     : Math.min(current + 1, questions.length);
   const checkpointQuestions = questions.slice(
     checkpointStartIndex,
-    checkpointEndIndex
+    checkpointEndIndex,
   );
   const checkpointProgress = questions.length
     ? (checkpointEndIndex / questions.length) * 100
@@ -474,7 +553,7 @@ export default function Quiz() {
   async function saveQuizAttempt(finalScore) {
     const metadata = getPracticeResultMetadata(
       practiceSession,
-      isDeckMode ? "deck" : "lesson"
+      isDeckMode ? "deck" : "lesson",
     );
 
     try {
@@ -482,6 +561,7 @@ export default function Quiz() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...lessonAuthHeaders(),
         },
         credentials: "include",
         body: JSON.stringify({
@@ -501,10 +581,11 @@ export default function Quiz() {
   }
 
   async function finishQuiz(finalScore, finalAnswers, returnToDeck = false) {
-    await saveQuizAttempt(finalScore);
-
     const resultPayload = {
-      ...getPracticeResultMetadata(practiceSession, isDeckMode ? "deck" : "lesson"),
+      ...getPracticeResultMetadata(
+        practiceSession,
+        isDeckMode ? "deck" : "lesson",
+      ),
       quizMode: "multiple",
       deckId: toNumericId(deckId),
       lessonId: lessonId || null,
@@ -518,7 +599,7 @@ export default function Quiz() {
     if (isDeckMode) {
       saveAccountQuizResult(
         `deckQuizResults_${deckId}`,
-        JSON.stringify(resultPayload)
+        JSON.stringify(resultPayload),
       );
     }
 
@@ -527,14 +608,16 @@ export default function Quiz() {
       returnToDeck && isDeckMode
         ? `/deck/${deckId}`
         : isDeckMode
-        ? `/review/deck/${deckId}`
-        : getPracticeReviewPath(practiceSession, { lessonId, deckId })
+          ? `/review/deck/${deckId}`
+          : getPracticeReviewPath(practiceSession, { lessonId, deckId }),
     );
   }
 
   function repeatCheckpointQuestions() {
     const repeatedAnswers = answers.slice(0, checkpointStartIndex);
-    const repeatedScore = repeatedAnswers.filter((answer) => answer.isCorrect).length;
+    const repeatedScore = repeatedAnswers.filter(
+      (answer) => answer.isCorrect,
+    ).length;
 
     setAnswers(repeatedAnswers);
     setScore(repeatedScore);
@@ -558,10 +641,18 @@ export default function Quiz() {
     setSelected(index);
     setLocked(true);
 
-    const chosenAnswer = question.type === 'identification' ? String(identificationValue || "").trim() : visibleOptions[index] || question.options[index] || "";
-    const isCorrect = question.type === 'identification'
-      ? chosenAnswer.replace(/\s+/g, ' ').toLowerCase() === String(question.correctAnswer).trim().replace(/\s+/g, ' ').toLowerCase()
-      : isSameText(chosenAnswer, question.correctAnswer);
+    const chosenAnswer =
+      question.type === "identification"
+        ? String(identificationValue || "").trim()
+        : visibleOptions[index] || question.options[index] || "";
+    const isCorrect =
+      question.type === "identification"
+        ? chosenAnswer.replace(/\s+/g, " ").toLowerCase() ===
+          String(question.correctAnswer)
+            .trim()
+            .replace(/\s+/g, " ")
+            .toLowerCase()
+        : isSameText(chosenAnswer, question.correctAnswer);
     const newScore = score + (isCorrect ? 1 : 0);
 
     const newAnswer = {
@@ -639,7 +730,7 @@ export default function Quiz() {
               navigate(
                 isDeckMode
                   ? `/review/deck/${deckId}`
-                  : getPracticeBackPath(practiceSession, { lessonId, deckId })
+                  : getPracticeBackPath(practiceSession, { lessonId, deckId }),
               )
             }
           >
@@ -654,7 +745,6 @@ export default function Quiz() {
 
   return (
     <div className={styles.wrapper}>
-
       <button
         type="button"
         className={styles.settingsBtn}
@@ -724,138 +814,162 @@ export default function Quiz() {
         </div>
       ) : (
         <>
-      <div className={styles.header}>
-        <h1 className={styles.title}>{title}</h1>
+          <div className={styles.header}>
+            <h1 className={styles.title}>{title}</h1>
 
-        <div className={styles.progressContainer}>
-          <div
-            className={styles.progressBar}
-            style={{ width: `${progressPercent}%` }}
-          />
-        </div>
+            <div className={styles.progressContainer}>
+              <div
+                className={styles.progressBar}
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
 
-        {settingsOpen && (
-          <div className={styles.settingsOverlay}>
-            <div className={styles.settingsModal}>
-              <div className={styles.settingsHeader}>
-                <h2>Accessibility Settings</h2>
+            {settingsOpen && (
+              <div className={styles.settingsOverlay}>
+                <div className={styles.settingsModal}>
+                  <div className={styles.settingsHeader}>
+                    <h2>Accessibility Settings</h2>
 
-                <button
-                  type="button"
-                  className={styles.closeSettings}
-                  onClick={() => setSettingsOpen(false)}
-                >
-                  ×
-                </button>
-              </div>
+                    <button
+                      type="button"
+                      className={styles.closeSettings}
+                      onClick={() => setSettingsOpen(false)}
+                    >
+                      ×
+                    </button>
+                  </div>
 
-              <div className={styles.settingsBody}>
-                <div className={styles.settingRow}>
-                  <div className={styles.settingInfo}>
-                    <div className={styles.settingIcon}>🔊</div>
+                  <div className={styles.settingsBody}>
+                    <div className={styles.settingRow}>
+                      <div className={styles.settingInfo}>
+                        <div className={styles.settingIcon}>🔊</div>
 
-                    <div className={styles.settingText}>
-                      <strong>Text to Speech</strong>
-                      <span>Read questions and choices aloud</span>
+                        <div className={styles.settingText}>
+                          <strong>Text to Speech</strong>
+                          <span>Read questions and choices aloud</span>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        className={`${styles.switchBtn} ${
+                          ttsEnabled ? styles.switchOn : ""
+                        }`}
+                        onClick={() => {
+                          setTtsEnabled((prev) => !prev);
+                          window.speechSynthesis?.cancel();
+                        }}
+                      >
+                        {ttsEnabled ? "ON" : "OFF"}
+                      </button>
+                    </div>
+
+                    <div className={styles.speedBox}>
+                      <div className={styles.speedHeader}>
+                        <label>Voice Speed</label>
+
+                        <span className={styles.speedValue}>
+                          {voiceSpeed.toFixed(1)}x
+                        </span>
+                      </div>
+
+                      <input
+                        type="range"
+                        min="0.5"
+                        max="1.5"
+                        step="0.1"
+                        value={voiceSpeed}
+                        onChange={(e) => {
+                          setVoiceSpeed(Number(e.target.value));
+                          window.speechSynthesis?.cancel();
+                        }}
+                      />
                     </div>
                   </div>
-
-                  <button
-                    type="button"
-                    className={`${styles.switchBtn} ${
-                      ttsEnabled ? styles.switchOn : ""
-                    }`}
-                    onClick={() => {
-                      setTtsEnabled((prev) => !prev);
-                      window.speechSynthesis?.cancel();
-                    }}
-                  >
-                    {ttsEnabled ? "ON" : "OFF"}
-                  </button>
-                </div>
-
-                <div className={styles.speedBox}>
-                  <div className={styles.speedHeader}>
-                    <label>Voice Speed</label>
-
-                    <span className={styles.speedValue}>
-                      {voiceSpeed.toFixed(1)}x
-                    </span>
-                  </div>
-
-                  <input
-                    type="range"
-                    min="0.5"
-                    max="1.5"
-                    step="0.1"
-                    value={voiceSpeed}
-                    onChange={(e) => {
-                      setVoiceSpeed(Number(e.target.value));
-                      window.speechSynthesis?.cancel();
-                    }}
-                  />
                 </div>
               </div>
-            </div>
+            )}
+
+            <p className={styles.subtitle}>
+              Question {current + 1} of {questions.length}
+            </p>
           </div>
-        )}
 
-        <p className={styles.subtitle}>
-          Question {current + 1} of {questions.length}
-        </p>
-      </div>
+          <div className={styles.questionBox}>
+            <div className={styles.questionTextBox}>
+              {ttsEnabled && (
+                <button
+                  type="button"
+                  className={styles.audioIconBtn}
+                  onClick={() => speakText(question.q)}
+                >
+                  <i className="bx bx-volume-full"></i>
+                </button>
+              )}
 
-      <div className={styles.questionBox}>
-        <div className={styles.questionTextBox}>
-          {ttsEnabled && (
-            <button
-              type="button"
-              className={styles.audioIconBtn}
-              onClick={() => speakText(question.q)}
-            >
-              <i className="bx bx-volume-full"></i>
-            </button>
-          )}
+              <p className={styles.question}>{question.q}</p>
+            </div>
 
-          <p className={styles.question}>{question.q}</p>
-        </div>
-
-        {question.type === 'identification' ? <form className={styles.options} onSubmit={event => { event.preventDefault(); if (typedAnswer.trim()) handleAnswer(-1, typedAnswer); }}>
-          <input className={styles.identificationInput} aria-label="Your identification answer" placeholder="Type your answer" maxLength={150} value={typedAnswer} onChange={event => setTypedAnswer(event.target.value)} disabled={locked} />
-          <button className={styles.option} type="submit" disabled={locked || !typedAnswer.trim()}>Submit answer</button>
-        </form> : <div className={styles.options}>
-          {visibleOptions.map((opt, i) => {
-            const isSelected = selected === i;
-
-            const optionClass = isSelected
-              ? `${styles.option} ${styles.selected}`
-              : styles.option;
-
-            return (
-              <button
-                key={i}
-                className={optionClass}
-                onClick={() => handleAnswer(i)}
-                disabled={locked}
+            {question.type === "identification" ? (
+              <form
+                className={styles.options}
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  if (typedAnswer.trim()) handleAnswer(-1, typedAnswer);
+                }}
               >
-                {ttsEnabled && (
-                  <span
-                    className={styles.optionAudioIcon}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      speakText(opt);
-                    }}
-                  >
-                    <i className="bx bx-volume-full"></i>
-                  </span>
-                )}
+                <input
+                  className={styles.identificationInput}
+                  aria-label="Your identification answer"
+                  placeholder="Type your answer"
+                  maxLength={150}
+                  value={typedAnswer}
+                  onChange={(event) => setTypedAnswer(event.target.value)}
+                  disabled={locked}
+                />
+                <button
+                  className={styles.option}
+                  type="submit"
+                  disabled={locked || !typedAnswer.trim()}
+                >
+                  Submit answer
+                </button>
+              </form>
+            ) : (
+              <div className={styles.options}>
+                {visibleOptions.map((opt, i) => {
+                  const isSelected = selected === i;
 
-                <span>{opt}</span>
-              </button>
-            );
-          })}
-        </div>}
-      </div>
+                  const optionClass = isSelected
+                    ? `${styles.option} ${styles.selected}`
+                    : styles.option;
+
+                  return (
+                    <button
+                      key={i}
+                      className={optionClass}
+                      onClick={() => handleAnswer(i)}
+                      disabled={locked}
+                    >
+                      {ttsEnabled && (
+                        <span
+                          className={styles.optionAudioIcon}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            speakText(opt);
+                          }}
+                        >
+                          <i className="bx bx-volume-full"></i>
+                        </span>
+                      )}
+
+                      <span>{opt}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </>
       )}
     </div>

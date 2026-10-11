@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink, Link, useLocation, useNavigate } from "react-router-dom";
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from "../../context/AuthContext";
 import { FiLogOut } from "react-icons/fi";
 
 import { Icon } from "../../pages/student/enrolled/EnrolledCourses";
@@ -37,20 +37,13 @@ function normalizeCourse(course) {
       course.courseCode ||
       course.course_code,
 
-    code:
-      course.code ||
-      course.courseCode ||
-      course.course_code ||
-      "COURSE",
+    code: course.code || course.courseCode || course.course_code || "COURSE",
 
     title,
   };
 }
 
-export default function StudentSidebar({
-  collapsed,
-  onCollapsedChange,
-}) {
+export default function StudentSidebar({ collapsed, onCollapsedChange }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { logout } = useAuth();
@@ -59,8 +52,7 @@ export default function StudentSidebar({
     return localStorage.getItem("sidebarCollapsed") === "true";
   });
 
-  const [enrolledCoursesOpen, setEnrolledCoursesOpen] =
-    useState(false);
+  const [enrolledCoursesOpen, setEnrolledCoursesOpen] = useState(false);
 
   const [enrolledCourses, setEnrolledCourses] = useState([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
@@ -71,9 +63,7 @@ export default function StudentSidebar({
    * 2. controlled by StudentLayout later.
    */
   const sidebarCollapsed =
-    typeof collapsed === "boolean"
-      ? collapsed
-      : internalCollapsed;
+    typeof collapsed === "boolean" ? collapsed : internalCollapsed;
 
   useEffect(() => {
     let active = true;
@@ -100,15 +90,13 @@ export default function StudentSidebar({
               Accept: "application/json",
               Authorization: `Bearer ${token}`,
             },
-          }
+          },
         );
 
         const data = await response.json().catch(() => ({}));
 
         if (!response.ok) {
-          throw new Error(
-            data.message || "Could not load enrolled courses."
-          );
+          throw new Error(data.message || "Could not load enrolled courses.");
         }
 
         const courses = Array.isArray(data.courses)
@@ -121,10 +109,7 @@ export default function StudentSidebar({
           setEnrolledCourses(courses.map(normalizeCourse));
         }
       } catch (error) {
-        console.error(
-          "Sidebar enrolled courses loading error:",
-          error
-        );
+        console.error("Sidebar enrolled courses loading error:", error);
 
         if (active) {
           setEnrolledCourses([]);
@@ -146,10 +131,7 @@ export default function StudentSidebar({
   const toggleSidebar = () => {
     const newValue = !sidebarCollapsed;
 
-    localStorage.setItem(
-      "sidebarCollapsed",
-      String(newValue)
-    );
+    localStorage.setItem("sidebarCollapsed", String(newValue));
 
     if (typeof onCollapsedChange === "function") {
       onCollapsedChange(newValue);
@@ -162,7 +144,7 @@ export default function StudentSidebar({
         detail: {
           collapsed: newValue,
         },
-      })
+      }),
     );
   };
 
@@ -174,9 +156,7 @@ export default function StudentSidebar({
   };
 
   const getNavClass = ({ isActive }) =>
-    `side-nav-item plain-nav-item ${
-      isActive ? "active" : ""
-    }`;
+    `side-nav-item plain-nav-item ${isActive ? "active" : ""}`;
 
   return (
     <aside
@@ -194,45 +174,28 @@ export default function StudentSidebar({
           alt="PuffyBrain logo"
           className="sidebar-logo"
           onClick={toggleSidebar}
-          title={
-            sidebarCollapsed
-              ? "Expand sidebar"
-              : "Collapse sidebar"
-          }
+          title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         />
 
-        <span className="brand-name">
-          PuffyBrain
-        </span>
+        <span className="brand-name">PuffyBrain</span>
       </div>
 
       {/* =========================
           NAVIGATION
       ========================= */}
 
-      <nav
-        className="side-nav"
-        aria-label="Student navigation"
-      >
+      <nav className="side-nav" aria-label="Student navigation">
         <NavLink
           to="/student"
           end
           className={({ isActive }) =>
-            `side-nav-item ${
-              isActive ? "active" : ""
-            }`
+            `side-nav-item ${isActive ? "active" : ""}`
           }
-          title={
-            sidebarCollapsed
-              ? "Home"
-              : undefined
-          }
+          title={sidebarCollapsed ? "Home" : undefined}
         >
           <Icon name="home" />
 
-          <span className="nav-label">
-            Home
-          </span>
+          <span className="nav-label">Home</span>
         </NavLink>
 
         {/* =========================
@@ -243,26 +206,18 @@ export default function StudentSidebar({
           <button
             type="button"
             className={`side-nav-item sidebar-enrolled-toggle ${
-              location.pathname.startsWith(
-                "/student/enrolled-courses"
-              )
+              location.pathname.startsWith("/student/enrolled-courses")
                 ? "active"
                 : ""
             }`}
             onClick={() => {
               navigate("/student/enrolled-courses");
             }}
-            title={
-              sidebarCollapsed
-                ? "Enrolled Courses"
-                : undefined
-            }
+            title={sidebarCollapsed ? "Enrolled Courses" : undefined}
           >
             <Icon name="courses" />
 
-            <span className="nav-label">
-              Enrolled Courses
-            </span>
+            <span className="nav-label">Enrolled Courses</span>
 
             {!sidebarCollapsed && (
               <svg
@@ -274,9 +229,7 @@ export default function StudentSidebar({
                 onClick={(event) => {
                   event.stopPropagation();
 
-                  setEnrolledCoursesOpen(
-                    (previous) => !previous
-                  );
+                  setEnrolledCoursesOpen((previous) => !previous);
                 }}
               >
                 <path d="m7 9 5 5 5-5" />
@@ -284,111 +237,88 @@ export default function StudentSidebar({
             )}
           </button>
 
-          {!sidebarCollapsed &&
-            enrolledCoursesOpen && (
-              <div className="sidebar-enrolled-list">
-                {loadingCourses ? (
-                  <div className="sidebar-enrolled-message">
-                    Loading courses...
-                  </div>
-                ) : enrolledCourses.length === 0 ? (
-                  <div className="sidebar-enrolled-message">
-                    No enrolled courses
-                  </div>
-                ) : (
-                  enrolledCourses.map((course) => {
-                    const courseId =
-                      course.id ||
-                      course.courseId ||
-                      course.course_id ||
-                      course.code ||
-                      course.courseCode ||
-                      course.course_code;
+          {!sidebarCollapsed && enrolledCoursesOpen && (
+            <div className="sidebar-enrolled-list">
+              {loadingCourses ? (
+                <div className="sidebar-enrolled-message">
+                  Loading courses...
+                </div>
+              ) : enrolledCourses.length === 0 ? (
+                <div className="sidebar-enrolled-message">
+                  No enrolled courses
+                </div>
+              ) : (
+                enrolledCourses.map((course) => {
+                  const courseId =
+                    course.id ||
+                    course.courseId ||
+                    course.course_id ||
+                    course.code ||
+                    course.courseCode ||
+                    course.course_code;
 
-                    const courseCode =
-                      course.code ||
-                      course.courseCode ||
-                      course.course_code ||
-                      "COURSE";
+                  const courseCode =
+                    course.code ||
+                    course.courseCode ||
+                    course.course_code ||
+                    "COURSE";
 
-                    const courseTitle =
-                      course.title ||
-                      course.courseName ||
-                      course.course_name ||
-                      course.name ||
-                      "Untitled course";
+                  const courseTitle =
+                    course.title ||
+                    course.courseName ||
+                    course.course_name ||
+                    course.name ||
+                    "Untitled course";
 
-                    return (
-                      <Link
-                        key={courseId}
-                        to={`/student/enrolled-courses/${courseId}`}
-                        className="sidebar-enrolled-course"
-                      >
-                        <span className="sidebar-course-indicator" />
+                  return (
+                    <Link
+                      key={courseId}
+                      to={`/student/enrolled-courses/${courseId}`}
+                      className="sidebar-enrolled-course"
+                    >
+                      <span className="sidebar-course-indicator" />
 
-                        <span className="sidebar-enrolled-course-text">
-                          <strong>
-                            {courseCode}
-                          </strong>
+                      <span className="sidebar-enrolled-course-text">
+                        <strong>{courseCode}</strong>
 
-                          <small>
-                            {courseTitle}
-                          </small>
-                        </span>
-                      </Link>
-                    );
-                  })
-                )}
-              </div>
-            )}
+                        <small>{courseTitle}</small>
+                      </span>
+                    </Link>
+                  );
+                })
+              )}
+            </div>
+          )}
         </div>
 
         <NavLink
           to="/student/public-courses"
           className={getNavClass}
-          title={
-            sidebarCollapsed
-              ? "Public Courses"
-              : undefined
-          }
+          title={sidebarCollapsed ? "Public Courses" : undefined}
         >
           <Icon name="public" />
 
-          <span className="nav-label">
-            Public Courses
-          </span>
+          <span className="nav-label">Public Courses</span>
         </NavLink>
 
         <NavLink
           to="/student/archived-courses"
           className={getNavClass}
-          title={
-            sidebarCollapsed
-              ? "Archived Classes"
-              : undefined
-          }
+          title={sidebarCollapsed ? "Archived Classes" : undefined}
         >
           <Icon name="archive" />
 
-          <span className="nav-label">
-            Archived classes
-          </span>
+          <span className="nav-label">Archived classes</span>
         </NavLink>
 
         <NavLink
           to="/student/settings"
           className={getNavClass}
-          title={
-            sidebarCollapsed
-              ? "Settings"
-              : undefined
-          }
+          title={sidebarCollapsed ? "Settings" : undefined}
         >
           <Icon name="settings" />
 
-          <span className="nav-label">
-            Settings
-          </span>
+          <span className="nav-label">Settings</span>
         </NavLink>
       </nav>
 
@@ -399,21 +329,12 @@ export default function StudentSidebar({
       <button
         type="button"
         className="logout-button"
-        title={
-          sidebarCollapsed
-            ? "Logout"
-            : undefined
-        }
+        title={sidebarCollapsed ? "Logout" : undefined}
         onClick={handleLogout}
       >
-        <FiLogOut
-          className="logout-icon"
-          aria-hidden="true"
-        />
+        <FiLogOut className="logout-icon" aria-hidden="true" />
 
-        <span className="logout-label">
-          Logout
-        </span>
+        <span className="logout-label">Logout</span>
       </button>
     </aside>
   );

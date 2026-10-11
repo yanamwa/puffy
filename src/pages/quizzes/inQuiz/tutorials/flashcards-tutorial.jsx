@@ -89,8 +89,8 @@ export default function FlashcardsTutorial() {
             <div className={styles.headerBody}>
               <p>
                 Flip, learn, and master! <br />
-                Review facts and test your memory in a fun, quick, and easy way —
-                perfect for learning on the go!
+                Review facts and test your memory in a fun, quick, and easy way
+                — perfect for learning on the go!
               </p>
 
               <button className={styles.startBtn} onClick={handleStart}>
@@ -107,15 +107,14 @@ export default function FlashcardsTutorial() {
             </div>
 
             <div
-              className={`${styles.flashcard} ${
-                flipped ? styles.flipped : ""
-              }`}
+              className={`${styles.flashcard} ${flipped ? styles.flipped : ""}`}
               onClick={handleFlip}
             >
               <div className={styles.flashcardInner}>
                 <div className={`${styles.flashcardFace} ${styles.front}`}>
                   <p>
-                    Which keyword is used to prevent a class from being subclassed?
+                    Which keyword is used to prevent a class from being
+                    subclassed?
                   </p>
                 </div>
 

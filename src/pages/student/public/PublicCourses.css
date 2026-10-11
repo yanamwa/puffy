@@ -26,8 +26,7 @@
 }
 
 /* Shared sidebar collapsed state */
-.public-courses-page:has(.enrolled-sidebar.collapsed)
-  .public-courses-main-area,
+.public-courses-page:has(.enrolled-sidebar.collapsed) .public-courses-main-area,
 .public-courses-page:has(.enrolled-sidebar.sidebar-collapsed)
   .public-courses-main-area {
   width: calc(100% - 76px);
@@ -420,4 +419,23 @@
 .enroll-cancel-btn:hover {
   background: var(--student-theme-buttercup);
   color: #263c52;
+}
+
+.public-enrolled-course-link {
+  color: inherit;
+  text-decoration: none;
+}
+.public-enrolled-course-link:hover {
+  text-decoration: underline;
+}
+.public-enrolled-course-link:focus-visible {
+  outline: 2px solid #7fa8d6;
+  outline-offset: 4px;
+}
+.public-course-folder button.enrolled-course-status:not(:disabled) {
+  cursor: pointer;
+}
+
+.public-course-folder-clickable {
+  cursor: pointer;
 }

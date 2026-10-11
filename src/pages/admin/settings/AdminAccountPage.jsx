@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   FiCamera,
   FiEye,
@@ -9,55 +9,55 @@ import {
   FiShield,
   FiUser,
   FiUsers,
-} from 'react-icons/fi';
-import { API_BASE } from '../../../config.js';
-import { useAuth } from '../../../context/AuthContext';
-import './AdminAccountPage.css';
+} from "react-icons/fi";
+import { API_BASE } from "../../../config.js";
+import { useAuth } from "../../../context/AuthContext";
+import "./AdminAccountPage.css";
 
-const DEFAULT_PROFILE_IMAGE = '/images/temporaryimg.png';
+const DEFAULT_PROFILE_IMAGE = "/images/temporaryimg.png";
 
 const defaultAdminData = {
-  name: 'Admin',
-  adminId: 'Not assigned',
-  role: 'Administrator',
-  department: 'Administration',
-  email: 'Not available',
-  accessLevel: 'Administrative Access',
-  temporaryPassword: 'Not available',
+  name: "Admin",
+  adminId: "Not assigned",
+  role: "Administrator",
+  department: "Administration",
+  email: "Not available",
+  accessLevel: "Administrative Access",
+  temporaryPassword: "Not available",
 };
 
 function getStoredToken() {
   return (
-    localStorage.getItem('puffy-token') ||
-    localStorage.getItem('token') ||
-    localStorage.getItem('authToken') ||
-    sessionStorage.getItem('puffy-token') ||
-    sessionStorage.getItem('token') ||
-    sessionStorage.getItem('authToken') ||
-    ''
+    localStorage.getItem("puffy-token") ||
+    localStorage.getItem("token") ||
+    localStorage.getItem("authToken") ||
+    sessionStorage.getItem("puffy-token") ||
+    sessionStorage.getItem("token") ||
+    sessionStorage.getItem("authToken") ||
+    ""
   );
 }
 
 function getUserRole(user) {
-  return user?.role || user?.userRole || user?.user_role || '';
+  return user?.role || user?.userRole || user?.user_role || "";
 }
 
 function isAdminUser(user) {
-  return getUserRole(user) === 'admin';
+  return getUserRole(user) === "admin";
 }
 
 function getHomePath(role) {
-  if (role === 'super_admin') return '/super-admin';
-  if (role === 'professor') return '/professor';
-  if (role === 'student') return '/student';
-  return '/admin';
+  if (role === "super_admin") return "/super-admin";
+  if (role === "professor") return "/professor";
+  if (role === "student") return "/student";
+  return "/admin";
 }
 
 function formatRole(role) {
   if (!role) return defaultAdminData.role;
 
   return String(role)
-    .replace(/_/g, ' ')
+    .replace(/_/g, " ")
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
@@ -65,28 +65,28 @@ function resolveAdminProfileImage(imagePath) {
   if (!imagePath) return DEFAULT_PROFILE_IMAGE;
 
   if (
-    imagePath.startsWith('http://') ||
-    imagePath.startsWith('https://') ||
-    imagePath.startsWith('blob:') ||
-    imagePath.startsWith('data:')
+    imagePath.startsWith("http://") ||
+    imagePath.startsWith("https://") ||
+    imagePath.startsWith("blob:") ||
+    imagePath.startsWith("data:")
   ) {
     return imagePath;
   }
 
   let fixedPath = imagePath;
 
-  if (fixedPath.startsWith('/api/uploads/profile-images/')) {
+  if (fixedPath.startsWith("/api/uploads/profile-images/")) {
     fixedPath = fixedPath.replace(
-      '/api/uploads/profile-images/',
-      '/uploads/profile-images/',
+      "/api/uploads/profile-images/",
+      "/uploads/profile-images/",
     );
   }
 
-  if (!fixedPath.startsWith('/')) {
+  if (!fixedPath.startsWith("/")) {
     fixedPath = `/${fixedPath}`;
   }
 
-  const serverOrigin = API_BASE.replace(/\/api\/?$/, '');
+  const serverOrigin = API_BASE.replace(/\/api\/?$/, "");
   return `${serverOrigin}${fixedPath}`;
 }
 
@@ -107,14 +107,11 @@ function getAdminProfileData(user) {
       user?.employee_id ||
       user?.verificationId ||
       user?.verification_id ||
-      (user?.userId || user?.id ? `ADM-${user.userId || user.id}` : '') ||
+      (user?.userId || user?.id ? `ADM-${user.userId || user.id}` : "") ||
       defaultAdminData.adminId,
 
     role: formatRole(
-      user?.role ||
-      user?.userRole ||
-      user?.user_role ||
-      defaultAdminData.role,
+      user?.role || user?.userRole || user?.user_role || defaultAdminData.role,
     ),
 
     department:
@@ -123,9 +120,7 @@ function getAdminProfileData(user) {
       user?.assigned_department ||
       defaultAdminData.department,
 
-    email:
-      user?.email ||
-      defaultAdminData.email,
+    email: user?.email || defaultAdminData.email,
 
     accessLevel:
       user?.accessLevel ||
@@ -148,34 +143,34 @@ function getAdminProfileData(user) {
 function getAdminProfileImage(user) {
   return resolveAdminProfileImage(
     user?.profileImage ||
-    user?.profile_image ||
-    user?.profileImageUrl ||
-    user?.profile_image_url ||
-    user?.profilePicture ||
-    user?.profile_picture ||
-    user?.avatar ||
-    '',
+      user?.profile_image ||
+      user?.profileImageUrl ||
+      user?.profile_image_url ||
+      user?.profilePicture ||
+      user?.profile_picture ||
+      user?.avatar ||
+      "",
   );
 }
 
 function storeUpdatedUser(updatedUser) {
   const serializedUser = JSON.stringify(updatedUser);
 
-  localStorage.setItem('puffy-user', serializedUser);
-  localStorage.setItem('user', serializedUser);
-  localStorage.setItem('currentUser', serializedUser);
-  localStorage.setItem('user_role', updatedUser.role || 'admin');
-  localStorage.setItem('user_email', updatedUser.email || '');
+  localStorage.setItem("puffy-user", serializedUser);
+  localStorage.setItem("user", serializedUser);
+  localStorage.setItem("currentUser", serializedUser);
+  localStorage.setItem("user_role", updatedUser.role || "admin");
+  localStorage.setItem("user_email", updatedUser.email || "");
   localStorage.setItem(
-    'username',
+    "username",
     updatedUser.displayName ||
       updatedUser.display_name ||
       updatedUser.name ||
-      '',
+      "",
   );
 
   window.dispatchEvent(
-    new CustomEvent('puffy-user-updated', { detail: updatedUser }),
+    new CustomEvent("puffy-user-updated", { detail: updatedUser }),
   );
 }
 
@@ -190,14 +185,11 @@ export default function AdminAccountPage() {
   const [adminUser, setAdminUser] = useState(() =>
     isAdminUser(user) ? user : null,
   );
-  const adminData = useMemo(
-    () => getAdminProfileData(adminUser),
-    [adminUser],
-  );
+  const adminData = useMemo(() => getAdminProfileData(adminUser), [adminUser]);
 
   const [showTemporaryPassword, setShowTemporaryPassword] = useState(false);
   const [profileLoading, setProfileLoading] = useState(true);
-  const [profileError, setProfileError] = useState('');
+  const [profileError, setProfileError] = useState("");
   const [profileImageUploading, setProfileImageUploading] = useState(false);
   const [profileImage, setProfileImage] = useState(() =>
     getAdminProfileImage(isAdminUser(user) ? user : null),
@@ -216,20 +208,20 @@ export default function AdminAccountPage() {
     async function loadAdminProfile() {
       try {
         setProfileLoading(true);
-        setProfileError('');
+        setProfileError("");
 
         const token = getStoredToken();
 
         if (!token) {
           throw new Error(
-            'Your login session was not found. Please log in again.',
+            "Your login session was not found. Please log in again.",
           );
         }
 
         const response = await fetch(`${API_BASE}/users/me`, {
-          method: 'GET',
+          method: "GET",
           headers: {
-            Accept: 'application/json',
+            Accept: "application/json",
             Authorization: `Bearer ${token}`,
           },
         });
@@ -238,23 +230,19 @@ export default function AdminAccountPage() {
 
         if (!response.ok) {
           throw new Error(
-            data.message || 'Unable to load administrator information.',
+            data.message || "Unable to load administrator information.",
           );
         }
 
-        const loggedInUser =
-          data.user ||
-          data.data?.user ||
-          data.data ||
-          data;
+        const loggedInUser = data.user || data.data?.user || data.data || data;
 
         if (!loggedInUser) {
-          throw new Error('Administrator account information was not found.');
+          throw new Error("Administrator account information was not found.");
         }
 
         const loggedInRole = getUserRole(loggedInUser);
 
-        if (loggedInRole && loggedInRole !== 'admin') {
+        if (loggedInRole && loggedInRole !== "admin") {
           if (active) {
             navigate(getHomePath(loggedInRole), { replace: true });
           }
@@ -272,11 +260,11 @@ export default function AdminAccountPage() {
           storeUpdatedUser(loggedInUser);
         }
       } catch (error) {
-        console.error('Admin profile loading error:', error);
+        console.error("Admin profile loading error:", error);
 
         if (active) {
           setProfileError(
-            error.message || 'Unable to load administrator profile.',
+            error.message || "Unable to load administrator profile.",
           );
         }
       } finally {
@@ -295,7 +283,7 @@ export default function AdminAccountPage() {
 
   useEffect(() => {
     return () => {
-      if (profileImage?.startsWith('blob:')) {
+      if (profileImage?.startsWith("blob:")) {
         URL.revokeObjectURL(profileImage);
       }
     };
@@ -303,12 +291,12 @@ export default function AdminAccountPage() {
 
   const changeProfilePicture = async (event) => {
     const selectedFile = event.target.files?.[0];
-    event.target.value = '';
+    event.target.value = "";
 
     if (!selectedFile) return;
 
-    if (!selectedFile.type.startsWith('image/')) {
-      window.alert('Please select a valid image file.');
+    if (!selectedFile.type.startsWith("image/")) {
+      window.alert("Please select a valid image file.");
       return;
     }
 
@@ -316,7 +304,7 @@ export default function AdminAccountPage() {
 
     if (selectedFile.size > maximumFileSize) {
       window.alert(
-        'The selected image is too large. Please choose an image smaller than 5 MB.',
+        "The selected image is too large. Please choose an image smaller than 5 MB.",
       );
       return;
     }
@@ -324,7 +312,7 @@ export default function AdminAccountPage() {
     const token = getStoredToken();
 
     if (!token) {
-      window.alert('Your login session was not found. Please log in again.');
+      window.alert("Your login session was not found. Please log in again.");
       return;
     }
 
@@ -336,10 +324,10 @@ export default function AdminAccountPage() {
 
     try {
       const formData = new FormData();
-      formData.append('profileImage', selectedFile);
+      formData.append("profileImage", selectedFile);
 
       const response = await fetch(`${API_BASE}/users/me/profile-image`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -350,20 +338,15 @@ export default function AdminAccountPage() {
 
       if (!response.ok) {
         throw new Error(
-          data.message || 'Unable to update your profile picture.',
+          data.message || "Unable to update your profile picture.",
         );
       }
 
-      const returnedUser =
-        data.user ||
-        data.data?.user ||
-        data.data ||
-        {};
-      const returnedRole =
-        getUserRole(returnedUser) || getUserRole(adminUser);
+      const returnedUser = data.user || data.data?.user || data.data || {};
+      const returnedRole = getUserRole(returnedUser) || getUserRole(adminUser);
 
-      if (returnedRole && returnedRole !== 'admin') {
-        throw new Error('The logged-in account is not an administrator.');
+      if (returnedRole && returnedRole !== "admin") {
+        throw new Error("The logged-in account is not an administrator.");
       }
 
       const returnedImage =
@@ -374,14 +357,14 @@ export default function AdminAccountPage() {
 
       if (!returnedImage) {
         throw new Error(
-          'The server updated the photo but did not return its saved path.',
+          "The server updated the photo but did not return its saved path.",
         );
       }
 
       const updatedUser = {
         ...(adminUser || {}),
         ...returnedUser,
-        role: returnedRole || 'admin',
+        role: returnedRole || "admin",
         profileImage: returnedImage,
         profile_image: returnedImage,
       };
@@ -399,7 +382,7 @@ export default function AdminAccountPage() {
       }
 
       window.dispatchEvent(
-        new CustomEvent('profile-image-updated', {
+        new CustomEvent("profile-image-updated", {
           detail: {
             profileImage: savedImageUrl,
             profile_image: savedImageUrl,
@@ -407,12 +390,10 @@ export default function AdminAccountPage() {
         }),
       );
     } catch (error) {
-      console.error('Admin profile picture update error:', error);
+      console.error("Admin profile picture update error:", error);
       URL.revokeObjectURL(previewUrl);
       setProfileImage(previousImage);
-      window.alert(
-        error.message || 'Unable to update your profile picture.',
-      );
+      window.alert(error.message || "Unable to update your profile picture.");
     } finally {
       setProfileImageUploading(false);
     }
@@ -424,7 +405,6 @@ export default function AdminAccountPage() {
 
   return (
     <div className="admin-profile-page">
-
       {/* =====================================
           PAGE HEADING
       ===================================== */}
@@ -440,492 +420,337 @@ export default function AdminAccountPage() {
       )}
 
       {!profileLoading && profileError && (
-        <div className="admin-profile-state">
-          {profileError}
-        </div>
+        <div className="admin-profile-state">{profileError}</div>
       )}
 
       {!profileLoading && !profileError && (
-      <section className="admin-profile-content">
-        <div className="admin-profile-layout">
-
-          {/* =================================
+        <section className="admin-profile-content">
+          <div className="admin-profile-layout">
+            {/* =================================
               LEFT: ADMIN ID CARD
           ================================= */}
 
-          <article className="admin-identity-card">
+            <article className="admin-identity-card">
+              <div className="admin-identity-card-accent" />
 
-            <div className="admin-identity-card-accent" />
-
-            {/* =================================
+              {/* =================================
                 CARD HEADER
             ================================= */}
 
-            <div className="admin-identity-header">
+              <div className="admin-identity-header">
+                <div className="admin-identity-brand">
+                  <img src="/images/logo_solo.png" alt="PuffyBrain" />
 
-              <div className="admin-identity-brand">
+                  <div>
+                    <strong>PuffyBrain</strong>
 
-                <img
-                  src="/images/logo_solo.png"
-                  alt="PuffyBrain"
-                />
-
-                <div>
-                  <strong>
-                    PuffyBrain
-                  </strong>
-
-                  <span>
-                    Administrator Identification Card
-                  </span>
+                    <span>Administrator Identification Card</span>
+                  </div>
                 </div>
 
+                <span className="admin-identity-role">Admin</span>
               </div>
 
-              <span className="admin-identity-role">
-                Admin
-              </span>
-
-            </div>
-
-            {/* =================================
+              {/* =================================
                 PROFILE PHOTO
             ================================= */}
 
-            <div className="admin-identity-photo-area">
+              <div className="admin-identity-photo-area">
+                <div className="admin-id-photo-frame">
+                  <img
+                    src={profileImage}
+                    alt={`${adminData.name}'s profile`}
+                    className="admin-id-photo"
+                    onError={(event) => {
+                      event.currentTarget.onerror = null;
+                      event.currentTarget.src = DEFAULT_PROFILE_IMAGE;
+                    }}
+                  />
 
-              <div className="admin-id-photo-frame">
+                  <label
+                    className="admin-photo-change-button"
 
-                <img
-                  src={profileImage}
-                  alt={`${adminData.name}'s profile`}
-                  className="admin-id-photo"
-                  onError={(event) => {
-                    event.currentTarget.onerror = null;
-                    event.currentTarget.src = DEFAULT_PROFILE_IMAGE;
-                  }}
-                />
+                    title={
+                      profileImageUploading
+                        ? "Uploading profile picture..."
+                        : "Change profile picture"
+                    }
 
-                <label
-                  className="admin-photo-change-button"
+                    aria-label={
+                      profileImageUploading
+                        ? "Uploading profile picture"
+                        : "Change profile picture"
+                    }
+                  >
+                    {profileImageUploading ? (
+                      <span className="admin-photo-uploading">...</span>
+                    ) : (
+                      <FiCamera aria-hidden="true" />
+                    )}
 
-                  title={
-                    profileImageUploading
-                      ? 'Uploading profile picture...'
-                      : 'Change profile picture'
-                  }
+                    <input
+                      type="file"
 
-                  aria-label={
-                    profileImageUploading
-                      ? 'Uploading profile picture'
-                      : 'Change profile picture'
-                  }
-                >
-                  {profileImageUploading ? (
-                    <span className="admin-photo-uploading">...</span>
-                  ) : (
-                    <FiCamera aria-hidden="true" />
-                  )}
-
-                  <input
-                    type="file"
-
-                    accept="
+                      accept="
                       image/png,
                       image/jpeg,
                       image/jpg,
                       image/webp
                     "
 
-                    className="admin-photo-input"
-                    onChange={changeProfilePicture}
-                    disabled={profileImageUploading}
-                  />
-
-                </label>
-
-              </div>
-
-              {/* =================================
-                  ADMIN MAIN INFO
-              ================================= */}
-
-              <div className="admin-identity-main">
-
-                <span className="admin-identity-overline">
-                  Official administrator profile
-                </span>
-
-                <h2>
-                  {adminData.name}
-                </h2>
-
-                <strong className="admin-identity-number">
-                  {adminData.adminId}
-                </strong>
-
-                <p>
-                  {adminData.department}
-                </p>
-
-                <div className="admin-identity-access-row">
-
-                  <span>
-                    {adminData.role}
-                  </span>
-
-                  <i aria-hidden="true" />
-
-                  <span>
-                    {adminData.accessLevel}
-                  </span>
-
-                </div>
-
-              </div>
-
-            </div>
-
-            {/* =================================
-                CARD FOOTER
-            ================================= */}
-
-            <div className="admin-identity-footer">
-
-              <div>
-
-                <span>
-                  Issued by
-                </span>
-
-                <strong>
-                  PuffyBrain Learning System
-                </strong>
-
-              </div>
-
-              <div
-                className="admin-id-barcode"
-                aria-hidden="true"
-              />
-
-            </div>
-
-          </article>
-
-          {/* =================================
-              RIGHT SIDE
-          ================================= */}
-
-          <div className="admin-profile-details">
-
-            {/* =================================
-                INFORMATION HEADER
-            ================================= */}
-
-            <div className="admin-profile-details-header">
-
-              <div>
-
-                <span className="admin-profile-eyebrow">
-                  Profile overview
-                </span>
-
-                <h2>
-                  Administrator Information
-                </h2>
-
-                <p>
-                  Your personal, administrative,
-                  and account information.
-                </p>
-
-              </div>
-
-            </div>
-
-            {/* =================================
-                PERSONAL INFORMATION
-            ================================= */}
-
-            <section className="admin-info-section">
-
-              <div className="admin-info-section-heading">
-
-                <span className="admin-info-section-icon">
-                  <FiUser aria-hidden="true" />
-                </span>
-
-                <div>
-
-                  <h3>
-                    Personal Information
-                  </h3>
-
-                  <p>
-                    Basic administrator account details
-                  </p>
-
-                </div>
-
-              </div>
-
-              <div className="admin-info-grid">
-
-                {/* FULL NAME */}
-
-                <div className="admin-info-item">
-
-                  <span className="admin-info-label">
-                    Full Name
-                  </span>
-
-                  <strong>
-                    {adminData.name}
-                  </strong>
-
-                </div>
-
-                {/* ADMIN ID */}
-
-                <div className="admin-info-item">
-
-                  <span className="admin-info-label">
-                    Admin ID
-                  </span>
-
-                  <strong>
-                    {adminData.adminId}
-                  </strong>
-
-                </div>
-
-                {/* EMAIL */}
-
-                <div className="admin-info-item admin-info-item-wide">
-
-                  <span className="admin-info-label">
-                    Email Address
-                  </span>
-
-                  <div className="admin-info-value-row">
-
-                    <FiMail aria-hidden="true" />
-
-                    <strong>
-                      {adminData.email}
-                    </strong>
-
-                  </div>
-
-                </div>
-
-              </div>
-
-            </section>
-
-            {/* =================================
-                ADMINISTRATIVE INFORMATION
-            ================================= */}
-
-            <section className="admin-info-section">
-
-              <div className="admin-info-section-heading">
-
-                <span className="admin-info-section-icon">
-                  <FiShield aria-hidden="true" />
-                </span>
-
-                <div>
-
-                  <h3>
-                    Administrative Information
-                  </h3>
-
-                  <p>
-                    Role assignment and
-                    administrative privileges
-                  </p>
-
-                </div>
-
-              </div>
-
-              <div className="admin-info-grid">
-
-                {/* ROLE */}
-
-                <div className="admin-info-item">
-
-                  <span className="admin-info-label">
-                    Role
-                  </span>
-
-                  <strong>
-                    {adminData.role}
-                  </strong>
-
-                </div>
-
-                {/* DEPARTMENT */}
-
-                <div className="admin-info-item">
-
-                  <span className="admin-info-label">
-                    Department
-                  </span>
-
-                  <div className="admin-info-value-row">
-
-                    <FiUsers aria-hidden="true" />
-
-                    <strong>
-                      {adminData.department}
-                    </strong>
-
-                  </div>
-
-                </div>
-
-                {/* ACCESS LEVEL */}
-
-                <div className="admin-info-item admin-info-item-wide">
-
-                  <span className="admin-info-label">
-                    Access Level
-                  </span>
-
-                  <div className="admin-access-level-value">
-
-                    <FiShield aria-hidden="true" />
-
-                    <strong>
-                      {adminData.accessLevel}
-                    </strong>
-
-                  </div>
-
-                </div>
-
-              </div>
-
-            </section>
-
-            {/* =================================
-                ACCOUNT SECURITY
-            ================================= */}
-
-            <section className="admin-info-section admin-security-section">
-
-              <div className="admin-info-section-heading">
-
-                <span className="admin-info-section-icon">
-                  <FiLock aria-hidden="true" />
-                </span>
-
-                <div>
-
-                  <h3>
-                    Account Security
-                  </h3>
-
-                  <p>
-                    Temporary account credentials
-                  </p>
-
-                </div>
-
-              </div>
-
-              {/* =================================
-                  TEMPORARY PASSWORD
-              ================================= */}
-
-              <div className="admin-password-card">
-
-                <div className="admin-password-copy">
-
-                  <span className="admin-info-label">
-                    Temporary Password
-                  </span>
-
-                  <strong
-                    className={
-                      showTemporaryPassword
-                        ? 'admin-password-visible'
-                        : 'admin-password-hidden'
-                    }
-                  >
-
-                    {showTemporaryPassword
-                      ? adminData.temporaryPassword
-                      : '••••••••••••••'}
-
-                  </strong>
-
+                      className="admin-photo-input"
+                      onChange={changeProfilePicture}
+                      disabled={profileImageUploading}
+                    />
+                  </label>
                 </div>
 
                 {/* =================================
+                  ADMIN MAIN INFO
+              ================================= */}
+
+                <div className="admin-identity-main">
+                  <span className="admin-identity-overline">
+                    Official administrator profile
+                  </span>
+
+                  <h2>{adminData.name}</h2>
+
+                  <strong className="admin-identity-number">
+                    {adminData.adminId}
+                  </strong>
+
+                  <p>{adminData.department}</p>
+
+                  <div className="admin-identity-access-row">
+                    <span>{adminData.role}</span>
+
+                    <i aria-hidden="true" />
+
+                    <span>{adminData.accessLevel}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* =================================
+                CARD FOOTER
+            ================================= */}
+
+              <div className="admin-identity-footer">
+                <div>
+                  <span>Issued by</span>
+
+                  <strong>PuffyBrain Learning System</strong>
+                </div>
+
+                <div className="admin-id-barcode" aria-hidden="true" />
+              </div>
+            </article>
+
+            {/* =================================
+              RIGHT SIDE
+          ================================= */}
+
+            <div className="admin-profile-details">
+              {/* =================================
+                INFORMATION HEADER
+            ================================= */}
+
+              <div className="admin-profile-details-header">
+                <div>
+                  <span className="admin-profile-eyebrow">
+                    Profile overview
+                  </span>
+
+                  <h2>Administrator Information</h2>
+
+                  <p>Your personal, administrative, and account information.</p>
+                </div>
+              </div>
+
+              {/* =================================
+                PERSONAL INFORMATION
+            ================================= */}
+
+              <section className="admin-info-section">
+                <div className="admin-info-section-heading">
+                  <span className="admin-info-section-icon">
+                    <FiUser aria-hidden="true" />
+                  </span>
+
+                  <div>
+                    <h3>Personal Information</h3>
+
+                    <p>Basic administrator account details</p>
+                  </div>
+                </div>
+
+                <div className="admin-info-grid">
+                  {/* FULL NAME */}
+
+                  <div className="admin-info-item">
+                    <span className="admin-info-label">Full Name</span>
+
+                    <strong>{adminData.name}</strong>
+                  </div>
+
+                  {/* ADMIN ID */}
+
+                  <div className="admin-info-item">
+                    <span className="admin-info-label">Admin ID</span>
+
+                    <strong>{adminData.adminId}</strong>
+                  </div>
+
+                  {/* EMAIL */}
+
+                  <div className="admin-info-item admin-info-item-wide">
+                    <span className="admin-info-label">Email Address</span>
+
+                    <div className="admin-info-value-row">
+                      <FiMail aria-hidden="true" />
+
+                      <strong>{adminData.email}</strong>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* =================================
+                ADMINISTRATIVE INFORMATION
+            ================================= */}
+
+              <section className="admin-info-section">
+                <div className="admin-info-section-heading">
+                  <span className="admin-info-section-icon">
+                    <FiShield aria-hidden="true" />
+                  </span>
+
+                  <div>
+                    <h3>Administrative Information</h3>
+
+                    <p>Role assignment and administrative privileges</p>
+                  </div>
+                </div>
+
+                <div className="admin-info-grid">
+                  {/* ROLE */}
+
+                  <div className="admin-info-item">
+                    <span className="admin-info-label">Role</span>
+
+                    <strong>{adminData.role}</strong>
+                  </div>
+
+                  {/* DEPARTMENT */}
+
+                  <div className="admin-info-item">
+                    <span className="admin-info-label">Department</span>
+
+                    <div className="admin-info-value-row">
+                      <FiUsers aria-hidden="true" />
+
+                      <strong>{adminData.department}</strong>
+                    </div>
+                  </div>
+
+                  {/* ACCESS LEVEL */}
+
+                  <div className="admin-info-item admin-info-item-wide">
+                    <span className="admin-info-label">Access Level</span>
+
+                    <div className="admin-access-level-value">
+                      <FiShield aria-hidden="true" />
+
+                      <strong>{adminData.accessLevel}</strong>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* =================================
+                ACCOUNT SECURITY
+            ================================= */}
+
+              <section className="admin-info-section admin-security-section">
+                <div className="admin-info-section-heading">
+                  <span className="admin-info-section-icon">
+                    <FiLock aria-hidden="true" />
+                  </span>
+
+                  <div>
+                    <h3>Account Security</h3>
+
+                    <p>Temporary account credentials</p>
+                  </div>
+                </div>
+
+                {/* =================================
+                  TEMPORARY PASSWORD
+              ================================= */}
+
+                <div className="admin-password-card">
+                  <div className="admin-password-copy">
+                    <span className="admin-info-label">Temporary Password</span>
+
+                    <strong
+                      className={
+                        showTemporaryPassword
+                          ? "admin-password-visible"
+                          : "admin-password-hidden"
+                      }
+                    >
+                      {showTemporaryPassword
+                        ? adminData.temporaryPassword
+                        : "••••••••••••••"}
+                    </strong>
+                  </div>
+
+                  {/* =================================
                     SHOW/HIDE PASSWORD
                 ================================= */}
 
-                <button
-                  type="button"
+                  <button
+                    type="button"
 
-                  className="admin-password-toggle"
+                    className="admin-password-toggle"
 
-                  onClick={() =>
-                    setShowTemporaryPassword(
-                      (currentValue) =>
-                        !currentValue,
-                    )
-                  }
+                    onClick={() =>
+                      setShowTemporaryPassword((currentValue) => !currentValue)
+                    }
 
-                  title={
-                    showTemporaryPassword
-                      ? 'Hide temporary password'
-                      : 'Show temporary password'
-                  }
+                    title={
+                      showTemporaryPassword
+                        ? "Hide temporary password"
+                        : "Show temporary password"
+                    }
 
-                  aria-label={
-                    showTemporaryPassword
-                      ? 'Hide temporary password'
-                      : 'Show temporary password'
-                  }
+                    aria-label={
+                      showTemporaryPassword
+                        ? "Hide temporary password"
+                        : "Show temporary password"
+                    }
 
-                  aria-pressed={
-                    showTemporaryPassword
-                  }
-                >
+                    aria-pressed={showTemporaryPassword}
+                  >
+                    {showTemporaryPassword ? (
+                      <FiEyeOff aria-hidden="true" />
+                    ) : (
+                      <FiEye aria-hidden="true" />
+                    )}
 
-                  {showTemporaryPassword ? (
-                    <FiEyeOff aria-hidden="true" />
-                  ) : (
-                    <FiEye aria-hidden="true" />
-                  )}
+                    <span>{showTemporaryPassword ? "Hide" : "Show"}</span>
+                  </button>
+                </div>
 
-                  <span>
-                    {showTemporaryPassword
-                      ? 'Hide'
-                      : 'Show'}
-                  </span>
-
-                </button>
-
-              </div>
-
-              <p className="admin-password-note">
-                Keep this password private. Change it from
-                the Settings page after your first
-                successful login.
-              </p>
-
-            </section>
-
+                <p className="admin-password-note">
+                  Keep this password private. Change it from the Settings page
+                  after your first successful login.
+                </p>
+              </section>
+            </div>
           </div>
-
-        </div>
-      </section>
+        </section>
       )}
     </div>
   );

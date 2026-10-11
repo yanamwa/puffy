@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
-import { FiChevronDown, FiTrash2 } from 'react-icons/fi';
-import { useAuth } from '../../../context/AuthContext';
+import { useEffect, useMemo, useState } from "react";
+import { FiChevronDown, FiTrash2 } from "react-icons/fi";
+import { useAuth } from "../../../context/AuthContext";
 import {
   createManagedNotification,
   deleteManagedNotificationFromServer,
@@ -13,58 +13,59 @@ import {
   saveManagedNotificationToServer,
   subscribeToManagedNotifications,
   writeManagedNotifications,
-} from '../../../utils/notifications';
-import '../Features/AdminFeaturePages.css';
+} from "../../../utils/notifications";
+import "../Features/AdminFeaturePages.css";
 
 const defaultCopy = {
-  pageTitle: 'Notifications & Announcements',
-  pageDescription: 'Create and manage notifications and announcements for PuffyBrain users.',
-  createTitle: 'Create Notification or Announcement',
-  titlePlaceholder: 'Enter notification or announcement title',
-  messagePlaceholder: 'Write your notification or announcement message',
-  postLabel: 'Post Notification',
-  listTitle: 'Posted Notifications & Announcements',
-  emptyMessage: 'No notifications or announcements found.',
-  deleteConfirm: 'Delete this notification or announcement?',
+  pageTitle: "Notifications & Announcements",
+  pageDescription:
+    "Create and manage notifications and announcements for PuffyBrain users.",
+  createTitle: "Create Notification or Announcement",
+  titlePlaceholder: "Enter notification or announcement title",
+  messagePlaceholder: "Write your notification or announcement message",
+  postLabel: "Post Notification",
+  listTitle: "Posted Notifications & Announcements",
+  emptyMessage: "No notifications or announcements found.",
+  deleteConfirm: "Delete this notification or announcement?",
 };
 
 const announcementCopy = {
   ...defaultCopy,
-  pageTitle: 'Announcement & Notification Management',
-  createTitle: 'Create Announcement',
-  titlePlaceholder: 'Enter announcement title',
-  messagePlaceholder: 'Write your announcement message',
-  postLabel: 'Post Announcement',
+  pageTitle: "Announcement & Notification Management",
+  createTitle: "Create Announcement",
+  titlePlaceholder: "Enter announcement title",
+  messagePlaceholder: "Write your announcement message",
+  postLabel: "Post Announcement",
 };
 
 function formatDate(value) {
   const date = new Date(value);
 
-  if (Number.isNaN(date.getTime())) return 'No date';
+  if (Number.isNaN(date.getTime())) return "No date";
 
-  return date.toLocaleString('en-US', {
-    month: '2-digit',
-    day: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
+  return date.toLocaleString("en-US", {
+    month: "2-digit",
+    day: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
     hour12: true,
   });
 }
 
 function readStoredSessionUser() {
   const storageSources = [
-    typeof localStorage === 'undefined' ? null : localStorage,
-    typeof sessionStorage === 'undefined' ? null : sessionStorage,
+    typeof localStorage === "undefined" ? null : localStorage,
+    typeof sessionStorage === "undefined" ? null : sessionStorage,
   ];
 
   for (const storage of storageSources) {
     if (!storage) continue;
 
     const candidates = [
-      storage.getItem('puffy-user'),
-      storage.getItem('user'),
-      storage.getItem('currentUser'),
+      storage.getItem("puffy-user"),
+      storage.getItem("user"),
+      storage.getItem("currentUser"),
     ];
 
     for (const candidate of candidates) {
@@ -89,44 +90,35 @@ function getUserDisplayName(user = {}) {
       user.full_name ||
       user.name ||
       user.username ||
-      '',
-  ).replace(/^@+/, '');
+      "",
+  ).replace(/^@+/, "");
 }
 
 function normalizeCreatorRole(role) {
-  const normalizedRole = String(role || '')
+  const normalizedRole = String(role || "")
     .trim()
     .toLowerCase()
-    .replace(/[\s_-]/g, '');
+    .replace(/[\s_-]/g, "");
 
-  if (normalizedRole === 'superadmin') {
-    return 'superAdmin';
+  if (normalizedRole === "superadmin") {
+    return "superAdmin";
   }
 
-  if (normalizedRole === 'admin') {
-    return 'admin';
+  if (normalizedRole === "admin") {
+    return "admin";
   }
 
-  return role || 'admin';
+  return role || "admin";
 }
 
-
 function getAnnouncementCreator(authUser) {
-  const user =
-    authUser ||
-    readStoredSessionUser() ||
-    {};
+  const user = authUser || readStoredSessionUser() || {};
 
   const role = normalizeCreatorRole(
-    user.role ||
-    user.userRole ||
-    user.user_role ||
-    '',
+    user.role || user.userRole || user.user_role || "",
   );
 
-  const name =
-    getUserDisplayName(user) ||
-    formatNotificationRoleLabel(role);
+  const name = getUserDisplayName(user) || formatNotificationRoleLabel(role);
 
   return {
     name,
@@ -134,31 +126,24 @@ function getAnnouncementCreator(authUser) {
   };
 }
 
-export default function NotificationPage({ variant = 'notification' }) {
+export default function NotificationPage({ variant = "notification" }) {
   const { user: authUser } = useAuth() || {};
-  const copy = variant === 'announcement' ? announcementCopy : defaultCopy;
-  const creator = useMemo(
-    () => getAnnouncementCreator(authUser),
-    [authUser],
-  );
-  const currentUserRole =
-  normalizeCreatorRole(
-    authUser?.role ||
-    authUser?.userRole ||
-    authUser?.user_role ||
-    creator.role,
+  const copy = variant === "announcement" ? announcementCopy : defaultCopy;
+  const creator = useMemo(() => getAnnouncementCreator(authUser), [authUser]);
+  const currentUserRole = normalizeCreatorRole(
+    authUser?.role || authUser?.userRole || authUser?.user_role || creator.role,
   );
 
-  const isSuperAdmin =
-    currentUserRole === 'superAdmin';
+  const isSuperAdmin = currentUserRole === "superAdmin";
 
-  const isAdmin =
-    currentUserRole === 'admin';
-  const [notifications, setNotifications] = useState(() => readManagedNotifications());
-  const [title, setTitle] = useState('');
-  const [message, setMessage] = useState('');
-  const [target, setTarget] = useState('all');
-  const [sortBy, setSortBy] = useState('newest');
+  const isAdmin = currentUserRole === "admin";
+  const [notifications, setNotifications] = useState(() =>
+    readManagedNotifications(),
+  );
+  const [title, setTitle] = useState("");
+  const [message, setMessage] = useState("");
+  const [target, setTarget] = useState("all");
+  const [sortBy, setSortBy] = useState("newest");
   const [isPosting, setIsPosting] = useState(false);
 
   useEffect(() => {
@@ -183,7 +168,7 @@ export default function NotificationPage({ variant = 'notification' }) {
             : nextNotifications;
         });
       } catch (error) {
-        console.warn('Unable to sync notifications from the server.', error);
+        console.warn("Unable to sync notifications from the server.", error);
       }
     }
 
@@ -213,9 +198,12 @@ export default function NotificationPage({ variant = 'notification' }) {
 
   const sortedNotifications = useMemo(() => {
     return [...notifications].sort((a, b) => {
-      if (sortBy === 'oldest') return new Date(a.createdAt) - new Date(b.createdAt);
-      if (sortBy === 'az') return String(a.title).localeCompare(String(b.title));
-      if (sortBy === 'za') return String(b.title).localeCompare(String(a.title));
+      if (sortBy === "oldest")
+        return new Date(a.createdAt) - new Date(b.createdAt);
+      if (sortBy === "az")
+        return String(a.title).localeCompare(String(b.title));
+      if (sortBy === "za")
+        return String(b.title).localeCompare(String(a.title));
       return new Date(b.createdAt) - new Date(a.createdAt);
     });
   }, [notifications, sortBy]);
@@ -224,7 +212,7 @@ export default function NotificationPage({ variant = 'notification' }) {
     event.preventDefault();
 
     if (!title.trim() || !message.trim()) {
-      window.alert('Please enter both title and message.');
+      window.alert("Please enter both title and message.");
       return;
     }
 
@@ -239,89 +227,69 @@ export default function NotificationPage({ variant = 'notification' }) {
     setIsPosting(true);
 
     try {
-      const nextNotifications = await saveManagedNotificationToServer(
-        nextNotification,
-      );
+      const nextNotifications =
+        await saveManagedNotificationToServer(nextNotification);
 
       setNotifications(nextNotifications);
-      setTitle('');
-      setMessage('');
-      setTarget('all');
+      setTitle("");
+      setMessage("");
+      setTarget("all");
     } catch (error) {
-      console.warn('Unable to save notification to the server.', error);
+      console.warn("Unable to save notification to the server.", error);
       setNotifications([nextNotification]);
-      setTitle('');
-      setMessage('');
-      setTarget('all');
+      setTitle("");
+      setMessage("");
+      setTarget("all");
     } finally {
       setIsPosting(false);
     }
   };
 
   const canDeleteNotification = (notification) => {
-      const creatorRole =
-        normalizeCreatorRole(
-          notification.createdByRole ||
-          notification.created_by_role ||
-          '',
-        );
+    const creatorRole = normalizeCreatorRole(
+      notification.createdByRole || notification.created_by_role || "",
+    );
 
-      // Super Admin can delete any notification.
-      if (isSuperAdmin) {
-        return true;
-      }
+    // Super Admin can delete any notification.
+    if (isSuperAdmin) {
+      return true;
+    }
 
-      // Admin cannot delete Super Admin notifications.
-      if (
-        isAdmin &&
-        creatorRole === 'superAdmin'
-      ) {
-        return false;
-      }
-
-      // Admin may delete Admin-created notifications.
-      if (
-        isAdmin &&
-        creatorRole === 'admin'
-      ) {
-        return true;
-      }
-
+    // Admin cannot delete Super Admin notifications.
+    if (isAdmin && creatorRole === "superAdmin") {
       return false;
-    };
+    }
+
+    // Admin may delete Admin-created notifications.
+    if (isAdmin && creatorRole === "admin") {
+      return true;
+    }
+
+    return false;
+  };
 
   const deleteNotification = async (notification) => {
     if (!canDeleteNotification(notification)) {
-      window.alert(
-        'You do not have permission to delete this notification.',
-      );
+      window.alert("You do not have permission to delete this notification.");
 
       return;
     }
 
-    const ok =
-      window.confirm(copy.deleteConfirm);
+    const ok = window.confirm(copy.deleteConfirm);
 
     if (!ok) return;
 
     try {
-      const nextNotifications =
-        await deleteManagedNotificationFromServer(
-          notification.id,
-        );
+      const nextNotifications = await deleteManagedNotificationFromServer(
+        notification.id,
+      );
 
       setNotifications(nextNotifications);
     } catch (error) {
-      console.warn(
-        'Unable to delete notification from the server.',
-        error,
-      );
+      console.warn("Unable to delete notification from the server.", error);
 
       setNotifications((current) =>
-        current.filter(
-          (item) =>
-            item.id !== notification.id,
-        ),
+        current.filter((item) => item.id !== notification.id),
       );
     }
   };
@@ -332,7 +300,10 @@ export default function NotificationPage({ variant = 'notification' }) {
       <p>{copy.pageDescription}</p>
 
       <div className="notification-management-grid">
-        <form className="feature-card notification-form" onSubmit={addNotification}>
+        <form
+          className="feature-card notification-form"
+          onSubmit={addNotification}
+        >
           <div className="feature-card-top" />
           <div className="feature-card-body">
             <h2>{copy.createTitle}</h2>
@@ -357,7 +328,10 @@ export default function NotificationPage({ variant = 'notification' }) {
 
             <label className="feature-field">
               <span>Send To</span>
-              <select value={target} onChange={(event) => setTarget(event.target.value)}>
+              <select
+                value={target}
+                onChange={(event) => setTarget(event.target.value)}
+              >
                 {managedNotificationTargetOptions.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
@@ -371,7 +345,7 @@ export default function NotificationPage({ variant = 'notification' }) {
               type="submit"
               disabled={isPosting}
             >
-              {isPosting ? 'Posting...' : copy.postLabel}
+              {isPosting ? "Posting..." : copy.postLabel}
             </button>
           </div>
         </form>
@@ -383,7 +357,10 @@ export default function NotificationPage({ variant = 'notification' }) {
               <h2>{copy.listTitle}</h2>
               <label className="sort-control">
                 <span>Sort by</span>
-                <select value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
+                <select
+                  value={sortBy}
+                  onChange={(event) => setSortBy(event.target.value)}
+                >
                   <option value="newest">Newest</option>
                   <option value="oldest">Oldest</option>
                   <option value="az">A-Z</option>
@@ -414,9 +391,7 @@ export default function NotificationPage({ variant = 'notification' }) {
                       <button
                         className="danger-feature-btn"
                         type="button"
-                        onClick={() =>
-                          deleteNotification(item)
-                        }
+                        onClick={() => deleteNotification(item)}
                       >
                         <FiTrash2 />
                         Delete

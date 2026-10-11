@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   FiArchive,
   FiCheck,
@@ -12,77 +12,81 @@ import {
   FiUser,
   FiUsers,
   FiX,
-} from 'react-icons/fi';
-import { API_BASE } from '../../../config';
-import './Users.css';
+} from "react-icons/fi";
+import { API_BASE } from "../../../config";
+import "./Users.css";
 
 const demoUsers = [
   {
     id: 1,
-    name: 'Meiko Santos',
-    email: 'meiko@puffybrain.test',
-    role: 'student',
-    status: 'Active',
-    joined: '2026-07-01',
+    name: "Meiko Santos",
+    email: "meiko@puffybrain.test",
+    role: "student",
+    status: "Active",
+    joined: "2026-07-01",
     decks: 8,
     modules: 4,
   },
   {
     id: 2,
-    name: 'Ashborn Reyes',
-    email: 'ashborn@puffybrain.test',
-    role: 'professor',
-    status: 'Active',
-    verificationStatus: 'approved',
-    joined: '2026-06-21',
+    name: "Ashborn Reyes",
+    email: "ashborn@puffybrain.test",
+    role: "professor",
+    status: "Active",
+    verificationStatus: "approved",
+    joined: "2026-06-21",
     decks: 12,
     modules: 9,
   },
 ];
 
 const initialStudentForm = {
-  name: '',
-  email: '',
-  studentId: '',
-  yearLevel: '',
-  sectionName: '',
+  name: "",
+  email: "",
+  studentId: "",
+  yearLevel: "",
+  sectionName: "",
 };
 
-const STUDENT_IMPORT_ACCEPT = '.csv,.xlsx';
+const STUDENT_IMPORT_ACCEPT = ".csv,.xlsx";
 
 const initialStudentImportStatus = {
-  state: 'idle',
-  fileName: '',
+  state: "idle",
+  fileName: "",
   fileSize: 0,
-  message: '',
-  detail: '',
+  message: "",
+  detail: "",
 };
 
 function normalizeUser(user) {
   const displayName =
-    user.name || user.displayName || user.display_name || user.username || 'Unnamed User';
+    user.name ||
+    user.displayName ||
+    user.display_name ||
+    user.username ||
+    "Unnamed User";
   const verificationStatus =
-    user.verificationStatus || user.verification_status || 'approved';
+    user.verificationStatus || user.verification_status || "approved";
   const archived =
     user.isArchived === true ||
     user.is_archived === 1 ||
     user.is_archived === true ||
-    user.status === 'Archived';
+    user.status === "Archived";
 
   return {
     id: user.id || user.userId || user.user_id || user.UserID || displayName,
     name: displayName,
-    email: user.email || 'No email found',
-    role: user.role || 'student',
-    status: archived ? 'Archived' : user.status || 'Active',
+    email: user.email || "No email found",
+    role: user.role || "student",
+    status: archived ? "Archived" : user.status || "Active",
     verificationStatus,
-    joined: user.joined || user.created_at || user.createdAt || '',
+    joined: user.joined || user.created_at || user.createdAt || "",
     decks: Number(user.decks || user.deck_count || 0),
     modules: Number(user.modules || user.module_count || 0),
-    studentId: user.studentId || user.student_id || '',
-    yearLevel: user.yearLevel || user.year_level || '',
-    sectionName: user.sectionName || user.section_name || '',
-    professorId: user.professorId || user.professor_id || '',
+    studentId: user.studentId || user.student_id || "",
+    yearLevel: user.yearLevel || user.year_level || "",
+    sectionName: user.sectionName || user.section_name || "",
+    professorId: user.professorId || user.professor_id || "",
     verified:
       user.verified === true ||
       user.is_verified === 1 ||
@@ -96,37 +100,39 @@ function normalizeUser(user) {
       user.profilePhoto ||
       user.avatar ||
       user.image ||
-      '',
+      "",
   };
 }
 
 function isAdminManagedUser(user) {
-  const role = String(user.role || '').toLowerCase();
-  const verificationStatus = String(user.verificationStatus || '').toLowerCase();
+  const role = String(user.role || "").toLowerCase();
+  const verificationStatus = String(
+    user.verificationStatus || "",
+  ).toLowerCase();
 
-  if (role === 'student') return true;
-  if (role === 'professor') return verificationStatus === 'approved';
+  if (role === "student") return true;
+  if (role === "professor") return verificationStatus === "approved";
 
   return false;
 }
 
 function formatDate(value) {
-  if (!value) return 'No date';
+  if (!value) return "No date";
 
   const date = new Date(value);
 
-  if (Number.isNaN(date.getTime())) return 'No date';
+  if (Number.isNaN(date.getTime())) return "No date";
 
-  return date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: '2-digit',
-    year: 'numeric',
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
   });
 }
 
 function titleCase(value) {
-  return String(value || '')
-    .replace(/[-_]/g, ' ')
+  return String(value || "")
+    .replace(/[-_]/g, " ")
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
@@ -140,63 +146,63 @@ function formatFileSize(bytes) {
 
 function getInitials(name) {
   return String(name)
-    .split(' ')
+    .split(" ")
     .filter(Boolean)
     .slice(0, 2)
     .map((part) => part.charAt(0).toUpperCase())
-    .join('');
+    .join("");
 }
 
 function getProfileImageUrl(image) {
-  const value = String(image || '').trim();
+  const value = String(image || "").trim();
 
   if (
     !value ||
-    value.toLowerCase() === 'null' ||
-    value.toLowerCase() === 'undefined' ||
-    value.includes('temporary profile.jpg')
+    value.toLowerCase() === "null" ||
+    value.toLowerCase() === "undefined" ||
+    value.includes("temporary profile.jpg")
   ) {
-    return '';
+    return "";
   }
 
   if (
-    value.startsWith('http') ||
-    value.startsWith('data:') ||
-    value.startsWith('blob:') ||
-    value.startsWith('/images/') ||
-    value.startsWith('/api/')
+    value.startsWith("http") ||
+    value.startsWith("data:") ||
+    value.startsWith("blob:") ||
+    value.startsWith("/images/") ||
+    value.startsWith("/api/")
   ) {
     return value;
   }
 
-  const cleanImage = value.replace(/^\/+/, '').replace(/^puffybrain\//, '');
+  const cleanImage = value.replace(/^\/+/, "").replace(/^puffybrain\//, "");
   return `${API_BASE}/${cleanImage}`;
 }
 
 function getAuthHeaders() {
   const token =
-    localStorage.getItem('puffy-token') ||
-    localStorage.getItem('token') ||
-    localStorage.getItem('authToken');
+    localStorage.getItem("puffy-token") ||
+    localStorage.getItem("token") ||
+    localStorage.getItem("authToken");
 
   return {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
 }
 
 function normalizeImportHeader(value) {
-  return String(value || '')
-    .replace(/^\ufeff/, '')
+  return String(value || "")
+    .replace(/^\ufeff/, "")
     .trim()
     .toLowerCase()
-    .replace(/[^a-z0-9]/g, '');
+    .replace(/[^a-z0-9]/g, "");
 }
 
 function parseCsvRows(text) {
   const rows = [];
   let row = [];
-  let cell = '';
+  let cell = "";
   let inQuotes = false;
 
   for (let index = 0; index < text.length; index += 1) {
@@ -213,19 +219,19 @@ function parseCsvRows(text) {
       continue;
     }
 
-    if (character === ',' && !inQuotes) {
+    if (character === "," && !inQuotes) {
       row.push(cell);
-      cell = '';
+      cell = "";
       continue;
     }
 
-    if ((character === '\n' || character === '\r') && !inQuotes) {
+    if ((character === "\n" || character === "\r") && !inQuotes) {
       row.push(cell);
       rows.push(row);
       row = [];
-      cell = '';
+      cell = "";
 
-      if (character === '\r' && nextCharacter === '\n') {
+      if (character === "\r" && nextCharacter === "\n") {
         index += 1;
       }
       continue;
@@ -245,22 +251,22 @@ function normalizeStudentImportRows(rows) {
   const cleanedRows = sourceRows
     .map((row) => {
       if (Array.isArray(row)) return row;
-      if (row && typeof row === 'object') return Object.values(row);
+      if (row && typeof row === "object") return Object.values(row);
       return [row];
     })
-    .map((row) => row.map((cell) => String(cell ?? '').trim()))
+    .map((row) => row.map((cell) => String(cell ?? "").trim()))
     .filter((row) => row.some(Boolean));
 
   if (cleanedRows.length === 0) return [];
 
   const header = cleanedRows[0].map(normalizeImportHeader);
   const headerAliases = [
-    'email',
-    'emailaddress',
-    'studentemail',
-    'name',
-    'fullname',
-    'studentname',
+    "email",
+    "emailaddress",
+    "studentemail",
+    "name",
+    "fullname",
+    "studentname",
   ];
   const hasHeader = header.some((cell) => headerAliases.includes(cell));
   const dataRows = hasHeader ? cleanedRows.slice(1) : cleanedRows;
@@ -274,20 +280,33 @@ function normalizeStudentImportRows(rows) {
   return dataRows
     .map((row, rowIndex) => ({
       sourceRow: rowIndex + (hasHeader ? 2 : 1),
-      name: row[indexOf(['name', 'fullname', 'studentname'], 0)] || '',
-      email: row[indexOf(['email', 'emailaddress', 'studentemail'], 1)] || '',
+      name: row[indexOf(["name", "fullname", "studentname"], 0)] || "",
+      email: row[indexOf(["email", "emailaddress", "studentemail"], 1)] || "",
       studentId:
         row[
           indexOf(
-            ['studentid', 'studentnumber', 'studentno', 'id', 'idnumber', 'schoolid'],
-            2
+            [
+              "studentid",
+              "studentnumber",
+              "studentno",
+              "id",
+              "idnumber",
+              "schoolid",
+            ],
+            2,
           )
-        ] || '',
+        ] || "",
       yearLevel:
-        row[indexOf(['year', 'yearlevel', 'studentyear', 'grade', 'gradelevel'], 3)] ||
-        '',
+        row[
+          indexOf(
+            ["year", "yearlevel", "studentyear", "grade", "gradelevel"],
+            3,
+          )
+        ] || "",
       sectionName:
-        row[indexOf(['section', 'sectionname', 'studentsection', 'block'], 4)] || '',
+        row[
+          indexOf(["section", "sectionname", "studentsection", "block"], 4)
+        ] || "",
     }))
     .filter((student) => student.name || student.email || student.studentId);
 }
@@ -297,10 +316,10 @@ function parseStudentCsv(text) {
 }
 
 async function parseStudentImportFile(file) {
-  const extension = file.name.split('.').pop()?.toLowerCase();
+  const extension = file.name.split(".").pop()?.toLowerCase();
 
-  if (extension === 'xlsx') {
-    const readXlsxFile = (await import('read-excel-file/browser')).default;
+  if (extension === "xlsx") {
+    const readXlsxFile = (await import("read-excel-file/browser")).default;
     return normalizeStudentImportRows(await readXlsxFile(file));
   }
 
@@ -308,15 +327,15 @@ async function parseStudentImportFile(file) {
 }
 
 function isSupportedStudentImportFile(file) {
-  const extension = file.name.split('.').pop()?.toLowerCase();
-  return extension === 'csv' || extension === 'xlsx';
+  const extension = file.name.split(".").pop()?.toLowerCase();
+  return extension === "csv" || extension === "xlsx";
 }
 
 function formatStudentImportFailure(student, fallbackMessage) {
-  const email = String(student.email || '').trim();
-  const normalizedMessage = String(fallbackMessage || '').toLowerCase();
+  const email = String(student.email || "").trim();
+  const normalizedMessage = String(fallbackMessage || "").toLowerCase();
 
-  if (normalizedMessage.includes('email is already registered')) {
+  if (normalizedMessage.includes("email is already registered")) {
     return `- Email "${email}" has been registered.`;
   }
 
@@ -325,7 +344,7 @@ function formatStudentImportFailure(student, fallbackMessage) {
   }
 
   if (!email) {
-    return '- Student email is required.';
+    return "- Student email is required.";
   }
 
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -333,15 +352,15 @@ function formatStudentImportFailure(student, fallbackMessage) {
   }
 
   return `- Email "${email}" could not be imported. ${
-    fallbackMessage || 'Please check this student record.'
+    fallbackMessage || "Please check this student record."
   }`;
 }
 
 function UserAvatar({ user, large = false }) {
   const [imageFailed, setImageFailed] = useState(false);
-  const imageUrl = imageFailed ? '' : getProfileImageUrl(user.profileImage);
-  const initials = getInitials(user.name) || '?';
-  const className = large ? 'users-modal-avatar' : 'users-avatar';
+  const imageUrl = imageFailed ? "" : getProfileImageUrl(user.profileImage);
+  const initials = getInitials(user.name) || "?";
+  const className = large ? "users-modal-avatar" : "users-avatar";
 
   return (
     <span className={className}>
@@ -357,22 +376,22 @@ function UserAvatar({ user, large = false }) {
 export default function UserManagementPage() {
   const fileInputRef = useRef(null);
   const [users, setUsers] = useState(demoUsers.map(normalizeUser));
-  const [query, setQuery] = useState('');
-  const [roleFilter, setRoleFilter] = useState('all');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [query, setQuery] = useState("");
+  const [roleFilter, setRoleFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [loading, setLoading] = useState(true);
-  const [notice, setNotice] = useState('');
+  const [notice, setNotice] = useState("");
   const [selectedUser, setSelectedUser] = useState(null);
-  const [busyUserId, setBusyUserId] = useState('');
+  const [busyUserId, setBusyUserId] = useState("");
   const [studentModalOpen, setStudentModalOpen] = useState(false);
   const [studentForm, setStudentForm] = useState(initialStudentForm);
   const [creatingStudent, setCreatingStudent] = useState(false);
   const [studentImportStatus, setStudentImportStatus] = useState(
-    initialStudentImportStatus
+    initialStudentImportStatus,
   );
   const studentImportBusy =
-    studentImportStatus.state === 'reading' ||
-    studentImportStatus.state === 'importing';
+    studentImportStatus.state === "reading" ||
+    studentImportStatus.state === "importing";
 
   useEffect(() => {
     let ignore = false;
@@ -383,7 +402,7 @@ export default function UserManagementPage() {
         const response = await fetch(`${API_BASE}/users`);
 
         if (!response.ok) {
-          throw new Error('User API unavailable.');
+          throw new Error("User API unavailable.");
         }
 
         const data = await response.json();
@@ -391,12 +410,14 @@ export default function UserManagementPage() {
 
         if (!ignore) {
           setUsers(nextUsers.map(normalizeUser).filter(isAdminManagedUser));
-          setNotice('');
+          setNotice("");
         }
       } catch {
         if (!ignore) {
           setUsers(demoUsers.map(normalizeUser));
-          setNotice('Showing sample approved users until the users API is available.');
+          setNotice(
+            "Showing sample approved users until the users API is available.",
+          );
         }
       } finally {
         if (!ignore) setLoading(false);
@@ -417,7 +438,10 @@ export default function UserManagementPage() {
   }, [studentModalOpen]);
 
   useEffect(() => {
-    if (studentImportStatus.state !== 'success' && studentImportStatus.state !== 'partial') {
+    if (
+      studentImportStatus.state !== "success" &&
+      studentImportStatus.state !== "partial"
+    ) {
       return undefined;
     }
 
@@ -431,10 +455,14 @@ export default function UserManagementPage() {
   const updateUserInList = (nextUser) => {
     const normalized = normalizeUser(nextUser);
     setUsers((currentUsers) =>
-      currentUsers.map((user) => (user.id === normalized.id ? normalized : user))
+      currentUsers.map((user) =>
+        user.id === normalized.id ? normalized : user,
+      ),
     );
     setSelectedUser((currentUser) =>
-      currentUser && currentUser.id === normalized.id ? normalized : currentUser
+      currentUser && currentUser.id === normalized.id
+        ? normalized
+        : currentUser,
     );
   };
 
@@ -458,14 +486,14 @@ export default function UserManagementPage() {
 
   const createStudent = async (payload) => {
     const response = await fetch(`${API_BASE}/users/student`, {
-      method: 'POST',
+      method: "POST",
       headers: getAuthHeaders(),
       body: JSON.stringify(payload),
     });
     const data = await response.json().catch(() => ({}));
 
     if (!response.ok || !data.success) {
-      throw new Error(data.message || 'Could not create student account.');
+      throw new Error(data.message || "Could not create student account.");
     }
 
     return data;
@@ -475,25 +503,25 @@ export default function UserManagementPage() {
     event.preventDefault();
 
     setCreatingStudent(true);
-    setNotice('');
+    setNotice("");
 
     try {
       const data = await createStudent(studentForm);
       const createdUser = normalizeUser(data.user);
 
       setUsers((currentUsers) => [createdUser, ...currentUsers]);
-      setRoleFilter('student');
-      setStatusFilter('all');
-      setQuery('');
+      setRoleFilter("student");
+      setStatusFilter("all");
+      setQuery("");
       setStudentForm(initialStudentForm);
       setStudentModalOpen(false);
       setNotice(
         data.credentialsEmailed
-          ? 'Student account created and temporary password emailed.'
-          : 'Student account created.'
+          ? "Student account created and temporary password emailed."
+          : "Student account created.",
       );
     } catch (error) {
-      setNotice(error.message || 'Could not create student account.');
+      setNotice(error.message || "Could not create student account.");
     } finally {
       setCreatingStudent(false);
     }
@@ -509,27 +537,27 @@ export default function UserManagementPage() {
 
   const handleBulkImport = async (event) => {
     const file = event.target.files?.[0];
-    event.target.value = '';
+    event.target.value = "";
     if (!file) return;
 
     if (!isSupportedStudentImportFile(file)) {
       setStudentImportStatus({
-        state: 'error',
+        state: "error",
         fileName: file.name,
         fileSize: file.size,
-        message: 'This file type is not supported.',
-        detail: '- Only .csv and .xlsx Excel files can be imported.',
+        message: "This file type is not supported.",
+        detail: "- Only .csv and .xlsx Excel files can be imported.",
       });
-      setNotice('Only CSV and XLSX files can be imported.');
+      setNotice("Only CSV and XLSX files can be imported.");
       return;
     }
 
     setStudentImportStatus({
-      state: 'reading',
+      state: "reading",
       fileName: file.name,
       fileSize: file.size,
-      message: 'Uploading student file...',
-      detail: '',
+      message: "Uploading student file...",
+      detail: "",
     });
 
     try {
@@ -537,13 +565,14 @@ export default function UserManagementPage() {
 
       if (students.length === 0) {
         setStudentImportStatus({
-          state: 'error',
+          state: "error",
           fileName: file.name,
           fileSize: file.size,
-          message: 'No student records found in this file.',
-          detail: 'Use columns for name, email, student ID, year level, and section.',
+          message: "No student records found in this file.",
+          detail:
+            "Use columns for name, email, student ID, year level, and section.",
         });
-        setNotice('Import file has no student records.');
+        setNotice("Import file has no student records.");
         return;
       }
 
@@ -552,26 +581,31 @@ export default function UserManagementPage() {
 
       for (const student of students) {
         setStudentImportStatus({
-          state: 'importing',
+          state: "importing",
           fileName: file.name,
           fileSize: file.size,
           message: `Importing ${
             createdUsers.length + failures.length + 1
           } of ${students.length} student records...`,
-          detail: `${students.length} record${students.length === 1 ? '' : 's'} found in the file.`,
+          detail: `${students.length} record${students.length === 1 ? "" : "s"} found in the file.`,
         });
 
         const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(student.email);
 
         if (!student.name || !student.email) {
           failures.push(
-            formatStudentImportFailure(student, 'Student name and email are required.')
+            formatStudentImportFailure(
+              student,
+              "Student name and email are required.",
+            ),
           );
           continue;
         }
 
         if (!validEmail) {
-          failures.push(formatStudentImportFailure(student, 'Enter a valid email address.'));
+          failures.push(
+            formatStudentImportFailure(student, "Enter a valid email address."),
+          );
           continue;
         }
 
@@ -582,23 +616,23 @@ export default function UserManagementPage() {
           failures.push(
             formatStudentImportFailure(
               student,
-              error.message || 'Could not create student.'
-            )
+              error.message || "Could not create student.",
+            ),
           );
         }
       }
 
       if (createdUsers.length === 0) {
-        const detail = failures.slice(0, 3).join('\n');
+        const detail = failures.slice(0, 3).join("\n");
 
         setStudentImportStatus({
-          state: 'error',
+          state: "error",
           fileName: file.name,
           fileSize: file.size,
-          message: 'No student accounts were imported.',
+          message: "No student accounts were imported.",
           detail,
         });
-        setNotice(detail || 'No student accounts were imported.');
+        setNotice(detail || "No student accounts were imported.");
         return;
       }
 
@@ -606,44 +640,45 @@ export default function UserManagementPage() {
         failures.length > 0
           ? `${createdUsers.length} imported, ${failures.length} failed.`
           : `${createdUsers.length} student account${
-              createdUsers.length === 1 ? '' : 's'
+              createdUsers.length === 1 ? "" : "s"
             } imported.`;
 
       setStudentImportStatus({
-        state: failures.length > 0 ? 'partial' : 'success',
+        state: failures.length > 0 ? "partial" : "success",
         fileName: file.name,
         fileSize: file.size,
         message: importMessage,
-        detail: failures.slice(0, 3).join('\n'),
+        detail: failures.slice(0, 3).join("\n"),
       });
       setUsers((currentUsers) => [...createdUsers, ...currentUsers]);
-      setRoleFilter('student');
-      setStatusFilter('all');
-      setQuery('');
+      setRoleFilter("student");
+      setStatusFilter("all");
+      setQuery("");
       setStudentForm(initialStudentForm);
       setStudentModalOpen(false);
       setNotice(
         failures.length > 0
           ? `${createdUsers.length} student account${
-              createdUsers.length === 1 ? '' : 's'
+              createdUsers.length === 1 ? "" : "s"
             } imported. ${failures.length} account${
-              failures.length === 1 ? '' : 's'
+              failures.length === 1 ? "" : "s"
             } failed.`
           : `${createdUsers.length} student account${
-              createdUsers.length === 1 ? '' : 's'
+              createdUsers.length === 1 ? "" : "s"
             } imported and temporary password email${
-              createdUsers.length === 1 ? '' : 's'
-            } sent.`
+              createdUsers.length === 1 ? "" : "s"
+            } sent.`,
       );
     } catch (error) {
       setStudentImportStatus({
-        state: 'error',
+        state: "error",
         fileName: file.name,
         fileSize: file.size,
-        message: 'Could not import this file.',
-        detail: error.message || 'Please check the CSV or Excel file and try again.',
+        message: "Could not import this file.",
+        detail:
+          error.message || "Please check the CSV or Excel file and try again.",
       });
-      setNotice(error.message || 'Could not import students.');
+      setNotice(error.message || "Could not import students.");
     }
   };
 
@@ -653,22 +688,22 @@ export default function UserManagementPage() {
     try {
       setBusyUserId(`${user.id}-archive`);
       const response = await fetch(`${API_BASE}/users/${user.id}/archive`, {
-        method: 'PATCH',
+        method: "PATCH",
         headers: getAuthHeaders(),
         body: JSON.stringify({ archive }),
       });
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.message || 'Could not update account.');
+        throw new Error(data.message || "Could not update account.");
       }
 
       updateUserInList(data.user);
       setNotice(data.message);
     } catch (error) {
-      setNotice(error.message || 'Could not update account.');
+      setNotice(error.message || "Could not update account.");
     } finally {
-      setBusyUserId('');
+      setBusyUserId("");
     }
   };
 
@@ -678,9 +713,9 @@ export default function UserManagementPage() {
     return users.filter((user) => {
       const role = String(user.role).toLowerCase();
       const status = String(user.status).toLowerCase();
-      const matchesRole = roleFilter === 'all' || role === roleFilter;
+      const matchesRole = roleFilter === "all" || role === roleFilter;
       const matchesStatus =
-        statusFilter === 'all' || status === statusFilter.toLowerCase();
+        statusFilter === "all" || status === statusFilter.toLowerCase();
       const matchesSearch =
         !search ||
         user.name.toLowerCase().includes(search) ||
@@ -698,27 +733,31 @@ export default function UserManagementPage() {
     const archivedCount = users.filter((user) => user.isArchived).length;
 
     return [
-      { label: 'Managed Users', value: users.length, icon: FiUsers },
-      { label: 'Students', value: countRole('student'), icon: FiUser },
-      { label: 'Approved Professors', value: countRole('professor'), icon: FiMail },
-      { label: 'Archived', value: archivedCount, icon: FiArchive },
+      { label: "Managed Users", value: users.length, icon: FiUsers },
+      { label: "Students", value: countRole("student"), icon: FiUser },
+      {
+        label: "Approved Professors",
+        value: countRole("professor"),
+        icon: FiMail,
+      },
+      { label: "Archived", value: archivedCount, icon: FiArchive },
     ];
   }, [users]);
 
   const studentImportPopupTitle =
-    studentImportStatus.state === 'reading'
-      ? 'Uploading file'
-      : studentImportStatus.state === 'importing'
-      ? 'Importing students'
-      : studentImportStatus.state === 'success'
-      ? 'Students imported'
-      : studentImportStatus.state === 'partial'
-      ? 'Import finished with notes'
-      : 'Student import';
+    studentImportStatus.state === "reading"
+      ? "Uploading file"
+      : studentImportStatus.state === "importing"
+        ? "Importing students"
+        : studentImportStatus.state === "success"
+          ? "Students imported"
+          : studentImportStatus.state === "partial"
+            ? "Import finished with notes"
+            : "Student import";
 
   return (
     <div className="users-page">
-      {studentImportStatus.state !== 'idle' && (
+      {studentImportStatus.state !== "idle" && (
         <aside
           className={`student-import-popup is-${studentImportStatus.state}`}
           role="status"
@@ -726,11 +765,11 @@ export default function UserManagementPage() {
           aria-atomic="true"
         >
           <span className="student-import-popup-icon">
-            {studentImportStatus.state === 'success' ? (
+            {studentImportStatus.state === "success" ? (
               <FiCheck />
-            ) : studentImportStatus.state === 'error' ? (
+            ) : studentImportStatus.state === "error" ? (
               <FiX />
-            ) : studentImportStatus.state === 'partial' ? (
+            ) : studentImportStatus.state === "partial" ? (
               <FiFileText />
             ) : (
               <FiClock />
@@ -741,11 +780,13 @@ export default function UserManagementPage() {
             <p>{studentImportStatus.message}</p>
             {studentImportStatus.fileName && (
               <span>
-                {studentImportStatus.fileName} -{' '}
+                {studentImportStatus.fileName} -{" "}
                 {formatFileSize(studentImportStatus.fileSize)}
               </span>
             )}
-            {studentImportStatus.detail && <small>{studentImportStatus.detail}</small>}
+            {studentImportStatus.detail && (
+              <small>{studentImportStatus.detail}</small>
+            )}
           </div>
           {!studentImportBusy && (
             <button
@@ -764,8 +805,8 @@ export default function UserManagementPage() {
         <div>
           <h1>Admin User Management</h1>
           <p>
-            Limited to registered students, approved professors, and archive or restore
-            records.
+            Limited to registered students, approved professors, and archive or
+            restore records.
           </p>
         </div>
 
@@ -882,7 +923,9 @@ export default function UserManagementPage() {
                       </td>
                       <td>{user.email}</td>
                       <td>
-                        <span className="users-role">{titleCase(user.role)}</span>
+                        <span className="users-role">
+                          {titleCase(user.role)}
+                        </span>
                       </td>
                       <td>
                         <span className={`users-status is-${status}`}>
@@ -890,7 +933,9 @@ export default function UserManagementPage() {
                         </span>
                       </td>
                       <td>{formatDate(user.joined)}</td>
-                      <td>{user.decks} decks / {user.modules} modules</td>
+                      <td>
+                        {user.decks} decks / {user.modules} modules
+                      </td>
                       <td>
                         <div className="users-action-group">
                           <button
@@ -908,10 +953,16 @@ export default function UserManagementPage() {
                             type="button"
                             onClick={() => handleArchiveToggle(user)}
                             disabled={busyUserId === `${user.id}-archive`}
-                            title={user.isArchived ? 'Restore account' : 'Archive account'}
+                            title={
+                              user.isArchived
+                                ? "Restore account"
+                                : "Archive account"
+                            }
                           >
                             <FiArchive />
-                            <span>{user.isArchived ? 'Restore' : 'Archive'}</span>
+                            <span>
+                              {user.isArchived ? "Restore" : "Archive"}
+                            </span>
                           </button>
                         </div>
                       </td>
@@ -925,7 +976,10 @@ export default function UserManagementPage() {
       </section>
 
       {selectedUser && (
-        <div className="users-modal-backdrop" onClick={() => setSelectedUser(null)}>
+        <div
+          className="users-modal-backdrop"
+          onClick={() => setSelectedUser(null)}
+        >
           <section
             className="users-modal"
             onClick={(event) => event.stopPropagation()}
@@ -960,23 +1014,23 @@ export default function UserManagementPage() {
               </div>
               <div>
                 <dt>Email</dt>
-                <dd>{selectedUser.verified ? 'Verified' : 'Pending'}</dd>
+                <dd>{selectedUser.verified ? "Verified" : "Pending"}</dd>
               </div>
               <div>
                 <dt>Student ID</dt>
-                <dd>{selectedUser.studentId || 'None'}</dd>
+                <dd>{selectedUser.studentId || "None"}</dd>
               </div>
               <div>
                 <dt>Year Level</dt>
-                <dd>{selectedUser.yearLevel || 'None'}</dd>
+                <dd>{selectedUser.yearLevel || "None"}</dd>
               </div>
               <div>
                 <dt>Section</dt>
-                <dd>{selectedUser.sectionName || 'None'}</dd>
+                <dd>{selectedUser.sectionName || "None"}</dd>
               </div>
               <div>
                 <dt>Professor ID</dt>
-                <dd>{selectedUser.professorId || 'None'}</dd>
+                <dd>{selectedUser.professorId || "None"}</dd>
               </div>
               <div>
                 <dt>Joined</dt>
@@ -984,7 +1038,9 @@ export default function UserManagementPage() {
               </div>
               <div>
                 <dt>Activity</dt>
-                <dd>{selectedUser.decks} decks / {selectedUser.modules} modules</dd>
+                <dd>
+                  {selectedUser.decks} decks / {selectedUser.modules} modules
+                </dd>
               </div>
             </dl>
           </section>
@@ -1013,7 +1069,9 @@ export default function UserManagementPage() {
               </span>
               <div>
                 <h2>Add Student</h2>
-                <p>Create or import student accounts with generated credentials.</p>
+                <p>
+                  Create or import student accounts with generated credentials.
+                </p>
               </div>
             </div>
 
@@ -1021,8 +1079,8 @@ export default function UserManagementPage() {
               <div>
                 <strong>Bulk Import Students</strong>
                 <p>
-                  Upload a CSV or Excel file with name, email, student ID, year level,
-                  and section columns.
+                  Upload a CSV or Excel file with name, email, student ID, year
+                  level, and section columns.
                 </p>
               </div>
               <button
@@ -1050,7 +1108,7 @@ export default function UserManagementPage() {
                 <input
                   type="text"
                   value={studentForm.name}
-                  onChange={handleStudentFieldChange('name')}
+                  onChange={handleStudentFieldChange("name")}
                   disabled={creatingStudent || studentImportBusy}
                   required
                 />
@@ -1061,7 +1119,7 @@ export default function UserManagementPage() {
                 <input
                   type="email"
                   value={studentForm.email}
-                  onChange={handleStudentFieldChange('email')}
+                  onChange={handleStudentFieldChange("email")}
                   disabled={creatingStudent || studentImportBusy}
                   required
                 />
@@ -1072,7 +1130,7 @@ export default function UserManagementPage() {
                 <input
                   type="text"
                   value={studentForm.studentId}
-                  onChange={handleStudentFieldChange('studentId')}
+                  onChange={handleStudentFieldChange("studentId")}
                   disabled={creatingStudent || studentImportBusy}
                 />
               </label>
@@ -1081,7 +1139,7 @@ export default function UserManagementPage() {
                 Year Level
                 <select
                   value={studentForm.yearLevel}
-                  onChange={handleStudentFieldChange('yearLevel')}
+                  onChange={handleStudentFieldChange("yearLevel")}
                   disabled={creatingStudent || studentImportBusy}
                 >
                   <option value="">Select year</option>
@@ -1097,7 +1155,7 @@ export default function UserManagementPage() {
                 <input
                   type="text"
                   value={studentForm.sectionName}
-                  onChange={handleStudentFieldChange('sectionName')}
+                  onChange={handleStudentFieldChange("sectionName")}
                   placeholder="Example: 1A"
                   disabled={creatingStudent || studentImportBusy}
                 />
@@ -1108,7 +1166,9 @@ export default function UserManagementPage() {
                 type="submit"
                 disabled={creatingStudent || studentImportBusy}
               >
-                {creatingStudent ? 'Creating Student...' : 'Create Student Account'}
+                {creatingStudent
+                  ? "Creating Student..."
+                  : "Create Student Account"}
               </button>
             </form>
           </section>

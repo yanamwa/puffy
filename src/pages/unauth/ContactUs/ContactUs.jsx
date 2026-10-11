@@ -58,7 +58,9 @@ function ContactUs() {
         if (data.success) {
           showAlert({
             title: "Message Sent!",
-            text: data.message || "Thank you for reaching out. We'll get back to you soon.",
+            text:
+              data.message ||
+              "Thank you for reaching out. We'll get back to you soon.",
             image: "/images/success.png",
           });
 
@@ -100,8 +102,9 @@ function ContactUs() {
             </h1>
 
             <p>
-              Have questions, suggestions, or feedback? We'd love to hear from you.
-              Fill out the form below and our team will get back to you as soon as possible.
+              Have questions, suggestions, or feedback? We'd love to hear from
+              you. Fill out the form below and our team will get back to you as
+              soon as possible.
             </p>
           </div>
 
@@ -151,11 +154,7 @@ function ContactUs() {
             ></textarea>
           </div>
 
-          <button
-            type="submit"
-            className={styles.submitBtn}
-            disabled={sending}
-          >
+          <button type="submit" className={styles.submitBtn} disabled={sending}>
             {sending ? "Sending..." : "Submit"}
           </button>
         </form>

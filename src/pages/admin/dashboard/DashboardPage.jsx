@@ -1,26 +1,32 @@
-import { FiBookOpen, FiUser, FiUsers } from 'react-icons/fi';
-import './Dashboard.css';
+import { FiBookOpen, FiUser, FiUsers } from "react-icons/fi";
+import "./Dashboard.css";
 
 const stats = [
-  { id: 1, label: 'Total Users', value: '15', badge: 'Live', icon: FiUsers },
-  { id: 2, label: 'Total Decks', value: '14', badge: 'Live', icon: FiBookOpen },
-  { id: 3, label: 'Recent Decks', value: '5', badge: 'Latest', icon: FiBookOpen },
+  { id: 1, label: "Total Users", value: "15", badge: "Live", icon: FiUsers },
+  { id: 2, label: "Total Decks", value: "14", badge: "Live", icon: FiBookOpen },
+  {
+    id: 3,
+    label: "Recent Decks",
+    value: "5",
+    badge: "Latest",
+    icon: FiBookOpen,
+  },
 ];
 
 const recentDecks = [
-  { id: 1, title: 'reviewer for mapeh', author: 'Created by @puffybrain' },
-  { id: 2, title: 'HCI 3', author: 'Created by @nighjri' },
-  { id: 3, title: 'dadawd', author: 'Created by @meiko' },
-  { id: 4, title: 'Introduction to js', author: 'Created by @meiko' },
-  { id: 5, title: 'Testing', author: 'Created by @meiko' },
+  { id: 1, title: "reviewer for mapeh", author: "Created by @puffybrain" },
+  { id: 2, title: "HCI 3", author: "Created by @nighjri" },
+  { id: 3, title: "dadawd", author: "Created by @meiko" },
+  { id: 4, title: "Introduction to js", author: "Created by @meiko" },
+  { id: 5, title: "Testing", author: "Created by @meiko" },
 ];
 
 const recentUsers = [
-  { id: 1, name: '@puffybrain', role: 'Recent user' },
-  { id: 2, name: '@anie', role: 'Recent user' },
-  { id: 3, name: '@Ashbornn', role: 'Recent user' },
-  { id: 4, name: '@shzume', role: 'Recent user' },
-  { id: 5, name: '@ads', role: 'Recent user' },
+  { id: 1, name: "@puffybrain", role: "Recent user" },
+  { id: 2, name: "@anie", role: "Recent user" },
+  { id: 3, name: "@Ashbornn", role: "Recent user" },
+  { id: 4, name: "@shzume", role: "Recent user" },
+  { id: 5, name: "@ads", role: "Recent user" },
 ];
 
 export default function DashboardPage() {
@@ -51,7 +57,9 @@ export default function DashboardPage() {
         <section className="section">
           <div className="section-header">
             <h2>Recent Created Decks</h2>
-            <a href="#" className="show-all">Show all</a>
+            <a href="#" className="show-all">
+              Show all
+            </a>
           </div>
           <div className="decks-list">
             {recentDecks.map((deck) => (
@@ -71,7 +79,9 @@ export default function DashboardPage() {
         <section className="section">
           <div className="section-header">
             <h2>Recent Users</h2>
-            <a href="#" className="show-all">Show all</a>
+            <a href="#" className="show-all">
+              Show all
+            </a>
           </div>
           <div className="users-list">
             {recentUsers.map((user) => (

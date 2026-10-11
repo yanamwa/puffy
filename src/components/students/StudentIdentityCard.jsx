@@ -3,12 +3,9 @@ import "./StudentIdentityCard.css";
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
-const SERVER_ORIGIN =
-  API_BASE_URL.replace(/\/api\/?$/, "");
+const SERVER_ORIGIN = API_BASE_URL.replace(/\/api\/?$/, "");
 
-const DEFAULT_PROFILE_IMAGE =
-  "/images/temporaryimg.png";
-
+const DEFAULT_PROFILE_IMAGE = "/images/temporaryimg.png";
 
 function resolveProfileImage(imagePath) {
   if (!imagePath) {
@@ -26,14 +23,10 @@ function resolveProfileImage(imagePath) {
 
   let fixedPath = imagePath;
 
-  if (
-    fixedPath.startsWith(
-      "/api/uploads/profile-images/"
-    )
-  ) {
+  if (fixedPath.startsWith("/api/uploads/profile-images/")) {
     fixedPath = fixedPath.replace(
       "/api/uploads/profile-images/",
-      "/uploads/profile-images/"
+      "/uploads/profile-images/",
     );
   }
 
@@ -73,11 +66,7 @@ function normalizeStudent(student = {}) {
       student.program_name ||
       "Program not set",
 
-    year:
-      student.yearLevel ||
-      student.year_level ||
-      student.year ||
-      "Not set",
+    year: student.yearLevel || student.year_level || student.year || "Not set",
 
     section:
       student.sectionName ||
@@ -111,10 +100,7 @@ export default function StudentIdentityCard({
 
       <div className="student-identity-header">
         <div className="student-identity-brand">
-          <img
-            src="/images/logo_solo.png"
-            alt="PuffyBrain"
-          />
+          <img src="/images/logo_solo.png" alt="PuffyBrain" />
 
           <div>
             <strong>PuffyBrain</strong>
@@ -122,23 +108,20 @@ export default function StudentIdentityCard({
           </div>
         </div>
 
-        <span className="student-identity-role">
-          Student
-        </span>
+        <span className="student-identity-role">Student</span>
       </div>
 
       <div className="student-identity-photo-area">
         <div className="student-id-photo-frame">
           <img
-                src={imageSource}
-                alt={`${data.name}'s profile`}
-                className="student-id-photo"
-                onError={(event) => {
-                    event.currentTarget.onerror = null;
-                    event.currentTarget.src =
-                    DEFAULT_PROFILE_IMAGE;
-                }}
-                />
+            src={imageSource}
+            alt={`${data.name}'s profile`}
+            className="student-id-photo"
+            onError={(event) => {
+              event.currentTarget.onerror = null;
+              event.currentTarget.src = DEFAULT_PROFILE_IMAGE;
+            }}
+          />
 
           {editable && (
             <label
@@ -147,20 +130,11 @@ export default function StudentIdentityCard({
               aria-label="Change profile picture"
             >
               {profileImageUploading ? (
-                <span className="student-photo-uploading">
-                  ...
-                </span>
+                <span className="student-photo-uploading">...</span>
               ) : (
-                <svg
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M4 8.5h3l1.4-2h7.2l1.4 2h3v10H4v-10Z" />
-                  <circle
-                    cx="12"
-                    cy="13.5"
-                    r="3.2"
-                  />
+                  <circle cx="12" cy="13.5" r="3.2" />
                 </svg>
               )}
 
@@ -201,9 +175,7 @@ export default function StudentIdentityCard({
       <div className="student-identity-footer">
         <div>
           <span>Issued by</span>
-          <strong>
-            PuffyBrain Learning System
-          </strong>
+          <strong>PuffyBrain Learning System</strong>
         </div>
       </div>
     </article>

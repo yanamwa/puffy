@@ -454,7 +454,7 @@
 
   .heroContent {
     width: 86%;
-    margin-top: 60px; 
+    margin-top: 60px;
     flex-direction: column;
   }
 
@@ -481,7 +481,24 @@
   }
 }
 /* Shared blue and white public theme */
-.contactPage { --color-primary: #ffffff; --color-secondary: #a8c6e7; --color-third: #5f86b1; --color-fourth: #7fa8d6; --color-fifth: #7fa8d6; --font-color: #4f6174; background: #ffffff; color: #4f6174; min-height: 100vh; }
-.header { background: #ffffff; }
-.contactInfo { background: #edf4fc; }
-.contactForm button[type="submit"] { background: #7fa8d6; color: white; }
+.contactPage {
+  --color-primary: #ffffff;
+  --color-secondary: #a8c6e7;
+  --color-third: #5f86b1;
+  --color-fourth: #7fa8d6;
+  --color-fifth: #7fa8d6;
+  --font-color: #4f6174;
+  background: #ffffff;
+  color: #4f6174;
+  min-height: 100vh;
+}
+.header {
+  background: #ffffff;
+}
+.contactInfo {
+  background: #edf4fc;
+}
+.contactForm button[type="submit"] {
+  background: #7fa8d6;
+  color: white;
+}

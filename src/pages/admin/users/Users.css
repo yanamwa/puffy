@@ -41,7 +41,10 @@
   font-weight: 950;
   padding: 0 17px;
   white-space: nowrap;
-  transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease;
+  transition:
+    transform 0.16s ease,
+    box-shadow 0.16s ease,
+    filter 0.16s ease;
 }
 
 .users-header-actions {
@@ -356,7 +359,10 @@
   font-size: 10px;
   font-weight: 950;
   padding: 0 13px;
-  transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease;
+  transition:
+    transform 0.16s ease,
+    box-shadow 0.16s ease,
+    filter 0.16s ease;
 }
 
 .users-secondary-btn {
@@ -376,7 +382,10 @@
   font-weight: 950;
   padding: 0 14px;
   white-space: nowrap;
-  transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease;
+  transition:
+    transform 0.16s ease,
+    box-shadow 0.16s ease,
+    filter 0.16s ease;
 }
 
 .users-icon-btn {
@@ -1225,7 +1234,7 @@
   min-height: 32px;
   border: 0;
   border-radius: 10px;
-  background: #7A8799;
+  background: #7a8799;
   box-shadow: 0 3px 0 rgba(58, 68, 84, 0.24);
   color: #ffffff;
   display: inline-flex;
@@ -1251,7 +1260,7 @@
 }
 
 .users-page .users-view-btn {
-  background: #7A8799;
+  background: #7a8799;
   box-shadow: 0 3px 0 rgba(58, 68, 84, 0.24);
 }
 
@@ -1300,7 +1309,7 @@
 }
 
 .users-page .users-secondary-btn {
-  background: #7A8799;
+  background: #7a8799;
   color: #ffffff;
 }
 
