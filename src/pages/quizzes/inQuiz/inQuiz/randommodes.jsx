@@ -964,8 +964,18 @@ export default function MixedMode() {
       {renderSettingsModal()}
 
       <div className={styles.header}>
-        <h1 className={styles.title}>{MIXED_MODE_TITLE}</h1>
-        <p className={styles.modeDescription}>{MIXED_MODE_DESCRIPTION}</p>
+        <h1 className={styles.title}>
+          {isMainQuiz
+            ? practiceSession.scope.moduleTitle ||
+              practiceSession.scope.scopeTitle ||
+              "Main Quiz"
+            : MIXED_MODE_TITLE}
+        </h1>
+        <p className={styles.modeDescription}>
+          {isMainQuiz
+            ? "Answer all the following questions"
+            : MIXED_MODE_DESCRIPTION}
+        </p>
 
         <div className={styles.counter}>
           Question {current + 1} of {questions.length}

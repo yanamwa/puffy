@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { fetchCourses } from "../../../services/courseApi.js";
 import QuizAssessmentDashboard from "./QuizAssessmentDashboard.jsx";
-import styles from "./AssessmentAnalysis.module.css";
+import { downloadAssessmentPdf } from "../../../services/pdfDownload.js";
 function readItems(course) {
   const value =
     course?.quizItems ||
@@ -25,6 +25,19 @@ export default function AssessmentDetail() {
   const [course, setCourse] = useState(initial);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [downloading, setDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState("");
+  const savePdf = async () => {
+    setDownloading(true);
+    setDownloadError("");
+    try {
+      await downloadAssessmentPdf(`assessment-${courseId}`);
+    } catch (error) {
+      setDownloadError(error.message || "PDF download failed. Please retry.");
+    } finally {
+      setDownloading(false);
+    }
+  };
   useEffect(() => {
     let active = true;
     setLoading(true);
@@ -54,19 +67,38 @@ export default function AssessmentDetail() {
   }, [courseId]);
   const title = course?.title || course?.course_name || "Assessment Analysis";
   return (
-    <section className="qa-assessment-page">
-      <header className={styles.header}>
+    <section className="qa-assessment-page qa-compact-assessment">
+      <nav className="qa-back-bar" aria-label="Back navigation">
+        <button type="button" onClick={() => navigate("/professor/students")}>
+          <span aria-hidden="true">‹</span> Back to assessment
+        </button>
+      </nav>
+      <header className="qa-page-heading">
         <div>
           <h1>Assessment Analysis</h1>
-          <p>{title}</p>
+          <p>Review practice and main quiz results for {title}.</p>
         </div>
-        <button
-          className={styles.backButton}
-          onClick={() => navigate("/professor/students")}
-        >
-          Back to assessments
-        </button>
+        <div className="qa-page-print-actions">
+          <button
+            type="button"
+            className="qa-page-print"
+            onClick={() => window.print()}
+            disabled={loading || Boolean(error)}
+          >
+            Print
+          </button>
+          <button
+            type="button"
+            className="qa-page-print"
+            onClick={savePdf}
+            disabled={loading || Boolean(error) || downloading}
+            title="Download assessment as a PDF"
+          >
+            {downloading ? "Downloading…" : "Save as PDF"}
+          </button>
+        </div>
       </header>
+      {downloadError && <p role="alert">{downloadError}</p>}
       {loading ? (
         <p>Loading assessment details…</p>
       ) : error ? (

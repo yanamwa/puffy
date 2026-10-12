@@ -11,6 +11,8 @@ import { syncDeckCardMemorizationFromAnswers } from "../../utils/cardMemorizatio
 import styles from "./lessonresult.module.css";
 import QuizModesModal from "../../components/quizmodes/QuizModesModal";
 import { fetchCourseContent } from "./courseContent.js";
+import MainQuizResult from "./MainQuizResult.jsx";
+import { isMainQuizResult } from "../../utils/quizResultType.js";
 
 function Sparkles(props) {
   return (
@@ -287,6 +289,7 @@ export default function LessonResult() {
   });
 
   const [attempts, setAttempts] = useState(0);
+  const [isMainQuiz, setIsMainQuiz] = useState(false);
   const [source, setSource] = useState(deckId ? "deck" : "lesson");
   const [resultDeckId, setResultDeckId] = useState(deckId || null);
   const [resultCourseId, setResultCourseId] = useState(null);
@@ -416,6 +419,8 @@ export default function LessonResult() {
           savedResults.scope?.nextModuleIndex,
       );
 
+      const mainQuizResult = isMainQuizResult(savedResults);
+      setIsMainQuiz(mainQuizResult);
       setResults({
         score: savedResults.score || 0,
         total: savedResults.total || 0,
@@ -557,7 +562,7 @@ export default function LessonResult() {
         savedAnswers,
       );
 
-      if (savedAnswers.length > 0) {
+      if (!mainQuizResult && savedAnswers.length > 0) {
         setIsFeedbackLoading(true);
         setAiFeedback(null);
 
@@ -960,6 +965,18 @@ export default function LessonResult() {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
+  if (isMainQuiz) {
+    return (
+      <MainQuizResult
+        score={results.score}
+        total={results.total}
+        percentage={percentage}
+        onBack={goBack}
+        onHome={goHome}
+      />
+    );
+  }
 
   return (
     <div className={styles.wrapper}>

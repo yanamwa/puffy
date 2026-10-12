@@ -7,6 +7,10 @@ import { lessonAuthHeaders } from "../../../services/lessonAuth.js";
 import { API_BASE } from "../../../config.js";
 import { fetchCourses } from "../../../services/courseApi.js";
 import styles from "./AssessmentAnalysis.module.css";
+import {
+  mainQuizKey,
+  mainQuizQuestions,
+} from "../../../services/mainQuizAnalysisData.js";
 
 const FALLBACK_RATIOS = [1, 0.83, 0.7, 0.5, 0.4];
 const QUESTIONS_PER_PAGE = 10;
@@ -86,132 +90,6 @@ function ChartLabel({ label }) {
       />
       {label}
     </span>
-  );
-}
-
-function ScoreDistributionChart({ distribution, totalItems }) {
-  const maximumScore = Math.max(
-    1,
-    totalItems || 0,
-    ...distribution.map((bucket) => bucket.score),
-  );
-  const largestCount = Math.max(
-    1,
-    ...distribution.map((bucket) => bucket.count),
-  );
-  const countStep = Math.max(1, Math.ceil(largestCount / 4));
-  const countMaximum = Math.ceil(largestCount / countStep) * countStep;
-  const left = 65;
-  const top = 30;
-  const plotWidth = 680;
-  const plotHeight = 210;
-  const x = (score) => left + ((score + 0.5) / (maximumScore + 1)) * plotWidth;
-  const y = (count) => top + plotHeight - (count / countMaximum) * plotHeight;
-  const scoreStep = Math.max(1, Math.ceil(maximumScore / 20));
-  const scoreTicks = Array.from(
-    { length: Math.floor(maximumScore / scoreStep) + 1 },
-    (_, index) => index * scoreStep,
-  );
-  if (scoreTicks.at(-1) !== maximumScore) scoreTicks.push(maximumScore);
-  const barWidth = Math.min(32, (plotWidth / (maximumScore + 1)) * 0.7);
-  const summary = distribution
-    .map(
-      (bucket) =>
-        `${bucket.count} ${bucket.count === 1 ? "student" : "students"} scored ${bucket.score}`,
-    )
-    .join("; ");
-
-  return (
-    <div className={styles.scoreDistributionChart}>
-      <svg
-        viewBox="0 0 780 305"
-        role="img"
-        aria-label={`Score distribution: ${summary}.`}
-      >
-        <title>Overall score distribution</title>
-        <text x="16" y="135" transform="rotate(-90 16 135)" textAnchor="middle">
-          Students
-        </text>
-        {Array.from(
-          { length: countMaximum / countStep + 1 },
-          (_, index) => index * countStep,
-        ).map((count) => (
-          <g key={count}>
-            <line
-              x1={left}
-              x2={left + plotWidth}
-              y1={y(count)}
-              y2={y(count)}
-              stroke="#e2e8f0"
-            />
-            <text x={left - 12} y={y(count) + 4} textAnchor="end">
-              {count}
-            </text>
-          </g>
-        ))}
-        <line
-          x1={left}
-          x2={left}
-          y1={top}
-          y2={top + plotHeight}
-          stroke="#b9c3ce"
-        />
-        <line
-          x1={left}
-          x2={left + plotWidth}
-          y1={top + plotHeight}
-          y2={top + plotHeight}
-          stroke="#b9c3ce"
-        />
-        {distribution.map((bucket) => (
-          <g key={bucket.score}>
-            <title>
-              {bucket.count} {bucket.count === 1 ? "student" : "students"}{" "}
-              scored {bucket.score}
-            </title>
-            <rect
-              x={x(bucket.score) - barWidth / 2}
-              y={y(bucket.count)}
-              width={barWidth}
-              height={top + plotHeight - y(bucket.count)}
-              fill="#7fa8d6"
-              rx="3"
-            />
-            <text
-              x={x(bucket.score)}
-              y={y(bucket.count) - 8}
-              textAnchor="middle"
-            >
-              {bucket.count} {bucket.count === 1 ? "student" : "students"}
-            </text>
-          </g>
-        ))}
-
-        {scoreTicks.map((score) => (
-          <text key={score} x={x(score)} y="260" textAnchor="middle">
-            {score}
-          </text>
-        ))}
-        <text x={left + plotWidth / 2} y="290" textAnchor="middle">
-          Quiz score (out of {maximumScore})
-        </text>
-      </svg>
-      <ul className={styles.scoreDistributionLabels} aria-label="Score labels">
-        {distribution.map((bucket) => (
-          <li key={bucket.score}>
-            <i
-              className={styles.pieLegendSwatch}
-              style={{ backgroundColor: "#7fa8d6" }}
-              aria-hidden="true"
-            />
-            <span>
-              {bucket.count} {bucket.count === 1 ? "student" : "students"} —
-              score {bucket.score} out of {maximumScore}
-            </span>
-          </li>
-        ))}
-      </ul>
-    </div>
   );
 }
 
@@ -765,7 +643,10 @@ async function fetchEnrollmentSummary(courseId) {
     throw new Error(data.message || "Could not load enrolled students.");
   }
 
-  return getEnrollmentSummary(data.enrolled);
+  return {
+    ...getEnrollmentSummary(data.enrolled),
+    students: Array.isArray(data.enrolled) ? data.enrolled : [],
+  };
 }
 
 function readNumber(...values) {
@@ -979,6 +860,14 @@ function normalizeQuizAttempts(course, totalItems) {
 
       return {
         answers,
+        userId: attempt.user_id ?? attempt.userId ?? attempt.student?.user_id,
+        studentName:
+          attempt.student_name || attempt.studentName || attempt.student?.name,
+        section:
+          attempt.section ||
+          attempt.student_section ||
+          attempt.student?.section,
+        earnedScore: answerScore,
         gender: normalizeGender(
           attempt?.gender ||
             attempt?.studentGender ||
@@ -1035,6 +924,8 @@ function readAttemptCorrectness(answer, selectedAnswer, correctAnswer) {
 
 function getAttemptAnswerAt(attempt, item, index) {
   const answers = Array.isArray(attempt.answers) ? attempt.answers : [];
+
+  if (Number.isInteger(item?.attemptIndex)) return answers[item.attemptIndex];
 
   if (item?.question) {
     const text = item.question.trim().toLowerCase();
@@ -1577,6 +1468,7 @@ export default function MainQuizAnalysis() {
   const [enrollmentSummary, setEnrollmentSummary] = useState(null);
   const [questionPage, setQuestionPage] = useState(0);
   const [activeView, setActiveView] = useState(VIEW_MODES.GRAPHICAL);
+  const [selectedMainQuiz, setSelectedMainQuiz] = useState("0");
   const [printing, setPrinting] = useState(false);
   useEffect(() => {
     const before = () => flushSync(() => setPrinting(true));
@@ -1607,7 +1499,7 @@ export default function MainQuizAnalysis() {
         setLoading(true);
         setErrorMessage("");
 
-        const loadedCourses = await fetchCourses();
+        const loadedCourses = await fetchCourses({}, { fallback: false });
         const loadedEnrollmentSummary = await fetchEnrollmentSummary(
           courseId,
         ).catch((error) => {
@@ -1668,27 +1560,43 @@ export default function MainQuizAnalysis() {
     };
   }, [courseId, refresh]);
 
-  const activeCourse = course || initialCourse;
+  const loadedCourse = course || initialCourse;
+  const recordedMainAttempts = useMemo(
+    () =>
+      readArrayField(loadedCourse?.quizAttempts)
+        .filter((attempt) => attempt.assessment_type === "main")
+        .map((attempt) => ({
+          ...attempt,
+          answers: readArrayField(attempt.answers),
+        })),
+    [loadedCourse],
+  );
+  const mainQuizKeys = [...new Set(recordedMainAttempts.map(mainQuizKey))].sort(
+    (a, b) => Number(a) - Number(b),
+  );
+  const activeMainQuiz = mainQuizKeys.includes(selectedMainQuiz)
+    ? selectedMainQuiz
+    : mainQuizKeys[0] || "0";
+  const selectedMainAttempts = useMemo(
+    () =>
+      recordedMainAttempts.filter(
+        (attempt) => mainQuizKey(attempt) === activeMainQuiz,
+      ),
+    [recordedMainAttempts, activeMainQuiz],
+  );
+  const activeCourse = useMemo(
+    () =>
+      loadedCourse
+        ? {
+            ...loadedCourse,
+            quizAttempts: selectedMainAttempts,
+          }
+        : null,
+    [loadedCourse, selectedMainAttempts],
+  );
   const quizItems = useMemo(() => {
-    const mainAttempts = readArrayField(activeCourse?.quizAttempts).filter(
-      (attempt) => attempt.assessment_type === "main",
-    );
-    const questions = new Map();
-    for (const attempt of mainAttempts) {
-      for (const answer of readArrayField(attempt.answers)) {
-        const question = answer.question || answer.prompt;
-        if (!question || questions.has(question)) continue;
-        questions.set(question, {
-          ...answer,
-          question,
-          cognitiveLevel: answer.cognitive_level,
-          thinkingSkill: answer.thinking_skill,
-          cognitiveCategory: answer.thinking_skill,
-        });
-      }
-    }
-    return [...questions.values()];
-  }, [activeCourse]);
+    return mainQuizQuestions(selectedMainAttempts);
+  }, [selectedMainAttempts]);
   const quizAttempts = useMemo(
     () => normalizeQuizAttempts(activeCourse, quizItems.length),
     [activeCourse, quizItems.length],
@@ -1705,6 +1613,34 @@ export default function MainQuizAnalysis() {
       quizItems: quizItems.length,
     }),
     [activeCourse, quizAttempts.length, quizItems, enrollmentSummary],
+  );
+  const studentResults = useMemo(
+    () =>
+      quizAttempts.map((attempt) => {
+        const student = enrollmentSummary?.students?.find(
+          (item) =>
+            attempt.userId != null &&
+            String(item.userId ?? item.user_id ?? item.id) ===
+              String(attempt.userId),
+        );
+        return {
+          ...attempt,
+          name:
+            student?.displayName ||
+            student?.name ||
+            student?.student_name ||
+            attempt.studentName ||
+            `Student ${attempt.userId ?? "(name unavailable)"}`,
+          section:
+            student?.sectionName ||
+            student?.section_name ||
+            student?.section ||
+            student?.student_section ||
+            attempt.section ||
+            "N/A",
+        };
+      }),
+    [quizAttempts, enrollmentSummary],
   );
   const rows = useMemo(
     () => buildRows(quizItems, totals, quizAttempts),
@@ -1743,10 +1679,7 @@ export default function MainQuizAnalysis() {
     [questionPageCount, rows.length],
   );
   const currentQuestionRange = questionPages[questionPage]?.range || "";
-  const quizTitle =
-    activeCourse?.quizTitle ||
-    activeCourse?.description ||
-    `${activeCourse?.title || "Assessment"} Quiz`;
+  const quizTitle = `Main Quiz ${Number(activeMainQuiz) + 1}`;
 
   useEffect(() => {
     setQuestionPage((current) =>
@@ -1924,6 +1857,25 @@ export default function MainQuizAnalysis() {
               <span className={styles.detailEyebrow}>MAIN QUIZ ANALYSIS</span>
               <h2>{activeCourse.title}</h2>
               <strong>{quizTitle}</strong>
+              {mainQuizKeys.length > 1 && (
+                <label>
+                  Main quiz{" "}
+                  <select
+                    value={activeMainQuiz}
+                    onChange={(event) => {
+                      setSelectedMainQuiz(event.target.value);
+                      setSelectedQuestion(null);
+                      setQuestionPage(0);
+                    }}
+                  >
+                    {mainQuizKeys.map((key) => (
+                      <option key={key} value={key}>
+                        Main Quiz {Number(key) + 1}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
               <p>
                 {totals.quizItems} Questions &bull;{" "}
                 {formatExamineeCount(totals.totalStudents)}
@@ -1973,6 +1925,67 @@ export default function MainQuizAnalysis() {
             </div>
           </div>
 
+          <section className={styles.analysisSection}>
+            <div className={styles.analysisSectionTitle}>Student Scores</div>
+            {activeView === VIEW_MODES.GRAPHICAL ? (
+              <div className={styles.studentScoreList}>
+                {studentResults.map((student) => (
+                  <article key={student.id} className={styles.studentScoreRow}>
+                    <div>
+                      <strong>{student.name}</strong>
+                      <span>Section: {student.section}</span>
+                    </div>
+                    <div
+                      className={styles.studentScoreBar}
+                      role="img"
+                      aria-label={`${student.name}: ${formatScoreWithPercent(student.earnedScore, student.total)}`}
+                    >
+                      <i
+                        style={{
+                          width: `${Math.max(0, Math.min(100, getScorePercent(student.earnedScore, student.total) || 0))}%`,
+                        }}
+                      />
+                    </div>
+                    <strong>
+                      {formatScoreWithPercent(
+                        student.earnedScore,
+                        student.total,
+                      )}
+                    </strong>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <div className={styles.tableWrap}>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Student Name</th>
+                      <th>Section</th>
+                      <th>Score</th>
+                      <th>Percentage</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {studentResults.map((student) => (
+                      <tr key={student.id}>
+                        <td>{student.name}</td>
+                        <td>{student.section}</td>
+                        <td>
+                          {formatScore(student.earnedScore, student.total)}
+                        </td>
+                        <td>
+                          {formatPercent(
+                            getScorePercent(student.earnedScore, student.total),
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
           {activeView === VIEW_MODES.GRAPHICAL ? (
             <div className={styles.graphicalView}>
               <section className={styles.analysisSection}>
@@ -1988,22 +2001,7 @@ export default function MainQuizAnalysis() {
                     </div>
                   ))}
                 </div>
-                <h3 className={styles.chartTitle}>
-                  Overall Score Distribution
-                </h3>
-                {quizAnalytics.scoreDistribution.length > 0 ? (
-                  <ScoreDistributionChart
-                    distribution={quizAnalytics.scoreDistribution}
-                    totalItems={totals.quizItems || rows.length}
-                  />
-                ) : (
-                  <div className={styles.emptyChart}>
-                    Score distribution appears after recorded attempts include
-                    student scores.
-                  </div>
-                )}
               </section>
-
               <section className={styles.analysisSection}>
                 <div className={styles.analysisSectionTitle}>
                   Student Overview

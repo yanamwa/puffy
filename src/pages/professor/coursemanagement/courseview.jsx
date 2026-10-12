@@ -4,9 +4,10 @@ import { useNavigate, useParams } from "react-router-dom";
 import Swal from "sweetalert2";
 import styles from "./courseview.module.css";
 import StudentIdentityCard from "../../../components/students/StudentIdentityCard";
+import { API_BASE } from "../../../config.js";
+import { downloadEnrollmentPdf } from "../../../services/pdfDownload.js";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API_BASE_URL = API_BASE;
 
 const SERVER_ORIGIN = API_BASE_URL.replace(/\/api\/?$/, "");
 
@@ -88,6 +89,25 @@ export default function CourseView() {
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState("enrolled");
+  const [studentPage, setStudentPage] = useState(1);
+  const [downloadingPdf, setDownloadingPdf] = useState(false);
+  const savePdf = async () => {
+    setDownloadingPdf(true);
+    try {
+      await downloadEnrollmentPdf(
+        enrolledStudents,
+        `enrolled-students-${courseId}`,
+      );
+    } catch (error) {
+      await Swal.fire({
+        icon: "error",
+        title: "PDF download failed",
+        text: error.message,
+      });
+    } finally {
+      setDownloadingPdf(false);
+    }
+  };
 
   const [course, setCourse] = useState(null);
 
@@ -233,6 +253,15 @@ export default function CourseView() {
     () => (activeTab === "requests" ? requests : enrolledStudents),
     [activeTab, requests, enrolledStudents],
   );
+  const studentPageCount = Math.max(1, Math.ceil(displayedStudents.length / 5));
+  const currentStudentPage = Math.min(studentPage, studentPageCount);
+  const visibleStudents = displayedStudents.slice(
+    (currentStudentPage - 1) * 5,
+    currentStudentPage * 5,
+  );
+  useEffect(() => {
+    setStudentPage(1);
+  }, [activeTab, courseId]);
 
   const getStudentName = (student) =>
     student?.displayName || student?.name || "Student";
@@ -675,6 +704,11 @@ export default function CourseView() {
 
   return (
     <section className={styles.courseViewPage}>
+      <nav className={styles.backBar} aria-label="Back navigation">
+        <button type="button" onClick={() => navigate("/professor/courses")}>
+          <span aria-hidden="true">‹</span> Back to courses
+        </button>
+      </nav>
       {/* ===============================================
           PAGE HEADER
       ================================================ */}
@@ -684,6 +718,24 @@ export default function CourseView() {
           <h1>Course View</h1>
 
           <p>View enrollment requests and students enrolled in this course.</p>
+        </div>
+        <div className={styles.printActions}>
+          <button
+            type="button"
+            className={styles.printButton}
+            onClick={() => window.print()}
+          >
+            Print
+          </button>
+          <button
+            type="button"
+            className={styles.printButton}
+            onClick={savePdf}
+            disabled={downloadingPdf}
+            title="Download enrolled students as a PDF"
+          >
+            {downloadingPdf ? "Downloading…" : "Save as PDF"}
+          </button>
         </div>
       </div>
 
@@ -790,7 +842,7 @@ export default function CourseView() {
                   </td>
                 </tr>
               ) : (
-                displayedStudents.map((student) => {
+                visibleStudents.map((student) => {
                   const studentKey = getStudentKey(student);
 
                   const name = getStudentName(student);
@@ -873,6 +925,67 @@ export default function CourseView() {
             </tbody>
           </table>
         </div>
+        {displayedStudents.length > 0 && (
+          <nav
+            className={styles.studentPagination}
+            aria-label="Student list pages"
+          >
+            <span>
+              Showing {(currentStudentPage - 1) * 5 + 1}–
+              {Math.min(currentStudentPage * 5, displayedStudents.length)} of{" "}
+              {displayedStudents.length}
+            </span>
+            <div>
+              <button
+                type="button"
+                disabled={currentStudentPage === 1}
+                onClick={() => setStudentPage(currentStudentPage - 1)}
+              >
+                Previous
+              </button>
+              <span>
+                Page {currentStudentPage} of {studentPageCount}
+              </span>
+              <button
+                type="button"
+                disabled={currentStudentPage === studentPageCount}
+                onClick={() => setStudentPage(currentStudentPage + 1)}
+              >
+                Next
+              </button>
+            </div>
+          </nav>
+        )}
+      </div>
+      <div className="course-enrollment-print">
+        <table>
+          <thead>
+            <tr>
+              <th>Student ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Year Level</th>
+              <th>Section</th>
+            </tr>
+          </thead>
+          <tbody>
+            {enrolledStudents.length ? (
+              enrolledStudents.map((student) => (
+                <tr key={getStudentKey(student)}>
+                  <td>{student.studentId || "N/A"}</td>
+                  <td>{getStudentName(student)}</td>
+                  <td>{student.email || "N/A"}</td>
+                  <td>{student.yearLevel || "N/A"}</td>
+                  <td>{student.sectionName || "N/A"}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={5}>No enrolled students.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
       {selectedStudent && (
         <div

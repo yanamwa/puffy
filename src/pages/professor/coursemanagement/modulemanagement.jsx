@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   archiveCourseById,
   fetchCourses,
+  fetchCourseEnrollmentCount,
 } from "../../../services/courseApi.js";
 import styles from "./modulemanage.module.css";
 import Swal from "sweetalert2";
@@ -34,12 +35,21 @@ export default function ModuleManagement() {
         setLoading(true);
         setErrorMessage("");
 
-        const loadedCourses = await fetchCourses({
-          includeArchived: true,
-        });
+        const loadedCourses = await fetchCourses(
+          { includeArchived: true },
+          { fallback: false },
+        );
+        const coursesWithEnrollments = await Promise.all(
+          loadedCourses.map(async (course) => ({
+            ...course,
+            students: await fetchCourseEnrollmentCount(
+              course.id ?? course.course_id,
+            ),
+          })),
+        );
 
         if (active) {
-          setCourses(Array.isArray(loadedCourses) ? loadedCourses : []);
+          setCourses(coursesWithEnrollments);
         }
       } catch (error) {
         if (active) {
@@ -347,7 +357,7 @@ export default function ModuleManagement() {
 
                 <div className={styles.courseStats}>
                   <span>
-                    {course.students || course.studentCount || 0} students
+                    {course.students} students
                   </span>
 
                   <span>
