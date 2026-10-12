@@ -1,110 +1,153 @@
 /* =====================================================
+
    ADMIN VARIABLES
-===================================================== */
+
+\===================================================== */
 
 :root {
+
   --admin-bg: #f7f7f8;
+
   --admin-card: #ffffff;
 
   --admin-ink: #191b2a;
+
   --admin-muted: #7d8798;
 
   --admin-line: #b9c1cc;
+
   --admin-soft-line: #dde2e8;
+
   --admin-shadow: #c5cbd4;
 
   --admin-green: #198754;
+
   --admin-green-dark: #146c43;
+
   --admin-green-soft: #e8f5ee;
+
 }
 
 /* =====================================================
+
    LAYOUT
-===================================================== */
+
+\===================================================== */
 
 .admin-layout {
+
   display: grid;
+
   grid-template-columns: 220px minmax(0, 1fr);
 
   height: 100vh;
+
   min-height: 0;
 
   overflow: hidden;
 
   background: var(--admin-bg);
+
   color: var(--admin-ink);
 
   transition: grid-template-columns 0.22s ease;
+
 }
 
 /* =====================================================
+
    COLLAPSED LAYOUT
-===================================================== */
+
+\===================================================== */
 
 .admin-layout.admin-sidebar-collapsed {
+
   grid-template-columns: 76px minmax(0, 1fr);
+
 }
 
 /* =====================================================
+
    SIDEBAR
-===================================================== */
+
+\===================================================== */
 
 .admin-sidebar {
+
   width: 100%;
+
   height: 100vh;
+
   min-height: 0;
 
   display: flex;
+
   flex-direction: column;
 
   overflow-x: hidden;
+
   overflow-y: auto;
 
   background: var(--admin-green);
+
   border-right: 1px solid #c4c8cf;
 
   color: #ffffff;
 
   transition: width 0.22s ease;
+
 }
 
 /* =====================================================
+
    BRAND
-===================================================== */
+
+\===================================================== */
 
 .sidebar-brand {
+
   min-height: 90px;
 
   display: flex;
+
   align-items: center;
+
   justify-content: center;
 
   gap: 9px;
 
   margin: 0 10px;
+
   padding: 16px 12px;
 
   border-bottom: 1px solid rgba(255, 255, 255, 0.25);
 
   overflow: hidden;
+
 }
 
 /* =====================================================
+
    LOGO BUTTON
+
 ===================================================== */
 
 .admin-logo-button {
+
   width: 44px;
+
   height: 44px;
 
   flex: 0 0 44px;
 
   display: grid;
+
   place-items: center;
 
   padding: 0;
 
   border: 0;
+
   border-radius: 50%;
 
   background: transparent;
@@ -112,33 +155,45 @@
   cursor: pointer;
 
   transition:
+
     transform 0.18s ease,
+
     background 0.18s ease;
+
 }
 
 .admin-logo-button:focus-visible {
+
   outline: 2px solid #ffffff;
 
   outline-offset: 3px;
+
 }
 
 .admin-logo-button img {
+
   display: block;
 
   width: 50px;
+
   height: 50px;
 
   object-fit: contain;
+
 }
 
 /* =====================================================
+
    BRAND NAME
-===================================================== */
+
+\===================================================== */
 
 .admin-brand-name {
+
   color: #ffffff;
 
-  font-size: 16px;
+  font-size:10px;
+
   font-weight: 600;
 
   line-height: 1;
@@ -148,36 +203,49 @@
   opacity: 1;
 
   transition:
+
     opacity 0.16s ease,
+
     width 0.22s ease;
+
 }
 
 /* =====================================================
+
    NAVIGATION
-===================================================== */
+
+\===================================================== */
 
 .sidebar-menu {
+
   flex: 1;
 
   display: flex;
+
   flex-direction: column;
 
   gap: 8px;
 
   padding: 24px 0 20px 18px;
+
 }
 
 /* =====================================================
+
    NAV LINK
-===================================================== */
+
+\===================================================== */
 
 .sidebar-link {
+
   position: relative;
 
   width: 100%;
+
   min-height: 44px;
 
   display: flex;
+
   align-items: center;
 
   gap: 12px;
@@ -197,6 +265,7 @@
   text-decoration: none;
 
   font-size: 14px;
+
   font-weight: 500;
 
   line-height: 1.15;
@@ -206,29 +275,41 @@
   white-space: nowrap;
 
   transition:
+
     background 0.18s ease,
+
     color 0.18s ease,
+
     border-color 0.18s ease;
+
 }
 
 /* =====================================================
+
    ICON
-===================================================== */
+
+\===================================================== */
 
 .sidebar-icon {
+
   width: 19px;
+
   height: 19px;
 
   flex: 0 0 19px;
 
   color: currentColor;
+
 }
 
 /* =====================================================
+
    LINK LABEL
-===================================================== */
+
+\===================================================== */
 
 .admin-nav-label {
+
   display: block;
 
   min-width: 0;
@@ -236,26 +317,35 @@
   overflow: hidden;
 
   text-overflow: ellipsis;
+
   white-space: nowrap;
 
   transition: opacity 0.16s ease;
+
 }
 
 /* =====================================================
+
    HOVER
-===================================================== */
+
+\===================================================== */
 
 .sidebar-link:not(.active):hover {
+
   background: rgba(255, 255, 255, 0.11);
 
   color: #ffffff;
+
 }
 
 /* =====================================================
+
    ACTIVE
-===================================================== */
+
+\===================================================== */
 
 .sidebar-link.active {
+
   background: #ffffff;
 
   border-color: rgba(255, 255, 255, 0.9);
@@ -265,54 +355,73 @@
   box-shadow: none;
 
   z-index: 2;
+
 }
 
 /*
+
    Covers the tiny green line that can
+
    appear on the right side of the pill.
+
 */
 
 .sidebar-link.active::after {
+
   content: "";
 
   position: absolute;
 
   top: 0;
+
   right: -2px;
+
   bottom: 0;
 
   width: 4px;
 
   background: #ffffff;
+
 }
 
 /* =====================================================
+
    LOGOUT 
-===================================================== */
+
+\===================================================== */
 
 .logout-btn {
+
   width: 100%;
+
   min-height: 66px;
 
   margin-top: auto;
+
   margin-bottom: 0;
 
   padding: 0 20px;
 
   display: flex;
+
   align-items: center;
+
   justify-content: center;
 
   gap: 10px;
 
   border: 0;
+
   border-radius: 0;
 
   background: #ffffff;
+
   color: #52615a;
 
   font: inherit;
+
   font-size: 18px;
+
   font-weight: 500;
 
   cursor: pointer;
@@ -320,34 +429,49 @@
   white-space: nowrap;
 
   transition:
+
     background 0.18s ease,
+
     color 0.18s ease;
+
 }
 
 .logout-btn svg {
+
   width: 19px;
+
   height: 19px;
 
   flex: 0 0 19px;
 
   color: currentColor;
+
 }
 
 .logout-btn:hover {
+
   background: #f7f7f8;
+
   color: #52615a;
+
 }
+
 /* =====================================================
+
    COLLAPSED SIDEBAR
-===================================================== */
+
+\===================================================== */
 
 .admin-sidebar-collapsed .sidebar-brand {
+
   margin-inline: 8px;
 
   padding-inline: 0;
+
 }
 
 .admin-sidebar-collapsed .admin-brand-name {
+
   width: 0;
 
   opacity: 0;
@@ -355,17 +479,21 @@
   overflow: hidden;
 
   pointer-events: none;
+
 }
 
 /* MENU */
 
 .admin-sidebar-collapsed .sidebar-menu {
+
   padding: 24px 8px 20px;
+
 }
 
 /* LINKS */
 
 .admin-sidebar-collapsed .sidebar-link {
+
   width: 52px;
 
   min-height: 46px;
@@ -383,22 +511,29 @@
   border-right: 1.5px solid transparent;
 
   border-radius: 999px;
+
 }
 
 .admin-sidebar-collapsed .sidebar-link.active {
+
   border-color: rgba(255, 255, 255, 0.85);
+
 }
 
 .admin-sidebar-collapsed .sidebar-link.active::after {
+
   display: none;
+
 }
 
 /* LABEL */
 
 .admin-sidebar-collapsed .admin-nav-label {
+
   position: absolute;
 
   width: 0;
+
   height: 0;
 
   overflow: hidden;
@@ -406,12 +541,15 @@
   opacity: 0;
 
   pointer-events: none;
+
 }
 
 /* LOGOUT */
 
 .admin-sidebar-collapsed .logout-btn {
+
   width: 100%;
+
   min-height: 66px;
 
   margin: auto 0 0;
@@ -419,7 +557,9 @@
   padding: 0;
 
   display: flex;
+
   align-items: center;
+
   justify-content: center;
 
   gap: 0;
@@ -427,42 +567,57 @@
   border-radius: 0;
 
   background: #ffffff;
+
   color: #52615a;
+
 }
 
 .admin-sidebar-collapsed .admin-logout-label {
+
   display: none;
+
 }
 
 /* =====================================================
+
    MAIN
-===================================================== */
+
+\===================================================== */
 
 .admin-main {
+
   min-width: 0;
+
   min-height: 0;
 
   height: 100vh;
 
   display: flex;
+
   flex-direction: column;
 
   overflow: hidden;
 
   background: var(--admin-bg);
+
 }
 
 /* =====================================================
+
    HEADER
-===================================================== */
+
+\===================================================== */
 
 .admin-header {
+
   flex: 0 0 68px;
 
   min-height: 68px;
 
   display: flex;
+
   align-items: center;
+
   justify-content: space-between;
 
   gap: 24px;
@@ -474,13 +629,17 @@
   border-bottom: 1.5px solid var(--admin-line);
 
   z-index: 100;
+
 }
 
 /* =====================================================
+
    SEARCH
-===================================================== */
+
+\===================================================== */
 
 .admin-header-search {
+
   position: relative;
 
   width: min(720px, 52vw);
@@ -488,11 +647,15 @@
   height: 43px;
 
   display: flex;
+
   align-items: center;
+
 }
 
 .admin-header-search input {
+
   width: 100%;
+
   height: 43px;
 
   padding: 0 42px 0 16px;
@@ -508,30 +671,41 @@
   color: var(--admin-ink);
 
   font: inherit;
+
   font-size: 12px;
+
   font-weight: 700;
 
   transition:
+
     border-color 0.18s ease,
+
     box-shadow 0.18s ease;
+
 }
 
 .admin-header-search input::placeholder {
+
   color: #a0a7b4;
+
 }
 
 .admin-header-search input:focus {
+
   border-color: var(--admin-green);
 
   box-shadow: 0 0 0 3px rgba(25, 135, 84, 0.1);
+
 }
 
 /* SEARCH ICON */
 
 .admin-header-search .search-icon {
+
   position: absolute;
 
   right: 16px;
+
   left: auto;
 
   top: 50%;
@@ -539,76 +713,107 @@
   transform: translateY(-50%);
 
   width: 16px;
+
   height: 16px;
 
   display: grid;
+
   place-items: center;
 
   color: var(--admin-muted);
 
   pointer-events: none;
+
 }
 
 .admin-header-search .search-icon svg {
+
   width: 16px;
+
   height: 16px;
+
 }
 
 /* =====================================================
+
    HEADER ACTIONS
-===================================================== */
+
+\===================================================== */
 
 .admin-header-actions {
+
   display: flex;
+
   align-items: center;
 
   gap: 20px;
 
   flex: 0 0 auto;
+
 }
 
 /* =====================================================
+
    CONTENT
-===================================================== */
+
+\===================================================== */
 
 .admin-content {
+
   flex: 1;
 
   min-width: 0;
+
   min-height: 0;
 
   overflow-x: hidden;
+
   overflow-y: auto;
 
   padding: 34px 42px 48px;
+
 }
 
 /* =====================================================
+
    TABLET
-===================================================== */
+
+\===================================================== */
 
 @media (max-width: 900px) {
+
   .admin-layout {
+
     grid-template-columns: 76px minmax(0, 1fr);
+
   }
 
   .admin-brand-name,
+
   .admin-nav-label,
+
   .admin-logout-label {
+
     display: none;
+
   }
 
   .sidebar-brand {
+
     margin-inline: 8px;
 
     padding-inline: 0;
+
   }
 
   .sidebar-menu {
+
     padding: 20px 8px;
+
   }
 
   .sidebar-link {
+
     width: 52px;
 
     justify-content: center;
@@ -620,14 +825,19 @@
     padding: 0;
 
     border-radius: 999px;
+
     border-right: 1.5px solid transparent;
+
   }
 
   .sidebar-link.active::after {
+
     display: none;
+
   }
 
   .logout-btn {
+
     width: 52px;
 
     justify-content: center;
@@ -637,45 +847,63 @@
     margin: auto auto 18px;
 
     padding: 0;
+
   }
 
   .admin-header {
+
     padding: 0 20px;
+
   }
 
   .admin-header-search {
+
     width: min(420px, 50vw);
+
   }
 
   .admin-content {
+
     padding: 28px 24px 38px;
+
   }
+
 }
 
 /* =====================================================
+
    MOBILE
-===================================================== */
+
+\===================================================== */
 
 @media (max-width: 640px) {
+
   .admin-layout,
+
   .admin-layout.admin-sidebar-collapsed {
+
     grid-template-columns: 1fr;
 
     height: auto;
+
     min-height: 100vh;
 
     overflow: visible;
+
   }
 
   .admin-sidebar {
+
     height: auto;
 
     min-height: 68px;
 
     flex-direction: row;
+
     align-items: center;
 
     overflow-x: auto;
+
     overflow-y: hidden;
 
     padding: 6px 8px;
@@ -683,9 +911,11 @@
     border-right: 0;
 
     border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+
   }
 
   .sidebar-brand {
+
     min-height: auto;
 
     flex: 0 0 auto;
@@ -697,25 +927,35 @@
     border-bottom: 0;
 
     border-right: 1px solid rgba(255, 255, 255, 0.25);
+
   }
 
   .admin-logo-button {
+
     width: 42px;
+
     height: 42px;
 
     flex-basis: 42px;
+
   }
 
   .admin-logo-button img {
+
     width: 36px;
+
     height: 36px;
+
   }
 
   .admin-brand-name {
+
     display: none;
+
   }
 
   .sidebar-menu {
+
     flex: 1;
 
     flex-direction: row;
@@ -723,11 +963,15 @@
     gap: 6px;
 
     padding: 0;
+
   }
 
   .sidebar-link {
+
     width: 42px;
+
     min-width: 42px;
+
     min-height: 42px;
 
     flex: 0 0 42px;
@@ -739,15 +983,21 @@
     padding: 0;
 
     border-radius: 50%;
+
   }
 
   .admin-nav-label {
+
     display: none;
+
   }
 
   .logout-btn {
+
     width: 42px;
+
     min-width: 42px;
+
     min-height: 42px;
 
     flex: 0 0 42px;
@@ -759,42 +1009,336 @@
     padding: 0;
 
     border-radius: 50%;
+
   }
 
   .admin-logout-label {
+
     display: none;
+
   }
 
   .admin-main {
+
     height: auto;
 
     min-height: calc(100vh - 68px);
 
     overflow: visible;
+
   }
 
   .admin-header {
+
     height: auto;
+
     min-height: 64px;
 
     gap: 10px;
 
     padding: 10px 12px;
+
   }
 
   .admin-header-search {
+
     flex: 1;
 
     width: auto;
+
   }
 
   .admin-header-actions {
+
     gap: 10px;
+
   }
 
   .admin-content {
+
     overflow: visible;
 
     padding: 22px 16px 32px;
+
+  }
+
+}
+
+
+/* =====================================================
+   STUDENT-INSPIRED ADMIN SIDEBAR
+   Scoped overrides. Keep these at the end of this file.
+===================================================== */
+@import url("https://fonts.googleapis.com/css2?family=Jersey+15&display=swap");
+
+.admin-layout {
+  grid-template-columns: 240px minmax(0, 1fr);
+}
+.admin-layout.admin-sidebar-collapsed {
+  grid-template-columns: 76px minmax(0, 1fr);
+}
+.admin-layout .admin-sidebar {
+  background: #7fa8d6;
+  border-right: 1px solid #6f98c7;
+  font-family: "Arial Rounded MT Bold", system-ui, sans-serif;
+  box-sizing: border-box;
+}
+.admin-layout .sidebar-brand {
+  position: relative;
+  height: 95px;
+  min-height: 95px;
+  flex: 0 0 95px;
+  margin: 0;
+  padding: 18px 10px 15px;
+  gap: 8px;
+  border: 0;
+  box-sizing: border-box;
+}
+.admin-layout .sidebar-brand::after {
+  content: "";
+  position: absolute;
+  left: 22px;
+  right: 22px;
+  bottom: 0;
+  height: 1px;
+  background: rgba(247,247,247,.78);
+}
+.admin-layout .admin-logo-button {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+}
+.admin-layout .admin-logo-button img {
+  width: 44px;
+  height: 44px;
+  transition: transform .2s ease;
+}
+.admin-layout .admin-logo-button:hover img { transform: scale(1.06); }
+.admin-layout .admin-brand-name {
+  font-family: "Arial Rounded MT Bold", system-ui, sans-serif;
+  font-size: 30px;
+  font-weight: 700;
+  color: #fff;
+}
+.admin-layout .sidebar-menu {
+  flex: 1 1 auto;
+  align-items: stretch;
+  gap: 14px;
+  padding: 26px 0 20px 56px;
+  box-sizing: border-box;
+}
+.admin-layout .sidebar-link {
+  width: 100%;
+  min-height: 40px;
+  gap: 10px;
+  padding: 0 12px 0 10px;
+  border: 1px solid transparent;
+  border-right: 0;
+  border-radius: 999px 0 0 999px;
+  background: transparent;
+  color: #fff;
+  font-family: "Arial Rounded MT Bold", system-ui, sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 1.15;
+  box-sizing: border-box;
+}
+.admin-layout .sidebar-link .sidebar-icon {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+}
+.admin-layout .sidebar-link .admin-nav-label {
+  font-size: 20px;
+  font-weight: 400;
+  text-overflow: ellipsis;
+}
+.admin-layout .sidebar-link:not(.active):hover {
+  background: #ffe08a;
+  border-color: #ffe08a;
+  color: #263c52;
+  box-shadow: 3px 3px 0 rgba(79,97,116,.18);
+}
+.admin-layout .sidebar-link.active {
+  background: #f7f7f7;
+  border-color: #f7f7f7;
+  color: #263c52;
+  box-shadow: 3px 3px 0 rgba(79,97,116,.18);
+}
+.admin-layout .sidebar-link.active::after {
+  display: block;
+  top: 1px;
+  right: -2px;
+  bottom: 1px;
+  width: 3px;
+  background: #f7f7f7;
+}
+.admin-layout .logout-btn,
+.admin-layout .logout-btn:hover {
+  width: 100%;
+  height: 56px;
+  min-height: 56px;
+  flex: 0 0 56px;
+  margin: auto 0 0;
+  padding: 0;
+  border: 0;
+  border-top: 1px solid #ececec;
+  border-radius: 0;
+  background: #f7f7f7;
+  color: #4f6174;
+  font-family: "Jersey 15", system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  gap: 12px;
+}
+.admin-layout .logout-btn:hover { color: #171927; }
+.admin-layout .logout-btn svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+}
+.admin-layout.admin-sidebar-collapsed .sidebar-brand {
+  justify-content: center;
+  padding: 18px 0 15px;
+}
+.admin-layout.admin-sidebar-collapsed .sidebar-brand::after {
+  left: 10px;
+  right: 10px;
+}
+.admin-layout.admin-sidebar-collapsed .admin-logo-button,
+.admin-layout.admin-sidebar-collapsed .admin-logo-button img {
+  width: 38px;
+  height: 38px;
+}
+.admin-layout.admin-sidebar-collapsed .admin-logo-button { flex-basis: 38px; }
+.admin-layout.admin-sidebar-collapsed .sidebar-menu {
+  padding: 26px 0 20px 18px;
+  gap: 14px;
+}
+.admin-layout.admin-sidebar-collapsed .sidebar-link {
+  width: 100%;
+  min-height: 42px;
+  align-self: stretch;
+  justify-content: flex-start;
+  margin: 0;
+  padding: 0 0 0 18px;
+  border: 1px solid transparent;
+  border-right: 0;
+  border-radius: 999px 0 0 999px;
+}
+.admin-layout.admin-sidebar-collapsed .sidebar-link .sidebar-icon {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+}
+.admin-layout.admin-sidebar-collapsed .sidebar-link.active {
+  border-color: #f7f7f7;
+  border-right: 0;
+}
+.admin-layout.admin-sidebar-collapsed .sidebar-link.active::after { display: block; }
+.admin-layout.admin-sidebar-collapsed .logout-btn {
+  width: 100%;
+  margin: auto 0 0;
+  border-radius: 0;
+}
+/* Tablet: use icon-only navigation without altering React state. */
+@media (min-width: 641px) and (max-width: 900px) {
+  .admin-layout { grid-template-columns: 76px minmax(0, 1fr); }
+  .admin-layout .sidebar-brand { padding: 18px 0 15px; }
+  .admin-layout .sidebar-brand::after { left: 10px; right: 10px; }
+  .admin-layout .admin-brand-name, .admin-layout .admin-nav-label,
+  .admin-layout .admin-logout-label { display: none; }
+  .admin-layout .sidebar-menu { padding: 26px 0 20px 18px; }
+  .admin-layout .sidebar-link {
+    width: 100%; min-height: 42px; justify-content: flex-start;
+    margin: 0; padding: 0 0 0 18px;
+    border-radius: 999px 0 0 999px;
+  }
+  .admin-layout .sidebar-link.active::after { display: block; }
+  .admin-layout .logout-btn { width: 100%; margin: auto 0 0; border-radius: 0; }
+}
+/* Mobile retains the original horizontal navigation layout. */
+@media (max-width: 640px) {
+  .admin-layout, .admin-layout.admin-sidebar-collapsed {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .admin-layout .admin-sidebar { border-right: 0; }
+  .admin-layout .sidebar-brand,
+  .admin-layout.admin-sidebar-collapsed .sidebar-brand {
+    height: auto; min-height: 42px; flex: 0 0 auto;
+    padding: 0 8px 0 0; margin: 0 8px 0 0;
+  }
+  .admin-layout .sidebar-brand::after { display: none; }
+  .admin-layout .sidebar-menu,
+  .admin-layout.admin-sidebar-collapsed .sidebar-menu {
+    flex: 1; flex-direction: row; gap: 6px; padding: 0;
+  }
+  .admin-layout .sidebar-link,
+  .admin-layout.admin-sidebar-collapsed .sidebar-link {
+    width: 42px; min-width: 42px; min-height: 42px; flex: 0 0 42px;
+    justify-content: center; align-self: center;
+    padding: 0; margin: 0; border-radius: 50%;
+  }
+  .admin-layout .sidebar-link.active::after { display: none; }
+  .admin-layout .logout-btn,
+  .admin-layout.admin-sidebar-collapsed .logout-btn {
+    width: 42px; min-width: 42px; height: 42px; min-height: 42px;
+    flex: 0 0 42px; margin: 0; border-radius: 50%; border: 0;
+  }
+}
+/* =========================================
+   ADMIN SIDEBAR FONT & SPACING FIX
+========================================= */
+
+@media (min-width: 901px) {
+  .admin-layout {
+    grid-template-columns: 240px minmax(0, 1fr);
+  }
+
+  /* BRAND */
+  .admin-layout .sidebar-brand {
+    gap: 7px;
+    padding: 18px 12px 15px;
+  }
+
+  .admin-layout .admin-brand-name {
+    font-size: 23px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+
+  .admin-layout .admin-logo-button,
+  .admin-layout .admin-logo-button img {
+    width: 38px;
+    height: 38px;
+  }
+
+  .admin-layout .admin-logo-button {
+    flex: 0 0 38px;
+  }
+
+  /* NAVIGATION */
+  .admin-layout .sidebar-menu {
+    padding: 26px 0 20px 22px;
+    gap: 12px;
+  }
+
+  .admin-layout .sidebar-link {
+    min-height: 42px;
+    gap: 10px;
+    padding: 0 10px;
+    font-size: 14px;
+  }
+
+  .admin-layout .sidebar-link .admin-nav-label {
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0;
+  }
+
+  .admin-layout .sidebar-link .sidebar-icon {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
   }
 }
