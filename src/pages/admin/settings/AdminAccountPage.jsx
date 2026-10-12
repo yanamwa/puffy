@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   FiCamera,
@@ -61,24 +61,42 @@ function formatRole(role) {
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
-function resolveAdminProfileImage(imagePath) {
-  if (!imagePath) return DEFAULT_PROFILE_IMAGE;
 
-  if (
-    imagePath.startsWith("http://") ||
-    imagePath.startsWith("https://") ||
-    imagePath.startsWith("blob:") ||
-    imagePath.startsWith("data:")
-  ) {
-    return imagePath;
+
+function resolveAdminProfileImage(imagePath) {
+  if (!imagePath || typeof imagePath !== "string") {
+    return DEFAULT_PROFILE_IMAGE;
   }
 
-  let fixedPath = imagePath;
+  const path = imagePath.trim().replace(/\\/g, "/");
 
-  if (fixedPath.startsWith("/api/uploads/profile-images/")) {
+  if (
+    path.startsWith("blob:") ||
+    path.startsWith("data:")
+  ) {
+    return path;
+  }
+
+  let fixedPath = path;
+
+  // Convert full localhost:3000 image URLs to backend URLs.
+  if (
+    fixedPath.startsWith("http://") ||
+    fixedPath.startsWith("https://")
+  ) {
+    const url = new URL(fixedPath);
+
+    if (url.hostname !== "localhost") {
+      return fixedPath;
+    }
+
+    fixedPath = url.pathname;
+  }
+
+  if (fixedPath.startsWith("/api/uploads/")) {
     fixedPath = fixedPath.replace(
-      "/api/uploads/profile-images/",
-      "/uploads/profile-images/",
+      "/api/uploads/",
+      "/uploads/"
     );
   }
 
@@ -86,9 +104,10 @@ function resolveAdminProfileImage(imagePath) {
     fixedPath = `/${fixedPath}`;
   }
 
-  const serverOrigin = API_BASE.replace(/\/api\/?$/, "");
-  return `${serverOrigin}${fixedPath}`;
+  return `http://localhost:5000${fixedPath}`;
 }
+
+
 
 function getAdminProfileData(user) {
   return {
@@ -182,6 +201,12 @@ export default function AdminAccountPage() {
   const navigate = useNavigate();
   const { user, updateUser } = useAuth();
 
+  const updateUserRef = useRef(updateUser);
+
+  useEffect(() => {
+    updateUserRef.current = updateUser;
+  }, [updateUser]);
+
   const [adminUser, setAdminUser] = useState(() =>
     isAdminUser(user) ? user : null,
   );
@@ -195,91 +220,116 @@ export default function AdminAccountPage() {
     getAdminProfileImage(isAdminUser(user) ? user : null),
   );
 
-  useEffect(() => {
-    if (isAdminUser(user)) {
-      setAdminUser(user);
-      setProfileImage(getAdminProfileImage(user));
-    }
-  }, [user]);
+  
+useEffect(() => {
+  if (!isAdminUser(user)) return;
 
-  useEffect(() => {
-    let active = true;
+  setAdminUser(user);
 
-    async function loadAdminProfile() {
-      try {
-        setProfileLoading(true);
-        setProfileError("");
+  const savedImage =
+    user.profileImage ||
+    user.profile_image ||
+    user.profileImageUrl ||
+    user.profile_image_url;
 
-        const token = getStoredToken();
+  // Only replace the displayed photo when the
+  // authenticated user actually has an image.
+  if (savedImage) {
+    setProfileImage(
+      resolveAdminProfileImage(savedImage)
+    );
+  }
+}, [user]);
 
-        if (!token) {
-          throw new Error(
-            "Your login session was not found. Please log in again.",
-          );
-        }
+  
+useEffect(() => {
+  let active = true;
+  const controller = new AbortController();
 
-        const response = await fetch(`${API_BASE}/users/me`, {
-          method: "GET",
-          headers: {
-            Accept: "application/json",
-            Authorization: `Bearer ${token}`,
-          },
+  async function loadAdminProfile() {
+    try {
+      setProfileLoading(true);
+      setProfileError("");
+
+      const token = getStoredToken();
+
+      if (!token) {
+        throw new Error(
+          "Your login session was not found. Please log in again."
+        );
+      }
+
+      const response = await fetch(`${API_BASE}/users/me`, {
+        method: "GET",
+        signal: controller.signal,
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(
+          data.message ||
+            "Unable to load administrator information."
+        );
+      }
+
+      const loggedInUser =
+        data.user || data.data?.user || data.data || data;
+
+      if (!loggedInUser) {
+        throw new Error(
+          "Administrator account information was not found."
+        );
+      }
+
+      if (!active) return;
+
+      const loggedInRole = getUserRole(loggedInUser);
+
+      if (loggedInRole && loggedInRole !== "admin") {
+        navigate(getHomePath(loggedInRole), {
+          replace: true,
         });
+        return;
+      }
 
-        const data = await response.json().catch(() => ({}));
+      setAdminUser(loggedInUser);
+      setProfileImage(getAdminProfileImage(loggedInUser));
 
-        if (!response.ok) {
-          throw new Error(
-            data.message || "Unable to load administrator information.",
-          );
-        }
+      const syncUser = updateUserRef.current;
 
-        const loggedInUser = data.user || data.data?.user || data.data || data;
+      if (typeof syncUser === "function") {
+        syncUser(loggedInUser);
+      } else {
+        storeUpdatedUser(loggedInUser);
+      }
+    } catch (error) {
+      if (!active || error.name === "AbortError") return;
 
-        if (!loggedInUser) {
-          throw new Error("Administrator account information was not found.");
-        }
+      console.error("Admin profile loading error:", error);
 
-        const loggedInRole = getUserRole(loggedInUser);
-
-        if (loggedInRole && loggedInRole !== "admin") {
-          if (active) {
-            navigate(getHomePath(loggedInRole), { replace: true });
-          }
-          return;
-        }
-
-        if (!active) return;
-
-        setAdminUser(loggedInUser);
-        setProfileImage(getAdminProfileImage(loggedInUser));
-
-        if (updateUser) {
-          updateUser(loggedInUser);
-        } else {
-          storeUpdatedUser(loggedInUser);
-        }
-      } catch (error) {
-        console.error("Admin profile loading error:", error);
-
-        if (active) {
-          setProfileError(
-            error.message || "Unable to load administrator profile.",
-          );
-        }
-      } finally {
-        if (active) {
-          setProfileLoading(false);
-        }
+      setProfileError(
+        error.message || "Unable to load administrator profile."
+      );
+    } finally {
+      if (active) {
+        setProfileLoading(false);
       }
     }
+  }
 
-    loadAdminProfile();
+  void loadAdminProfile();
 
-    return () => {
-      active = false;
-    };
-  }, [navigate, updateUser]);
+  return () => {
+    active = false;
+    controller.abort();
+  };
+}, [navigate]);
+
 
   useEffect(() => {
     return () => {
@@ -342,53 +392,51 @@ export default function AdminAccountPage() {
         );
       }
 
-      const returnedUser = data.user || data.data?.user || data.data || {};
-      const returnedRole = getUserRole(returnedUser) || getUserRole(adminUser);
+      
+        const returnedUser =
+          data.user || data.data?.user || data.data || {};
 
-      if (returnedRole && returnedRole !== "admin") {
-        throw new Error("The logged-in account is not an administrator.");
-      }
+        const returnedImage =
+          returnedUser.profileImage ||
+          returnedUser.profile_image ||
+          data.profileImage ||
+          data.profile_image;
 
-      const returnedImage =
-        returnedUser.profileImage ||
-        returnedUser.profile_image ||
-        data.profileImage ||
-        data.profile_image;
+        if (!returnedImage || typeof returnedImage !== "string") {
+          throw new Error(
+            "The server did not return a valid profile image path."
+          );
+        }
 
-      if (!returnedImage) {
-        throw new Error(
-          "The server updated the photo but did not return its saved path.",
+        // Preserve the original authenticated user information.
+        const updatedUser = {
+          ...(adminUser || {}),
+          ...returnedUser,
+          role: "admin",
+          profileImage: returnedImage,
+          profile_image: returnedImage,
+        };
+
+        const savedImageUrl =
+          resolveAdminProfileImage(returnedImage);
+
+        // Update the profile page without forcing a reload.
+        setProfileImage(savedImageUrl);
+        setAdminUser(updatedUser);
+
+        // Revoke the temporary preview after replacing it.
+        URL.revokeObjectURL(previewUrl);
+
+        // Inform other components that the picture changed.
+        window.dispatchEvent(
+          new CustomEvent("profile-image-updated", {
+            detail: {
+              profileImage: savedImageUrl,
+              profile_image: savedImageUrl,
+            },
+          })
         );
-      }
 
-      const updatedUser = {
-        ...(adminUser || {}),
-        ...returnedUser,
-        role: returnedRole || "admin",
-        profileImage: returnedImage,
-        profile_image: returnedImage,
-      };
-
-      const savedImageUrl = resolveAdminProfileImage(returnedImage);
-
-      URL.revokeObjectURL(previewUrl);
-      setProfileImage(savedImageUrl);
-      setAdminUser(updatedUser);
-
-      if (updateUser) {
-        updateUser(updatedUser);
-      } else {
-        storeUpdatedUser(updatedUser);
-      }
-
-      window.dispatchEvent(
-        new CustomEvent("profile-image-updated", {
-          detail: {
-            profileImage: savedImageUrl,
-            profile_image: savedImageUrl,
-          },
-        }),
-      );
     } catch (error) {
       console.error("Admin profile picture update error:", error);
       URL.revokeObjectURL(previewUrl);

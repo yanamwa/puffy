@@ -477,3 +477,41 @@
   box-shadow: 0 1px 0 #c9cbd1 !important;
   transform: translateY(2px);
 }
+/* Active | Archived tabs beside the course search */
+.admin-modules-toolbar-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.admin-modules-view-tabs {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  background: #f3f5f8;
+  border: 1px solid var(--admin-soft-line, #d8dee8);
+  border-radius: 12px;
+}
+.admin-modules-view-tabs button {
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--admin-ink, #191b2c);
+  padding: 9px 17px;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.admin-modules-view-tabs button.is-active {
+  background: var(--admin-ink, #191b2c);
+  color: #fff;
+}
+.admin-modules-view-tabs button:focus-visible {
+  outline: 2px solid #607fa5;
+  outline-offset: 2px;
+}
+@media (max-width: 760px) {
+  .admin-modules-toolbar-right { justify-content: space-between; width: 100%; }
+}
