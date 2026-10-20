@@ -10,14 +10,14 @@
 
 /* =====================================================
    MAIN AREA
-   253px = width of your student sidebar
+   Matches the expanded student sidebar width.
 ===================================================== */
 
 .student-notifications-main-area {
   min-height: 100vh;
 
-  margin-left: 240px;
-  width: calc(100% - 253px);
+  margin-left: 320px;
+  width: calc(100% - 320px);
 
   display: flex;
   flex-direction: column;

@@ -15,9 +15,9 @@ import {
 
 import "../enrolled/EnrolledCourses.css";
 import "./PublicCourses.css";
+import { API_BASE } from "../../../config.js";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API_BASE_URL = API_BASE;
 
 const DEFAULT_PROFILE_IMAGE = "/images/temporary profile.jpg";
 
@@ -44,7 +44,8 @@ function getStoredToken() {
     localStorage.getItem("authToken") ||
     localStorage.getItem("puffy-token") ||
     sessionStorage.getItem("token") ||
-    sessionStorage.getItem("authToken")
+    sessionStorage.getItem("authToken") ||
+    sessionStorage.getItem("puffy-token")
   );
 }
 
@@ -249,12 +250,12 @@ export default function PublicCourses() {
       });
   }, [activeSort, dateSort, publicCourses, searchQuery, titleSort]);
 
-  const loadEnrolledCourses = async () => {
+  const loadEnrolledCourses = async (isActive = () => true) => {
     try {
       const token = getStoredToken();
 
       if (!token) {
-        setEnrolledCourses([]);
+        if (isActive()) setEnrolledCourses([]);
         return;
       }
 
@@ -262,6 +263,7 @@ export default function PublicCourses() {
         `${API_BASE_URL}/courses/enrolled?summaryOnly=true`,
         {
           method: "GET",
+          cache: "no-store",
           headers: {
             Accept: "application/json",
             Authorization: `Bearer ${token}`,
@@ -281,32 +283,37 @@ export default function PublicCourses() {
           ? data.data
           : [];
 
-      setEnrolledCourses(loadedCourses.map(normalizeCourse));
+      if (isActive()) setEnrolledCourses(loadedCourses.map(normalizeCourse));
     } catch (error) {
       console.error("Enrolled courses loading error:", error);
-      setEnrolledCourses([]);
     }
   };
 
   useEffect(() => {
     let active = true;
+    let refreshing = false;
 
-    const refreshCourses = async () => {
+    const refreshCourses = async (initial = false) => {
+      if (!active || refreshing) return;
+      refreshing = true;
       try {
-        setLoading(true);
-        setErrorMessage("");
+        if (initial) setLoading(true);
 
-        const courses = await loadPublicStudentCourses();
+        const [courses] = await Promise.all([
+          loadPublicStudentCourses(),
+          loadEnrolledCourses(() => active),
+        ]);
 
         if (active) {
           setPublicCourses(Array.isArray(courses) ? courses : []);
+          setErrorMessage("");
         }
       } catch (error) {
-        if (active) {
-          setPublicCourses([]);
+        if (active && initial) {
           setErrorMessage(error.message || "Could not load public courses.");
         }
       } finally {
+        refreshing = false;
         if (active) {
           setLoading(false);
         }
@@ -314,20 +321,26 @@ export default function PublicCourses() {
     };
 
     const handleRefresh = () => {
-      refreshCourses();
-      loadEnrolledCourses();
+      if (document.visibilityState !== "hidden") refreshCourses();
     };
 
-    refreshCourses();
-    loadEnrolledCourses();
+    refreshCourses(true);
+    const intervalId = window.setInterval(handleRefresh, 5000);
 
     window.addEventListener(PROFESSOR_COURSES_EVENT, handleRefresh);
     window.addEventListener("storage", handleRefresh);
+    window.addEventListener("focus", handleRefresh);
+    window.addEventListener("online", handleRefresh);
+    document.addEventListener("visibilitychange", handleRefresh);
 
     return () => {
       active = false;
+      window.clearInterval(intervalId);
       window.removeEventListener(PROFESSOR_COURSES_EVENT, handleRefresh);
       window.removeEventListener("storage", handleRefresh);
+      window.removeEventListener("focus", handleRefresh);
+      window.removeEventListener("online", handleRefresh);
+      document.removeEventListener("visibilitychange", handleRefresh);
     };
   }, []);
 

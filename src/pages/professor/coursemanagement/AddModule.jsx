@@ -1,3 +1,5 @@
+import ProfessorCatalogSelection from "../../../components/catalog/ProfessorCatalogSelection.jsx";
+import ManagementBackBar from "../../../components/ManagementBackBar.jsx";
 import { selectCourseBuilderDraft } from "../../../services/courseBuilderDraft.js";
 import { ensureGenerationCourse } from "../../../services/generationCourseDraft.js";
 import QuizSourceEvidence from "../../../components/quizmodes/QuizSourceEvidence.jsx";
@@ -75,11 +77,11 @@ function createEmptyContentModule(index = 0) {
     lessonPages: [],
     quizItems: [],
     mainQuizSettings: {
-      enabled: true,
+      enabled: false,
       unlockAt: "",
       lockAt: "",
     },
-    mainQuizEnabled: true,
+    mainQuizEnabled: false,
     mainQuizUnlockAt: "",
   };
 }
@@ -303,6 +305,9 @@ function normalizeContentModule(module, index) {
   const mainQuizSettings = normalizeMainQuizSettings(module);
 
   return {
+    ...(module?.studentPublished !== undefined
+      ? { studentPublished: module.studentPublished }
+      : {}),
     id:
       module?.id ||
       module?.lesson_id ||
@@ -310,6 +315,7 @@ function normalizeContentModule(module, index) {
       createId("module"),
 
     title: String(module?.title || "").trim() || `Module ${index + 1}`,
+    catalogCoverageTitle: module?.catalogCoverageTitle || "",
 
     description: String(module?.description || module?.summary || ""),
 
@@ -551,6 +557,7 @@ export default function AddModule() {
 
   const isEditing = Boolean(id);
   const generationCourseRef = useRef(null);
+  const courseSaveInFlight = useRef(false);
 
   const [form, setForm] = useState(() => {
     const draft = selectCourseBuilderDraft(
@@ -1225,10 +1232,103 @@ export default function AddModule() {
     }
   };
 
+  const uploadModuleToStudents = async (moduleId) => {
+    if (courseSaveInFlight.current) return;
+    const target = form.contentModules.find(
+      (module) => String(module.id) === String(moduleId),
+    );
+    if (!target) return;
+    const publishing = target.studentPublished !== true;
+    if (!publishing) {
+      const confirmation = await Swal.fire({
+        icon: "question",
+        title: "Remove module from students?",
+        text: "Students will no longer have access to this module's lessons and quizzes. Your content stays saved and can be uploaded again later.",
+        showCancelButton: true,
+        confirmButtonText: "Remove from Students",
+        cancelButtonText: "Keep uploaded",
+        confirmButtonColor: "#7fa8d6",
+        focusCancel: true,
+      });
+      if (!confirmation.isConfirmed || courseSaveInFlight.current) return;
+    }
+    if (!form.title.trim() || !form.summary.trim()) {
+      await Swal.fire({
+        icon: "info",
+        title: "Complete course details",
+        text: "Add the course title and description before uploading a module.",
+      });
+      return;
+    }
+    courseSaveInFlight.current = true;
+    setIsSaving(true);
+    try {
+      const persisted = await ensureGenerationCourse(
+        form,
+        id,
+        generationCourseRef,
+        saveCourse,
+      );
+      setForm((current) => ({
+        ...current,
+        id: persisted.id,
+        code: persisted.code || current.code,
+      }));
+      const contentModules = form.contentModules.map((module) => ({
+        ...module,
+        studentPublished:
+          String(module.id) === String(moduleId)
+            ? publishing
+            : module.studentPublished === true,
+      }));
+      const updated = {
+        ...form,
+        id: persisted.id,
+        code: persisted.code || form.code,
+        status: "published",
+        visibility: "public",
+        contentModules,
+      };
+      const saved = await saveCourse(updated, { fallback: false });
+      const next = {
+        ...updated,
+        id: saved?.id || saved?.course_id || persisted.id,
+      };
+      setForm(next);
+      writeCourseBuilderDraft(id, next);
+      writeCourseBuilderDraft(next.id, next);
+      await Swal.fire({
+        icon: "success",
+        title: publishing ? "Module uploaded" : "Module removed from students",
+        text: publishing
+          ? "This module is available to enrolled students. Other modules keep their upload status."
+          : "Student access is off for this module. Its lessons and quizzes are still saved.",
+      });
+    } catch (error) {
+      await Swal.fire({
+        icon: "error",
+        title: "Upload failed",
+        text: error.message || "Please try again.",
+      });
+    } finally {
+      courseSaveInFlight.current = false;
+      setIsSaving(false);
+    }
+  };
+
   const saveCourseForm = async (event) => {
     event.preventDefault();
 
-    if (isSaving) {
+    if (isSaving || courseSaveInFlight.current) {
+      return;
+    }
+
+    if (!isEditing && !Number(form.id) && !form.catalogId) {
+      await Swal.fire({
+        icon: "warning",
+        title: "Select a course",
+        text: "Select an active course from the Course Catalog.",
+      });
       return;
     }
 
@@ -1253,17 +1353,15 @@ export default function AddModule() {
       const label = `Module ${index + 1}${module.title.trim() ? ` (${module.title.trim()})` : ""}`;
       if (!module.title.trim())
         missingDetails.push(`${label}: module title is missing.`);
-      if (!module.learningObjectives.trim())
-        missingDetails.push(`${label}: learning objectives are missing.`);
-      if (!module.lessonPages.length)
-        missingDetails.push(`${label}: no lesson pages.`);
       if (!module.quizItems.length)
         missingPracticeQuizzes.push(
           `${label}: no Practice Quiz questions yet.`,
         );
     });
+    const uploadToStudents = event.nativeEvent?.submitter?.value === "publish";
     const saveAsDraft =
-      form.status !== "published" || missingDetails.length > 0;
+      (!uploadToStudents && form.status !== "published") ||
+      missingDetails.length > 0;
     const detailsList = (details) => {
       const list = document.createElement("ul");
       list.style.textAlign = "left";
@@ -1319,6 +1417,14 @@ export default function AddModule() {
       null;
 
     const payload = {
+      catalogId: form.catalogId || null,
+      syllabusVersionId: form.syllabusVersionId || null,
+      className: form.className || "",
+      academicYear: form.academicYear || "",
+      semester: form.semester || "",
+      program: form.program || "",
+      yearLevel: form.yearLevel || "",
+      sectionName: form.sectionName || "",
       title: courseTitle,
       courseName: courseTitle,
       course_name: courseTitle,
@@ -1372,10 +1478,12 @@ export default function AddModule() {
       professor_profile_image: professorProfileImage,
     };
 
+    if (courseSaveInFlight.current) return;
     try {
+      courseSaveInFlight.current = true;
       setIsSaving(true);
 
-      await saveCourse(
+      const savedCourse = await saveCourse(
         isEditing ||
           (Number.isSafeInteger(Number(form.id)) && Number(form.id) > 0)
           ? {
@@ -1383,7 +1491,21 @@ export default function AddModule() {
               id: id || form.id,
             }
           : payload,
+        { fallback: false },
       );
+      // Retain the server identity before showing dialogs or navigating. A
+      // subsequent save must update this draft rather than POST another class.
+      const savedId = savedCourse?.id ?? savedCourse?.course_id;
+      if (Number.isSafeInteger(Number(savedId)) && Number(savedId) > 0) {
+        const persistedDraft = {
+          ...form,
+          id: Number(savedId),
+          code: savedCourse.code || savedCourse.course_code || form.code,
+        };
+        setForm(persistedDraft);
+        writeCourseBuilderDraft(id, persistedDraft);
+        writeCourseBuilderDraft(savedId, persistedDraft);
+      }
 
       await Swal.fire({
         icon: "success",
@@ -1400,7 +1522,7 @@ export default function AddModule() {
         html:
           (saveAsDraft
             ? `<p>Saved as a draft. Students cannot access it until it is published.</p>${form.status !== "published" ? "<p>Status is set to Draft.</p>" : ""}${missingDetails.length ? `<section><h3>Required before publishing</h3>${detailsList(missingDetails)}</section>` : "<p>The required details are complete. Select Publish to make the course available.</p>"}`
-            : "<p>The course was published successfully.</p>") +
+            : "<p>The course is available to students. Empty modules can be completed later. Save this published course after adding lessons to make them available to students.</p>") +
           (missingPracticeQuizzes.length
             ? `<section><h3>Practice Quiz <small>Optional</small></h3>${detailsList(missingPracticeQuizzes)}<p>Practice Quizzes do not prevent publishing.</p></section>`
             : ""),
@@ -1422,6 +1544,7 @@ export default function AddModule() {
         confirmButtonText: "OK",
       });
     } finally {
+      courseSaveInFlight.current = false;
       setIsSaving(false);
     }
   };
@@ -1446,6 +1569,14 @@ export default function AddModule() {
         isEditing ? "edit-course-page" : ""
       }`}
     >
+      <ManagementBackBar
+        onClick={() => {
+          writeCourseBuilderDraft(id, form);
+          navigate("/professor/courses");
+        }}
+      >
+        Back to courses
+      </ManagementBackBar>
       <div className={styles.pageHeader}>
         <div>
           <h1>{isEditing ? "Edit Course" : "Add Course"}</h1>
@@ -1459,61 +1590,71 @@ export default function AddModule() {
 
       <form className={styles.formCard} onSubmit={saveCourseForm}>
         <div className={styles.popupInfoGrid}>
-          <div className={styles.popupField}>
-            <label className={styles.popupLabel}>
-              Course Title
-              <span className={styles.required}>*Required</span>
-            </label>
-
-            <input
-              className={styles.popupInput}
-              value={form.title}
-              onChange={(event) =>
-                updateField("title", limit(event.target.value, TITLE_LIMIT))
-              }
-              placeholder="Enter course title"
+          <div className={styles.courseIdentityColumn}>
+            <ProfessorCatalogSelection
+              form={form}
+              onChange={setForm}
+              isEditing={isEditing}
             />
 
-            <div className={counterClass(form.title.length, TITLE_LIMIT)}>
-              {form.title.length}/{TITLE_LIMIT} characters
+            <div className={styles.popupField}>
+              <label className={styles.popupLabel}>
+                Course Title
+                <span className={styles.required}>*Required</span>
+              </label>
+
+              <input
+                className={styles.popupInput}
+                value={form.title}
+                readOnly={!!form.catalogId || !isEditing}
+                onChange={(event) =>
+                  updateField("title", limit(event.target.value, TITLE_LIMIT))
+                }
+                placeholder="Enter course title"
+              />
+
+              <div className={counterClass(form.title.length, TITLE_LIMIT)}>
+                {form.title.length}/{TITLE_LIMIT} characters
+              </div>
             </div>
           </div>
+          <div className={styles.courseClassColumn}>
+            <div className={styles.popupField}>
+              <label className={styles.popupLabel}>
+                Class Join Code
+                <span className={styles.required}>*Required</span>
+              </label>
 
-          <div className={styles.popupField}>
-            <label className={styles.popupLabel}>
-              Course Code
-              <span className={styles.required}>*Required</span>
-            </label>
+              <input
+                className={styles.popupInput}
+                value={form.code}
+                readOnly
+                aria-readonly="true"
+                placeholder="Auto-generated course code"
+              />
 
-            <input
-              className={styles.popupInput}
-              value={form.code}
-              readOnly
-              aria-readonly="true"
-              placeholder="Auto-generated course code"
-            />
+              <p className={styles.courseCodeNote}>
+                Auto-generated course code. It cannot be changed.
+              </p>
 
-            <p className={styles.courseCodeNote}>
-              Auto-generated course code. It cannot be changed.
-            </p>
-
-            <div className={counterClass(form.code.length, CODE_LIMIT)}>
-              {form.code.length}/{CODE_LIMIT} characters
+              <div className={counterClass(form.code.length, CODE_LIMIT)}>
+                {form.code.length}/{CODE_LIMIT} characters
+              </div>
             </div>
-          </div>
 
-          <div className={styles.popupField}>
-            <label className={styles.popupLabel}>Status</label>
+            <div className={`${styles.popupField} ${styles.courseStatusField}`}>
+              <label className={styles.popupLabel}>Status</label>
 
-            <select
-              className={styles.popupSelect}
-              value={form.status}
-              onChange={(event) => updateField("status", event.target.value)}
-            >
-              <option value="draft">Draft</option>
+              <select
+                className={styles.popupSelect}
+                value={form.status}
+                onChange={(event) => updateField("status", event.target.value)}
+              >
+                <option value="draft">Draft</option>
 
-              <option value="published">Published</option>
-            </select>
+                <option value="published">Published</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -1615,6 +1756,23 @@ export default function AddModule() {
                       </div>
 
                       <div className={styles.moduleCardHeaderActions}>
+                        <button
+                          type="button"
+                          className={`${styles.moduleUploadBtn} ${module.studentPublished === true ? styles.moduleUploaded : styles.moduleNotUploaded}`}
+                          aria-pressed={module.studentPublished === true}
+                          title={module.studentPublished === true ? "Click to turn student access off" : "Click to upload to students"}
+                          disabled={
+                            isSaving ||
+                            Boolean(processingModuleId) ||
+                            Boolean(generatingQuizModuleId)
+                          }
+                          onClick={() => uploadModuleToStudents(module.id)}
+                        >
+                          {module.studentPublished === true
+                            ? "Uploaded - Turn Off"
+                            : "Upload to Students"}
+                        </button>
+
                         <button
                           type="button"
                           className={styles.moduleExpandBtn}

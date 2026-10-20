@@ -1,3 +1,4 @@
+import { studentVisibleModuleIndices } from "../../../utils/studentModuleVisibility.js";
 import { mainQuizScheduleState } from "../../../utils/mainQuizSchedule.js";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -744,6 +745,9 @@ export default function StudentCourseDetail() {
     [course, mainQuizSettingsVersion],
   );
 
+  const visibleModuleIndices = studentVisibleModuleIndices(modules);
+  const visibleModuleCount = visibleModuleIndices.length;
+
   const courseRouteId = course
     ? String(course.id || course.course_id || course.code || "")
     : "";
@@ -759,19 +763,20 @@ export default function StudentCourseDetail() {
   const getModuleProgress = (index) => moduleProgressValues[index] ?? 0;
 
   const isModuleLearnUnlocked = (index) => {
-    if (index === 0) {
-      return true;
-    }
-
-    return getModuleProgress(index - 1) >= 100;
+    const position = visibleModuleIndices.indexOf(index);
+    if (position < 0) return false;
+    return (
+      position === 0 ||
+      getModuleProgress(visibleModuleIndices[position - 1]) >= 100
+    );
   };
 
   const isModulePracticeUnlocked = (index) =>
     isModuleLearnUnlocked(index) && getModuleProgress(index) >= 100;
 
   const areAllModulesCompleted =
-    modules.length > 0 &&
-    moduleProgressValues.every((progress) => progress >= 100);
+    visibleModuleCount > 0 &&
+    visibleModuleIndices.every((index) => getModuleProgress(index) >= 100);
 
   const createFallbackQuiz = (module, index) => ({
     id: `${module.id || courseRouteId}-practice-${index + 1}`,
@@ -1051,11 +1056,9 @@ export default function StudentCourseDetail() {
   };
 
   const startCourseLearning = () => {
-    const firstIncompleteIndex = moduleProgressValues.findIndex(
-      (progress) => progress < 100,
-    );
-
-    const targetIndex = firstIncompleteIndex === -1 ? 0 : firstIncompleteIndex;
+    const targetIndex =
+      visibleModuleIndices.find((index) => getModuleProgress(index) < 100) ??
+      visibleModuleIndices[0];
 
     const targetModule = modules[targetIndex];
 
@@ -1076,8 +1079,8 @@ export default function StudentCourseDetail() {
       return;
     }
 
-    const quizzes = modules.flatMap((module, index) =>
-      getModulePracticeItems(module, index),
+    const quizzes = visibleModuleIndices.flatMap((index) =>
+      getModulePracticeItems(modules[index], index),
     );
 
     openPracticeModes({
@@ -1086,7 +1089,7 @@ export default function StudentCourseDetail() {
       source: "course",
       moduleIndex: -1,
       title: `Everything in ${course.code}`,
-      detail: `${modules.length} module(s)`,
+      detail: `${visibleModuleCount} module(s)`,
       quizzes,
     });
   };
@@ -1256,17 +1259,17 @@ export default function StudentCourseDetail() {
         <main className="student-course-detail-content">
           <section className="student-course-shell">
             <div className="student-course-hero">
+              <div className="student-course-meta-row">
+                <span>{course.code}</span>
+
+                <span>
+                  {course.visibility === "private"
+                    ? "Private course"
+                    : "Public course"}
+                </span>
+              </div>
+
               <div className="student-course-copy">
-                <div className="student-course-meta-row">
-                  <span>{course.code}</span>
-
-                  <span>
-                    {course.visibility === "private"
-                      ? "Private course"
-                      : "Public course"}
-                  </span>
-                </div>
-
                 <h1>{course.title}</h1>
 
                 <p>
@@ -1316,7 +1319,7 @@ export default function StudentCourseDetail() {
                       type="button"
                       className="student-start-button"
                       onClick={startCourseLearning}
-                      disabled={modules.length === 0}
+                      disabled={visibleModuleCount === 0}
                     >
                       Start Learning
                     </button>
@@ -1351,16 +1354,17 @@ export default function StudentCourseDetail() {
                   </p>
                 </div>
 
-                <span>{modules.length} module(s)</span>
+                <span>{visibleModuleCount} module(s)</span>
               </div>
 
-              {modules.length === 0 ? (
+              {visibleModuleCount === 0 ? (
                 <div className="student-empty-state">
                   No modules have been added to this course yet.
                 </div>
               ) : (
                 <div className="student-module-list">
                   {modules.map((module, index) => {
+                    if (!visibleModuleIndices.includes(index)) return null;
                     const moduleProgress = getModuleProgress(index);
                     const learnUnlocked = isModuleLearnUnlocked(index);
                     const practiceUnlocked = isModulePracticeUnlocked(index);
@@ -1396,35 +1400,20 @@ export default function StudentCourseDetail() {
 
                         <div className="student-module-main">
                           <div className="student-module-title-row">
-                            <div>
-                              <span className="student-module-eyebrow">
-                                Module {index + 1}
-                              </span>
-
-                              <h3>{module.title}</h3>
-                            </div>
-
-                            <span
-                              className={`student-module-status ${moduleState}`}
-                            >
-                              {!learnUnlocked
-                                ? "Locked"
-                                : moduleProgress >= 100
-                                  ? "Completed"
-                                  : moduleProgress > 0
-                                    ? "In progress"
-                                    : "Available"}
+                            <span className="student-module-eyebrow">
+                              Module {index + 1}
                             </span>
                           </div>
 
-                          <p>
-                            {module.description ||
-                              `${module.lessonPages.length} lesson page(s)`}
-                          </p>
+                          <h3>{module.title}</h3>
 
                           {!learnUnlocked && (
                             <small className="student-module-lock-message">
-                              Complete Module {index} to unlock this module.
+                              Complete Module{" "}
+                              {visibleModuleIndices[
+                                visibleModuleIndices.indexOf(index) - 1
+                              ] + 1}{" "}
+                              to unlock this module.
                             </small>
                           )}
 
@@ -1440,56 +1429,69 @@ export default function StudentCourseDetail() {
                           </div>
                         </div>
 
-                        <div className="student-module-actions">
-                          <button
-                            type="button"
-                            className="student-module-learn-button"
-                            onClick={() => startModuleLearning(module, index)}
-                            disabled={!learnUnlocked}
+                        <div className="student-module-action-panel">
+                          <span
+                            className={`student-module-status ${moduleState}`}
                           >
-                            {moduleProgress > 0 ? "Continue" : "Learn"}
-                          </button>
+                            {!learnUnlocked
+                              ? "Locked"
+                              : moduleProgress >= 100
+                                ? "Completed"
+                                : moduleProgress > 0
+                                  ? "In progress"
+                                  : "Available"}
+                          </span>
+                          <div className="student-module-actions">
+                            <button
+                              type="button"
+                              className="student-module-learn-button"
+                              onClick={() => startModuleLearning(module, index)}
+                              disabled={!learnUnlocked}
+                            >
+                              {moduleProgress > 0 ? "Continue" : "Learn"}
+                            </button>
 
-                          <button
-                            type="button"
-                            className="student-module-practice-button"
-                            onClick={() => openModulePractice(module, index)}
-                            disabled={!practiceUnlocked}
-                            title={
-                              practiceUnlocked
-                                ? `Practice ${module.title}`
-                                : "Finish reading this module first."
-                            }
-                          >
-                            Practice
-                          </button>
-
-                          <button
-                            type="button"
-                            className={`student-module-main-quiz-button ${
-                              mainQuizDisabled ? "is-disabled" : ""
-                            }`}
-                            onClick={(event) => {
-                              if (mainQuizDisabled) {
-                                event.preventDefault();
-                                return;
+                            <button
+                              type="button"
+                              className="student-module-practice-button"
+                              onClick={() => openModulePractice(module, index)}
+                              disabled={!practiceUnlocked}
+                              title={
+                                practiceUnlocked
+                                  ? `Practice ${module.title}`
+                                  : "Finish reading this module first."
                               }
+                            >
+                              Practice
+                            </button>
 
-                              openModuleMainQuiz(module, index);
-                            }}
-                            disabled={mainQuizDisabled}
-                            aria-disabled={mainQuizDisabled}
-                            title={mainQuizTitle}
-                          >
-                            Main Quiz
-                          </button>
+                            <button
+                              type="button"
+                              className={`student-module-main-quiz-button ${
+                                mainQuizDisabled ? "is-disabled" : ""
+                              }`}
+                              onClick={(event) => {
+                                if (mainQuizDisabled) {
+                                  event.preventDefault();
+                                  return;
+                                }
+
+                                openModuleMainQuiz(module, index);
+                              }}
+                              disabled={mainQuizDisabled}
+                              aria-disabled={mainQuizDisabled}
+                              title={mainQuizTitle}
+                            >
+                              Main Quiz
+                            </button>
+                          </div>
+
+                          {mainQuizDisabled && (
+                            <small className="student-module-main-quiz-lock-message">
+                              {mainQuizTitle}
+                            </small>
+                          )}
                         </div>
-
-                        {mainQuizDisabled && (
-                          <small className="student-module-main-quiz-lock-message">
-                            {mainQuizTitle}
-                          </small>
-                        )}
                       </article>
                     );
                   })}

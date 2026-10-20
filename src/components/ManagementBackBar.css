@@ -1,0 +1,40 @@
+.management-back-bar {
+  display: flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 7px 18px;
+  box-sizing: border-box;
+  border-bottom: 1px solid #c4c4c4;
+  background: #d9d9d9;
+}
+.management-back-bar button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #606060;
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.5;
+  cursor: pointer;
+}
+.management-back-bar button:hover {
+  color: #345a83;
+}
+.management-back-bar button:focus-visible {
+  outline: 2px solid #567fab;
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+.management-back-bar svg {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+}
+@media print {
+  .management-back-bar {
+    display: none !important;
+  }
+}

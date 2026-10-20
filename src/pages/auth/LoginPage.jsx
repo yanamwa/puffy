@@ -276,7 +276,17 @@ function Login() {
           signal: controller.signal,
         });
 
-        data = await res.json().catch(() => ({}));
+        data = await res.json().catch(() => null);
+        if (res.status >= 500) {
+          throw new Error(
+            "The login server is unavailable. Please try again when the backend is running.",
+          );
+        }
+        if (!data || typeof data !== "object" || !("success" in data)) {
+          throw new Error(
+            "The login server returned an unexpected response. Please check the API configuration.",
+          );
+        }
       } finally {
         window.clearTimeout(timeoutId);
       }

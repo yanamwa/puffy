@@ -1,3 +1,4 @@
+import { studentModuleNavigation } from "../../utils/studentModuleVisibility.js";
 import styles from "./lesson.module.css";
 
 import {
@@ -100,19 +101,10 @@ function Introduction() {
 
   const requestedModuleIndex = Number(searchParams.get("module") || 0);
 
-  const moduleIndex = Math.min(
-    Math.max(
-      Number.isInteger(requestedModuleIndex) ? requestedModuleIndex : 0,
-      0,
-    ),
-
-    Math.max(modules.length - 1, 0),
-  );
-
+  const navigation = studentModuleNavigation(modules, requestedModuleIndex);
+  const moduleIndex = navigation.moduleIndex;
   const activeModule = modules[moduleIndex] || null;
-
-  const moduleNumber = moduleIndex + 1;
-
+  const moduleNumber = navigation.moduleNumber;
   const moduleTitle = activeModule?.title || lesson?.title || "Untitled module";
 
   const moduleQuery = `?module=${moduleIndex}`;

@@ -29,10 +29,10 @@
   Reserve that exact space so Home never slides underneath it.
 */
 .student-home-main-area {
-  width: calc(100% - 240px);
+  width: calc(100% - 320px);
   min-width: 0;
   min-height: 100vh;
-  margin-left: 240px;
+  margin-left: 320px;
 
   transition:
     width 220ms ease,
@@ -910,4 +910,55 @@
 .home-progress-filter:hover {
   border-color: var(--student-theme-morning-breeze);
   color: var(--student-theme-accent);
+}
+
+/* Larger, readable text in the student calendar. */
+.home-mini-calendar .home-calendar-header h2 {
+  font-size: 20px;
+}
+.home-mini-calendar .home-calendar-header button {
+  font-size: 16px;
+}
+.home-mini-calendar .home-calendar-weekdays {
+  font-size: 8px;
+}
+.home-mini-calendar .home-calendar-grid button,
+.home-mini-calendar .home-calendar-blank {
+  width: 22px;
+  height: 22px;
+  font-size: 13px;
+}
+.home-mini-calendar .student-academic-calendar {
+  font-size: 14px;
+}
+.home-mini-calendar .student-academic-calendar h3 {
+  font-size: 16px;
+}
+.home-mini-calendar .student-academic-calendar h4,
+.home-mini-calendar .student-academic-calendar p,
+.home-mini-calendar .student-academic-calendar > .academic-button {
+  font-size: 14px;
+}
+.home-mini-calendar .academic-student-event small {
+  font-size: 12px;
+}
+
+/* Highlight dates that have published academic events. */
+.home-mini-calendar .home-calendar-grid button.academic-event-day {
+  color: #c53c43;
+  font-weight: 700;
+}
+.home-mini-calendar .home-calendar-grid button.academic-event-day::after {
+  background: #c53c43;
+}
+.home-mini-calendar .home-calendar-grid button.academic-event-day.selected {
+  background: #c53c43;
+  color: #fff;
+}
+.home-mini-calendar .home-calendar-grid button.academic-event-day.selected::after {
+  background: #fff;
+}
+
+.home-mini-calendar .home-calendar-header h2 {
+  white-space: nowrap;
 }

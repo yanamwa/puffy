@@ -1,0 +1,128 @@
+.home-recent-quiz-results {
+  border: 1px solid #d4d7dd;
+  border-radius: 18px;
+  padding: 20px;
+  background: white;
+  color: #4f6174;
+}
+.home-recent-quiz-results .home-section-header {
+  align-items: center;
+  gap: 16px;
+}
+.home-recent-quiz-results .home-section-header h2 {
+  font-size: 20px;
+}
+.home-results-view-all {
+  background: transparent;
+  border: 0;
+  padding: 6px 0;
+  color: #5f86b1;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.home-results-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+.home-results-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+.home-results-table th {
+  padding: 12px 0 10px;
+  font-size: 12px;
+  font-weight: 400;
+  color: #69717f;
+  border-bottom: 1px solid #dfe3e9;
+}
+.home-results-table td {
+  padding: 14px 0;
+  border-bottom: 1px solid #edf0f4;
+  font-size: 14px;
+  vertical-align: middle;
+}
+.home-results-table tr:last-child td {
+  border-bottom: 0;
+}
+.home-results-table th:first-child {
+  width: 48%;
+}
+.home-results-table td:first-child {
+  padding-right: 18px;
+}
+.home-results-table td:first-child strong {
+  display: block;
+  color: #263c52;
+  font-size: 14px;
+}
+.home-results-table td:first-child > span {
+  display: block;
+  margin-top: 5px;
+  font-size: 11px;
+  color: #69717f;
+}
+.home-results-score {
+  width: 25%;
+  font-weight: 700;
+}
+.home-results-table .home-results-outcome {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+}
+.home-results-outcome.passed {
+  color: #198754;
+}
+.home-results-outcome.failed {
+  color: #c53c43;
+}
+.home-results-outcome > span {
+  width: 16px;
+  height: 16px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  line-height: 1;
+}
+.home-results-empty {
+  font-size: 14px;
+  padding: 12px 0;
+}
+.home-results-pagination {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+  font-size: 12px;
+}
+.home-results-pagination button {
+  border: 1px solid #a8c6e7;
+  border-radius: 8px;
+  padding: 7px 10px;
+  background: #edf4fc;
+  color: #355a80;
+  cursor: pointer;
+}
+.home-results-pagination button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+@media (max-width: 480px) {
+  .home-recent-quiz-results {
+    padding: 14px;
+  }
+  .home-recent-quiz-results .home-section-header h2 {
+    font-size: 16px;
+  }
+  .home-results-table {
+    min-width: 330px;
+  }
+}

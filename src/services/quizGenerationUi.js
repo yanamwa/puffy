@@ -28,7 +28,7 @@ function requestMainQuizSettings() {
     showCloseButton: true,
     closeButtonAriaLabel: "Close Main Quiz generation",
     showCancelButton: true,
-    confirmButtonText: "Save",
+    confirmButtonText: "Generate",
     cancelButtonText: "Cancel",
     buttonsStyling: false,
     focusConfirm: false,

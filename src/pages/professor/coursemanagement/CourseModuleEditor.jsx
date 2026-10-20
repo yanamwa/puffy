@@ -1,3 +1,5 @@
+import { createPortal } from "react-dom";
+import ManagementBackBar from "../../../components/ManagementBackBar.jsx";
 import { ensureGenerationCourse } from "../../../services/generationCourseDraft.js";
 import QuizSourceEvidence from "../../../components/quizmodes/QuizSourceEvidence.jsx";
 import { lessonAuthHeaders } from "../../../services/lessonAuth.js";
@@ -282,6 +284,9 @@ function normalizeContentModule(module, index = 0) {
   const mainQuizSettings = normalizeMainQuizSettings(module);
 
   return {
+    ...(module?.studentPublished !== undefined
+      ? { studentPublished: module.studentPublished }
+      : {}),
     id:
       module?.id ||
       module?.lesson_id ||
@@ -471,7 +476,7 @@ function writeCourseBuilderDraft(courseId, draft) {
   }
 }
 
-export default function CourseModuleEditor() {
+export default function CourseModuleEditor({ quizManagement = false }) {
   const { id, moduleId, assessmentType } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
@@ -480,6 +485,21 @@ export default function CourseModuleEditor() {
   const generationCourseRef = useRef(null);
   const mainQuizSettingsDialog = useRef(null);
   const [generatorOpen, setGeneratorOpen] = useState(false);
+  useEffect(() => {
+    if (!generatorOpen) return;
+    const root = document.getElementById("root");
+    const wasInert = root?.inert;
+    const previousOverflow = document.body.style.overflow;
+    const previousFocus = document.activeElement;
+    if (root) root.inert = true;
+    document.body.style.overflow = "hidden";
+    return () => {
+      if (root) root.inert = wasInert;
+      document.body.style.overflow = previousOverflow;
+      previousFocus?.focus?.();
+    };
+  }, [generatorOpen]);
+
   const [loading, setLoading] = useState(true);
   const [courseDraft, setCourseDraft] = useState(null);
   const [moduleDraft, setModuleDraft] = useState(null);
@@ -493,13 +513,22 @@ export default function CourseModuleEditor() {
   const [mainConfigError, setMainConfigError] = useState("");
   const [activePageIndex, setActivePageIndex] = useState(0);
   const [activeQuizIndex, setActiveQuizIndex] = useState(0);
+  const [selectedQuestionIndexes, setSelectedQuestionIndexes] = useState([]);
+  const [selectedPageIndexes, setSelectedPageIndexes] = useState([]);
+
+  useEffect(() => {
+    setSelectedPageIndexes([]);
+  }, [id, moduleId]);
   const [activeAssessment, setActiveAssessment] = useState(routeAssessment);
 
   const builderPath = id
     ? `/professor/courses/edit/${id}`
     : "/professor/courses/new";
-  const moduleEditorPath = `${builderPath}/modules/${moduleId}/edit`;
   const isAssessmentPage = Boolean(routeAssessment);
+  const isQuizWorkspace = quizManagement || isAssessmentPage;
+  const quizModulePath = id
+    ? `/professor/quizzes/${encodeURIComponent(id)}/modules/${encodeURIComponent(moduleId)}`
+    : `${builderPath}/modules/${moduleId}`;
 
   useEffect(() => {
     setActiveAssessment(routeAssessment);
@@ -643,6 +672,15 @@ export default function CourseModuleEditor() {
 
   const lessonCount = moduleDraft?.lessonPages?.length || 0;
   const quizCount = assessmentItems.length;
+  useEffect(() => {
+    setSelectedQuestionIndexes([]);
+  }, [
+    moduleId,
+    isMainAssessment,
+    selectedMainQuiz,
+    quizCount,
+    baselinePreview,
+  ]);
   const practiceQuizCount = moduleDraft?.quizItems?.length || 0;
   const activeLessonTabPageIndex = Math.floor(
     activePageIndex / LESSON_TAB_PAGE_SIZE,
@@ -877,17 +915,17 @@ export default function CourseModuleEditor() {
     });
   };
 
-  const removeActiveLessonPage = async () => {
-    if (!activePage) {
+  const removeSelectedLessonPages = async () => {
+    if (!selectedPageIndexes.length) {
       return;
     }
 
     const result = await Swal.fire({
       icon: "warning",
-      title: "Remove Page?",
-      text: "This lesson page will be removed from the module.",
+      title: "Remove Selected Pages?",
+      text: `${selectedPageIndexes.length} lesson page(s) will be removed from the module.`,
       showCancelButton: true,
-      confirmButtonText: "Remove Page",
+      confirmButtonText: "Remove Selected",
       cancelButtonText: "Cancel",
       confirmButtonColor: "#d93025",
       cancelButtonColor: "#858d9b",
@@ -898,15 +936,18 @@ export default function CourseModuleEditor() {
       return;
     }
 
+    setSelectedPageIndexes([]);
     setModuleDraft((current) => {
       const lessonPages = current.lessonPages.filter(
-        (_, index) => index !== activePageIndex,
+        (_, index) => !selectedPageIndexes.includes(index),
       );
 
+      const remainingBeforeActive = current.lessonPages.filter(
+        (_, index) =>
+          index < activePageIndex && !selectedPageIndexes.includes(index),
+      ).length;
       setActivePageIndex(
-        lessonPages.length
-          ? Math.min(activePageIndex, lessonPages.length - 1)
-          : 0,
+        Math.max(0, Math.min(remainingBeforeActive, lessonPages.length - 1)),
       );
 
       return {
@@ -1011,17 +1052,21 @@ export default function CourseModuleEditor() {
     });
   };
 
-  const removeActiveQuizItem = async () => {
-    if (!activeQuiz) {
+  const removeQuizItems = async (indexes) => {
+    if (viewingGeneratedMain || !indexes.length) {
       return;
     }
 
     const result = await Swal.fire({
       icon: "warning",
-      title: "Remove Question?",
-      text: "This quiz question will be removed from the module.",
+      title:
+        indexes.length === 1
+          ? "Remove Question?"
+          : "Remove Selected Questions?",
+      text: `${indexes.length} question(s) will be removed from the module.`,
       showCancelButton: true,
-      confirmButtonText: "Remove Question",
+      confirmButtonText:
+        indexes.length === 1 ? "Remove Question" : "Remove Selected",
       cancelButtonText: "Cancel",
       confirmButtonColor: "#d93025",
       cancelButtonColor: "#858d9b",
@@ -1032,20 +1077,22 @@ export default function CourseModuleEditor() {
       return;
     }
 
+    const removedIndexes = new Set(indexes);
+    setSelectedQuestionIndexes([]);
     if (baselinePreview) {
       setMainQuizConfig((current) => ({
         ...current,
         baselineQuestions: current.baselineQuestions.filter(
-          (_, index) => index !== activeQuizIndex,
+          (_, index) => !removedIndexes.has(index),
         ),
       }));
-      setActiveQuizIndex((index) => Math.max(0, index - 1));
+      setActiveQuizIndex(0);
       return;
     }
 
     setModuleDraft((current) => {
       const quizItems = (current[quizItemsKey] || []).filter(
-        (_, index) => index !== activeQuizIndex,
+        (_, index) => !removedIndexes.has(index),
       );
 
       setActiveQuizIndex(
@@ -1275,9 +1322,7 @@ export default function CourseModuleEditor() {
     }
 
     navigate(
-      `${builderPath}/modules/${moduleId}/${getAssessmentRouteSegment(
-        nextAssessment,
-      )}/edit`,
+      `${quizModulePath}/${getAssessmentRouteSegment(nextAssessment)}/edit`,
       {
         state: {
           courseDraft: updatedCourse,
@@ -1296,7 +1341,7 @@ export default function CourseModuleEditor() {
 
     setActiveAssessment("");
 
-    navigate(moduleEditorPath, {
+    navigate(quizModulePath, {
       state: {
         courseDraft: updatedCourse,
       },
@@ -1401,8 +1446,12 @@ export default function CourseModuleEditor() {
     } catch (error) {
       await Swal.fire({
         icon: "error",
-        title: "Generation Failed",
-        text: error.message || "Could not process the lesson file.",
+        title: /couldn.t verify|grounding/i.test(error.message || "")
+          ? "Lesson needs another attempt"
+          : "Generation Failed",
+        text: /couldn.t verify|grounding/i.test(error.message || "")
+          ? "Some lesson details could not be verified against your source. Your files are saved. Use Retry with saved sources in the module to try again without uploading them again."
+          : error.message || "Could not process the lesson file.",
         confirmButtonText: "OK",
       });
     } finally {
@@ -1418,6 +1467,65 @@ export default function CourseModuleEditor() {
   });
 
   const saveModule = async () => {
+    if (isQuizWorkspace && isMainAssessment && assessmentItems.length === 0) {
+      await Swal.fire({
+        icon: "warning",
+        title: "Questions Required",
+        text: "Please add at least one question before saving the Main Quiz.",
+        confirmButtonText: "OK",
+      });
+      return;
+    }
+
+    if (isQuizWorkspace && isMainAssessment) {
+      const seenQuestions = new Set();
+      for (const [index, question] of assessmentItems.entries()) {
+        const text = String(question.question || "").trim();
+        const options = question.options || [];
+        const answer = String(question.correct_answer || "").trim();
+        let title = "Required Fields";
+        let message = "";
+
+        if (!text) {
+          message = "Please enter the question.";
+        } else if (seenQuestions.has(text.toLowerCase())) {
+          title = "Duplicate Question";
+          message =
+            "Please use a different question. This question is already in the quiz.";
+        } else if (
+          question.type === "multiple_choice" &&
+          (options.length !== 4 ||
+            options.some((option) => !String(option).trim()))
+        ) {
+          message = "Please fill in all four answer choices.";
+        } else if (
+          question.type === "multiple_choice" &&
+          new Set(options).size !== options.length
+        ) {
+          title = "Duplicate Answer Choices";
+          message = "Please enter four different answer choices.";
+        } else if (
+          !answer ||
+          (question.type !== "identification" &&
+            !options.includes(question.correct_answer))
+        ) {
+          message = "Please enter or select the correct answer.";
+        }
+
+        if (message) {
+          setActiveQuizIndex(index);
+          await Swal.fire({
+            icon: "warning",
+            title,
+            text: `Question ${index + 1}: ${message}`,
+            confirmButtonText: "OK",
+          });
+          return;
+        }
+        seenQuestions.add(text.toLowerCase());
+      }
+    }
+
     if (!moduleDraft.title.trim()) {
       await Swal.fire({
         icon: "warning",
@@ -1479,15 +1587,19 @@ export default function CourseModuleEditor() {
 
     await Swal.fire({
       icon: "success",
-      title: "Module Saved",
-      text: "Your module changes were added back to the course.",
+      title: isQuizWorkspace ? "Quiz Saved" : "Module Saved",
+      text: isQuizWorkspace
+        ? "Your quiz changes have been saved."
+        : "Your module changes were added back to the course.",
       confirmButtonText: "Done",
     });
 
     navigate(
-      updatedCourse.id
-        ? `/professor/courses/edit/${updatedCourse.id}`
-        : builderPath,
+      isQuizWorkspace
+        ? quizModulePath
+        : updatedCourse.id
+          ? `/professor/courses/edit/${updatedCourse.id}`
+          : builderPath,
       {
         state: {
           courseDraft: updatedCourse,
@@ -1501,11 +1613,16 @@ export default function CourseModuleEditor() {
       writeCourseBuilderDraft(id, courseDraft);
     }
 
-    navigate(builderPath, {
-      state: {
-        courseDraft,
+    navigate(
+      isQuizWorkspace
+        ? `/professor/quizzes?course=${encodeURIComponent(id || "")}`
+        : builderPath,
+      {
+        state: {
+          courseDraft,
+        },
       },
-    });
+    );
   };
 
   if (loading || !moduleDraft) {
@@ -1524,25 +1641,36 @@ export default function CourseModuleEditor() {
     <div
       className={`${styles.addModulePage} ${styles.courseModuleEditorPage} ${isAssessmentPage ? styles.assessmentPage : ""} course-module-editor-page`}
     >
-      {isAssessmentPage && (
-        <div className={styles.assessmentBreadcrumb}>
-          <button type="button" onClick={returnToAssessments}>
-            ← Go back lesson
-          </button>
-        </div>
-      )}
+      <ManagementBackBar
+        onClick={() => {
+          const updatedCourse = buildUpdatedCourse();
+          writeCourseBuilderDraft(id, updatedCourse);
+          navigate(
+            isQuizWorkspace
+              ? `/professor/quizzes?course=${encodeURIComponent(id || "")}`
+              : builderPath,
+            { state: { courseDraft: updatedCourse } },
+          );
+        }}
+      >
+        Back to modules
+      </ManagementBackBar>
       <div className={styles.pageHeader}>
         <h1>
           {isAssessmentPage
             ? `${getAssessmentLabel(activeAssessment)} Editor`
-            : "Edit Module"}
+            : quizManagement
+              ? `Quiz Management · ${moduleDraft.title}`
+              : "Edit Module"}
         </h1>
         <p className={styles.pageHeaderText}>
           {isAssessmentPage
             ? `Edit the ${getAssessmentLabel(
                 activeAssessment,
               ).toLowerCase()} for this module on its own page.`
-            : "Build the course using modules. Each module can contain lesson pages and its own quiz."}
+            : quizManagement
+              ? "Manage practice and main quizzes for this module."
+              : "Build lesson pages for this course module."}
         </p>
         {isMainAssessment && (
           <p className={styles.pageHeaderText}>
@@ -1560,7 +1688,7 @@ export default function CourseModuleEditor() {
             Main Quiz Settings
           </button>
         )}
-        {!isAssessmentPage && (
+        {!isQuizWorkspace && (
           <button
             className={styles.assessmentSettingsButton}
             type="button"
@@ -1572,99 +1700,136 @@ export default function CourseModuleEditor() {
       </div>
 
       <main className={styles.moduleEditorForm}>
-        {!isAssessmentPage && (
+        {!isQuizWorkspace && (
           <>
-            {generatorOpen && (
-              <div
-                className={styles.generatorOverlay}
-                onClick={(event) => {
-                  if (event.target === event.currentTarget)
-                    setGeneratorOpen(false);
-                }}
-                onKeyDown={(event) => {
-                  if (event.key === "Escape") setGeneratorOpen(false);
-                }}
-              >
+            {generatorOpen &&
+              createPortal(
                 <div
-                  role="dialog"
-                  aria-modal="true"
-                  className={styles.generateModuleDialog}
-                  aria-labelledby="generate-module-title"
+                  className={styles.courseModuleEditorPage}
+                  style={{ display: "contents" }}
                 >
-                  <section className={styles.moduleMaterialBand}>
-                    <button
-                      type="button"
-                      className={styles.settingsDialogClose}
-                      aria-label="Close module generator"
-                      autoFocus
-                      onClick={() => setGeneratorOpen(false)}
-                    >
-                      ×
-                    </button>
-                    <h2 id="generate-module-title">
-                      Generate Module from Material
-                    </h2>
-                    <p>
-                      Upload your learning material and PuffyBrain will organize
-                      the content into lesson pages automatically.
-                    </p>
-
-                    <div className={styles.generatorFilePicker}>
-                      <LessonFilePicker
-                        files={uploadedFile}
-                        disabled={processingFile}
-                        buttonClassName={styles.customFileBtn}
-                        onChange={setUploadedFile}
-                      />
-                    </div>
-
-                    <button
-                      className={styles.popupAddBtn}
-                      type="button"
-                      onClick={handleGenerateModule}
-                      disabled={processingFile || !uploadedFile.length}
-                    >
-                      {processingFile ? "Generating..." : "Generate Module"}
-                    </button>
-
-                    {processingFile && (
-                      <p role="status">
-                        {generationProgress || "Queuing materials..."}
-                      </p>
-                    )}
-                    <LessonSourceManager
-                      courseId={id}
-                      jobScope={moduleId}
-                      lessonId={
-                        Number.isInteger(Number(moduleId)) &&
-                        Number(moduleId) > 0
-                          ? Number(moduleId)
-                          : null
-                      }
-                      onGenerated={(result) => {
-                        setModuleDraft((current) => ({
-                          ...current,
-                          title: result.module_title,
-                          description: result.description,
-                          learningObjectives: result.learning_objectives,
-                          lessonPages: result.lesson_pages.map((page) => ({
-                            ...page,
-                            id: createId("page"),
-                          })),
-                        }));
-                        setCourseDraft((current) => ({
-                          ...current,
-                          subject: result.subject,
-                        }));
-                        setActivePageIndex(0);
+                  <div
+                    className={styles.generatorOverlay}
+                    onClick={(event) => {
+                      if (event.target === event.currentTarget)
                         setGeneratorOpen(false);
-                        setUploadedFile([]);
-                      }}
-                    />
-                  </section>
-                </div>
-              </div>
-            )}
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key === "Escape") setGeneratorOpen(false);
+                      if (event.key === "Tab") {
+                        const controls = [
+                          ...event.currentTarget.querySelectorAll(
+                            "button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), summary, a[href]",
+                          ),
+                        ].filter((element) => element.getClientRects().length);
+                        const first = controls[0],
+                          last = controls.at(-1);
+                        if (
+                          event.shiftKey &&
+                          document.activeElement === first
+                        ) {
+                          event.preventDefault();
+                          last?.focus();
+                        } else if (
+                          !event.shiftKey &&
+                          document.activeElement === last
+                        ) {
+                          event.preventDefault();
+                          first?.focus();
+                        }
+                      }
+                    }}
+                  >
+                    <div
+                      role="dialog"
+                      aria-modal="true"
+                      className={styles.generateModuleDialog}
+                      aria-labelledby="generate-module-title"
+                    >
+                      <section className={styles.moduleMaterialBand}>
+                        <button
+                          type="button"
+                          className={styles.settingsDialogClose}
+                          aria-label="Close module generator"
+                          autoFocus
+                          onClick={() => setGeneratorOpen(false)}
+                        >
+                          ×
+                        </button>
+                        <h2 id="generate-module-title">
+                          Generate Module from Material
+                        </h2>
+                        <p>
+                          Upload your learning material and PuffyBrain will
+                          organize the content into lesson pages automatically.
+                        </p>
+
+                        <div className={styles.generatorFilePicker}>
+                          <LessonFilePicker
+                            files={uploadedFile}
+                            disabled={processingFile}
+                            buttonClassName={styles.customFileBtn}
+                            onChange={setUploadedFile}
+                          />
+                        </div>
+
+                        {processingFile && (
+                          <p role="status">
+                            {generationProgress || "Queuing materials..."}
+                          </p>
+                        )}
+                        <LessonSourceManager
+                          courseId={id}
+                          jobScope={moduleId}
+                          lessonId={
+                            Number.isInteger(Number(moduleId)) &&
+                            Number(moduleId) > 0
+                              ? Number(moduleId)
+                              : null
+                          }
+                          onGenerated={(result) => {
+                            setModuleDraft((current) => ({
+                              ...current,
+                              title: result.module_title,
+                              description: result.description,
+                              learningObjectives: result.learning_objectives,
+                              lessonPages: result.lesson_pages.map((page) => ({
+                                ...page,
+                                id: createId("page"),
+                              })),
+                            }));
+                            setCourseDraft((current) => ({
+                              ...current,
+                              subject: result.subject,
+                            }));
+                            setActivePageIndex(0);
+                            setGeneratorOpen(false);
+                            setUploadedFile([]);
+                          }}
+                        />
+                      </section>
+                      <div className={styles.generatorDialogFooter}>
+                        <button
+                          type="button"
+                          className={styles.generatorCancel}
+                          onClick={() => setGeneratorOpen(false)}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          className={styles.popupAddBtn}
+                          type="button"
+                          onClick={handleGenerateModule}
+                          disabled={processingFile || !uploadedFile.length}
+                        >
+                          {processingFile ? "Generating..." : "Generate Module"}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>,
+                document.body,
+              )}
 
             <section className={styles.moduleEditorDetails}>
               <div className={styles.popupField}>
@@ -1726,8 +1891,10 @@ export default function CourseModuleEditor() {
           </>
         )}
 
-        {!isAssessmentPage && (
-          <section className={styles.moduleEditorBand}>
+        {!isQuizWorkspace && (
+          <section
+            className={`${styles.moduleEditorBand} ${styles.lessonPageEditor}`}
+          >
             <div className={styles.moduleEditorBandHeader}>
               <div>
                 <h2>Lesson Pages</h2>
@@ -1742,15 +1909,6 @@ export default function CourseModuleEditor() {
                 >
                   + Add Page
                 </button>
-
-                <button
-                  className={`${styles.popupAddBtn} ${styles.moduleEditorRemoveBtn}`}
-                  type="button"
-                  onClick={removeActiveLessonPage}
-                  disabled={!activePage}
-                >
-                  Remove Page
-                </button>
               </div>
             </div>
 
@@ -1760,22 +1918,65 @@ export default function CourseModuleEditor() {
                   <span className={styles.moduleEditorEmptyTab}>No pages</span>
                 ) : (
                   <>
+                    <div className={styles.questionSelectionControls}>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={selectedPageIndexes.length === lessonCount}
+                          ref={(element) => {
+                            if (element)
+                              element.indeterminate =
+                                selectedPageIndexes.length > 0 &&
+                                selectedPageIndexes.length < lessonCount;
+                          }}
+                          onChange={(event) =>
+                            setSelectedPageIndexes(
+                              event.target.checked
+                                ? moduleDraft.lessonPages.map(
+                                    (_, index) => index,
+                                  )
+                                : [],
+                            )
+                          }
+                        />
+                        Select All
+                      </label>
+                      <button
+                        type="button"
+                        className={styles.popupAddBtn}
+                        disabled={!selectedPageIndexes.length}
+                        onClick={removeSelectedLessonPages}
+                      >
+                        Remove Selected ({selectedPageIndexes.length})
+                      </button>
+                    </div>
                     {visibleLessonPages.map((page, offset) => {
                       const index = activeLessonTabPageStart + offset;
-
                       return (
-                        <button
-                          key={page.id}
-                          type="button"
-                          className={`${styles.lessonPageTab} ${
-                            index === activePageIndex
-                              ? styles.lessonPageTabActive
-                              : ""
-                          }`}
-                          onClick={() => setActivePageIndex(index)}
+                        <div
+                          key={page.id || index}
+                          className={styles.questionSelectionRow}
                         >
-                          Page {index + 1}
-                        </button>
+                          <input
+                            type="checkbox"
+                            aria-label={`Select page ${index + 1}`}
+                            checked={selectedPageIndexes.includes(index)}
+                            onChange={(event) =>
+                              setSelectedPageIndexes((current) =>
+                                event.target.checked
+                                  ? [...current, index]
+                                  : current.filter((value) => value !== index),
+                              )
+                            }
+                          />
+                          <button
+                            type="button"
+                            className={`${styles.lessonPageTab} ${index === activePageIndex ? styles.lessonPageTabActive : ""}`}
+                            onClick={() => setActivePageIndex(index)}
+                          >
+                            Page {index + 1}
+                          </button>
+                        </div>
                       );
                     })}
 
@@ -1950,508 +2151,534 @@ export default function CourseModuleEditor() {
           </section>
         )}
 
-        <section className={styles.moduleEditorBand}>
-          {!activeAssessment && (
-            <div className={styles.moduleEditorBandHeader}>
-              <div>
-                <h2>Module Assessments</h2>
-                <p>
-                  Practice and main quiz settings belonging only to this module.
-                </p>
+        {isQuizWorkspace && (
+          <section className={styles.moduleEditorBand}>
+            {!activeAssessment && (
+              <div className={styles.moduleEditorBandHeader}>
+                <div>
+                  <h2>Module Assessments</h2>
+                  <p>
+                    Practice and main quiz settings belonging only to this
+                    module.
+                  </p>
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {!activeAssessment ? (
-            <div className={styles.moduleAssessmentGrid}>
-              <article className={styles.moduleAssessmentCard}>
-                <span
-                  className={styles.assessmentFolderAccent}
-                  aria-hidden="true"
-                >
-                  +
-                </span>
-                <div>
-                  <h3>Practice Quiz</h3>
-                  <p>{practiceQuizCount} Questions</p>
-                  <p>Unlimited Attempts</p>
-                </div>
-
-                <div className={styles.assessmentCardFooter}>
-                  <button
-                    className={styles.assessmentEditButton}
-                    type="button"
-                    onClick={() => openAssessmentEditor("practice")}
+            {!activeAssessment ? (
+              <div className={styles.moduleAssessmentGrid}>
+                <article className={styles.moduleAssessmentCard}>
+                  <span
+                    className={styles.assessmentFolderAccent}
+                    aria-hidden="true"
                   >
-                    Edit Practice Quiz
-                  </button>
-                </div>
-              </article>
+                    +
+                  </span>
+                  <div>
+                    <h3>Practice Quiz</h3>
+                    <p>{practiceQuizCount} Questions</p>
+                    <p>Unlimited Attempts</p>
+                  </div>
 
-              <article className={styles.moduleAssessmentCard}>
-                <span
-                  className={styles.assessmentFolderAccent}
-                  aria-hidden="true"
-                >
-                  +
-                </span>
-                <div>
-                  <h3>Main Quiz</h3>
-                  <p>
-                    {mainQuizConfig
-                      ? `${mainQuizConfig.questionCount} Personalized Questions`
-                      : "Not configured yet"}
-                  </p>
-                  <p>
-                    Passing Score: {mainQuizConfig?.passingPercentage ?? 60}%
-                  </p>
-                  <p>
-                    Status:{" "}
-                    {mainQuizSettings.enabled
-                      ? mainQuizUnlockLabel
-                        ? `Opens ${mainQuizUnlockLabel}`
-                        : "Available now"
-                      : "Disabled"}
-                  </p>
-                </div>
-
-                <div className={styles.assessmentCardFooter}>
-                  <button
-                    className={styles.assessmentEditButton}
-                    type="button"
-                    onClick={() => openAssessmentEditor("main")}
-                  >
-                    Edit Main Quiz
-                  </button>
-                </div>
-              </article>
-            </div>
-          ) : (
-            <div className={styles.moduleAssessmentEditor}>
-              {activeAssessment === "main" && (
-                <dialog
-                  ref={mainQuizSettingsDialog}
-                  className={styles.mainQuizSettingsDialog}
-                  aria-labelledby="main-quiz-access-title"
-                  onClick={(event) => {
-                    if (event.target === event.currentTarget)
-                      event.currentTarget.close();
-                  }}
-                >
-                  <div className={styles.mainQuizSettingsPanel}>
+                  <div className={styles.assessmentCardFooter}>
                     <button
+                      className={styles.assessmentEditButton}
                       type="button"
-                      className={styles.settingsDialogClose}
-                      aria-label="Close main quiz settings"
-                      onClick={() => mainQuizSettingsDialog.current?.close()}
+                      onClick={() => openAssessmentEditor("practice")}
                     >
-                      ×
+                      Edit Practice Quiz
                     </button>
-                    <div>
-                      <h4 id="main-quiz-access-title">Main Quiz Access</h4>
-                      <p>
-                        Lock or unlock the main quiz and set when student access
-                        opens and closes.
-                      </p>
-                    </div>
+                  </div>
+                </article>
 
-                    <div className={styles.mainQuizSettingsControls}>
-                      <button
-                        className={`${styles.mainQuizToggle} ${
-                          mainQuizSettings.enabled
-                            ? styles.mainQuizToggleOn
-                            : styles.mainQuizToggleOff
-                        }`}
-                        type="button"
-                        aria-pressed={!mainQuizSettings.enabled}
-                        onClick={() =>
-                          updateMainQuizSettings(
-                            "enabled",
-                            !mainQuizSettings.enabled,
-                          )
-                        }
-                      >
-                        {mainQuizSettings.enabled
-                          ? "Lock Main Quiz"
-                          : "Unlock Main Quiz"}
-                      </button>
-
-                      <label className={styles.mainQuizTimerField}>
-                        Unlock date and time
-                        <input
-                          className={styles.popupInput}
-                          type="datetime-local"
-                          value={mainQuizSettings.unlockAt}
-                          onChange={(event) =>
-                            updateMainQuizSettings(
-                              "unlockAt",
-                              event.target.value,
-                            )
-                          }
-                        />
-                      </label>
-
-                      <button
-                        className={styles.assessmentBackButton}
-                        type="button"
-                        onClick={() => updateMainQuizSettings("unlockAt", "")}
-                        disabled={!mainQuizSettings.unlockAt}
-                      >
-                        Clear Unlock Date
-                      </button>
-                      <label className={styles.mainQuizTimerField}>
-                        Lock date and time
-                        <input
-                          className={styles.popupInput}
-                          type="datetime-local"
-                          value={mainQuizSettings.lockAt}
-                          min={mainQuizSettings.unlockAt || undefined}
-                          onChange={(event) =>
-                            updateMainQuizSettings("lockAt", event.target.value)
-                          }
-                        />
-                      </label>
-                      <button
-                        className={styles.assessmentBackButton}
-                        type="button"
-                        onClick={() => updateMainQuizSettings("lockAt", "")}
-                        disabled={!mainQuizSettings.lockAt}
-                      >
-                        Clear Lock Date
-                      </button>
-                    </div>
-
-                    <p className={styles.mainQuizAccessHint}>
+                <article className={styles.moduleAssessmentCard}>
+                  <span
+                    className={styles.assessmentFolderAccent}
+                    aria-hidden="true"
+                  >
+                    +
+                  </span>
+                  <div>
+                    <h3>Main Quiz</h3>
+                    <p>
+                      {mainQuizConfig
+                        ? `${mainQuizConfig.questionCount} Personalized Questions`
+                        : "Not configured yet"}
+                    </p>
+                    <p>
+                      Passing Score: {mainQuizConfig?.passingPercentage ?? 60}%
+                    </p>
+                    <p>
+                      Status:{" "}
                       {mainQuizSettings.enabled
                         ? mainQuizUnlockLabel
-                          ? `Scheduled access opens on ${mainQuizUnlockLabel} and closes at the lock date, if set.`
-                          : "Unlocked — students can access the main quiz after they finish the module."
-                        : "Locked — students cannot access the main quiz. Click Unlock Main Quiz to allow access."}
+                          ? `Opens ${mainQuizUnlockLabel}`
+                          : "Available now"
+                        : "Disabled"}
                     </p>
-                    {mainQuizSettings.lockAt && (
-                      <p className={styles.mainQuizAccessHint}>
-                        Student access closes on{" "}
-                        {formatDateTimeLabel(mainQuizSettings.lockAt)}.
-                      </p>
-                    )}
+                  </div>
+
+                  <div className={styles.assessmentCardFooter}>
                     <button
+                      className={styles.assessmentEditButton}
                       type="button"
-                      className={styles.assessmentSettingsButton}
-                      onClick={() => mainQuizSettingsDialog.current?.close()}
+                      onClick={() => openAssessmentEditor("main")}
                     >
-                      Done
+                      Edit Main Quiz
                     </button>
                   </div>
-                </dialog>
-              )}
-
-              {isMainAssessment && mainConfigError && (
-                <p role="alert">{mainConfigError}</p>
-              )}
-              {isMainAssessment && mainQuizConfig && (
-                <p>
-                  {mainQuizConfig.questionCount} questions ·{" "}
-                  {mainQuizConfig.multipleChoiceCount} Multiple Choice ·{" "}
-                  {mainQuizConfig.identificationCount} Identification ·{" "}
-                  {mainQuizConfig.trueFalseCount} True/False · Passing score:{" "}
-                  {mainQuizConfig.passingPercentage}%
-                </p>
-              )}
-              {isMainAssessment && generatedMainQuizzes.length > 0 && (
-                <label>
-                  Student quiz{" "}
-                  <select
-                    className={styles.popupInput}
-                    value={selectedMainQuiz}
-                    onChange={(event) => {
-                      setSelectedMainQuiz(Number(event.target.value));
-                      setActiveQuizIndex(0);
+                </article>
+              </div>
+            ) : (
+              <div className={styles.moduleAssessmentEditor}>
+                {activeAssessment === "main" && (
+                  <dialog
+                    ref={mainQuizSettingsDialog}
+                    className={styles.mainQuizSettingsDialog}
+                    aria-labelledby="main-quiz-access-title"
+                    onClick={(event) => {
+                      if (event.target === event.currentTarget)
+                        event.currentTarget.close();
                     }}
                   >
-                    <option value={-1}>Questions</option>
-                    {generatedMainQuizzes.map((quiz, index) => (
-                      <option key={quiz.quizId} value={index}>
-                        {quiz.studentName} ·{" "}
-                        {quiz.submitted ? "Recorded" : "Generated"}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              )}
-              <div className={styles.moduleEditorWorkspace}>
-                <div className={styles.lessonPageTabs}>
-                  {quizCount === 0 ? (
-                    <span className={styles.moduleEditorEmptyTab}>No quiz</span>
-                  ) : (
-                    <>
-                      {visibleQuizItems.map((item, offset) => {
-                        const index = activeQuizPageStart + offset;
+                    <div className={styles.mainQuizSettingsPanel}>
+                      <button
+                        type="button"
+                        className={styles.settingsDialogClose}
+                        aria-label="Close main quiz settings"
+                        onClick={() => mainQuizSettingsDialog.current?.close()}
+                      >
+                        ×
+                      </button>
+                      <div>
+                        <h4 id="main-quiz-access-title">Main Quiz Access</h4>
+                        <p>
+                          Lock or unlock the main quiz and set when student
+                          access opens and closes.
+                        </p>
+                      </div>
 
-                        return (
-                          <button
-                            key={item.id}
-                            type="button"
-                            className={`${styles.lessonPageTab} ${
-                              index === activeQuizIndex
-                                ? styles.lessonPageTabActive
-                                : ""
-                            }`}
-                            onClick={() => setActiveQuizIndex(index)}
-                          >
-                            Question {index + 1}
-                          </button>
-                        );
-                      })}
+                      <div className={styles.mainQuizSettingsControls}>
+                        <button
+                          className={`${styles.mainQuizToggle} ${
+                            mainQuizSettings.enabled
+                              ? styles.mainQuizToggleOn
+                              : styles.mainQuizToggleOff
+                          }`}
+                          type="button"
+                          aria-pressed={!mainQuizSettings.enabled}
+                          onClick={() =>
+                            updateMainQuizSettings(
+                              "enabled",
+                              !mainQuizSettings.enabled,
+                            )
+                          }
+                        >
+                          {mainQuizSettings.enabled
+                            ? "Lock Main Quiz"
+                            : "Unlock Main Quiz"}
+                        </button>
 
-                      {quizCount > QUIZ_TAB_PAGE_SIZE && (
-                        <div className={styles.questionTabPager}>
-                          <div className={styles.questionTabPagerControls}>
-                            <button
-                              type="button"
-                              onClick={goToPreviousQuizPage}
-                              disabled={!canShowPreviousQuizPage}
-                            >
-                              Previous
-                            </button>
+                        <label className={styles.mainQuizTimerField}>
+                          Unlock date and time
+                          <input
+                            className={styles.popupInput}
+                            type="datetime-local"
+                            value={mainQuizSettings.unlockAt}
+                            onChange={(event) =>
+                              updateMainQuizSettings(
+                                "unlockAt",
+                                event.target.value,
+                              )
+                            }
+                          />
+                        </label>
 
-                            <button
-                              type="button"
-                              onClick={goToNextQuizPage}
-                              disabled={!canShowNextQuizPage}
-                            >
-                              Next
-                            </button>
-                          </div>
-                        </div>
+                        <button
+                          className={styles.assessmentBackButton}
+                          type="button"
+                          onClick={() => updateMainQuizSettings("unlockAt", "")}
+                          disabled={!mainQuizSettings.unlockAt}
+                        >
+                          Clear Unlock Date
+                        </button>
+                        <label className={styles.mainQuizTimerField}>
+                          Lock date and time
+                          <input
+                            className={styles.popupInput}
+                            type="datetime-local"
+                            value={mainQuizSettings.lockAt}
+                            min={mainQuizSettings.unlockAt || undefined}
+                            onChange={(event) =>
+                              updateMainQuizSettings(
+                                "lockAt",
+                                event.target.value,
+                              )
+                            }
+                          />
+                        </label>
+                        <button
+                          className={styles.assessmentBackButton}
+                          type="button"
+                          onClick={() => updateMainQuizSettings("lockAt", "")}
+                          disabled={!mainQuizSettings.lockAt}
+                        >
+                          Clear Lock Date
+                        </button>
+                      </div>
+
+                      <p className={styles.mainQuizAccessHint}>
+                        {mainQuizSettings.enabled
+                          ? mainQuizUnlockLabel
+                            ? `Scheduled access opens on ${mainQuizUnlockLabel} and closes at the lock date, if set.`
+                            : "Unlocked — students can access the main quiz after they finish the module."
+                          : "Locked — students cannot access the main quiz. Click Unlock Main Quiz to allow access."}
+                      </p>
+                      {mainQuizSettings.lockAt && (
+                        <p className={styles.mainQuizAccessHint}>
+                          Student access closes on{" "}
+                          {formatDateTimeLabel(mainQuizSettings.lockAt)}.
+                        </p>
                       )}
-                    </>
-                  )}
-                </div>
-
-                <div
-                  className={`${styles.popupQuizCard} ${styles.moduleQuizEditorCard}`}
-                >
-                  <div className={styles.quizEditorToolbar}>
-                    <h2>Question</h2>
-                    <div className={styles.moduleEditorBandActions}>
                       <button
-                        className={styles.popupAddBtn}
                         type="button"
-                        onClick={addQuizItem}
-                        disabled={viewingGeneratedMain}
+                        className={styles.assessmentSettingsButton}
+                        onClick={() => mainQuizSettingsDialog.current?.close()}
                       >
-                        + Add Qestion
-                      </button>
-
-                      <button
-                        className={`${styles.popupAddBtn} ${styles.moduleEditorRemoveBtn}`}
-                        type="button"
-                        onClick={removeActiveQuizItem}
-                        disabled={viewingGeneratedMain || !activeQuiz}
-                      >
-                        Remove Question
-                      </button>
-                      <button
-                        className={styles.popupAddBtn}
-                        type="button"
-                        onClick={autoGenerateQuiz}
-                        disabled={generatingQuiz}
-                      >
-                        {generatingQuiz
-                          ? isMainAssessment
-                            ? "Generating Main Quiz…"
-                            : "Generating Practice Quiz…"
-                          : "Auto Generate"}
+                        Done
                       </button>
                     </div>
+                  </dialog>
+                )}
+
+                <div className={styles.moduleEditorWorkspace}>
+                  <div className={styles.lessonPageTabs}>
+                    {quizCount === 0 ? (
+                      <span className={styles.moduleEditorEmptyTab}>
+                        No quiz
+                      </span>
+                    ) : (
+                      <>
+                        {!viewingGeneratedMain && (
+                          <div className={styles.questionSelectionControls}>
+                            <label>
+                              <input
+                                type="checkbox"
+                                checked={
+                                  selectedQuestionIndexes.length === quizCount
+                                }
+                                ref={(element) => {
+                                  if (element)
+                                    element.indeterminate =
+                                      selectedQuestionIndexes.length > 0 &&
+                                      selectedQuestionIndexes.length <
+                                        quizCount;
+                                }}
+                                onChange={(event) =>
+                                  setSelectedQuestionIndexes(
+                                    event.target.checked
+                                      ? assessmentItems.map((_, index) => index)
+                                      : [],
+                                  )
+                                }
+                              />
+                              Select All
+                            </label>
+                            <button
+                              type="button"
+                              className={styles.popupAddBtn}
+                              disabled={!selectedQuestionIndexes.length}
+                              onClick={() =>
+                                removeQuizItems(selectedQuestionIndexes)
+                              }
+                            >
+                              Remove Selected ({selectedQuestionIndexes.length})
+                            </button>
+                          </div>
+                        )}
+                        {visibleQuizItems.map((item, offset) => {
+                          const index = activeQuizPageStart + offset;
+
+                          return (
+                            <div
+                              key={item.id || index}
+                              className={styles.questionSelectionRow}
+                            >
+                              {!viewingGeneratedMain && (
+                                <input
+                                  type="checkbox"
+                                  aria-label={`Select question ${index + 1}`}
+                                  checked={selectedQuestionIndexes.includes(
+                                    index,
+                                  )}
+                                  onChange={(event) =>
+                                    setSelectedQuestionIndexes((current) =>
+                                      event.target.checked
+                                        ? [...current, index]
+                                        : current.filter(
+                                            (value) => value !== index,
+                                          ),
+                                    )
+                                  }
+                                />
+                              )}
+                              <button
+                                type="button"
+                                className={`${styles.lessonPageTab} ${
+                                  index === activeQuizIndex
+                                    ? styles.lessonPageTabActive
+                                    : ""
+                                }`}
+                                onClick={() => setActiveQuizIndex(index)}
+                              >
+                                Question {index + 1}
+                              </button>
+                            </div>
+                          );
+                        })}
+
+                        {quizCount > QUIZ_TAB_PAGE_SIZE && (
+                          <div className={styles.questionTabPager}>
+                            <div className={styles.questionTabPagerControls}>
+                              <button
+                                type="button"
+                                onClick={goToPreviousQuizPage}
+                                disabled={!canShowPreviousQuizPage}
+                              >
+                                Previous
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={goToNextQuizPage}
+                                disabled={!canShowNextQuizPage}
+                              >
+                                Next
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    )}
                   </div>
-                  <div className={styles.quizEditorFields}>
-                    {activeQuiz ? (
-                      <fieldset
-                        disabled={viewingGeneratedMain}
-                        style={{ border: 0, padding: 0, margin: 0 }}
-                      >
-                        <label className={styles.popupLabel}>
-                          Question{" "}
-                          <span className={styles.required}>*required</span>
-                        </label>
-                        <input
-                          className={styles.popupInput}
-                          value={activeQuiz.question}
-                          onChange={(event) =>
-                            updateQuizItem(
-                              activeQuizIndex,
-                              "question",
-                              limit(event.target.value, QUIZ_LIMIT),
-                            )
-                          }
-                          placeholder="Enter question"
-                        />
 
-                        <label
-                          className={styles.popupLabel}
-                          htmlFor="quiz-question-type"
+                  <div
+                    className={`${styles.popupQuizCard} ${styles.moduleQuizEditorCard}`}
+                  >
+                    <div className={styles.quizEditorToolbar}>
+                      <h2>Question</h2>
+                      <div className={styles.moduleEditorBandActions}>
+                        <button
+                          className={styles.popupAddBtn}
+                          type="button"
+                          onClick={addQuizItem}
+                          disabled={viewingGeneratedMain}
                         >
-                          Question type
-                        </label>
-                        {viewingGeneratedMain ? (
-                          <p className={styles.quizReviewValue}>
-                            {{
-                              multiple_choice: "Multiple Choice",
-                              identification: "Identification",
-                              true_false: "True or False",
-                            }[activeQuiz.type] || activeQuiz.type}
-                          </p>
-                        ) : (
-                          <select
-                            id="quiz-question-type"
-                            className={styles.popupSelect}
-                            value={activeQuiz.type}
-                            onChange={(event) => {
-                              const type = event.target.value;
-                              updateQuizItem(activeQuizIndex, "type", type);
-                              updateQuizItem(
-                                activeQuizIndex,
-                                "options",
-                                type === "identification"
-                                  ? []
-                                  : type === "true_false"
-                                    ? ["True", "False"]
-                                    : ["", "", "", ""],
-                              );
-                              updateQuizItem(
-                                activeQuizIndex,
-                                "correct_answer",
-                                "",
-                              );
-                            }}
-                          >
-                            <option value="multiple_choice">
-                              Multiple Choice
-                            </option>
-                            <option value="identification">
-                              Identification
-                            </option>
-                            <option value="true_false">True or False</option>
-                          </select>
-                        )}
+                          + Add Qestion
+                        </button>
 
-                        {activeQuiz.type !== "identification" && (
+                        <button
+                          className={styles.popupAddBtn}
+                          type="button"
+                          onClick={autoGenerateQuiz}
+                          disabled={generatingQuiz}
+                        >
+                          {generatingQuiz
+                            ? isMainAssessment
+                              ? "Generating Main Quiz…"
+                              : "Generating Practice Quiz…"
+                            : "Auto Generate"}
+                        </button>
+                      </div>
+                    </div>
+                    <div className={styles.quizEditorFields}>
+                      {activeQuiz ? (
+                        <fieldset
+                          disabled={viewingGeneratedMain}
+                          style={{ border: 0, padding: 0, margin: 0 }}
+                        >
                           <label className={styles.popupLabel}>
-                            Answer choices
+                            Question{" "}
+                            <span className={styles.required}>*required</span>
                           </label>
-                        )}
-                        <div className={styles.optionsGrid}>
-                          {activeQuiz.options.map((option, optionIndex) => (
-                            <input
-                              key={optionIndex}
-                              className={styles.popupInput}
-                              value={option}
-                              disabled={activeQuiz.type === "true_false"}
-                              onChange={(event) =>
-                                updateQuizOption(
+                          <input
+                            className={styles.popupInput}
+                            value={activeQuiz.question}
+                            onChange={(event) =>
+                              updateQuizItem(
+                                activeQuizIndex,
+                                "question",
+                                limit(event.target.value, QUIZ_LIMIT),
+                              )
+                            }
+                            placeholder="Enter question"
+                          />
+
+                          <label
+                            className={styles.popupLabel}
+                            htmlFor="quiz-question-type"
+                          >
+                            Question type
+                          </label>
+                          {viewingGeneratedMain ? (
+                            <p className={styles.quizReviewValue}>
+                              {{
+                                multiple_choice: "Multiple Choice",
+                                identification: "Identification",
+                                true_false: "True or False",
+                              }[activeQuiz.type] || activeQuiz.type}
+                            </p>
+                          ) : (
+                            <select
+                              id="quiz-question-type"
+                              className={styles.popupSelect}
+                              value={activeQuiz.type}
+                              onChange={(event) => {
+                                const type = event.target.value;
+                                updateQuizItem(activeQuizIndex, "type", type);
+                                updateQuizItem(
                                   activeQuizIndex,
-                                  optionIndex,
-                                  limit(event.target.value, QUIZ_LIMIT),
+                                  "options",
+                                  type === "identification"
+                                    ? []
+                                    : type === "true_false"
+                                      ? ["True", "False"]
+                                      : ["", "", "", ""],
+                                );
+                                updateQuizItem(
+                                  activeQuizIndex,
+                                  "correct_answer",
+                                  "",
+                                );
+                              }}
+                            >
+                              <option value="multiple_choice">
+                                Multiple Choice
+                              </option>
+                              <option value="identification">
+                                Identification
+                              </option>
+                              <option value="true_false">True or False</option>
+                            </select>
+                          )}
+
+                          {activeQuiz.type !== "identification" && (
+                            <label className={styles.popupLabel}>
+                              Answer choices
+                            </label>
+                          )}
+                          <div className={styles.optionsGrid}>
+                            {activeQuiz.options.map((option, optionIndex) => (
+                              <input
+                                key={optionIndex}
+                                className={styles.popupInput}
+                                value={option}
+                                disabled={activeQuiz.type === "true_false"}
+                                onChange={(event) =>
+                                  updateQuizOption(
+                                    activeQuizIndex,
+                                    optionIndex,
+                                    limit(event.target.value, QUIZ_LIMIT),
+                                  )
+                                }
+                                placeholder={`Option ${optionIndex + 1}`}
+                                aria-label={`Answer choice ${optionIndex + 1}`}
+                              />
+                            ))}
+                          </div>
+
+                          <label
+                            className={styles.popupLabel}
+                            htmlFor={
+                              viewingGeneratedMain
+                                ? undefined
+                                : "quiz-correct-answer"
+                            }
+                          >
+                            Correct answer
+                          </label>
+                          {viewingGeneratedMain ? (
+                            <p className={styles.quizReviewValue}>
+                              {activeQuiz.correct_answer ||
+                                "No correct answer provided"}
+                            </p>
+                          ) : activeQuiz.type === "identification" ? (
+                            <input
+                              id="quiz-correct-answer"
+                              className={styles.popupInput}
+                              value={activeQuiz.correct_answer}
+                              onChange={(event) =>
+                                updateQuizItem(
+                                  activeQuizIndex,
+                                  "correct_answer",
+                                  event.target.value,
                                 )
                               }
-                              placeholder={`Option ${optionIndex + 1}`}
-                              aria-label={`Answer choice ${optionIndex + 1}`}
+                              placeholder="Correct identification answer"
+                              aria-label="Correct identification answer"
+                              maxLength={150}
                             />
-                          ))}
-                        </div>
+                          ) : (
+                            <select
+                              id="quiz-correct-answer"
+                              className={styles.popupSelect}
+                              value={activeQuiz.correct_answer}
+                              onChange={(event) =>
+                                updateQuizItem(
+                                  activeQuizIndex,
+                                  "correct_answer",
+                                  event.target.value,
+                                )
+                              }
+                            >
+                              <option value="">Select correct answer</option>
+                              {activeQuiz.options.map((option, optionIndex) => (
+                                <option
+                                  key={optionIndex}
+                                  value={option}
+                                  disabled={!String(option || "").trim()}
+                                >
+                                  {option || `Option ${optionIndex + 1}`}
+                                </option>
+                              ))}
+                            </select>
+                          )}
 
-                        <label
-                          className={styles.popupLabel}
-                          htmlFor={
-                            viewingGeneratedMain
-                              ? undefined
-                              : "quiz-correct-answer"
-                          }
-                        >
-                          Correct answer
-                        </label>
-                        {viewingGeneratedMain ? (
-                          <p className={styles.quizReviewValue}>
-                            {activeQuiz.correct_answer ||
-                              "No correct answer provided"}
-                          </p>
-                        ) : activeQuiz.type === "identification" ? (
-                          <input
-                            id="quiz-correct-answer"
-                            className={styles.popupInput}
-                            value={activeQuiz.correct_answer}
-                            onChange={(event) =>
-                              updateQuizItem(
-                                activeQuizIndex,
-                                "correct_answer",
-                                event.target.value,
-                              )
-                            }
-                            placeholder="Correct identification answer"
-                            aria-label="Correct identification answer"
-                            maxLength={150}
-                          />
-                        ) : (
-                          <select
-                            id="quiz-correct-answer"
-                            className={styles.popupSelect}
-                            value={activeQuiz.correct_answer}
-                            onChange={(event) =>
-                              updateQuizItem(
-                                activeQuizIndex,
-                                "correct_answer",
-                                event.target.value,
-                              )
-                            }
+                          <label
+                            className={styles.popupLabel}
+                            htmlFor="quiz-answer-explanation"
                           >
-                            <option value="">Select correct answer</option>
-                            {activeQuiz.options.map((option, optionIndex) => (
-                              <option
-                                key={optionIndex}
-                                value={option}
-                                disabled={!String(option || "").trim()}
-                              >
-                                {option || `Option ${optionIndex + 1}`}
-                              </option>
-                            ))}
-                          </select>
-                        )}
-
-                        <label
-                          className={styles.popupLabel}
-                          htmlFor="quiz-answer-explanation"
-                        >
-                          Explanation
-                        </label>
-                        <textarea
-                          id="quiz-answer-explanation"
-                          className={`${styles.popupTextarea} ${styles.popupAnswerBox}`}
-                          value={activeQuiz.explanation}
-                          onChange={(event) =>
-                            updateQuizItem(
-                              activeQuizIndex,
-                              "explanation",
-                              limit(event.target.value, QUIZ_LIMIT),
-                            )
-                          }
-                          placeholder="Explanation"
-                        />
-                        <QuizSourceEvidence question={activeQuiz} />
-                      </fieldset>
-                    ) : (
-                      <div className={styles.popupEmptyQuiz}>
-                        {isMainAssessment
-                          ? "Add a quiz item to begin."
-                          : "Add a quiz item to begin."}
-                      </div>
-                    )}
+                            Explanation
+                          </label>
+                          <textarea
+                            id="quiz-answer-explanation"
+                            className={`${styles.popupTextarea} ${styles.popupAnswerBox}`}
+                            value={activeQuiz.explanation}
+                            onChange={(event) =>
+                              updateQuizItem(
+                                activeQuizIndex,
+                                "explanation",
+                                limit(event.target.value, QUIZ_LIMIT),
+                              )
+                            }
+                            placeholder="Explanation"
+                          />
+                          <QuizSourceEvidence question={activeQuiz} />
+                        </fieldset>
+                      ) : (
+                        <div className={styles.popupEmptyQuiz}>
+                          {isMainAssessment
+                            ? "Add a quiz item to begin."
+                            : "Add a quiz item to begin."}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
-        </section>
+            )}
+          </section>
+        )}
 
         <div className={styles.moduleEditorActions}>
           <button
@@ -2466,7 +2693,7 @@ export default function CourseModuleEditor() {
             type="button"
             onClick={saveModule}
           >
-            Save Module
+            {isQuizWorkspace ? "Save Quiz" : "Save Module"}
           </button>
         </div>
       </main>

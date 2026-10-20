@@ -46,12 +46,12 @@ export default function UserSidebar({
         <div className={styles.logo}>
           <img
             className={styles.logoExpanded}
-            src="/images/logo1.png"
+            src="/images/logo.png"
             alt="PuffyBrain"
           />
           <img
             className={styles.logoCollapsed}
-            src="/images/logo_solo.png"
+            src="/images/logo.png"
             alt="PuffyBrain"
           />
         </div>

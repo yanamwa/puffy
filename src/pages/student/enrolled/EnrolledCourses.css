@@ -9,7 +9,7 @@
 
   min-height: 100vh;
   display: grid;
-  grid-template-columns: 240px minmax(0, 1fr);
+  grid-template-columns: 320px minmax(0, 1fr);
   background: #f7f7f7;
   color: var(--ink);
   font-family: "Arial Rounded MT Bold", system-ui, sans-serif;

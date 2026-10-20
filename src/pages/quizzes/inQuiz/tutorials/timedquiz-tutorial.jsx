@@ -140,11 +140,13 @@ export default function TimedQuiz() {
           </div>
 
           <div className={styles.slideshowBox}>
-            <div className={styles.demoHeader}>Quiz Tutorial</div>
-            <div className={styles.timerBox}>
-              <div className={styles.timer}>
-                {String(Math.floor(timeLeft / 60)).padStart(2, "0")}:
-                {String(timeLeft % 60).padStart(2, "0")}
+            <div className={styles.demoHeader}>
+              <span>Quiz Tutorial</span>
+              <div className={styles.timerBox}>
+                <div className={styles.timer}>
+                  {String(Math.floor(timeLeft / 60)).padStart(2, "0")}:
+                  {String(timeLeft % 60).padStart(2, "0")}
+                </div>
               </div>
             </div>
 

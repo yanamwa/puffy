@@ -1,6 +1,10 @@
+import {
+  assessmentModules,
+  filterModuleAttempts,
+} from "../../../utils/assessmentModuleScope.js";
 import styles from "./AssessmentAnalysis.module.css";
 import MainQuizAnalysis from "./MainQuizAnalysis.jsx";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { API_BASE } from "../../../config.js";
 import { lessonAuthHeaders } from "../../../services/lessonAuth.js";
 import "./QuizAssessmentDashboard.css";
@@ -31,62 +35,35 @@ function Bars({ rows }) {
     </div>
   );
 }
-function StudentProgressChart({ students }) {
-  const series = [
-    { key: "first", label: "First", color: "#c1d3e8" },
-    { key: "latest", label: "Latest", color: "#7fa8d6" },
-    { key: "best", label: "Best", color: "#24476b" },
-  ];
-  if (!students.length) return null;
-  return (
-    <div className="qa-progress-chart">
-      <div className="qa-chart-legend">
-        {series.map((row) => (
-          <span key={row.key}>
-            <i style={{ background: row.color }} />
-            {row.label}
-          </span>
-        ))}
-      </div>
-      <div className="qa-progress-scroll">
-        <div className="qa-progress-groups">
-          {students.map((student, index) => (
-            <div className="qa-progress-student" key={index}>
-              <div className="qa-progress-bars">
-                {series.map((row) => (
-                  <div className="qa-progress-series" key={row.key}>
-                    <strong>{pct(student[row.key])}</strong>
-                    <div className="qa-progress-track">
-                      <div
-                        style={{
-                          height: `${Math.min(100, Math.max(0, student[row.key] || 0))}%`,
-                          background: row.color,
-                        }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <span>{student.name}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-      <p>First, latest, and best scores by student (0–100%).</p>
-    </div>
-  );
-}
-
 export default function QuizAssessmentDashboard({
   courseId,
   courseTitle,
   items = [],
+  course,
 }) {
+  const modules = useMemo(() => assessmentModules(course), [course]);
+  const [moduleIndex, setModuleIndex] = useState("all");
+  useEffect(() => {
+    setModuleIndex("all");
+  }, [courseId]);
+  const moduleTitle =
+    moduleIndex === "all"
+      ? "All Modules"
+      : modules[Number(moduleIndex)]?.title || "Module";
+  const scopedItems =
+    moduleIndex === "all"
+      ? items
+      : modules[Number(moduleIndex)]?.quizItems ||
+        modules[Number(moduleIndex)]?.quiz_items ||
+        [];
   const [type, setType] = useState("practice");
+  const [responseView, setResponseView] = useState(false);
   const [view, setView] = useState("graph");
   const [data, setData] = useState({ attempts: [], students: [] });
   const [status, setStatus] = useState("Loading recorded attempts…");
   const [refresh, setRefresh] = useState(0);
+  const loadedCourseId = useRef(null);
+  const [refreshError, setRefreshError] = useState("");
   useEffect(() => {
     const update = () => setRefresh((value) => value + 1);
     window.addEventListener("focus", update);
@@ -98,7 +75,8 @@ export default function QuizAssessmentDashboard({
   }, []);
   useEffect(() => {
     const controller = new AbortController();
-    setStatus("Loading recorded attempts…");
+    const isInitialLoad = loadedCourseId.current !== courseId;
+    if (isInitialLoad) setStatus("Loading recorded attempts…");
     fetch(`${API_BASE}/assessment-attempts/${encodeURIComponent(courseId)}`, {
       credentials: "include",
       headers: lessonAuthHeaders(),
@@ -108,22 +86,33 @@ export default function QuizAssessmentDashboard({
         const result = await response.json();
         if (!response.ok || !result.success)
           throw Error(result.message || "Could not load attempts.");
+        if (controller.signal.aborted) return;
         setData(result);
+        loadedCourseId.current = courseId;
+        setRefreshError("");
         setStatus("");
       })
       .catch((error) => {
-        if (error.name !== "AbortError") setStatus(error.message);
+        if (error.name !== "AbortError") {
+          if (isInitialLoad) setStatus(error.message);
+          else
+            setRefreshError(
+              "Could not refresh results. Showing the last loaded data.",
+            );
+        }
       });
     return () => controller.abort();
   }, [courseId, refresh]);
   const summary = useMemo(
     () =>
       summarizeAssessment(
-        data.attempts.filter((a) => a.assessment_type === type),
+        filterModuleAttempts(data.attempts, moduleIndex, modules).filter(
+          (a) => a.assessment_type === type,
+        ),
         data.students,
-        items,
+        scopedItems,
       ),
-    [data, type, items],
+    [data, type, scopedItems, moduleIndex, modules],
   );
   const cognitiveRows = ["LOTS", "HOTS"].map((label) => ({
     label,
@@ -152,7 +141,10 @@ export default function QuizAssessmentDashboard({
   const lotsShare = classifiedCount
     ? (skillCounts[0].count / classifiedCount) * 100
     : 0;
-  const selectType = (next) => setType(next);
+  const selectType = (next) => {
+    setType(next);
+    setResponseView(false);
+  };
   const metrics = [
     ["Students", summary.students.length],
     ["Attempts", summary.attempts],
@@ -164,20 +156,58 @@ export default function QuizAssessmentDashboard({
   ];
   return (
     <section className="qa-dashboard">
-      <nav className="qa-assessment-tabs" aria-label="Assessment type">
-        {["practice", "main"].map((value) => (
+      {refreshError && <p role="status">{refreshError}</p>}
+      <div className="qa-module-filter">
+        <label htmlFor="analysis-module">Module</label>
+        <select
+          id="analysis-module"
+          value={moduleIndex}
+          onChange={(event) => {
+            setModuleIndex(event.target.value);
+            setResponseView(false);
+          }}
+        >
+          <option value="all">All Modules</option>
+          {modules.map((module, index) => (
+            <option key={module.id || index} value={String(index)}>
+              {index + 1}. {module.title || `Module ${index + 1}`}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="qa-workspace-navigation">
+        <nav className="qa-assessment-tabs" aria-label="Assessment type">
+          {["practice", "main"].map((value) => (
+            <button
+              key={value}
+              aria-pressed={type === value}
+              onClick={() => selectType(value)}
+            >
+              {value === "practice" ? "Practice Quiz" : "Main Quiz"}
+            </button>
+          ))}
+        </nav>
+        {type === "main" && moduleIndex !== "all" && (
           <button
-            key={value}
-            aria-pressed={type === value}
-            onClick={() => selectType(value)}
+            className="qa-response-button"
+            type="button"
+            aria-pressed={responseView}
+            onClick={() => setResponseView((value) => !value)}
           >
-            {value === "practice" ? "Practice Quiz" : "Main Quiz"}
+            {responseView ? "Summary" : "Individual Responses"}
           </button>
-        ))}
-      </nav>
-      {type === "main" ? (
+        )}
+      </div>
+      {type === "main" && moduleIndex !== "all" ? (
         <div className="qa-main-analysis">
-          <MainQuizAnalysis />
+          <MainQuizAnalysis
+            key={`${courseId}:${moduleIndex}`}
+            moduleIndex={moduleIndex}
+            modules={modules}
+            moduleTitle={moduleTitle}
+            responseView={responseView}
+            onSummary={() => setResponseView(false)}
+          />
         </div>
       ) : (
         <div className="qa-content-panel qa-print-report">
@@ -189,6 +219,7 @@ export default function QuizAssessmentDashboard({
                   : "MAIN QUIZ ANALYSIS"}
               </p>
               <h2>{courseTitle}</h2>
+              <p className="qa-report-module">{moduleTitle}</p>
             </div>
             <button
               type="button"
@@ -225,7 +256,8 @@ export default function QuizAssessmentDashboard({
             <>
               <>
                 <div className={styles.analysisSectionTitle}>
-                  Overall Practice Quiz Analysis
+                  Overall {type === "practice" ? "Practice" : "Main"} Quiz
+                  Analysis
                 </div>
                 <div className={`${styles.performanceGrid} qa-metrics`}>
                   {metrics.map(([label, value]) => (
@@ -237,46 +269,15 @@ export default function QuizAssessmentDashboard({
                 </div>
 
                 <div className={styles.analysisSectionTitle}>
-                  Student Progress
-                </div>
-                {view === "table" && (
-                  <div className="qa-table">
-                    <table>
-                      <thead>
-                        <tr>
-                          <th scope="col">Student</th>
-                          <th scope="col">Attempts</th>
-                          <th scope="col">First</th>
-                          <th scope="col">Latest</th>
-                          <th scope="col">Best</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {summary.students.length ? (
-                          summary.students.map((student, index) => (
-                            <tr key={index}>
-                              <td>{student.name}</td>
-                              <td>{student.attempts}</td>
-                              <td>{pct(student.first)}</td>
-                              <td>{pct(student.latest)}</td>
-                              <td>{pct(student.best)}</td>
-                            </tr>
-                          ))
-                        ) : (
-                          <tr>
-                            <td colSpan={5}>No enrolled students yet.</td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-                {view === "graph" && (
-                  <StudentProgressChart students={summary.students} />
-                )}
-                <div className={styles.analysisSectionTitle}>
                   Topic Performance
                 </div>
+                <p className="qa-topic-intro">
+                  Topic performance shows how accurately students answered
+                  questions about each topic across all recorded {type}
+                  attempts. It helps identify which topics students understand
+                  and which need further explanation or practice. Repeated
+                  attempts are included in these results.
+                </p>
                 {!summary.topics.length ? (
                   <p>
                     Topic performance appears after attempts include question
@@ -295,14 +296,14 @@ export default function QuizAssessmentDashboard({
                         </tr>
                       </thead>
                       <tbody>
-                        {summary.topics.map((r) => (
-                          <tr key={r.label}>
-                            <td>{r.label}</td>
-                            <td>{pct(r.percent)}</td>
+                        {summary.topics.map((topic) => (
+                          <tr key={topic.label}>
+                            <td>{topic.label}</td>
+                            <td>{pct(topic.percent)}</td>
                             <td>
-                              {r.percent >= 80
+                              {topic.percent >= 80
                                 ? "Strong"
-                                : r.percent >= 60
+                                : topic.percent >= 60
                                   ? "Average"
                                   : "Weak"}
                             </td>
@@ -438,66 +439,62 @@ export default function QuizAssessmentDashboard({
                 <div className={styles.analysisSectionTitle}>
                   Question Analysis
                 </div>
-                <p className="qa-skill-guide">
-                  Correct (%) is the percentage of recorded responses that
-                  answered each question correctly: correct responses ÷ total
-                  responses × 100. For example, 1 correct answer out of 4
-                  responses is 25%. Repeat practice attempts count as additional
-                  responses. A higher percentage means the question was answered
-                  correctly more often.
-                </p>
                 {!summary.questions.length ? (
                   <p>
                     Question analysis appears after attempts include question
                     responses. Older score-only attempts remain included in
-                    student progress.
+                    overall score totals.
                   </p>
                 ) : (
                   <>
-                    {view === "graph" && (
-                      <Bars
-                        rows={summary.questions.map((q, i) => ({
-                          label: `Question ${i + 1}`,
-                          percent: q.percent,
-                        }))}
-                      />
-                    )}
-                    {view === "table" && (
-                      <div className="qa-table">
-                        <table>
-                          <thead>
-                            <tr>
-                              <th>Question</th>
-                              <th>Topic</th>
-                              <th>Skill</th>
-                              <th>Level</th>
-                              <th>Responses</th>
-                              <th>Correct (%)</th>
+                    <div className="qa-table qa-question-analysis">
+                      <table>
+                        <thead>
+                          <tr>
+                            <th>Question</th>
+                            <th>Topic</th>
+                            <th>Skill</th>
+                            <th>Level</th>
+                            <th>Responses</th>
+                            <th>Correct (%)</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {summary.questions.map((q, i) => (
+                            <tr key={i}>
+                              <td>
+                                <strong>Question {i + 1}</strong>
+                                <p>{q.question}</p>
+                              </td>
+                              <td>{q.topic}</td>
+                              <td>{q.skill}</td>
+                              <td>{q.level || "Unclassified"}</td>
+                              <td>{q.responses}</td>
+                              <td>
+                                {view === "graph" && (
+                                  <div
+                                    className="qa-bar-track qa-question-bar"
+                                    role="meter"
+                                    aria-label={`Question ${i + 1} correct responses`}
+                                    aria-valuemin={0}
+                                    aria-valuemax={100}
+                                    aria-valuenow={q.percent || 0}
+                                  >
+                                    <div
+                                      style={{ width: `${q.percent || 0}%` }}
+                                    />
+                                  </div>
+                                )}
+                                {pct(q.percent)}
+                                <small style={{ display: "block" }}>
+                                  {q.correct} of {q.responses} correct
+                                </small>
+                              </td>
                             </tr>
-                          </thead>
-                          <tbody>
-                            {summary.questions.map((q, i) => (
-                              <tr key={i}>
-                                <td>
-                                  <strong>Question {i + 1}</strong>
-                                  <p>{q.question}</p>
-                                </td>
-                                <td>{q.topic}</td>
-                                <td>{q.skill}</td>
-                                <td>{q.level || "Unclassified"}</td>
-                                <td>{q.responses}</td>
-                                <td>
-                                  {pct(q.percent)}
-                                  <small style={{ display: "block" }}>
-                                    {q.correct} of {q.responses} correct
-                                  </small>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </>
                 )}
               </>

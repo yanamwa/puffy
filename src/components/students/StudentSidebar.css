@@ -9,7 +9,7 @@
   top: 0;
   left: 0;
   z-index: 100;
-  width: 240px;
+  width: 320px;
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -681,4 +681,92 @@
 .logout-button:hover {
   background: var(--student-theme-active-pill);
   color: var(--student-theme-ink);
+}
+
+/* Match the professor sidebar's final typography and spacing. */
+#root .enrolled-sidebar,
+#root .enrolled-sidebar :where(a, button, span, p, strong) {
+  font-family: Arial, Helvetica, sans-serif !important;
+}
+
+#root .enrolled-sidebar .brand-name,
+#root .enrolled-sidebar .nav-label,
+#root .enrolled-sidebar .logout-label,
+#root .enrolled-sidebar .side-nav-item,
+#root .enrolled-sidebar .logout-button {
+  font-size: 20px !important;
+  font-weight: 600 !important;
+  line-height: 1.2;
+}
+
+#root .enrolled-sidebar .sidebar-logo {
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
+}
+
+#root .enrolled-sidebar .brand-lockup {
+  padding: 18px 20px 15px;
+}
+
+#root .enrolled-sidebar .brand-lockup::after {
+  background: rgba(255, 247, 214, 0.8);
+}
+
+#root .enrolled-sidebar .side-nav {
+  gap: 14px;
+  padding: 26px 0 20px 28px;
+}
+
+#root .enrolled-sidebar .side-nav-item {
+  min-height: 50px;
+  gap: 9px;
+  padding: 0 10px;
+}
+
+#root .enrolled-sidebar .side-nav-item svg,
+#root .enrolled-sidebar .logout-icon {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+}
+
+#root .enrolled-sidebar .logout-button {
+  border-color: transparent;
+  background: var(--student-theme-morning-breeze);
+  color: #ffffff;
+}
+
+#root .enrolled-sidebar .logout-button:hover,
+#root .enrolled-sidebar .logout-button:focus-visible,
+#root .enrolled-sidebar .logout-button:active {
+  border-color: var(--student-theme-cloud-puff);
+  background: var(--student-theme-sunwashed);
+  box-shadow: 3px 3px 0 rgba(79, 97, 116, 0.18);
+  color: #263c52;
+}
+
+#root .enrolled-sidebar.sidebar-collapsed .sidebar-logo {
+  width: 65px;
+  height: 65px;
+}
+
+#root .enrolled-sidebar.sidebar-collapsed .brand-lockup {
+  padding: 18px 0 15px;
+}
+
+#root .enrolled-sidebar.sidebar-collapsed .side-nav {
+  padding-left: 18px;
+}
+
+#root .enrolled-sidebar.sidebar-collapsed .side-nav-item {
+  gap: 0;
+  padding: 0 0 0 18px;
+}
+
+/* Give the full logo room to remain readable in the expanded sidebar. */
+#root .enrolled-sidebar:not(.sidebar-collapsed) .brand-lockup {
+  height: 120px;
+  min-height: 120px;
+  padding: 10px 12px;
 }

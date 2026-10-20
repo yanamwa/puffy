@@ -402,7 +402,7 @@ export default function SuperAdminModesManagement() {
           HEADER
       ================================================= */}
 
-      <div className="feature-page-top">
+      <div className="feature-page-top super-page-heading">
         <div>
           <h1>Mode Management</h1>
 

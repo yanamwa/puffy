@@ -296,8 +296,10 @@ export default function NotificationPage({ variant = "notification" }) {
 
   return (
     <div className="admin-page feature-page notification-management-page">
-      <h1>{copy.pageTitle}</h1>
-      <p>{copy.pageDescription}</p>
+      <header className="super-page-heading super-standalone-heading"><div>
+        <h1>{copy.pageTitle}</h1>
+        <p>{copy.pageDescription}</p>
+      </div></header>
 
       <div className="notification-management-grid">
         <form

@@ -1369,3 +1369,17 @@
     max-height: 240px;
   }
 }
+
+.superadmin-layout .users-page .users-header-actions .users-create-btn {
+  background: #7fa8d6;
+  border-color: #6f98c7;
+  color: #fff;
+  box-shadow: 0 6px 0 #5f86b1;
+}
+.superadmin-layout .users-page .users-header-actions .users-create-btn:hover {
+  background: #6995c6;
+  box-shadow: 0 6px 0 #4f759e;
+}
+.superadmin-layout .users-page .users-header-actions .users-create-btn:active {
+  box-shadow: 0 2px 0 #4f759e;
+}

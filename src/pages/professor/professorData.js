@@ -195,7 +195,51 @@ export function stampCourseForProfessor(
   };
 }
 
+let persistedCourses = null;
+let courseStorageReady;
+
+function openCourseDatabase() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open("puffy-course-storage", 1);
+    request.onupgradeneeded = () => {
+      request.result.createObjectStore("courses");
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function accessCourseStorage(courses) {
+  const database = await openCourseDatabase();
+  try {
+    return await new Promise((resolve, reject) => {
+      const writing = courses !== undefined;
+      const transaction = database.transaction("courses", writing ? "readwrite" : "readonly");
+      const store = transaction.objectStore("courses");
+      const request = writing ? store.put(courses, PROFESSOR_COURSES_KEY) : store.get(PROFESSOR_COURSES_KEY);
+      transaction.oncomplete = () => resolve(request.result);
+      transaction.onabort = () => reject(transaction.error || new Error("Course storage transaction failed."));
+      transaction.onerror = () => reject(transaction.error);
+    });
+  } finally {
+    database.close();
+  }
+}
+
+export function loadProfessorCourseStorage() {
+  if (!courseStorageReady) {
+    courseStorageReady = accessCourseStorage().then((courses) => {
+      if (Array.isArray(courses)) persistedCourses = courses;
+    }).catch((error) => {
+      courseStorageReady = null;
+      throw error;
+    });
+  }
+  return courseStorageReady;
+}
+
 function readAllProfessorCourses() {
+  if (persistedCourses) return persistedCourses;
   try {
     const saved = localStorage.getItem(PROFESSOR_COURSES_KEY);
     return saved ? JSON.parse(saved) : professorCoursesSeed;
@@ -222,7 +266,8 @@ export function readProfessorCourses(options = {}) {
   );
 }
 
-export function saveProfessorCourses(courses, options = {}) {
+export async function saveProfessorCourses(courses, options = {}) {
+  await loadProfessorCourseStorage();
   const incomingCourses = Array.isArray(courses) ? courses : [];
   const professor = options.professor || getCurrentProfessorIdentity();
   let coursesToStore = incomingCourses;
@@ -240,7 +285,14 @@ export function saveProfessorCourses(courses, options = {}) {
     visibleCourses = stampedCourses;
   }
 
-  localStorage.setItem(PROFESSOR_COURSES_KEY, JSON.stringify(coursesToStore));
+  try {
+    await accessCourseStorage(coursesToStore);
+  } catch {
+    throw new Error("Could not save the course in this browser. Keep this page open and try again, or reconnect to the server.");
+  }
+  persistedCourses = coursesToStore;
+  // Remove only the legacy course copy, and only after durable storage succeeds.
+  localStorage.removeItem(PROFESSOR_COURSES_KEY);
 
   window.dispatchEvent(
     new CustomEvent(PROFESSOR_COURSES_EVENT, {
@@ -264,4 +316,11 @@ export function getProfessorCourseOwner(course) {
     course.instructor ||
     "Professor"
   );
+}
+
+// Hydrate synchronous dashboard readers and notify them when persisted data arrives.
+if (typeof window !== "undefined" && typeof indexedDB !== "undefined") {
+  loadProfessorCourseStorage().then(() => {
+    if (persistedCourses) window.dispatchEvent(new CustomEvent(PROFESSOR_COURSES_EVENT));
+  }).catch(() => {});
 }

@@ -155,6 +155,9 @@ function normalizeStudent(user) {
 
     course:
       savedUser.course ||
+      savedUser.program ||
+      savedUser.programName ||
+      savedUser.program_name ||
       savedUser.courseName ||
       savedUser.course_name ||
       "Course not set",

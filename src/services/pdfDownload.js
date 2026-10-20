@@ -42,7 +42,13 @@ export async function downloadAssessmentPdf(name) {
     const height = pdf.internal.pageSize.getHeight() - 24;
     let first = true;
     // Capture each report section separately to keep long reports within canvas limits.
-    const sections = [...report.querySelectorAll("section")].filter(
+    const sections = [
+      ...report.querySelectorAll(
+        report.classList.contains("main-response-report")
+          ? ".main-response-card"
+          : "section",
+      ),
+    ].filter(
       (section) =>
         !section.querySelector("section") &&
         section.getBoundingClientRect().height > 0,

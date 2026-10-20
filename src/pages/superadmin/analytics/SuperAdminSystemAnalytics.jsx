@@ -543,7 +543,7 @@ export default function SuperAdminSystemAnalytics() {
   if (loading) {
     return (
       <div className="admin-page system-analytics-page">
-        <section className="system-analytics-header">
+        <section className="system-analytics-header super-page-heading">
           <div>
             <span className="system-analytics-kicker">
               <FiBarChart2 aria-hidden="true" />
@@ -566,7 +566,7 @@ export default function SuperAdminSystemAnalytics() {
   if (loadError || !analytics) {
     return (
       <div className="admin-page system-analytics-page">
-        <section className="system-analytics-header">
+        <section className="system-analytics-header super-page-heading">
           <div>
             <span className="system-analytics-kicker">
               <FiBarChart2 aria-hidden="true" />
@@ -592,7 +592,7 @@ export default function SuperAdminSystemAnalytics() {
           PAGE HEADER
       =============================================== */}
 
-      <section className="system-analytics-header">
+      <section className="system-analytics-header super-page-heading">
         <div>
           <span className="system-analytics-kicker">
             <FiBarChart2 aria-hidden="true" />

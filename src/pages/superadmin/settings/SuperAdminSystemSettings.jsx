@@ -352,7 +352,7 @@ export default function SuperAdminSystemSettings() {
           PAGE HEADER
       =============================================== */}
 
-      <section className="super-system-settings-heading">
+      <section className="super-system-settings-heading super-page-heading">
         <div>
           <span className="super-system-settings-eyebrow">
             <FiSettings aria-hidden="true" />

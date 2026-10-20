@@ -1,3 +1,4 @@
+import { studentModuleNavigation } from "../../utils/studentModuleVisibility.js";
 const attemptSaves = new Map();
 import { lessonAuthHeaders } from "../../services/lessonAuth.js";
 import {
@@ -10,7 +11,10 @@ import { API_BASE } from "../../config.js";
 import { syncDeckCardMemorizationFromAnswers } from "../../utils/cardMemorization.js";
 import styles from "./lessonresult.module.css";
 import QuizModesModal from "../../components/quizmodes/QuizModesModal";
-import { fetchCourseContent } from "./courseContent.js";
+import {
+  fetchCourseContent,
+  getCourseContentModules,
+} from "./courseContent.js";
 import MainQuizResult from "./MainQuizResult.jsx";
 import { isMainQuizResult } from "../../utils/quizResultType.js";
 
@@ -77,7 +81,8 @@ const getContinueModuleTitle = (title) => {
 };
 
 const getContinueModuleLabel = (moduleNavigation) => {
-  const moduleNumber = moduleNavigation.nextModuleIndex + 1;
+  const moduleNumber =
+    moduleNavigation.nextModuleNumber || moduleNavigation.nextModuleIndex + 1;
   const title = getContinueModuleTitle(moduleNavigation.nextModuleTitle);
 
   return `Continue to Module ${moduleNumber}${title ? `: ${title}` : ""}`;
@@ -301,6 +306,39 @@ export default function LessonResult() {
     nextModuleTitle: "",
   });
 
+  useEffect(() => {
+    if (!resultCourseId || moduleNavigation.moduleIndex === null) return;
+    let active = true;
+    fetchCourseContent(resultCourseId)
+      .then((content) => {
+        if (!active) return;
+        const modules = getCourseContentModules(content);
+        const nav = studentModuleNavigation(
+          modules,
+          moduleNavigation.moduleIndex,
+        );
+        setModuleNavigation((current) => ({
+          ...current,
+          nextModuleIndex: nav.nextModuleIndex,
+          nextModuleNumber:
+            nav.nextModuleIndex === null ? null : nav.moduleNumber + 1,
+          nextModuleTitle: modules[nav.nextModuleIndex]?.title || "",
+          moduleCount: nav.moduleCount,
+        }));
+      })
+      .catch(() => {
+        if (active)
+          setModuleNavigation((current) => ({
+            ...current,
+            nextModuleIndex: null,
+            nextModuleTitle: "",
+          }));
+      });
+    return () => {
+      active = false;
+    };
+  }, [resultCourseId, moduleNavigation.moduleIndex]);
+
   const [quizMode, setQuizMode] = useState("");
   const [isTimedOut, setIsTimedOut] = useState(false);
   const [showQuizModal, setShowQuizModal] = useState(false);
@@ -444,9 +482,8 @@ export default function LessonResult() {
         moduleCount: Number.isInteger(detectedModuleCount)
           ? detectedModuleCount
           : null,
-        nextModuleIndex: Number.isInteger(detectedNextModuleIndex)
-          ? detectedNextModuleIndex
-          : null,
+        // Recheck current publication status before offering another module.
+        nextModuleIndex: null,
         nextModuleTitle:
           savedResults.nextModuleTitle ||
           savedResults.next_module_title ||

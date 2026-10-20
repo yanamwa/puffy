@@ -50,7 +50,7 @@ export default function AdminLayout({ children }) {
     <div className={styles.layout}>
       <aside className={styles.sidebar}>
         <div className={styles.logo}>
-          <img src="/images/logo1.png" alt="Logo" />
+          <img src="/images/logo.png" alt="Logo" />
         </div>
 
         <div className={styles.menuLabel}>Menu</div>

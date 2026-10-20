@@ -228,7 +228,7 @@ export default function SuperAdminAuditLogs() {
           HEADER
       =============================================== */}
 
-      <section className="audit-log-header">
+      <section className="audit-log-header super-page-heading">
         <div>
           <span className="audit-log-kicker">
             <FiShield aria-hidden="true" />

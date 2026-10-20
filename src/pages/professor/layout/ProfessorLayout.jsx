@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
 
-import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
+import {
+  Link,
+  NavLink,
+  Outlet,
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
 
 import { useAuth } from "../../../context/AuthContext";
 
@@ -8,6 +14,7 @@ import {
   FiBell,
   FiBookOpen,
   FiGrid,
+  FiClipboard,
   FiLogOut,
   FiPlusCircle,
   FiSearch,
@@ -47,6 +54,11 @@ const menuItems = [
     label: "Course Management",
     path: "/professor/courses",
     icon: FiBookOpen,
+  },
+  {
+    label: "Quiz Management",
+    path: "/professor/quizzes",
+    icon: FiClipboard,
   },
   {
     label: "Assessment Analysis",
@@ -166,6 +178,7 @@ export default function ProfessorLayout() {
   const { user: authUser, logout } = useAuth();
 
   const navigate = useNavigate();
+  const { pathname } = useLocation();
 
   /* ===================================================
      HEADER USER
@@ -369,10 +382,11 @@ export default function ProfessorLayout() {
       ================================================= */}
 
       <aside className="professor-sidebar">
-        <div className="professor-brand">
+        <div className="professor-brand" style={{ height: 120, minHeight: 120, padding: "10px 12px", boxSizing: "border-box" }}>
           <button
             type="button"
             className="professor-logo-button"
+            style={{ width: "100%", maxWidth: sidebarCollapsed ? 65 : 280, height: sidebarCollapsed ? 65 : 100, flex: sidebarCollapsed ? "0 1 65px" : "0 1 280px", borderRadius: 0 }}
             onClick={toggleSidebar}
             aria-label={
               sidebarCollapsed
@@ -382,22 +396,24 @@ export default function ProfessorLayout() {
             aria-expanded={!sidebarCollapsed}
             title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
-            <img src="/images/logo_solo.png" alt="PuffyBrain logo" />
+            <img src="/images/logo.png" alt="PuffyBrain" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
           </button>
-
-          <span className="professor-brand-name">PuffyBrain</span>
         </div>
 
         <nav className="professor-menu" aria-label="Professor navigation">
           {menuItems.map((item) => {
             const Icon = item.icon;
+            const isAssessmentDetail =
+              item.path === "/professor/students" &&
+              pathname.startsWith("/professor/assessment/");
 
             return (
               <NavLink
                 key={item.path}
                 to={item.path}
+                aria-current={isAssessmentDetail ? "page" : undefined}
                 className={({ isActive }) =>
-                  `professor-link ${isActive ? "active" : ""}`
+                  `professor-link ${isActive || isAssessmentDetail ? "active" : ""}`
                 }
                 title={sidebarCollapsed ? item.label : undefined}
               >

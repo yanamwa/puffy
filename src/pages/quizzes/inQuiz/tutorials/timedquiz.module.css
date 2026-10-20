@@ -2,8 +2,6 @@
   min-height: 100vh;
   padding: 35px 20px;
   box-sizing: border-box;
-
-  background-image: url("/images/background_notebook.png");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -150,10 +148,8 @@
 ========================= */
 
 .timerBox {
-  position: absolute;
-
-  top: -20px;
-  right: 40px;
+  position: static;
+  flex-shrink: 0;
 
   background: #efefef;
 
@@ -163,6 +159,9 @@
 }
 
 .timer {
+  box-sizing: border-box;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
   width: 90px;
   height: 36px;
 
@@ -481,7 +480,9 @@
 }
 .demoHeader {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
   align-items: center;
   min-height: 64px;
   margin: 0 -24px 20px;

@@ -2,6 +2,7 @@ import { API_BASE } from "../config.js";
 import {
   getCurrentProfessorIdentity,
   readProfessorCourses,
+  loadProfessorCourseStorage,
   saveProfessorCourses,
   stampCourseForProfessor,
 } from "../pages/professor/professorData.js";
@@ -337,7 +338,8 @@ function canUseLocalWriteFallback(error) {
   return !error.status || error.status === 404 || error.status >= 500;
 }
 
-function saveLocalCourse(course) {
+async function saveLocalCourse(course) {
+  await loadProfessorCourseStorage();
   const courses = readProfessorCourses().map(normalizeLocalCourse);
   const hasId =
     course.id !== undefined && course.id !== null && course.id !== "";
@@ -358,20 +360,21 @@ function saveLocalCourse(course) {
     (item) => String(item.id) === String(normalizedCourse.id),
   );
 
-  saveProfessorCourses(
+  await saveProfessorCourses(
     courseExists ? nextCourses : [normalizedCourse, ...nextCourses],
   );
   return normalizedCourse;
 }
 
-function deleteLocalCourse(id) {
+async function deleteLocalCourse(id) {
+  await loadProfessorCourseStorage();
   const courses = readProfessorCourses().map(normalizeLocalCourse);
   const normalizedId = String(id || "");
   const nextCourses = courses.filter(
     (course) => String(course.id) !== normalizedId,
   );
 
-  saveProfessorCourses(nextCourses);
+  await saveProfessorCourses(nextCourses);
 
   return {
     success: true,
@@ -379,7 +382,8 @@ function deleteLocalCourse(id) {
   };
 }
 
-function archiveLocalCourse(id, archived = true) {
+async function archiveLocalCourse(id, archived = true) {
+  await loadProfessorCourseStorage();
   const courses = readProfessorCourses().map(normalizeLocalCourse);
   const normalizedId = String(id || "");
   let updatedCourse = null;
@@ -400,7 +404,7 @@ function archiveLocalCourse(id, archived = true) {
     return updatedCourse;
   });
 
-  saveProfessorCourses(nextCourses);
+  await saveProfessorCourses(nextCourses);
 
   return {
     success: true,
@@ -490,6 +494,7 @@ export async function fetchCourses(params = {}, options = {}) {
     }
 
     console.warn("Using local course data:", error.message);
+    await loadProfessorCourseStorage();
     return filterLocalCourses(readProfessorCourses(), params);
   }
 }
@@ -505,6 +510,7 @@ export async function fetchCourse(id) {
 
     return data.course || data.module;
   } catch (error) {
+    await loadProfessorCourseStorage();
     const localCourse = findLocalCourse(id);
 
     if (localCourse) return localCourse;
@@ -566,7 +572,7 @@ export async function saveCourse(course, options = {}) {
 
     return data.course || data.module;
   } catch (error) {
-    if (options.fallback === false || !canUseLocalWriteFallback(error))
+    if (course.catalogId || course.catalog_id || options.fallback === false || !canUseLocalWriteFallback(error))
       throw error;
 
     console.warn("Saving course locally:", error.message);

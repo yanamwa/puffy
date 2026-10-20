@@ -7,25 +7,16 @@ import { useAuth } from "../../../context/AuthContext";
 import { API_BASE } from "../../../config.js";
 
 import {
-
+  FiCalendar,
   FiGrid,
-
   FiUsers,
-
   FiBook,
-
   FiBell,
-
   FiActivity,
-
   FiSettings,
-
   FiUser,
-
   FiSearch,
-
   FiLogOut,
-
 } from "react-icons/fi";
 
 import RoleNotificationMenu from "../../../components/rolenotif/RoleNotificationMenu";
@@ -55,75 +46,65 @@ const DEFAULT_PROFILE_IMAGE = "/images/temporaryimg.png";
 const mainMenuItems = [
 
   {
-
     label: "Dashboard",
 
     path: "/admin/dashboard",
 
     icon: FiGrid,
-
+  },
+  {
+    label: "Academic Calendar",
+    path: "/admin/academic-calendar",
+    icon: FiCalendar,
   },
 
   {
-
     label: "User Management",
 
     path: "/admin/users",
 
     icon: FiUsers,
-
   },
 
   {
-
     label: "Course Management",
 
     path: "/admin/courses",
 
     icon: FiBook,
-
   },
 
   {
-
     label: "Reports",
 
     path: "/admin/reports",
 
     icon: FiActivity,
-
   },
 
   {
-
     label: "Announcements & Notifications",
 
     path: "/admin/notification",
 
     icon: FiBell,
-
   },
 
   {
-
     label: "Profile",
 
     path: "/admin/profile",
 
     icon: FiUser,
-
   },
 
   {
-
     label: "Settings",
 
     path: "/admin/settings",
 
     icon: FiSettings,
-
   },
-
 ];
 
 /* =====================================================
@@ -133,23 +114,14 @@ const mainMenuItems = [
 /===================================================== */
 
 function getStoredToken() {
-
   return (
-
     localStorage.getItem("token") ||
-
     localStorage.getItem("authToken") ||
-
     localStorage.getItem("puffy-token") ||
-
     sessionStorage.getItem("token") ||
-
     sessionStorage.getItem("authToken") ||
-
     sessionStorage.getItem("puffy-token")
-
   );
-
 }
 
 /* =====================================================
@@ -159,27 +131,18 @@ function getStoredToken() {
 /===================================================== */
 
 function getStoredUser() {
-
   try {
-
     const storedUser =
-
       localStorage.getItem("puffy-user") ||
-
       localStorage.getItem("user") ||
-
       localStorage.getItem("currentUser");
 
     return storedUser ? JSON.parse(storedUser) : null;
-
   } catch (error) {
-
     console.error("Unable to read stored admin:", error);
 
     return null;
-
   }
-
 }
 
 /* =====================================================
@@ -188,8 +151,6 @@ function getStoredUser() {
 
 /===================================================== */
 
-
-
 function resolveProfileImage(imagePath) {
   if (!imagePath || typeof imagePath !== "string") {
     return DEFAULT_PROFILE_IMAGE;
@@ -197,19 +158,13 @@ function resolveProfileImage(imagePath) {
 
   const path = imagePath.trim().replace(/\\/g, "/");
 
-  if (
-    path.startsWith("blob:") ||
-    path.startsWith("data:")
-  ) {
+  if (path.startsWith("blob:") || path.startsWith("data:")) {
     return path;
   }
 
   let fixedPath = path;
 
-  if (
-    fixedPath.startsWith("http://") ||
-    fixedPath.startsWith("https://")
-  ) {
+  if (fixedPath.startsWith("http://") || fixedPath.startsWith("https://")) {
     const url = new URL(fixedPath);
 
     if (url.hostname !== "localhost") {
@@ -220,10 +175,7 @@ function resolveProfileImage(imagePath) {
   }
 
   if (fixedPath.startsWith("/api/uploads/")) {
-    fixedPath = fixedPath.replace(
-      "/api/uploads/",
-      "/uploads/"
-    );
+    fixedPath = fixedPath.replace("/api/uploads/", "/uploads/");
   }
 
   if (!fixedPath.startsWith("/")) {
@@ -240,25 +192,16 @@ function resolveProfileImage(imagePath) {
 \===================================================== */
 
 function getDisplayName(user) {
-
   const name =
-
     user?.displayName ||
-
     user?.display_name ||
-
     user?.fullName ||
-
     user?.full_name ||
-
     user?.name ||
-
     user?.username ||
-
     "Admin";
 
   return String(name).replace(/^@+/, "");
-
 }
 
 /* =====================================================
@@ -268,7 +211,6 @@ function getDisplayName(user) {
 \===================================================== */
 
 export default function AdminLayout({ children }) {
-
   const { user: authUser, logout } = useAuth();
 
   const navigate = useNavigate();
@@ -280,9 +222,7 @@ export default function AdminLayout({ children }) {
   =================================================== */
 
   const [headerUser, setHeaderUser] = useState(() => {
-
     return getStoredUser() || authUser || null;
-
   });
 
   /* ===================================================
@@ -292,9 +232,7 @@ export default function AdminLayout({ children }) {
   =================================================== */
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
-
     return localStorage.getItem("adminSidebarCollapsed") === "true";
-
   });
 
   /* ===================================================
@@ -304,49 +242,36 @@ export default function AdminLayout({ children }) {
   =================================================== */
 
   useEffect(() => {
-
     const fetchCurrentAdmin = async () => {
-
       try {
-
         const token = getStoredToken();
 
         if (!token) {
-
           return;
-
         }
 
         const response = await fetch(`${API_BASE_URL}/users/me`, {
-
           method: "GET",
 
           headers: {
-
             Accept: "application/json",
 
             Authorization: `Bearer ${token}`,
-
           },
-
         });
 
         const data = await response.json().catch(() => ({}));
 
         if (!response.ok) {
-
           console.error("Unable to load admin:", data.message);
 
           return;
-
         }
 
         const loggedInUser = data.user || data.data?.user || data.data || data;
 
         if (!loggedInUser) {
-
           return;
-
         }
 
         /*
@@ -366,9 +291,7 @@ export default function AdminLayout({ children }) {
          */
 
         if (loggedInUser.role && loggedInUser.role !== "admin") {
-
           return;
-
         }
 
         setHeaderUser(loggedInUser);
@@ -380,17 +303,12 @@ export default function AdminLayout({ children }) {
         localStorage.setItem("user", serializedUser);
 
         localStorage.setItem("currentUser", serializedUser);
-
       } catch (error) {
-
         console.error("Admin header loading error:", error);
-
       }
-
     };
 
     fetchCurrentAdmin();
-
   }, []);
 
   /* ===================================================
@@ -400,21 +318,15 @@ export default function AdminLayout({ children }) {
   =================================================== */
 
   useEffect(() => {
-
     if (!authUser) {
-
       return;
-
     }
 
     setHeaderUser((currentUser) => ({
-
       ...currentUser,
 
       ...authUser,
-
     }));
-
   }, [authUser]);
 
   /* ===================================================
@@ -424,73 +336,50 @@ export default function AdminLayout({ children }) {
   =================================================== */
 
   useEffect(() => {
-
     const handleUserUpdated = (event) => {
-
       const updatedUser = event.detail || getStoredUser();
 
       if (!updatedUser) {
-
         return;
-
       }
 
       setHeaderUser((currentUser) => ({
-
         ...currentUser,
 
         ...updatedUser,
-
       }));
-
     };
 
     const handleStorageChange = (event) => {
-
       if (
-
         event.key !== "puffy-user" &&
-
         event.key !== "user" &&
-
         event.key !== "currentUser"
-
       ) {
-
         return;
-
       }
 
       const updatedUser = getStoredUser();
 
       if (updatedUser) {
-
         setHeaderUser(updatedUser);
-
       }
-
     };
 
     const handleProfileImageUpdated = (event) => {
-
       const image = event.detail?.profileImage || event.detail?.profile_image;
 
       if (!image) {
-
         return;
-
       }
 
       setHeaderUser((currentUser) => ({
-
         ...currentUser,
 
         profileImage: image,
 
         profile_image: image,
-
       }));
-
     };
 
     window.addEventListener("puffy-user-updated", handleUserUpdated);
@@ -500,21 +389,16 @@ export default function AdminLayout({ children }) {
     window.addEventListener("storage", handleStorageChange);
 
     return () => {
-
       window.removeEventListener("puffy-user-updated", handleUserUpdated);
 
       window.removeEventListener(
-
         "profile-image-updated",
 
         handleProfileImageUpdated,
-
       );
 
       window.removeEventListener("storage", handleStorageChange);
-
     };
-
   }, []);
 
   /* ===================================================
@@ -524,19 +408,12 @@ export default function AdminLayout({ children }) {
   =================================================== */
 
   const profileImagePath =
-
     headerUser?.profileImage ||
-
     headerUser?.profile_image ||
-
     headerUser?.profileImageUrl ||
-
     headerUser?.profile_image_url ||
-
     headerUser?.avatar ||
-
     headerUser?.image ||
-
     "";
 
   const avatarSrc = resolveProfileImage(profileImagePath);
@@ -550,17 +427,13 @@ export default function AdminLayout({ children }) {
   =================================================== */
 
   const toggleSidebar = () => {
-
     setSidebarCollapsed((currentValue) => {
-
       const newValue = !currentValue;
 
       localStorage.setItem("adminSidebarCollapsed", String(newValue));
 
       return newValue;
-
     });
-
   };
 
   /* ===================================================
@@ -570,15 +443,11 @@ export default function AdminLayout({ children }) {
   =================================================== */
 
   const handleLogout = () => {
-
     void logout();
 
     navigate("/login", {
-
       replace: true,
-
     });
-
   };
 
   /* ===================================================
@@ -588,17 +457,11 @@ export default function AdminLayout({ children }) {
   =================================================== */
 
   return (
-
     <div
-
       className={`admin-layout ${
-
         sidebarCollapsed ? "admin-sidebar-collapsed" : ""
-
       }`}
-
     >
-
       {/* ================================================
 
           SIDEBAR
@@ -606,79 +469,72 @@ export default function AdminLayout({ children }) {
       ================================================= */}
 
       <aside className="admin-sidebar">
-
-        <div className="sidebar-brand">
-
+        <div
+          className="sidebar-brand"
+          style={{
+            height: 120,
+            minHeight: 120,
+            padding: "10px 12px",
+            boxSizing: "border-box",
+          }}
+        >
           <button
-
             type="button"
 
             className="admin-logo-button"
+            style={{
+              width: "100%",
+              maxWidth: sidebarCollapsed ? 65 : 280,
+              height: sidebarCollapsed ? 65 : 100,
+              flex: sidebarCollapsed ? "0 1 65px" : "0 1 280px",
+              borderRadius: 0,
+            }}
 
             onClick={toggleSidebar}
 
             aria-label={
-
               sidebarCollapsed
-
                 ? "Expand admin sidebar"
-
                 : "Collapse admin sidebar"
-
             }
 
             aria-expanded={!sidebarCollapsed}
 
             title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-
           >
-
-            <img src="/images/logo_solo.png" alt="PuffyBrain logo" />
-
+            <img
+              src="/images/logo.png"
+              alt="PuffyBrain"
+              style={{ width: "100%", height: "100%", objectFit: "contain" }}
+            />
           </button>
-
-          <span className="admin-brand-name">PuffyBrain</span>
-
         </div>
 
         <nav className="sidebar-menu" aria-label="Admin navigation">
-
           {mainMenuItems.map((item) => {
-
             const Icon = item.icon;
 
             return (
-
               <NavLink
-
                 key={item.path}
 
                 to={item.path}
 
                 className={({ isActive }) =>
-
                   `sidebar-link ${isActive ? "active" : ""}`
-
                 }
 
                 title={sidebarCollapsed ? item.label : undefined}
-
               >
-
                 <Icon className="sidebar-icon" aria-hidden="true" />
 
                 <span className="admin-nav-label">{item.label}</span>
-
               </NavLink>
-
             );
-
           })}
-
         </nav>
 
         <button
-
           type="button"
 
           onClick={handleLogout}
@@ -686,15 +542,11 @@ export default function AdminLayout({ children }) {
           className="logout-btn"
 
           title={sidebarCollapsed ? "Logout" : undefined}
-
         >
-
           <FiLogOut aria-hidden="true" />
 
           <span className="admin-logout-label">Logout</span>
-
         </button>
-
       </aside>
 
       {/* ================================================
@@ -704,7 +556,6 @@ export default function AdminLayout({ children }) {
       ================================================= */}
 
       <main className="admin-main">
-
         {/* ==============================================
 
             HEADER
@@ -712,33 +563,24 @@ export default function AdminLayout({ children }) {
         =============================================== */}
 
         <header className="admin-header">
-
           <label className="admin-header-search">
-
             <input
-
               type="search"
 
               placeholder="Search..."
 
               aria-label="Search admin pages"
-
             />
 
             <span className="search-icon" aria-hidden="true">
-
               <FiSearch />
-
             </span>
-
           </label>
 
           <div className="admin-header-actions">
-
             <RoleNotificationMenu role="admin" />
 
             <HeaderProfileChip
-
               username={displayName}
 
               accountLabel="Admin account"
@@ -748,35 +590,26 @@ export default function AdminLayout({ children }) {
               profilePath="/admin/profile"
 
               menuItems={[
-
                 {
-
                   label: "Profile",
 
                   path: "/admin/profile",
 
                   icon: "user",
-
                 },
 
                 {
-
                   label: "Settings",
 
                   path: "/admin/settings",
 
                   icon: "settings",
-
                 },
-
               ]}
 
               onLogout={handleLogout}
-
             />
-
           </div>
-
         </header>
 
         {/* ==============================================
@@ -786,11 +619,7 @@ export default function AdminLayout({ children }) {
         =============================================== */}
 
         <div className="admin-content">{children}</div>
-
       </main>
-
     </div>
-
   );
-
 }

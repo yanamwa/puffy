@@ -573,6 +573,8 @@
 }
 
 .lessonSlideContent p {
+  text-align: justify;
+  text-align-last: start;
   margin: 0 0 12px;
   padding: 0;
 }
@@ -1388,6 +1390,8 @@
    ========================================================= */
 
 .introDescription {
+  text-align: justify;
+  text-align-last: start;
   margin: 0 0 12px;
   padding: 0;
 
@@ -1425,6 +1429,8 @@
 }
 
 .introObjectivesList li {
+  text-align: justify;
+  text-align-last: start;
   margin: 0 0 7px;
   padding-left: 4px;
 }

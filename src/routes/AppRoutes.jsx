@@ -1,3 +1,5 @@
+import AcademicCalendarPage from "../pages/admin/AcademicCalendarPage.jsx";
+import QuizManagement from "../pages/professor/quizmanagement/QuizManagement.jsx";
 import AboutUs from "../pages/unauth/about/Aboutus.jsx";
 import FAQ from "../pages/unauth/faq/faq.jsx";
 import ContactUs from "../pages/unauth/ContactUs/ContactUs.jsx";
@@ -15,7 +17,7 @@ import RecoverAccountPage from "../pages/auth/RecoverAccount";
 import AdminLayout from "../pages/admin/shared/AdminLayout";
 import DashboardPage from "../pages/admin/dashboard/DashboardPage";
 import UserManagementPage from "../pages/admin/users/UserManagementPage";
-import ModuleManagementPage from "../pages/admin/modules/ModuleManagementPage";
+import CourseManagementPage from "../pages/admin/modules/CourseManagementPage.jsx";
 import NotificationPage from "../pages/admin/notification/NotificationPage";
 import DecksPage from "../pages/admin/decks/DecksPage";
 import ReportsPage from "../pages/admin/reports/ReportsPage";
@@ -140,10 +142,26 @@ export default function AppRoutes() {
           />
 
           <Route
+            path="/super-admin/academic-calendar"
+            element={
+              <SuperAdminLayout>
+                <AcademicCalendarPage />
+              </SuperAdminLayout>
+            }
+          />
+          <Route
+            path="/admin/academic-calendar"
+            element={
+              <AdminLayout>
+                <AcademicCalendarPage />
+              </AdminLayout>
+            }
+          />
+          <Route
             path="/super-admin/courses"
             element={
               <SuperAdminLayout>
-                <ModuleManagementPage />
+                <CourseManagementPage />
               </SuperAdminLayout>
             }
           />
@@ -246,7 +264,7 @@ export default function AppRoutes() {
             path="/admin/courses"
             element={
               <AdminLayout>
-                <ModuleManagementPage />
+                <CourseManagementPage />
               </AdminLayout>
             }
           />
@@ -326,6 +344,15 @@ export default function AppRoutes() {
             />
             <Route path="dashboard" element={<ProfessorHome />} />
             <Route path="courses" element={<ModuleManagement />} />
+            <Route path="quizzes" element={<QuizManagement />} />
+            <Route
+              path="quizzes/:id/modules/:moduleId"
+              element={<CourseModuleEditor quizManagement />}
+            />
+            <Route
+              path="quizzes/:id/modules/:moduleId/:assessmentType/edit"
+              element={<CourseModuleEditor quizManagement />}
+            />
             <Route path="courses/new" element={<AddModule />} />
             <Route
               path="courses/new/modules/:moduleId/edit"

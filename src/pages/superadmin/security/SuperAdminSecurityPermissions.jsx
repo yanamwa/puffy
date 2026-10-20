@@ -102,7 +102,7 @@ export default function SuperAdminSecurityPermissions() {
           PAGE HEADER
       ============================================== */}
 
-      <div className="feature-page-top">
+      <div className="feature-page-top super-page-heading">
         <div>
           <h1>Security and Permissions</h1>
 

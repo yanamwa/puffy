@@ -345,9 +345,10 @@ export default function BackupPage() {
 
   return (
     <div className="admin-page feature-page">
-      <h1>Backup & Restore</h1>
-
-      <p>Create and restore backups of the PuffyBrain database.</p>
+      <header className="super-page-heading super-standalone-heading"><div>
+        <h1>Backup & Restore</h1>
+        <p>Create and restore backups of the PuffyBrain database.</p>
+      </div></header>
 
       <div className="backup-grid">
         {/* BACKUP */}

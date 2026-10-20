@@ -170,14 +170,15 @@ export default function StudentSidebar({ collapsed, onCollapsedChange }) {
 
       <div className="brand-lockup">
         <img
-          src="/images/logo_solo.png"
+          src="/images/logo.png"
           alt="PuffyBrain logo"
           className="sidebar-logo"
+          style={{ width: "100%", maxWidth: sidebarCollapsed ? 65 : 280, height: sidebarCollapsed ? 65 : 100, objectFit: "contain" }}
           onClick={toggleSidebar}
           title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         />
 
-        <span className="brand-name">PuffyBrain</span>
+
       </div>
 
       {/* =========================

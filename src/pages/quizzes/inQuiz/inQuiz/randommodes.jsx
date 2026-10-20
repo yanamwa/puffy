@@ -1053,6 +1053,14 @@ export default function MixedMode() {
               }}
               disabled={locked}
             />
+            <button
+              type="button"
+              className={styles.submitAnswer}
+              onClick={handleTyping}
+              disabled={locked || !typingAnswer.trim()}
+            >
+              Submit Answer
+            </button>
           </div>
         )}
       </div>

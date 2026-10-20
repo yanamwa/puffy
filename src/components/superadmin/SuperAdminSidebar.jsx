@@ -1,6 +1,7 @@
 import { NavLink } from "react-router-dom";
 
 import {
+  FiCalendar,
   FiActivity,
   FiBell,
   FiBook,
@@ -35,6 +36,11 @@ const mainMenuItems = [
     label: "Modes Management",
     path: "/super-admin/modes",
     icon: FiSun,
+  },
+  {
+    label: "Academic Calendar",
+    path: "/super-admin/academic-calendar",
+    icon: FiCalendar,
   },
   {
     label: "System Analytics",
@@ -95,10 +101,25 @@ export default function SuperAdminSidebar({
 
   return (
     <aside className="admin-sidebar">
-      <div className="sidebar-brand">
+      <div
+        className="sidebar-brand"
+        style={{
+          height: 120,
+          minHeight: 120,
+          padding: "10px 12px",
+          boxSizing: "border-box",
+        }}
+      >
         <button
           type="button"
           className="superadmin-logo-button"
+          style={{
+            width: "100%",
+            maxWidth: sidebarCollapsed ? 65 : 280,
+            height: sidebarCollapsed ? 65 : 100,
+            flex: sidebarCollapsed ? "0 1 65px" : "0 1 280px",
+            borderRadius: 0,
+          }}
           onClick={toggleSidebar}
           aria-label={
             sidebarCollapsed
@@ -108,10 +129,12 @@ export default function SuperAdminSidebar({
           aria-expanded={!sidebarCollapsed}
           title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
-          <img src="/images/logo_solo.png" alt="PuffyBrain logo" />
+          <img
+            src="/images/logo.png"
+            alt="PuffyBrain"
+            style={{ width: "100%", height: "100%", objectFit: "contain" }}
+          />
         </button>
-
-        <span className="superadmin-brand-name">PuffyBrain</span>
       </div>
 
       <nav className="sidebar-menu" aria-label="Super Admin navigation">

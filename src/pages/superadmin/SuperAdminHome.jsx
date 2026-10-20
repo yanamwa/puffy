@@ -653,7 +653,7 @@ export default function SuperAdminHome() {
 
   return (
     <div className="super-dashboard">
-      <header className="super-dashboard-welcome">
+      <header className="super-dashboard-welcome super-page-heading">
         <div>
           <p className="super-dashboard-date">{formatCurrentDate()}</p>
           <h1>Welcome back, Super Admin!</h1>

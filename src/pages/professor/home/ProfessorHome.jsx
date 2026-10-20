@@ -653,9 +653,9 @@ export default function ProfessorHome() {
                     <td>
                       <Link
                         className="dashboard-table-action"
-                        to={course.managePath}
+                        to={`/professor/courses/view/${encodeURIComponent(course.id)}`}
                       >
-                        Manage Course
+                        View Students
                       </Link>
                     </td>
                   </tr>

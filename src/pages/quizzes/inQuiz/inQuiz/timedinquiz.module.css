@@ -4,11 +4,6 @@
   box-sizing: border-box;
   position: relative;
   overflow-x: hidden;
-
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2)),
-    url("/images/background_notebook.png");
-
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

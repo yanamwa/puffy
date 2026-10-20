@@ -4,10 +4,18 @@ import {
   fetchCourses,
   fetchCourseEnrollmentCount,
 } from "../../../services/courseApi.js";
-import styles from "./AssessmentAnalysis.module.css";
+import {
+  FiBookOpen,
+  FiUsers,
+  FiLayers,
+  FiFileText,
+  FiArrowRight,
+  FiSearch,
+} from "react-icons/fi";
+import styles from "./AssessmentDashboard.module.css";
 
 function formatDate(value) {
-  if (!value) return "0";
+  if (!value) return "—";
 
   const date = new Date(value);
 
@@ -47,13 +55,21 @@ function normalizeCourse(course, index) {
       "Course details not available",
     students:
       course.students || course.studentCount || course.student_count || 0,
-    modules: course.moduleCount || course.module_count || course.modules || 0,
+    modules:
+      Number(
+        course.moduleCount ??
+          course.module_count ??
+          course.contentModules?.length ??
+          course.modules ??
+          0,
+      ) || 0,
     quizzes:
-      course.quizzes ||
-      course.quizCount ||
-      course.quiz_count ||
-      course.quizItems ||
-      0,
+      Number(
+        course.quizzes ??
+          course.quizCount ??
+          course.quiz_count ??
+          (Array.isArray(course.quizItems) ? course.quizItems.length : 0),
+      ) || 0,
     date: formatDate(
       course.createdAt ||
         course.created_at ||
@@ -132,68 +148,184 @@ export default function AssessmentAnalysis() {
     });
   };
 
+  const metrics = [
+    {
+      label: "Courses",
+      value: courses.length,
+      icon: FiBookOpen,
+      hint: "Available for analysis",
+    },
+    {
+      label: "Student enrollments",
+      value: courses.reduce(
+        (sum, course) => sum + Number(course.students || 0),
+        0,
+      ),
+      icon: FiUsers,
+      hint: "Across all courses",
+    },
+    {
+      label: "Learning modules",
+      value: courses.reduce((sum, course) => sum + course.modules, 0),
+      icon: FiLayers,
+      hint: "Across all courses",
+    },
+    {
+      label: "Quiz questions",
+      value: courses.reduce((sum, course) => sum + course.quizzes, 0),
+      icon: FiFileText,
+      hint: "Across all courses",
+    },
+  ];
+  const enrollmentCourses = [...courses]
+    .sort((a, b) => b.students - a.students)
+    .slice(0, 5);
+  const maxStudents = Math.max(
+    1,
+    ...enrollmentCourses.map((course) => course.students),
+  );
+
   return (
     <section className={styles.page}>
       <header className={styles.header}>
         <h1>Assessment Analysis</h1>
         <p>
-          Select a course, then review class progress and each student's
-          performance inside that course.
+          Review your courses at a glance, then open a course to explore student
+          performance.
         </p>
       </header>
-
-      <section className={styles.searchPanel}>
-        <label className={styles.searchBox}>
-          <input
-            type="search"
-            value={searchQuery}
-            onChange={(event) => setSearchQuery(event.target.value)}
-            placeholder="search for courses"
-            aria-label="Search courses"
-          />
-        </label>
-      </section>
-
-      <section className={styles.courseArea}>
-        {loading ? (
-          <div className={styles.message}>Loading courses...</div>
-        ) : errorMessage ? (
-          <div className={styles.message}>{errorMessage}</div>
-        ) : filteredCourses.length === 0 ? (
-          <div className={styles.message}>No courses found.</div>
-        ) : (
-          <div className={styles.courseGrid}>
-            {filteredCourses.map((course) => (
-              <button
-                type="button"
-                key={course.id}
-                className={styles.courseCard}
-                onClick={() => openAssessment(course)}
-              >
-                <span className={styles.dateText}>
-                  Date created: {course.date}
-                </span>
-
-                <span className={styles.codeText}>
-                  <span>Course Code:</span> {course.code}
-                </span>
-
-                <strong>{course.title}</strong>
-
-                <span className={styles.description}>{course.description}</span>
-
-                <span className={styles.divider} />
-
-                <span className={styles.stats}>
-                  <span>{course.students} students</span>
-                  <span>{course.modules} Modules</span>
-                  <span>{course.quizzes} Quizzes</span>
-                </span>
-              </button>
+      {loading ? (
+        <div className={styles.message} role="status">
+          Loading assessment overview…
+        </div>
+      ) : errorMessage ? (
+        <div className={styles.message} role="alert">
+          {errorMessage}
+        </div>
+      ) : (
+        <>
+          <section className={styles.metrics} aria-label="Assessment summary">
+            {metrics.map(({ label, value, icon: Icon, hint }) => (
+              <article className={`${styles.metric} dashboard-summary-card`} key={label}>
+                <div className="dashboard-summary-top">
+                  <span className="dashboard-summary-icon">
+                    <Icon aria-hidden="true" />
+                  </span>
+                  <span>{label}</span>
+                </div>
+                <strong>{value.toLocaleString()}</strong>
+                <small>{hint}</small>
+              </article>
             ))}
+          </section>
+          <div className={styles.overviewGrid}>
+            <section className={styles.panel}>
+              <div className={styles.panelHeading}>
+                <div>
+                  <h2>Enrollment by course</h2>
+                  <p>Your five largest classes</p>
+                </div>
+                <FiUsers aria-hidden="true" />
+              </div>
+              {enrollmentCourses.length ? (
+                <div className={styles.bars}>
+                  {enrollmentCourses.map((course) => (
+                    <div className={styles.barRow} key={course.id}>
+                      <div>
+                        <span>{course.title}</span>
+                        <strong>{course.students} students</strong>
+                      </div>
+                      <div className={styles.track}>
+                        <span
+                          style={{
+                            width: `${(Number(course.students) / maxStudents) * 100}%`,
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p>No enrollment data yet.</p>
+              )}
+            </section>
           </div>
-        )}
-      </section>
+          <section className={styles.panel}>
+            <div className={styles.tableHeading}>
+              <div>
+                <h2>Course overview</h2>
+                <p>
+                  {filteredCourses.length} of {courses.length} courses
+                </p>
+              </div>
+              <label className={styles.searchBox}>
+                <FiSearch aria-hidden="true" />
+                <input
+                  type="search"
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  placeholder="Search courses…"
+                  aria-label="Search courses"
+                />
+              </label>
+            </div>
+            {filteredCourses.length ? (
+              <div className={styles.tableWrap}>
+                <table>
+                  <thead>
+                    <tr>
+                      <th scope="col">Course</th>
+                      <th scope="col">Students</th>
+                      <th scope="col">Modules</th>
+                      <th scope="col">Quiz questions</th>
+                      <th scope="col">Created</th>
+                      <th scope="col">Analysis</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredCourses.map((course) => (
+                      <tr key={course.id}>
+                        <td>
+                          <strong className={styles.courseTitle}>
+                            {course.title}
+                          </strong>
+                          <span className={styles.courseCode}>
+                            {course.code}
+                          </span>
+                        </td>
+                        <td>
+                          <span className={styles.countBadge}>
+                            {course.students}
+                          </span>
+                        </td>
+                        <td>{course.modules}</td>
+                        <td>{course.quizzes}</td>
+                        <td>{course.date}</td>
+                        <td>
+                          <button
+                            className={styles.viewButton}
+                            type="button"
+                            onClick={() => openAssessment(course)}
+                            aria-label={`View analysis for ${course.title}`}
+                          >
+                            View analysis <FiArrowRight aria-hidden="true" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className={styles.empty}>
+                {courses.length
+                  ? "No courses match your search."
+                  : "Your courses will appear here once you create a course."}
+              </p>
+            )}
+          </section>
+        </>
+      )}
     </section>
   );
 }

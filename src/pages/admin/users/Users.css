@@ -2748,7 +2748,7 @@
 .users-page .users-panel-top { margin-bottom:24px; }
 .users-page .users-table { width:100%; border-collapse:collapse; }
 .users-page .users-table th { text-align:left; }
-.users-page .users-action-group { display:flex; flex-direction:column; align-items:flex-start; gap:7px; }
+.users-page .users-action-group { display:flex; flex-direction:row; flex-wrap:nowrap; align-items:center; gap:8px; width:max-content; }
 .users-page .users-action-group .users-icon-btn { white-space:nowrap; }
 .users-page .users-modal-actions { display:flex; justify-content:flex-end; padding-top:20px; }
 @media(max-width:800px) { .users-page .users-panel { padding:20px 16px; } .users-page .users-table-wrap { overflow-x:auto; } }
@@ -2763,3 +2763,19 @@
 .users-credential-copy:hover { filter: brightness(1.15); }
 .users-credential-note { color: #667085; font-size: 12px; line-height: 1.5; margin: 16px 0 0; }
 @media (max-width: 440px) { .users-credential-row { flex-direction: column; } .users-credential-copy { min-height: 40px; } }
+
+/* Keep table action buttons aligned in one row. */
+.users-page .users-table th:last-child,
+.users-page .users-table td:last-child {
+  min-width: 176px;
+  white-space: nowrap;
+}
+.users-page .users-action-group .users-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  min-width: 76px;
+  height: 32px;
+  box-sizing: border-box;
+}

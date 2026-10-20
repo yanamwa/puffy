@@ -475,7 +475,7 @@ export default function SuperAdminProfile() {
           PAGE HEADER
       ============================================== */}
 
-      <section className="superadmin-profile-header">
+      <section className="superadmin-profile-header super-page-heading">
         <div>
           <span className="superadmin-profile-header-kicker">
             <FiShield aria-hidden="true" />

@@ -170,3 +170,16 @@
     margin-left: 0;
   }
 }
+
+/* Confirmation above the Generate Module dialog. */
+.confirmContainer { z-index: 30000 !important; }
+.confirmPopup { padding: 0 0 24px; border: 1px solid #cbd9e8; border-radius: 12px; overflow: hidden; box-shadow: 0 24px 64px #182d423d; font-family: Arial, sans-serif; }
+.confirmPopup .confirmTitle { margin: 0; padding: 20px 24px; background: #7fa8d6; color: #182d42; font-size: 20px; font-weight: 600; }
+.confirmPopup .confirmText { margin: 0; padding: 24px; color: #526176; font-size: 14px; line-height: 1.6; }
+.confirmPopup .confirmActions { gap: 12px; margin: 0; padding: 0 24px; }
+.confirmButton, .cancelButton { min-height: 42px; padding: 10px 16px; border: 1px solid #a0c2e6; border-radius: 7px; font: inherit; font-size: 14px; cursor: pointer; }
+.confirmButton { background: #7fa8d6; color: #182d42; }
+.confirmButton:hover { background: #6995c6; }
+.cancelButton { background: #fff; color: #365d86; border-color: #cbd9e8; }
+.cancelButton:hover { background: #edf4fc; }
+.confirmButton:focus-visible, .cancelButton:focus-visible { outline: 2px solid #6995c6; outline-offset: 3px; }

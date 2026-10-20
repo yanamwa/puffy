@@ -50,7 +50,7 @@
   color: #2563eb;
 
   font-family: system-ui, sans-serif;
-  font-size: 10px;
+  font-size: 14px;
   font-weight: 800;
 
   letter-spacing: 0.7px;
@@ -82,7 +82,7 @@
   color: var(--admin-muted, #8a919c);
 
   font-family: system-ui, sans-serif;
-  font-size: 12px;
+  font-size: 16px;
   font-weight: 500;
 
   line-height: 1.5;
@@ -116,7 +116,7 @@
   border-radius: 999px;
 
   font: inherit;
-  font-size: 12px;
+  font-size: 16px;
   font-weight: 600;
 
   cursor: pointer;
@@ -183,7 +183,7 @@
   color: #2563eb;
 
   font-family: system-ui, sans-serif;
-  font-size: 11px;
+  font-size: 16px;
   font-weight: 650;
 }
 
@@ -258,7 +258,7 @@
   color: #2563eb;
 
   font-family: system-ui, sans-serif;
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 800;
 
   letter-spacing: 0.6px;
@@ -271,7 +271,7 @@
 
   color: var(--admin-ink, #343940);
 
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 500;
 }
 
@@ -281,7 +281,7 @@
   color: var(--admin-muted, #858d97);
 
   font-family: system-ui, sans-serif;
-  font-size: 10px;
+  font-size: 14px;
   font-weight: 500;
 
   line-height: 1.45;
@@ -327,7 +327,7 @@
   color: #444b53;
 
   font-family: system-ui, sans-serif;
-  font-size: 11px;
+  font-size: 16px;
   font-weight: 750;
 }
 
@@ -339,7 +339,7 @@
   color: #8a929c;
 
   font-family: system-ui, sans-serif;
-  font-size: 10px;
+  font-size: 14px;
   font-weight: 500;
 
   line-height: 1.45;
@@ -419,7 +419,7 @@
   color: #555d67;
 
   font-family: system-ui, sans-serif;
-  font-size: 10px;
+  font-size: 14px;
   font-weight: 750;
 }
 
@@ -440,7 +440,7 @@
   color: #343940;
 
   font-family: system-ui, sans-serif;
-  font-size: 11px;
+  font-size: 16px;
 }
 
 .super-settings-field input:focus,
@@ -482,7 +482,7 @@
   display: block;
 
   font-family: system-ui, sans-serif;
-  font-size: 10px;
+  font-size: 14px;
   font-weight: 800;
 }
 
@@ -490,7 +490,7 @@
   margin: 4px 0 0;
 
   font-family: system-ui, sans-serif;
-  font-size: 10px;
+  font-size: 14px;
 
   line-height: 1.45;
 }
@@ -546,4 +546,12 @@
   .super-setting-row {
     gap: 15px;
   }
+}
+
+.superadmin-layout .super-system-settings-page .super-page-heading p {
+  font-size: 16px;
+}
+.super-system-settings-page .super-setting-row-text p,
+.super-system-settings-page .super-settings-card-header p {
+  line-height: 1.65;
 }

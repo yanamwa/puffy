@@ -765,7 +765,9 @@ export default function EditModule() {
 
       await Swal.fire({
         icon: "error",
-        title: "Generation Failed",
+        title: /couldn.t verify|grounding/i.test(error.message || "")
+          ? "Lesson needs another attempt"
+          : "Generation Failed",
         text: err.message || "Something went wrong while generating quiz.",
         buttonsStyling: false,
       });

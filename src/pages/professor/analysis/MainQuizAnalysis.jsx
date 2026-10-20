@@ -1,6 +1,8 @@
+import { filterModuleAttempts } from "../../../utils/assessmentModuleScope.js";
+import MainQuizResponses from "./MainQuizResponses.jsx";
 import { flushSync } from "react-dom";
 import "./QuizAssessmentDashboard.css";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { FiBarChart2, FiGrid } from "react-icons/fi";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { lessonAuthHeaders } from "../../../services/lessonAuth.js";
@@ -14,6 +16,7 @@ import {
 
 const FALLBACK_RATIOS = [1, 0.83, 0.7, 0.5, 0.4];
 const QUESTIONS_PER_PAGE = 10;
+const STUDENTS_PER_PAGE = 5;
 const VIEW_MODES = {
   GRAPHICAL: "graphical",
   TABLE: "table",
@@ -860,6 +863,17 @@ function normalizeQuizAttempts(course, totalItems) {
 
       return {
         answers,
+        email:
+          attempt.student_email ||
+          attempt.studentEmail ||
+          attempt.email ||
+          attempt.student?.email ||
+          "",
+        submittedAt:
+          attempt.submitted_at ||
+          attempt.submittedAt ||
+          attempt.created_at ||
+          "",
         userId: attempt.user_id ?? attempt.userId ?? attempt.student?.user_id,
         studentName:
           attempt.student_name || attempt.studentName || attempt.student?.name,
@@ -875,7 +889,12 @@ function normalizeQuizAttempts(course, totalItems) {
             attempt?.user?.gender ||
             attempt?.student?.gender,
         ),
-        id: attempt?.id || attempt?.attemptId || attempt?.attempt_id || index,
+        id:
+          attempt?.attempts_id ||
+          attempt?.id ||
+          attempt?.attemptId ||
+          attempt?.attempt_id ||
+          index,
         score: normalizeScoreToItems(Number(answerScore), rawTotal, totalItems),
         total: rawTotal,
       };
@@ -1452,7 +1471,13 @@ function buildRows(items, totals, attempts = []) {
   });
 }
 
-export default function MainQuizAnalysis() {
+export default function MainQuizAnalysis({
+  responseView = false,
+  moduleIndex = "all",
+  modules = [],
+  moduleTitle = "All Modules",
+  onSummary = () => {},
+}) {
   const { courseId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
@@ -1464,12 +1489,14 @@ export default function MainQuizAnalysis() {
   const [course, setCourse] = useState(initialCourse);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
+  const [refreshError, setRefreshError] = useState("");
   const [selectedQuestion, setSelectedQuestion] = useState(null);
   const [enrollmentSummary, setEnrollmentSummary] = useState(null);
   const [questionPage, setQuestionPage] = useState(0);
   const [activeView, setActiveView] = useState(VIEW_MODES.GRAPHICAL);
   const [selectedMainQuiz, setSelectedMainQuiz] = useState("0");
   const [printing, setPrinting] = useState(false);
+  const [studentPage, setStudentPage] = useState(0);
   useEffect(() => {
     const before = () => flushSync(() => setPrinting(true));
     const after = () => setPrinting(false);
@@ -1482,6 +1509,7 @@ export default function MainQuizAnalysis() {
   }, []);
 
   const [refresh, setRefresh] = useState(0);
+  const loadedCourseId = useRef(null);
   useEffect(() => {
     const update = () => setRefresh((value) => value + 1);
     window.addEventListener("focus", update);
@@ -1496,7 +1524,7 @@ export default function MainQuizAnalysis() {
 
     async function loadCourse() {
       try {
-        setLoading(true);
+        if (loadedCourseId.current !== courseId) setLoading(true);
         setErrorMessage("");
 
         const loadedCourses = await fetchCourses({}, { fallback: false });
@@ -1530,21 +1558,30 @@ export default function MainQuizAnalysis() {
             throw new Error(
               attemptData.message || "Could not load main quiz attempts.",
             );
-          if (active)
+          if (active) {
             setCourse({
               ...found,
               quizAttempts: attemptData.attempts.filter(
                 (attempt) => attempt.assessment_type === "main",
               ),
             });
+            loadedCourseId.current = courseId;
+            setRefreshError("");
+          }
         } else if (active) {
           setErrorMessage("Assessment details could not be found.");
         }
       } catch (error) {
         if (active) {
-          setErrorMessage(
-            error.message || "Could not load assessment details.",
-          );
+          if (loadedCourseId.current === courseId) {
+            setRefreshError(
+              "Could not refresh results. Showing the last loaded data.",
+            );
+          } else {
+            setErrorMessage(
+              error.message || "Could not load assessment details.",
+            );
+          }
         }
       } finally {
         if (active) {
@@ -1563,13 +1600,17 @@ export default function MainQuizAnalysis() {
   const loadedCourse = course || initialCourse;
   const recordedMainAttempts = useMemo(
     () =>
-      readArrayField(loadedCourse?.quizAttempts)
+      filterModuleAttempts(
+        readArrayField(loadedCourse?.quizAttempts),
+        moduleIndex,
+        modules,
+      )
         .filter((attempt) => attempt.assessment_type === "main")
         .map((attempt) => ({
           ...attempt,
           answers: readArrayField(attempt.answers),
         })),
-    [loadedCourse],
+    [loadedCourse, moduleIndex, modules],
   );
   const mainQuizKeys = [...new Set(recordedMainAttempts.map(mainQuizKey))].sort(
     (a, b) => Number(a) - Number(b),
@@ -1625,6 +1666,8 @@ export default function MainQuizAnalysis() {
         );
         return {
           ...attempt,
+          email:
+            student?.email || student?.student_email || attempt.email || "",
           name:
             student?.displayName ||
             student?.name ||
@@ -1642,6 +1685,22 @@ export default function MainQuizAnalysis() {
       }),
     [quizAttempts, enrollmentSummary],
   );
+  const studentPageCount = Math.max(
+    1,
+    Math.ceil(studentResults.length / STUDENTS_PER_PAGE),
+  );
+  const currentStudentPage = Math.min(studentPage, studentPageCount - 1);
+  const visibleStudentResults = printing
+    ? studentResults
+    : studentResults.slice(
+        currentStudentPage * STUDENTS_PER_PAGE,
+        (currentStudentPage + 1) * STUDENTS_PER_PAGE,
+      );
+
+  useEffect(() => {
+    setStudentPage(0);
+  }, [selectedMainQuiz, courseId]);
+
   const rows = useMemo(
     () => buildRows(quizItems, totals, quizAttempts),
     [quizItems, quizAttempts, totals],
@@ -1818,11 +1877,30 @@ export default function MainQuizAnalysis() {
 
   if (!loading && activeCourse && !errorMessage && !quizAttempts.length) {
     return (
-      <section className={styles.detailPanel}>
-        <p className={styles.message} role="status">
-          No results yet.
-        </p>
+      <section className="qa-empty-report qa-print-report">
+        <header className="qa-empty-report-heading">
+          <span className="qa-empty-eyebrow">MAIN QUIZ ANALYSIS</span>
+          <h2>{activeCourse.title}</h2>
+          <p className="qa-empty-module">{moduleTitle}</p>
+        </header>
+        <div className="qa-empty-state" role="status">
+          <h3>No results yet</h3>
+          <p>Results will appear after students complete this module's main quiz.</p>
+        </div>
       </section>
+    );
+  }
+
+  if (responseView && activeCourse && !errorMessage) {
+    return (
+      <MainQuizResponses
+        courseId={courseId}
+        courseTitle={`${activeCourse.title} - ${moduleTitle}`}
+        quizTitle={quizTitle}
+        attempts={studentResults}
+        onBack={onSummary}
+        embedded
+      />
     );
   }
 
@@ -1846,6 +1924,7 @@ export default function MainQuizAnalysis() {
         </button>
       </header>
 
+      {refreshError && <p role="status">{refreshError}</p>}
       {loading && !activeCourse ? (
         <div className={styles.message}>Loading assessment details...</div>
       ) : errorMessage ? (
@@ -1856,6 +1935,7 @@ export default function MainQuizAnalysis() {
             <div className={styles.detailTitle}>
               <span className={styles.detailEyebrow}>MAIN QUIZ ANALYSIS</span>
               <h2>{activeCourse.title}</h2>
+              <p className="qa-report-module">{moduleTitle}</p>
               <strong>{quizTitle}</strong>
               {mainQuizKeys.length > 1 && (
                 <label>
@@ -1925,67 +2005,6 @@ export default function MainQuizAnalysis() {
             </div>
           </div>
 
-          <section className={styles.analysisSection}>
-            <div className={styles.analysisSectionTitle}>Student Scores</div>
-            {activeView === VIEW_MODES.GRAPHICAL ? (
-              <div className={styles.studentScoreList}>
-                {studentResults.map((student) => (
-                  <article key={student.id} className={styles.studentScoreRow}>
-                    <div>
-                      <strong>{student.name}</strong>
-                      <span>Section: {student.section}</span>
-                    </div>
-                    <div
-                      className={styles.studentScoreBar}
-                      role="img"
-                      aria-label={`${student.name}: ${formatScoreWithPercent(student.earnedScore, student.total)}`}
-                    >
-                      <i
-                        style={{
-                          width: `${Math.max(0, Math.min(100, getScorePercent(student.earnedScore, student.total) || 0))}%`,
-                        }}
-                      />
-                    </div>
-                    <strong>
-                      {formatScoreWithPercent(
-                        student.earnedScore,
-                        student.total,
-                      )}
-                    </strong>
-                  </article>
-                ))}
-              </div>
-            ) : (
-              <div className={styles.tableWrap}>
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Student Name</th>
-                      <th>Section</th>
-                      <th>Score</th>
-                      <th>Percentage</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {studentResults.map((student) => (
-                      <tr key={student.id}>
-                        <td>{student.name}</td>
-                        <td>{student.section}</td>
-                        <td>
-                          {formatScore(student.earnedScore, student.total)}
-                        </td>
-                        <td>
-                          {formatPercent(
-                            getScorePercent(student.earnedScore, student.total),
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </section>
           {activeView === VIEW_MODES.GRAPHICAL ? (
             <div className={styles.graphicalView}>
               <section className={styles.analysisSection}>
@@ -2002,6 +2021,100 @@ export default function MainQuizAnalysis() {
                   ))}
                 </div>
               </section>
+              <section className={styles.analysisSection}>
+                <div className={styles.analysisSectionTitle}>
+                  Student Scores
+                </div>
+                {activeView === VIEW_MODES.GRAPHICAL ? (
+                  <div className={styles.studentScoreList}>
+                    {visibleStudentResults.map((student) => (
+                      <article
+                        key={student.id}
+                        className={styles.studentScoreRow}
+                      >
+                        <div>
+                          <strong>{student.name}</strong>
+                          <span>Section: {student.section}</span>
+                        </div>
+                        <div
+                          className={styles.studentScoreBar}
+                          role="img"
+                          aria-label={`${student.name}: ${formatScoreWithPercent(student.earnedScore, student.total)}`}
+                        >
+                          <i
+                            style={{
+                              width: `${Math.max(0, Math.min(100, getScorePercent(student.earnedScore, student.total) || 0))}%`,
+                            }}
+                          />
+                        </div>
+                        <strong>
+                          {formatScoreWithPercent(
+                            student.earnedScore,
+                            student.total,
+                          )}
+                        </strong>
+                      </article>
+                    ))}
+                  </div>
+                ) : (
+                  <div className={styles.tableWrap}>
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Student Name</th>
+                          <th>Section</th>
+                          <th>Score</th>
+                          <th>Percentage</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {visibleStudentResults.map((student) => (
+                          <tr key={student.id}>
+                            <td>{student.name}</td>
+                            <td>{student.section}</td>
+                            <td>
+                              {formatScore(student.earnedScore, student.total)}
+                            </td>
+                            <td>
+                              {formatPercent(
+                                getScorePercent(
+                                  student.earnedScore,
+                                  student.total,
+                                ),
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+                {!printing && studentPageCount > 1 && (
+                  <nav
+                    className={styles.studentPagination}
+                    aria-label="Student scores pages"
+                  >
+                    <button
+                      type="button"
+                      disabled={currentStudentPage === 0}
+                      onClick={() => setStudentPage(currentStudentPage - 1)}
+                    >
+                      Previous
+                    </button>
+                    <span aria-live="polite">
+                      Page {currentStudentPage + 1} of {studentPageCount}
+                    </span>
+                    <button
+                      type="button"
+                      disabled={currentStudentPage + 1 === studentPageCount}
+                      onClick={() => setStudentPage(currentStudentPage + 1)}
+                    >
+                      Next
+                    </button>
+                  </nav>
+                )}
+              </section>
+
               <section className={styles.analysisSection}>
                 <div className={styles.analysisSectionTitle}>
                   Student Overview
@@ -2351,6 +2464,99 @@ export default function MainQuizAnalysis() {
                     </tbody>
                   </table>
                 </div>
+              </section>
+              <section className={styles.analysisSection}>
+                <div className={styles.analysisSectionTitle}>
+                  Student Scores
+                </div>
+                {activeView === VIEW_MODES.GRAPHICAL ? (
+                  <div className={styles.studentScoreList}>
+                    {visibleStudentResults.map((student) => (
+                      <article
+                        key={student.id}
+                        className={styles.studentScoreRow}
+                      >
+                        <div>
+                          <strong>{student.name}</strong>
+                          <span>Section: {student.section}</span>
+                        </div>
+                        <div
+                          className={styles.studentScoreBar}
+                          role="img"
+                          aria-label={`${student.name}: ${formatScoreWithPercent(student.earnedScore, student.total)}`}
+                        >
+                          <i
+                            style={{
+                              width: `${Math.max(0, Math.min(100, getScorePercent(student.earnedScore, student.total) || 0))}%`,
+                            }}
+                          />
+                        </div>
+                        <strong>
+                          {formatScoreWithPercent(
+                            student.earnedScore,
+                            student.total,
+                          )}
+                        </strong>
+                      </article>
+                    ))}
+                  </div>
+                ) : (
+                  <div className={styles.tableWrap}>
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Student Name</th>
+                          <th>Section</th>
+                          <th>Score</th>
+                          <th>Percentage</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {visibleStudentResults.map((student) => (
+                          <tr key={student.id}>
+                            <td>{student.name}</td>
+                            <td>{student.section}</td>
+                            <td>
+                              {formatScore(student.earnedScore, student.total)}
+                            </td>
+                            <td>
+                              {formatPercent(
+                                getScorePercent(
+                                  student.earnedScore,
+                                  student.total,
+                                ),
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+                {!printing && studentPageCount > 1 && (
+                  <nav
+                    className={styles.studentPagination}
+                    aria-label="Student scores pages"
+                  >
+                    <button
+                      type="button"
+                      disabled={currentStudentPage === 0}
+                      onClick={() => setStudentPage(currentStudentPage - 1)}
+                    >
+                      Previous
+                    </button>
+                    <span aria-live="polite">
+                      Page {currentStudentPage + 1} of {studentPageCount}
+                    </span>
+                    <button
+                      type="button"
+                      disabled={currentStudentPage + 1 === studentPageCount}
+                      onClick={() => setStudentPage(currentStudentPage + 1)}
+                    >
+                      Next
+                    </button>
+                  </nav>
+                )}
               </section>
 
               <section className={styles.analysisSection}>

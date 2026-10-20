@@ -874,7 +874,7 @@ export default function CourseView() {
 
                       <td>{student.yearLevel || "N/A"}</td>
 
-                      <td>{student.sectionName || "N/A"}</td>
+                      <td>{student.sectionName || student.section_name || student.section || "N/A"}</td>
 
                       <td>
                         {activeTab === "requests" ? (
@@ -976,7 +976,7 @@ export default function CourseView() {
                   <td>{getStudentName(student)}</td>
                   <td>{student.email || "N/A"}</td>
                   <td>{student.yearLevel || "N/A"}</td>
-                  <td>{student.sectionName || "N/A"}</td>
+                  <td>{student.sectionName || student.section_name || student.section || "N/A"}</td>
                 </tr>
               ))
             ) : (

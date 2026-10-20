@@ -359,7 +359,7 @@ export default function QandA() {
   }
 
   async function checkAnswer() {
-    if (!questions[current] || notifOpen) return;
+    if (!questions[current] || notifOpen || !inputValue.trim()) return;
 
     window.speechSynthesis?.cancel();
 
@@ -669,6 +669,14 @@ export default function QandA() {
                 onKeyDown={handleKeyDown}
                 disabled={notifOpen}
               />
+              <button
+                type="button"
+                className={styles.submitAnswer}
+                onClick={checkAnswer}
+                disabled={notifOpen || !inputValue.trim()}
+              >
+                Submit Answer
+              </button>
             </div>
           </div>
         </>

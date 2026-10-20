@@ -108,6 +108,7 @@ export default function AssessmentDetail() {
           courseId={courseId}
           courseTitle={title}
           items={readItems(course)}
+          course={course}
         />
       )}
     </section>

@@ -1,3 +1,12 @@
+import RecentMainQuizResults from "../../../components/students/RecentMainQuizResults.jsx";
+import {
+  calendarDateKey,
+  eventsOnDate,
+} from "../../../services/academicCalendarDates.js";
+import {
+  StudentAcademicCalendar,
+  useAcademicCalendars,
+} from "../../../components/academicCalendar/AcademicCalendar.jsx";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
@@ -16,24 +25,6 @@ const API_BASE_URL =
   import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 const DEFAULT_PROFILE_IMAGE = "/images/temporary profile.jpg";
-
-const progressData = {
-  week: [
-    { id: 1, label: "Courses on track", value: "4/5", accent: "BK" },
-    { id: 2, label: "Studied this week", value: "6.5 hrs", accent: "TM" },
-    { id: 3, label: "Avg. quiz accuracy", value: "84%", accent: "OK" },
-  ],
-  month: [
-    { id: 1, label: "Courses on track", value: "4/5", accent: "BK" },
-    { id: 2, label: "Studied this month", value: "24 hrs", accent: "TM" },
-    { id: 3, label: "Avg. quiz accuracy", value: "87%", accent: "OK" },
-  ],
-  year: [
-    { id: 1, label: "Courses completed", value: "8", accent: "BK" },
-    { id: 2, label: "Studied this year", value: "142 hrs", accent: "TM" },
-    { id: 3, label: "Avg. quiz accuracy", value: "89%", accent: "OK" },
-  ],
-};
 
 function getStoredToken() {
   return (
@@ -164,12 +155,16 @@ export default function StudentHome() {
   const [joinModalOpen, setJoinModalOpen] = useState(false);
   const [courseCode, setCourseCode] = useState("");
 
-  const [progressPeriod, setProgressPeriod] = useState("week");
-
   const [shownMonth, setShownMonth] = useState(
     () => new Date(new Date().getFullYear(), new Date().getMonth(), 1),
   );
   const [selectedDate, setSelectedDate] = useState(() => new Date());
+  const academicCalendars = useAcademicCalendars();
+  const [academicCalendarId, setAcademicCalendarId] = useState(null);
+  const activeAcademicCalendar =
+    academicCalendars.records.find(
+      (record) => record.calendar_id === academicCalendarId,
+    ) || academicCalendars.records[0];
 
   const todoStorageKey = useMemo(() => {
     const user = getStoredUser();
@@ -219,7 +214,7 @@ export default function StudentHome() {
   const monthLabel = shownMonth.toLocaleString("en-US", {
     month: "long",
     year: "numeric",
-  });
+  }).replace(/\s+/g, "");
 
   const displayName =
     currentUser?.displayName ||
@@ -482,15 +477,6 @@ export default function StudentHome() {
     navigate(`/student/enrolled-courses/${course.id}`);
   };
 
-  const nextProgressPeriod = () => {
-    const periods = ["week", "month", "year"];
-
-    setProgressPeriod((current) => {
-      const index = periods.indexOf(current);
-      return periods[(index + 1) % periods.length];
-    });
-  };
-
   return (
     <div className="student-home-page">
       <StudentSidebar />
@@ -584,32 +570,7 @@ export default function StudentHome() {
               </div>
             </section>
 
-            <section
-              className="home-section home-progress-section"
-              aria-labelledby="progress-overview-title"
-            >
-              <div className="home-section-header">
-                <h2 id="progress-overview-title">Progress overview</h2>
-
-                <button
-                  type="button"
-                  className="home-progress-filter"
-                  onClick={nextProgressPeriod}
-                >
-                  {progressPeriod}
-                </button>
-              </div>
-
-              <div className="home-progress-grid">
-                {progressData[progressPeriod].map((item) => (
-                  <article key={item.id} className="home-progress-card">
-                    <span className="home-progress-icon">{item.accent}</span>
-                    <strong>{item.value}</strong>
-                    <span className="home-progress-label">{item.label}</span>
-                  </article>
-                ))}
-              </div>
-            </section>
+            <RecentMainQuizResults />
           </main>
 
           <aside className="student-home-profile-panel">
@@ -673,11 +634,26 @@ export default function StudentHome() {
                     <button
                       key={item.key}
                       type="button"
-                      className={
+                      className={[
                         item.date.toDateString() === selectedDate.toDateString()
                           ? "selected"
-                          : ""
-                      }
+                          : "",
+                        eventsOnDate(
+                          activeAcademicCalendar?.events,
+                          calendarDateKey(item.date),
+                        ).length
+                          ? "academic-event-day"
+                          : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" ")}
+                      aria-label={[
+                        item.date.toLocaleDateString("en-US"),
+                        ...eventsOnDate(
+                          activeAcademicCalendar?.events,
+                          calendarDateKey(item.date),
+                        ).map((event) => event.title),
+                      ].join(": ")}
                       onClick={() => setSelectedDate(item.date)}
                     >
                       {item.day}
@@ -685,6 +661,18 @@ export default function StudentHome() {
                   ),
                 )}
               </div>
+              <StudentAcademicCalendar
+                records={academicCalendars.records}
+                selected={activeAcademicCalendar}
+                onSelect={setAcademicCalendarId}
+                date={selectedDate}
+                month={shownMonth}
+                onShift={shiftMonth}
+                onDateSelect={setSelectedDate}
+                error={academicCalendars.error}
+                loading={academicCalendars.loading}
+                onRetry={academicCalendars.reload}
+              />
             </section>
 
             <section className="home-todo-card">

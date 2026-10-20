@@ -2320,7 +2320,7 @@ export default function SuperAdminUserManagementPage() {
         </aside>
       )}
 
-      <div className="users-page-header">
+      <div className="users-page-header super-page-heading">
         <div>
           <h1>User Management</h1>
           <p>

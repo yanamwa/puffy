@@ -1,3 +1,4 @@
+import { studentModuleNavigation } from "../../utils/studentModuleVisibility.js";
 import {
   readAccountQuizResult,
   saveAccountQuizResult,
@@ -86,17 +87,14 @@ function Lesson() {
 
   const modules = useMemo(() => getCourseContentModules(lesson), [lesson]);
   const requestedModuleIndex = Number(searchParams.get("module") || 0);
-  const moduleIndex = Math.min(
-    Math.max(
-      Number.isInteger(requestedModuleIndex) ? requestedModuleIndex : 0,
-      0,
-    ),
-    Math.max(modules.length - 1, 0),
-  );
+  const navigation = studentModuleNavigation(modules, requestedModuleIndex);
+  const moduleIndex = navigation.moduleIndex;
   const activeModule = modules[moduleIndex] || null;
-  const moduleNumber = moduleIndex + 1;
-  const moduleCount = Math.max(modules.length, 1);
-  const nextModule = modules[moduleIndex + 1] || null;
+  const moduleNumber = navigation.moduleNumber;
+  const moduleCount = Math.max(navigation.moduleCount, 1);
+  const modulePosition = Math.max(moduleNumber - 1, 0);
+  const nextModuleIndex = navigation.nextModuleIndex;
+  const nextModule = nextModuleIndex === null ? null : modules[nextModuleIndex];
   const modulePracticeId = `${lessonId}-${
     activeModule?.id || `module-${moduleNumber}`
   }`;
@@ -253,7 +251,7 @@ function Lesson() {
       : 100;
     const courseProgressToSave = Math.min(
       100,
-      Math.round(((moduleIndex + progressToSave / 100) / moduleCount) * 100),
+      Math.round(((modulePosition + progressToSave / 100) / moduleCount) * 100),
     );
 
     saveStudentReadingProgress(lessonId, courseProgressToSave, {
@@ -333,7 +331,7 @@ function Lesson() {
 
     const completedCourseProgress = Math.min(
       100,
-      Math.round(((moduleIndex + 1) / moduleCount) * 100),
+      Math.round(((modulePosition + 1) / moduleCount) * 100),
     );
     const completedRecord = {
       module_index: moduleIndex,
@@ -383,7 +381,7 @@ function Lesson() {
         moduleIndex,
         moduleNumber,
         moduleCount,
-        nextModuleIndex: nextModule ? moduleIndex + 1 : null,
+        nextModuleIndex: nextModuleIndex,
         nextModuleTitle: nextModule?.title || "",
         scopeTitle: moduleTitle,
         scopeDetail: `${lessonSlides.length} lesson page(s)`,
@@ -395,7 +393,7 @@ function Lesson() {
 
   const continueToNextModule = () => {
     if (nextModule) {
-      navigate(`/introduction/${lessonId}?module=${moduleIndex + 1}`);
+      navigate(`/introduction/${lessonId}?module=${nextModuleIndex}`);
       return;
     }
 

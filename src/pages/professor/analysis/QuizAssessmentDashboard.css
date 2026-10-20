@@ -645,3 +645,187 @@
 .qa-page-print-actions .qa-page-print {
   min-width: 88px;
 }
+.qa-topic-intro {
+  margin: 18px 0;
+  line-height: 1.7;
+  color: #526579;
+}
+
+.qa-question-analysis table {
+  min-width: 850px;
+}
+
+.qa-question-analysis th:first-child {
+  width: 32%;
+}
+
+.qa-question-analysis th:last-child {
+  width: 20%;
+}
+
+.qa-question-bar {
+  min-width: 140px;
+  margin-bottom: 8px;
+}
+
+.qa-response-button {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 16px;
+  border: 1px solid #7fa8d6;
+  border-radius: 8px;
+  background: #7fa8d6;
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+.qa-response-button:hover {
+  background: #638fbd;
+}
+.qa-response-button:focus-visible {
+  outline: 2px solid #48688f;
+  outline-offset: 3px;
+}
+@media print {
+  .qa-response-button {
+    display: none !important;
+  }
+}
+
+/* Shared assessment workspace layout. */
+.qa-workspace-navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+}
+.qa-workspace-navigation .qa-assessment-tabs {
+  margin-bottom: 0;
+}
+.qa-workspace-navigation > .qa-response-button {
+  margin-bottom: 12px;
+  min-width: 168px;
+  justify-content: center;
+}
+.qa-compact-assessment .qa-page-print {
+  background: #6f96c2;
+  border-color: #6f96c2;
+  border-radius: 8px;
+}
+.qa-compact-assessment .qa-page-print:hover:not(:disabled) {
+  background: #567fae;
+}
+.qa-main-analysis > section > section,
+.qa-content-panel {
+  border-radius: 0 10px 10px 10px;
+  border: 1px solid #cbd4df;
+  background: white;
+  padding: 24px;
+}
+.qa-main-analysis [class*="detailTop"] {
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+@media (max-width: 600px) {
+  .qa-workspace-navigation {
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .qa-workspace-navigation > .qa-response-button {
+    margin-left: auto;
+  }
+  .qa-workspace-navigation .qa-assessment-tabs {
+    order: 2;
+    width: 100%;
+  }
+}
+@media print {
+  .qa-workspace-navigation {
+    display: none !important;
+  }
+}
+
+/* Keep module selection outside the tabs, with scope repeated in printed reports. */
+.qa-module-filter {
+  display: grid;
+  gap: 10px;
+  margin: -28px -42px 24px;
+  width: calc(100% + 84px);
+  max-width: none;
+  box-sizing: border-box;
+  padding: 18px 42px;
+  border-bottom: 1px solid #d1d5db;
+  background: #ededed;
+  color: #606060;
+  font: inherit;
+}
+.qa-module-filter label {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+.qa-assessment-page .qa-module-filter select {
+  appearance: none;
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  box-sizing: border-box;
+  padding: 12px 44px 12px 16px;
+  border: 1px solid #c6c6c6;
+  border-radius: 8px;
+  background-color: #fff;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath d='m4 6 4 4 4-4' fill='none' stroke='%23606060' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  color: #606060;
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+  box-shadow: none;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.qa-assessment-page .qa-module-filter select:hover {
+  border-color: #7fa8d6;
+}
+.qa-assessment-page .qa-module-filter select:focus-visible {
+  outline: none;
+  border-color: #7fa8d6;
+  box-shadow: 0 0 0 3px #7fa8d626;
+}
+.qa-report-module {
+  margin: 8px 0 0;
+  color: #365d86;
+  font-size: 15px;
+}
+@media print {
+  .qa-module-filter {
+    display: none;
+  }
+}
+
+@media (max-width: 700px) {
+  .qa-module-filter {
+    margin: -22px -16px 22px;
+    width: calc(100% + 32px);
+    padding: 18px 16px;
+  }
+}
+
+/* Simple empty state for a module without main quiz submissions. */
+.qa-main-analysis .qa-empty-report {
+  overflow: hidden;
+  border: 1px solid #d5e1ee;
+  border-radius: 10px;
+  background: #fff;
+}
+.qa-empty-report-heading {
+  padding: 20px 24px;
+  border-bottom: 1px solid #e3ebf4;
+}
+.qa-empty-eyebrow { color: #6383a5; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; }
+.qa-empty-report-heading h2 { margin: 8px 0; color: #294765; font-size: 20px; line-height: 1.4; }
+.qa-empty-report-heading .qa-empty-module { margin: 0; color: #6383a5; font-size: 14px; }
+.qa-empty-state { padding: 32px 24px; text-align: center; }
+.qa-empty-state h3 { margin: 0 0 8px; color: #294765; font-size: 18px; font-weight: 500; }
+.qa-empty-state > p { margin: 0; color: #73849a; font-size: 14px; line-height: 1.6; }

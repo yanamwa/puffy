@@ -26,13 +26,6 @@ code {
   font-family: "Merriweather", Georgia, serif;
 }
 
-#root .enrolled-sidebar .side-nav-item,
-#root .enrolled-sidebar .brand-name,
-#root .enrolled-sidebar .brand-lockup span,
-#root .enrolled-sidebar .nav-label,
-#root .enrolled-sidebar .dropdown-mark,
-#root .enrolled-sidebar .logout-label,
-#root .enrolled-sidebar .enrolled-subnav-item,
 #root .admin-sidebar .sidebar-brand h2,
 #root .admin-sidebar .sidebar-link,
 #root .admin-sidebar .logout-btn,
@@ -48,6 +41,58 @@ code {
   font-size: 10px !important;
   font-weight: 400 !important;
   line-height: 1.2 !important;
+}
+
+#root .enrolled-sidebar .side-nav-item,
+#root .enrolled-sidebar .nav-label,
+#root .enrolled-sidebar .logout-label,
+#root .enrolled-sidebar .enrolled-subnav-item {
+  font-size: 20px;
+  line-height: 1.35;
+}
+
+#root .enrolled-sidebar .brand-name {
+  font-size: 24px;
+}
+
+#root .enrolled-sidebar:not(.sidebar-collapsed) .side-nav {
+  padding: 26px 0 0 12px;
+  gap: 14px;
+}
+
+#root .enrolled-sidebar .side-nav-item {
+  min-height: 52px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  gap: 8px;
+}
+
+#root .enrolled-sidebar .nav-label {
+  white-space: normal;
+  min-width: 0;
+  line-height: 1.2;
+}
+
+#root .enrolled-sidebar .sidebar-enrolled-toggle {
+  gap: 6px;
+  padding-left: 4px;
+  padding-right: 6px;
+}
+
+#root .enrolled-sidebar .sidebar-enrolled-toggle .nav-label {
+  white-space: nowrap;
+  font-size: 18px;
+  letter-spacing: -0.5px;
+}
+
+#root .enrolled-sidebar .sidebar-enrolled-toggle > svg:not(.sidebar-dropdown-arrow) {
+  width: 18px;
+  height: 18px;
+}
+
+#root .enrolled-sidebar .side-nav-item svg {
+  width: 22px;
+  height: 22px;
 }
 
 #root .admin-sidebar .menu-section-title,

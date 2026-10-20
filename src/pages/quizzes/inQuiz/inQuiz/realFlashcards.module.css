@@ -7,7 +7,6 @@
   padding: 40px 20px;
   font-family: "Jersey 15", sans-serif;
 
-  background-image: url("/images/background_notebook.png");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -167,15 +166,11 @@
 .flashcardWrapper {
   width: 92%;
   max-width: 1180px;
-  background: #f7f7f7;
   height: 420px;
   border-radius: 45px;
   padding: 38px 70px 35px;
   margin-top: 25px;
   box-sizing: border-box;
-  box-shadow:
-    0 8px 18px rgba(0, 0, 0, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.7);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -325,7 +320,7 @@
   display: flex;
   justify-content: center;
   gap: 30px;
-  background: #edf4fc;
+  background: #c3c3c4;
   border-radius: 0 0 26px 26px;
   box-sizing: border-box;
   z-index: 4;
@@ -1176,5 +1171,67 @@
 
   .audioIconBtn i {
     font-size: 11px !important;
+  }
+}
+
+/* Let both faces size the card so long questions and answers remain visible. */
+.flashcardWrapper {
+  height: auto !important;
+}
+
+.flashcard {
+  height: auto !important;
+  flex-shrink: 0;
+}
+
+.flashcardInner {
+  display: grid;
+  height: auto;
+}
+
+.flashcardFace {
+  position: relative;
+  inset: auto;
+  grid-area: 1 / 1;
+  min-width: 0;
+  min-height: 300px;
+  box-sizing: border-box;
+  padding: 60px 36px 32px !important;
+  border-radius: 26px 26px 0 0 !important;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 31px,
+    rgba(127, 168, 214, 0.3) 31px,
+    rgba(127, 168, 214, 0.3) 32px
+  );
+  background-size: 100% 32px;
+  overflow: visible;
+}
+
+.flashcardFace p,
+.flashcardContent p,
+.back p {
+  max-width: 100% !important;
+  overflow-wrap: anywhere;
+}
+
+.difficulty {
+  position: relative;
+  bottom: auto;
+}
+
+@media (max-width: 480px) {
+  .flashcardFace {
+    min-height: 260px;
+    padding: 48px 18px 24px !important;
+    border-radius: 16px 16px 0 0 !important;
+  }
+
+  .flashcardFace p,
+  .flashcardContent p,
+  .back p {
+    font-size: 18px !important;
+    line-height: 1.5 !important;
   }
 }

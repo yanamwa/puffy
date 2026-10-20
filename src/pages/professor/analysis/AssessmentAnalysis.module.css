@@ -1756,8 +1756,12 @@
 
 .studentScoreList {
   display: grid;
-  gap: 16px;
+  gap: 0;
   margin: 20px 0;
+  border: 1px solid #cccccc;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #ffffff;
 }
 .studentScoreRow {
   display: grid;
@@ -1767,6 +1771,10 @@
     );
   align-items: center;
   gap: 20px;
+  padding: 16px;
+}
+.studentScoreRow + .studentScoreRow {
+  border-top: 1px solid #dddddd;
 }
 .studentScoreRow > div:first-child {
   display: grid;
@@ -1793,7 +1801,27 @@
   .studentScoreRow {
     grid-template-columns: minmax(0, 1fr);
     gap: 10px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid #d2deeb;
   }
+}
+.studentPagination {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.studentPagination button {
+  padding: 8px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: white;
+  color: #334155;
+  font: inherit;
+  cursor: pointer;
+}
+
+.studentPagination button:disabled {
+  opacity: 0.45;
+  cursor: default;
 }

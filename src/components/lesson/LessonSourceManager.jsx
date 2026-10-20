@@ -1,3 +1,4 @@
+import Swal from "sweetalert2";
 import {
   FiRefreshCw,
   FiRotateCw,
@@ -110,12 +111,26 @@ export default function LessonSourceManager({
     notifyLessonGenerated(result.lesson_pages || []);
   };
   const generate = async (id, reindex) => {
-    if (
-      !window.confirm(
-        "Replace this module’s lesson pages with a new source-based generation?",
-      )
-    )
-      return;
+    const confirmation = await Swal.fire({
+      title: "Generate new lesson pages?",
+      text: "New pages will replace this module's current lesson pages when generation succeeds. Any edits to those pages will be replaced. Your saved source files will be reused.",
+      showCancelButton: true,
+      confirmButtonText: "Generate pages",
+      cancelButtonText: "Keep current pages",
+      focusCancel: true,
+      reverseButtons: true,
+      buttonsStyling: false,
+      customClass: {
+        container: styles.confirmContainer,
+        popup: styles.confirmPopup,
+        title: styles.confirmTitle,
+        htmlContainer: styles.confirmText,
+        actions: styles.confirmActions,
+        confirmButton: styles.confirmButton,
+        cancelButton: styles.cancelButton,
+      },
+    });
+    if (!confirmation.isConfirmed || sourceScope.current !== key) return;
     setBusy(true);
     try {
       complete(await regenerateLessonSource(id, reindex, progress, queued));
