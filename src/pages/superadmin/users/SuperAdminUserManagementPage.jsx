@@ -1,3 +1,4 @@
+import UserPagination, { useUserPagination } from "../../../components/UserPagination";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
@@ -540,7 +541,7 @@ export default function SuperAdminUserManagementPage() {
     };
   }, [users]);
 
-  const visibleUsers = useMemo(() => {
+  const filteredUsers = useMemo(() => {
     const search = query.trim().toLowerCase();
     const tabUsers = userGroups[activeTab] || userGroups.all;
 
@@ -559,6 +560,8 @@ export default function SuperAdminUserManagementPage() {
         .some((value) => value.includes(search));
     });
   }, [activeTab, query, userGroups]);
+  const pagination = useUserPagination(filteredUsers, activeTab, query);
+  const visibleUsers = pagination.rows;
 
   const stats = useMemo(
     () => [
@@ -2393,8 +2396,7 @@ export default function SuperAdminUserManagementPage() {
           <div>
             <h2>{USER_TABS.find((tab) => tab.id === activeTab)?.label}</h2>
             <p>
-              {visibleUsers.length} record{visibleUsers.length === 1 ? "" : "s"}{" "}
-              shown
+              {pagination.range} records shown
             </p>
           </div>
 
@@ -2421,6 +2423,7 @@ export default function SuperAdminUserManagementPage() {
             {renderUserTable()}
           </table>
         </div>
+        <UserPagination pagination={pagination} loading={loading} />
       </section>
 
       {credentialResults.length > 0 && (

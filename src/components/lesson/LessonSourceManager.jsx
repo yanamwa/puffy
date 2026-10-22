@@ -22,6 +22,7 @@ export default function LessonSourceManager({
   lessonId = null,
   jobScope,
   onGenerated,
+  generationContext = null,
 }) {
   const [sources, setSources] = useState([]),
     [busy, setBusy] = useState(false),
@@ -133,7 +134,7 @@ export default function LessonSourceManager({
     if (!confirmation.isConfirmed || sourceScope.current !== key) return;
     setBusy(true);
     try {
-      complete(await regenerateLessonSource(id, reindex, progress, queued));
+      complete(await regenerateLessonSource(id, reindex, progress, queued, generationContext));
       await refresh();
     } catch (error) {
       setMessage(error.message);

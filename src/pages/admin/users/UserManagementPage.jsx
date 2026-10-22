@@ -1,3 +1,4 @@
+import UserPagination, { useUserPagination } from "../../../components/UserPagination";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   FiArchive, FiCheck, FiClock, FiEye, FiFileText, FiMail,
@@ -350,6 +351,7 @@ export default function UserManagementPage() {
       !search || [user.name, user.email, user.id, user.studentId, user.professorDepartment]
         .some(value => String(value ?? "").toLowerCase().includes(search)));
   }, [userGroups, activeTab, query]);
+  const pagination = useUserPagination(filteredUsers, activeTab, query);
   const securityLabel = user => user.isTemporary ? `Temporary until ${formatDate(user.temporaryExpiresAt)}` : user.mustChangePassword ? "Temporary password" : user.verified ? "Email verified" : "Email pending";
   const stats = [
     { label: "Managed Users", value: users.length, icon: FiUsers },
@@ -374,20 +376,20 @@ export default function UserManagementPage() {
     <section className="users-panel">
       <nav className="user-management-tabs" aria-label="User management sections">
         {USER_TABS.map(tab => <button key={tab.id} type="button" className={activeTab === tab.id ? "active" : ""} aria-pressed={activeTab === tab.id} onClick={() => setActiveTab(tab.id)}>{tab.label}</button>)}
-      </nav><div className="users-panel-top"><div><h2>{USER_TABS.find(tab => tab.id === activeTab)?.label}</h2><p>{filteredUsers.length} user records shown</p></div>
+      </nav><div className="users-panel-top"><div><h2>{USER_TABS.find(tab => tab.id === activeTab)?.label}</h2><p>{pagination.range} user records shown</p></div>
       <div className="users-controls"><label className="users-search"><FiSearch /><input type="text" placeholder="Search users..." value={query} onChange={event => setQuery(event.target.value)} /></label>
       </div></div>
       {notice && <div className="users-notice" role="status">{notice}</div>}
       {loadError && <div className="users-notice" role="alert">{loadError} <button type="button" onClick={loadUsers}>Retry</button></div>}
       <div className="users-table-wrap"><table className="users-table"><thead><tr><th>User</th><th>Email</th><th>Role</th><th>Status</th><th>Joined</th><th>Security</th><th>Action</th></tr></thead>
-        <tbody>{loading ? <tr><td className="users-empty" colSpan={7}>Loading users...</td></tr> : filteredUsers.length === 0 ? <tr><td className="users-empty" colSpan={7}>{loadError ? "Unable to load users." : "No users match your filters."}</td></tr> : filteredUsers.map(user => <tr key={user.id}>
+        <tbody>{loading ? <tr><td className="users-empty" colSpan={7}>Loading users...</td></tr> : filteredUsers.length === 0 ? <tr><td className="users-empty" colSpan={7}>{loadError ? "Unable to load users." : "No users match your filters."}</td></tr> : pagination.rows.map(user => <tr key={user.id}>
           <td><div className="users-person"><UserAvatar user={user} /><div><strong>{user.name}</strong><small>ID: {user.id}</small></div></div></td>
           <td>{user.email}</td><td><span className="users-role">{titleCase(user.role)}</span></td>
           <td><span className={`users-status is-${String(user.status).toLowerCase()}`}>{titleCase(user.status)}</span></td>
           <td>{formatDate(user.joined)}</td><td>{securityLabel(user)}</td>
           <td><div className="users-action-group"><button className="users-icon-btn users-view-btn" type="button" onClick={() => setSelectedUser(user)} title="View user"><FiEye /><span>View</span></button>
             <button className="users-icon-btn users-archive-btn" type="button" onClick={() => handleArchiveToggle(user)} disabled={busyUserId !== null} title={user.isArchived ? "Restore account" : "Archive account"}><FiArchive /><span>{busyUserId === user.id ? "Saving..." : user.isArchived ? "Restore" : "Archive"}</span></button></div></td>
-        </tr>)}</tbody></table></div>
+        </tr>)}</tbody></table></div><UserPagination pagination={pagination} loading={loading} />
     </section>
     {selectedUser && <div className="users-modal-backdrop" onClick={() => setSelectedUser(null)}><section className="users-modal" role="dialog" aria-modal="true" aria-label="User details" onClick={event => event.stopPropagation()}>
       <button className="users-modal-close" type="button" onClick={() => setSelectedUser(null)} aria-label="Close user details"><FiX /></button>

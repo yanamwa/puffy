@@ -993,9 +993,14 @@
 
 .feature-page .primary-feature-btn,
 .feature-page .restore-feature-btn {
-  background: #17192a !important;
-  box-shadow: 0 5px 0 #c9cbd1 !important;
-  color: #ffffff !important;
+  background: #c6ddf4 !important;
+  box-shadow: 0 5px 0 #a0c2e6 !important;
+  color: #234f7b !important;
+}
+
+.feature-page .primary-feature-btn:hover:not(:disabled),
+.feature-page .restore-feature-btn:hover:not(:disabled) {
+  background: #a5c5e8 !important;
 }
 
 .feature-page .edit-btn {

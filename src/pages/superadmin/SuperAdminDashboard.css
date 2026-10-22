@@ -1,4 +1,11 @@
 .super-dashboard {
+  --admin-ink: #263e5b;
+  --admin-muted: #637c97;
+  --admin-line: #cbdced;
+  --admin-soft-line: #e1ecf7;
+  --admin-shadow: #e1eaf4;
+  --admin-peach: #edf5fd;
+  --admin-peach-line: #cbdff2;
   color: var(--admin-ink);
   display: grid;
   gap: 22px;
@@ -50,9 +57,9 @@
 }
 
 .dashboard-health-dot {
-  background: #198754;
+  background: #82b3df;
   border-radius: 50%;
-  box-shadow: 0 0 0 5px rgba(25, 135, 84, 0.13);
+  box-shadow: 0 0 0 5px rgba(130, 179, 223, 0.18);
   height: 11px;
   width: 11px;
 }
@@ -140,6 +147,10 @@
   grid-template-columns: minmax(0, 1.65fr) minmax(330px, 0.85fr);
 }
 
+.dashboard-main-grid.dashboard-single-column {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .dashboard-panel {
   background: #ffffff;
   border: 1.5px solid var(--admin-line);
@@ -193,9 +204,9 @@
 }
 
 .dashboard-filter-group button.active {
-  background: #198754;
-  border-color: #198754;
-  color: #ffffff;
+  background: #dcecfb;
+  border-color: #a6c8e8;
+  color: #294e75;
 }
 
 .growth-chart {
@@ -505,7 +516,7 @@
 }
 
 .status-indicator.is-ok {
-  background: #198754;
+  background: #82b3df;
 }
 
 .status-indicator.is-warning {
@@ -547,7 +558,7 @@
 }
 
 .security-card.is-ok {
-  border-color: rgba(25, 135, 84, 0.35);
+  border-color: #cbdff2;
 }
 
 .security-card.is-warning {

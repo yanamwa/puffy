@@ -8,7 +8,7 @@ function coverageList(value) {
   }
 }
 
-// Only new, unsaved classes receive empty module shells. Never fabricate lesson content.
+// Copy catalog lessons into independent, unpublished professor drafts.
 export function applyCatalogToDraft(
   form,
   course,
@@ -32,6 +32,7 @@ export function applyCatalogToDraft(
         (module) =>
           !module.catalogCoverageTitle ||
           module.title !== module.catalogCoverageTitle ||
+          module.topics?.some(t => t.trim()) ||
           module.description ||
           module.learningObjectives ||
           module.lessonPages?.length ||
@@ -57,9 +58,11 @@ export function applyCatalogToDraft(
               id: createId(),
               title,
               catalogCoverageTitle: title,
-              description: "",
-              learningObjectives: "",
-              lessonPages: [],
+              description: String(row.description || ""),
+              learningObjectives: String(row.learning_objectives || ""),
+              topics: [...(row.topics || [])],
+              studentPublished: false,
+              lessonPages: (row.lesson_pages || []).map(page => ({ ...page, id: createId() })),
               quizItems: [],
               mainQuizSettings: { enabled: false, unlockAt: "", lockAt: "" },
               mainQuizEnabled: false,

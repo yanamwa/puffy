@@ -42,9 +42,11 @@ export default function ProfessorCatalogSelection({
           if (active) setLoading(false);
         });
     load();
+    const timer = setInterval(load, 10000);
     window.addEventListener("puffy-catalog-updated", load);
     return () => {
       active = false;
+      clearInterval(timer);
       window.removeEventListener("puffy-catalog-updated", load);
     };
   }, [revision]);
@@ -64,6 +66,11 @@ export default function ProfessorCatalogSelection({
       onChange(applyCatalogToDraft(form, selected));
   }, [locked, selected, form, onChange]);
   const choose = (course) => {
+    if (["queued", "running"].includes(course.versions?.[0]?.generation_status)) {
+      setError("Draft lessons are still generating for this course. Try selecting it again shortly.");
+      return;
+    }
+
     onChange(applyCatalogToDraft(form, course));
     setOpen(false);
     setQuery("");

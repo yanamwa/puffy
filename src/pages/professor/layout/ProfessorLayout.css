@@ -2665,6 +2665,10 @@
   grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.65fr);
 }
 
+#root .attention-grid > .dashboard-panel {
+  align-self: stretch;
+}
+
 #root .dashboard-attention-table {
   min-width: 0;
 }

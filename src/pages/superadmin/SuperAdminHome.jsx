@@ -2,32 +2,28 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   FiActivity,
-  FiArchive,
-  FiBell,
   FiBookOpen,
   FiClock,
   FiDatabase,
-  FiFileText,
   FiHardDrive,
   FiLock,
   FiMail,
   FiMonitor,
-  FiPlus,
   FiRefreshCw,
   FiShield,
   FiSmartphone,
-  FiTrendingUp,
   FiUserCheck,
-  FiUserPlus,
   FiUsers,
 } from "react-icons/fi";
 import { API_BASE } from "../../config";
+import { useAuth } from "../../context/AuthContext";
+import { getUserRole } from "../../utils/roles";
 import "./SuperAdminDashboard.css";
 
 const roleColors = {
-  students: "#198754",
-  professors: "#0d6efd",
-  administrators: "#6f42c1",
+  students: "#82b3df",
+  professors: "#b5d7f1",
+  administrators: "#9aaee0",
 };
 
 const growthFilters = [
@@ -311,7 +307,10 @@ function isCourseActive(course) {
   );
 }
 
-export default function SuperAdminHome() {
+export default function ManagementDashboard() {
+  const { user } = useAuth();
+  const isSuperAdmin = getUserRole(user) === "super_admin";
+  const roleLabel = isSuperAdmin ? "Super Admin" : "Admin";
   const [users, setUsers] = useState([]);
   const [courses, setCourses] = useState([]);
   const [growthRange, setGrowthRange] = useState("30d");
@@ -459,92 +458,15 @@ export default function SuperAdminHome() {
     totals.students + totals.professors + totals.administrators;
   const latestPendingApprovals = pendingApprovals.slice(0, 5);
 
-  const recentActivity = useMemo(() => {
-    const entries = [];
-    const newestStudents = activeUsers
-      .filter((user) => user.roleGroup === "student")
-      .sort(
-        (left, right) =>
-          (parseDate(right.joined)?.getTime() || 0) -
-          (parseDate(left.joined)?.getTime() || 0),
-      );
-    const approvedProfessors = activeUsers
-      .filter(
-        (user) => user.roleGroup === "professor" && user.status === "Active",
+  const recentUsers = useMemo(
+    () => [...activeUsers]
+      .sort((left, right) =>
+        (parseDate(right.joined)?.getTime() || 0) -
+        (parseDate(left.joined)?.getTime() || 0),
       )
-      .sort(
-        (left, right) =>
-          (parseDate(right.joined)?.getTime() || 0) -
-          (parseDate(left.joined)?.getTime() || 0),
-      );
-    const archivedUsers = users
-      .filter((user) => user.isArchived)
-      .sort(
-        (left, right) =>
-          (parseDate(right.joined)?.getTime() || 0) -
-          (parseDate(left.joined)?.getTime() || 0),
-      );
-    const publishedCourses = courses
-      .filter(isCourseActive)
-      .sort(
-        (left, right) =>
-          (parseDate(right.updatedAt)?.getTime() || 0) -
-          (parseDate(left.updatedAt)?.getTime() || 0),
-      );
-
-    if (newestStudents[0]) {
-      entries.push({
-        user: "Administrator",
-        action: `created student account for ${newestStudents[0].name}`,
-        time: formatRelativeTime(newestStudents[0].joined),
-        icon: FiUserPlus,
-      });
-    }
-
-    if (approvedProfessors[0]) {
-      entries.push({
-        user: "Super Admin",
-        action: `approved professor registration for ${approvedProfessors[0].name}`,
-        time: formatRelativeTime(approvedProfessors[0].joined),
-        icon: FiUserCheck,
-      });
-    }
-
-    if (publishedCourses[0]) {
-      entries.push({
-        user: publishedCourses[0].professorName,
-        action: `published ${publishedCourses[0].title}`,
-        time: formatRelativeTime(publishedCourses[0].updatedAt),
-        icon: FiBookOpen,
-      });
-    }
-
-    if (archivedUsers[0]) {
-      entries.push({
-        user: "Super Admin",
-        action: `archived ${archivedUsers[0].name}`,
-        time: formatRelativeTime(archivedUsers[0].joined),
-        icon: FiArchive,
-      });
-    }
-
-    return [
-      ...entries,
-      {
-        user: "Super Admin",
-        action: "updated system settings",
-        time: "Today",
-        icon: FiShield,
-      },
-      {
-        user: "System",
-        action: "completed database backup",
-        time: "Today",
-        icon: FiDatabase,
-      },
-    ].slice(0, 6);
-  }, [activeUsers, courses, users]);
-
+      .slice(0, 5),
+    [activeUsers],
+  );
   const statusItems = [
     {
       label: "Database",
@@ -605,10 +527,10 @@ export default function SuperAdminHome() {
     },
     { label: "Active Courses", value: totals.courses, icon: FiBookOpen },
     {
-      label: "Pending Professor Approvals",
-      value: totals.pending,
+      label: isSuperAdmin ? "Pending Professor Approvals" : "Total Users",
+      value: isSuperAdmin ? totals.pending : activeUsers.length,
       icon: FiClock,
-      to: "/super-admin/users?tab=approvals",
+      to: isSuperAdmin ? "/super-admin/users?tab=approvals" : "/admin/users",
     },
     {
       label: "Active Users Today",
@@ -617,46 +539,12 @@ export default function SuperAdminHome() {
     },
   ];
 
-  const quickActions = [
-    {
-      label: "Add Student",
-      to: "/super-admin/users?tab=students&action=add-student",
-      icon: FiPlus,
-    },
-    {
-      label: "Add Professor",
-      to: "/super-admin/users?tab=professors&action=add-professor",
-      icon: FiUserPlus,
-    },
-    {
-      label: "Add Administrator",
-      to: "/super-admin/users?tab=admins&action=add-admin",
-      icon: FiShield,
-    },
-    {
-      label: "Review Professor Requests",
-      to: "/super-admin/users?tab=approvals",
-      icon: FiUserCheck,
-    },
-    {
-      label: "Create Announcement",
-      to: "/super-admin/announcements",
-      icon: FiBell,
-    },
-    { label: "Back Up Database", to: "/super-admin/backup", icon: FiDatabase },
-    {
-      label: "View Audit Logs",
-      to: "/super-admin/audit-logs",
-      icon: FiFileText,
-    },
-  ];
-
   return (
     <div className="super-dashboard">
       <header className="super-dashboard-welcome super-page-heading">
         <div>
           <p className="super-dashboard-date">{formatCurrentDate()}</p>
-          <h1>Welcome back, Super Admin!</h1>
+          <h1>Welcome back, {roleLabel}!</h1>
           <p>Here is an overview of PuffyBrain&apos;s system activity.</p>
         </div>
         <div className="super-dashboard-health">
@@ -670,7 +558,7 @@ export default function SuperAdminHome() {
 
       <section
         className="dashboard-summary-grid"
-        aria-label="Super admin summary"
+        aria-label={`${roleLabel} summary`}
       >
         {summaryCards.map((card) => {
           const Icon = card.icon;
@@ -808,8 +696,8 @@ export default function SuperAdminHome() {
         </section>
       </div>
 
-      <div className="dashboard-main-grid">
-        <section className="dashboard-panel dashboard-wide-panel">
+      <div className={`dashboard-main-grid ${!isSuperAdmin ? "dashboard-single-column" : ""}`}>
+        {isSuperAdmin && <section className="dashboard-panel dashboard-wide-panel">
           <div className="dashboard-panel-header">
             <div>
               <h2>Pending Professor Approvals</h2>
@@ -871,32 +759,39 @@ export default function SuperAdminHome() {
               </tbody>
             </table>
           </div>
-        </section>
+        </section>}
 
         <section className="dashboard-panel">
           <div className="dashboard-panel-header">
             <div>
-              <h2>Recent System Activity</h2>
-              <p>Important account, course, security, and backup events.</p>
+              <h2>Recent Users</h2>
+              <p>Latest registered users.</p>
             </div>
+            <Link className="dashboard-text-link" to={isSuperAdmin ? "/super-admin/users" : "/admin/users"}>
+              View All Users
+            </Link>
           </div>
 
           <div className="activity-list">
-            {recentActivity.map((item) => {
-              const Icon = item.icon;
+            {!recentUsers.length && (
+              <p className="dashboard-empty">
+                {loading ? "Loading recent users…" : "No recent users found."}
+              </p>
+            )}
+            {recentUsers.map((item) => {
               return (
                 <article
                   className="activity-item"
-                  key={`${item.user}-${item.action}`}
+                  key={item.id}
                 >
                   <span>
-                    <Icon />
+                    <FiUsers />
                   </span>
                   <div>
-                    <strong>{item.user}</strong>
-                    <p>{item.action}</p>
+                    <strong>{item.name}</strong>
+                    <p>{item.role.replace(/[_-]/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase())} · {item.email}</p>
                   </div>
-                  <time>{item.time}</time>
+                  <time>{item.joined ? formatRelativeTime(item.joined) : "Date unavailable"}</time>
                 </article>
               );
             })}
@@ -904,7 +799,7 @@ export default function SuperAdminHome() {
         </section>
       </div>
 
-      <div className="dashboard-main-grid">
+      {isSuperAdmin && <div className="dashboard-main-grid">
         <section className="dashboard-panel">
           <div className="dashboard-panel-header">
             <div>
@@ -958,33 +853,8 @@ export default function SuperAdminHome() {
             ))}
           </div>
         </section>
-      </div>
+      </div>}
 
-      <section className="dashboard-panel">
-        <div className="dashboard-panel-header">
-          <div>
-            <h2>Quick Actions</h2>
-            <p>Shortcuts for common Super Admin tasks.</p>
-          </div>
-          <FiTrendingUp className="quick-actions-mark" />
-        </div>
-
-        <div className="quick-action-grid">
-          {quickActions.map((action) => {
-            const Icon = action.icon;
-            return (
-              <Link
-                className="quick-action-link"
-                to={action.to}
-                key={action.label}
-              >
-                <Icon />
-                <span>{action.label}</span>
-              </Link>
-            );
-          })}
-        </div>
-      </section>
     </div>
   );
 }

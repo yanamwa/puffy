@@ -187,7 +187,7 @@ export default function QuizAssessmentDashboard({
             </button>
           ))}
         </nav>
-        {type === "main" && moduleIndex !== "all" && (
+        {type === "main" && (
           <button
             className="qa-response-button"
             type="button"
@@ -198,7 +198,7 @@ export default function QuizAssessmentDashboard({
           </button>
         )}
       </div>
-      {type === "main" && moduleIndex !== "all" ? (
+      {type === "main" && (moduleIndex !== "all" || responseView) ? (
         <div className="qa-main-analysis">
           <MainQuizAnalysis
             key={`${courseId}:${moduleIndex}`}

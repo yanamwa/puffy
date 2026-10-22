@@ -316,6 +316,7 @@ function normalizeContentModule(module, index) {
 
     title: String(module?.title || "").trim() || `Module ${index + 1}`,
     catalogCoverageTitle: module?.catalogCoverageTitle || "",
+    topics: Array.isArray(module?.topics) ? module.topics : [],
 
     description: String(module?.description || module?.summary || ""),
 
@@ -1039,6 +1040,12 @@ export default function AddModule() {
       const formData = new FormData();
       formData.append("course_id", generationCourse.id);
       formData.append("client_module_key", moduleId);
+      formData.append("generation_context", JSON.stringify({
+        module_title: selectedModule.title,
+        topics: selectedModule.topics || [],
+        learning_objectives: selectedModule.learningObjectives,
+        instructions: selectedModule.description,
+      }));
       if (Number.isInteger(Number(moduleId)) && Number(moduleId) > 0)
         formData.append("lesson_id", moduleId);
       uploadedFile.forEach((file) => formData.append("files", file));
@@ -1084,15 +1091,16 @@ export default function AddModule() {
             ? module
             : {
                 ...module,
-                title: limit(data.module_title || module.title, TITLE_LIMIT),
+                title: limit(module.title || data.module_title, TITLE_LIMIT),
                 description: limit(
                   data.description || module.description,
                   LONG_LIMIT,
                 ),
                 learningObjectives: limit(
-                  data.learning_objectives || module.learningObjectives,
+                  module.learningObjectives || data.learning_objectives,
                   LONG_LIMIT,
                 ),
+                studentPublished: false,
                 lessonPages: generatedPages,
               },
         ),
@@ -1834,6 +1842,13 @@ export default function AddModule() {
                         </div>
 
                         <div className={styles.popupSection}>
+                          <label className={styles.popupLabel}>Suggested topics (one per line)</label>
+                          <textarea className={styles.popupTextarea} value={(module.topics || []).join("\n")}
+                            onChange={event => updateContentModule(module.id, "topics", event.target.value.split("\n"))}
+                            placeholder="Review, remove, or add topics before generating lessons" />
+                          <p>The syllabus guides coverage. Upload learning materials below for detailed references. Review generated lessons before publishing.</p>
+                        </div>
+                        <div className={styles.popupSection}>
                           <label className={styles.popupLabel}>
                             Learning Objectives
                             <span className={styles.required}>*Required</span>
@@ -1855,7 +1870,7 @@ export default function AddModule() {
 
                         <div className={styles.popupSection}>
                           <label className={styles.popupLabel}>
-                            Generate Module from Material
+                            Generate Lessons from Reference Materials
                           </label>
 
                           <div className={styles.uploadRow}>
@@ -1881,12 +1896,13 @@ export default function AddModule() {
                             >
                               {isProcessing
                                 ? "Generating..."
-                                : "Generate Module"}
+                                : module.lessonPages.length ? "Regenerate Lessons" : "Generate Lessons"}
                             </button>
                           </div>
                           <LessonSourceManager
                             courseId={id}
                             jobScope={module.id}
+                            generationContext={{ module_title: module.title, topics: module.topics || [], learning_objectives: module.learningObjectives, instructions: module.description }}
                             lessonId={
                               Number.isInteger(Number(module.id)) &&
                               Number(module.id) > 0
@@ -1902,10 +1918,11 @@ export default function AddModule() {
                                       ? item
                                       : {
                                           ...item,
-                                          title: result.module_title,
+                                          studentPublished: false,
+                                          title: item.title || result.module_title,
                                           description: result.description,
                                           learningObjectives:
-                                            result.learning_objectives,
+                                            item.learningObjectives || result.learning_objectives,
                                           lessonPages: result.lesson_pages.map(
                                             (page) => ({
                                               ...page,

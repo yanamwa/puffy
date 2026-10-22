@@ -30,9 +30,12 @@ export default function ModuleManagement() {
   useEffect(() => {
     let active = true;
 
-    async function loadCourses() {
+    let loadingCourses = false;
+    async function loadCourses(initial = false) {
+      if (loadingCourses) return;
+      loadingCourses = true;
       try {
-        setLoading(true);
+        if (initial) setLoading(true);
         setErrorMessage("");
 
         const loadedCourses = await fetchCourses(
@@ -56,16 +59,24 @@ export default function ModuleManagement() {
           setErrorMessage(error.message || "Could not load courses.");
         }
       } finally {
+        loadingCourses = false;
         if (active) {
           setLoading(false);
         }
       }
     }
 
-    loadCourses();
+    loadCourses(true);
+    const refresh = () => loadCourses();
+    window.addEventListener("focus", refresh);
+    window.addEventListener("puffy-catalog-updated", refresh);
+    const timer = window.setInterval(refresh, 30000);
 
     return () => {
       active = false;
+      window.removeEventListener("focus", refresh);
+      window.removeEventListener("puffy-catalog-updated", refresh);
+      window.clearInterval(timer);
     };
   }, []);
 

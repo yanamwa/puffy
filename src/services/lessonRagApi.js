@@ -66,10 +66,11 @@ export async function regenerateLessonSource(
   reindex = false,
   onProgress,
   onQueued = () => {},
+  generationContext = null,
 ) {
   const queued = await request(
     `/sources/${encodeURIComponent(documentId)}/${reindex ? "reindex" : "generate"}`,
-    { method: "POST" },
+    { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ generation_context: generationContext }) },
   );
   onQueued(queued.job_id);
   return waitForLessonJob(queued.job_id, onProgress);

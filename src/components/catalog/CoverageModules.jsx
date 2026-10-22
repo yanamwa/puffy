@@ -11,7 +11,7 @@ export default function CoverageModules({ value, onChange, busy = false }) {
   const modules = readCoverage(value);
   return (
     <fieldset className="catalog-coverage">
-      <legend>Course Coverage — Module Titles ({modules.length})</legend>
+      <legend>Course Coverage — Suggested Modules ({modules.length})</legend>
       <p>
         Suggested from the main headings in the syllabus Topic column. Review,
         correct, or add titles below. These are saved with this syllabus
@@ -59,8 +59,8 @@ export default function CoverageModules({ value, onChange, busy = false }) {
         + Add Module Title
       </button>
       <p className="catalog-note">
-        Saving this outline does not create professor classes, lesson content,
-        or quizzes.
+        Save and Activate starts generating draft lessons from these modules.
+        Professors review and publish the lessons in their own course spaces.
       </p>
     </fieldset>
   );

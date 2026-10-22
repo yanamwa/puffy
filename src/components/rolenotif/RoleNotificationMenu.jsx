@@ -144,6 +144,7 @@ function getNotificationIcon(type = "") {
     .toLowerCase();
 
   if (
+    normalizedType === "course_archived" ||
     normalizedType === "enrollment_request" ||
     normalizedType === "enrollment_approved" ||
     normalizedType === "enrollment_declined" ||

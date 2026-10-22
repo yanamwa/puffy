@@ -4,6 +4,34 @@
   These rules only provide the shared StudentSidebar + StudentHeader page layout.
 */
 
+/* Match the password panel to the shared blue dashboard palette. */
+.student-settings-page .password-card-icon {
+  background: #edf4fc;
+  color: #234f7b;
+}
+.student-settings-page .password-visibility-button,
+.student-settings-page .password-requirements span.met,
+.student-settings-page .match-success {
+  color: #234f7b;
+}
+.student-settings-page .password-input-wrapper input:focus {
+  border-color: #7fa8d6;
+  box-shadow: 0 0 0 3px rgba(127, 168, 214, 0.15);
+}
+.student-settings-page .password-security-note {
+  border-color: #c5d8ec;
+  background: #f2f7fd;
+}
+.student-settings-page .password-security-note > span {
+  background: #355a80;
+}
+.student-settings-page .password-security-note strong {
+  color: #234f7b;
+}
+.student-settings-page .password-security-note p {
+  color: #647b93;
+}
+
 .student-settings-page {
   width: 100%;
   min-height: 100vh;

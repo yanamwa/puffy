@@ -1,4 +1,5 @@
-import { findCatalogCodeMatches } from "../../services/catalogDuplicates.js";
+import Swal from "sweetalert2";
+import { findArchivedCatalogCodeMatches, findCatalogCodeMatches, normalizeCatalogCode } from "../../services/catalogDuplicates.js";
 import CoverageModules from "./CoverageModules.jsx";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -73,21 +74,48 @@ export function CatalogFields({
 export default function SyllabusWizard({ course, onClose, onSaved }) {
   const [upload, setUpload] = useState(null),
     [details, setDetails] = useState({ programs: [] }),
-    [busy, setBusy] = useState(false),
-    [error, setError] = useState("");
+    [busy, setBusy] = useState(false);
   const [reviewed, setReviewed] = useState(false),
     [matches, setMatches] = useState([]),
     [attach, setAttach] = useState(course || null),
     [invalid, setInvalid] = useState(false);
   const pending = useRef(null);
-  const errorRef = useRef(null);
+  const setError = (message) => {
+    if (!message) return;
+    void Swal.fire({
+      icon: "warning",
+      title: "Please check before continuing",
+      text: message,
+      confirmButtonText: "OK",
+      confirmButtonColor: "#80a9d3",
+      allowOutsideClick: false,
+      didOpen: () => {
+        const container = Swal.getContainer();
+        if (container) container.style.zIndex = "2000";
+      },
+    });
+  };
+  const duplicateNotice = useRef("");
   useEffect(() => {
-    if (error)
-      errorRef.current?.scrollIntoView({
-        block: "nearest",
-        behavior: "smooth",
-      });
-  }, [error]);
+    const code = normalizeCatalogCode(details.code);
+    if (duplicateNotice.current !== code) duplicateNotice.current = "";
+    if (
+      course ||
+      !matches.some((match) => normalizeCatalogCode(match.code) === code) ||
+      duplicateNotice.current === code
+    ) return;
+    duplicateNotice.current = code;
+    Swal.fire({
+      icon: "warning",
+      title: "Course code already exists",
+      text: "Select the existing course to save this PDF as a new syllabus version.",
+      confirmButtonText: "OK",
+      confirmButtonColor: "#80a9d3",
+      didOpen: () => {
+        Swal.getContainer().style.zIndex = "2000";
+      },
+    });
+  }, [course, details.code, matches]);
   useEffect(
     () => () => {
       if (pending.current)
@@ -204,25 +232,48 @@ export default function SyllabusWizard({ course, onClose, onSaved }) {
         );
         setMatches(existing);
         if (existing.length) {
-          setError(
-            `Course code ${details.code.trim()} already exists. Select the existing course below to save this PDF as a new syllabus version.`,
-          );
+          duplicateNotice.current = "";
           return;
         }
+        const archived = await findArchivedCatalogCodeMatches(details.code, catalogRequest);
+        if (archived.length) {
+          const previous = archived[0];
+          const choice = await Swal.fire({
+            icon: "question",
+            title: `Restore archived ${previous.code}?`,
+            text: `${previous.title}. Restore this course and keep its syllabus history, or create a separate course with the same code. Restoring adds your uploaded PDF as a new syllabus version when you save.${archived.length > 1 ? " The most recently archived match will be restored." : ""}`,
+            showDenyButton: true,
+            showCancelButton: true,
+            confirmButtonText: "Restore archived course",
+            denyButtonText: "Create new course",
+            cancelButtonText: "Back",
+            confirmButtonColor: "#80a9d3",
+            denyButtonColor: "#576b80",
+            didOpen: () => { Swal.getContainer().style.zIndex = "2000"; },
+          });
+          if (choice.isConfirmed) {
+            setAttach(previous);
+            setDetails(current => ({ ...current, code: previous.code, title: previous.title, description: previous.description, units: previous.units, programs: previous.programs }));
+            setReviewed(false);
+            return;
+          }
+          if (!choice.isDenied) return;
+        }
       }
-      await catalogRequest("", {
+      const saved = await catalogRequest("", {
         method: "POST",
         body: JSON.stringify({
           ...details,
           uploadId: upload.uploadId,
           catalogId: attach?.catalog_id,
+          restoreArchived: Boolean(attach?.archived_at),
           activate,
           reviewed,
         }),
       });
       pending.current = null;
       notifyCatalogChanged();
-      onSaved(attach ? "Syllabus version saved." : "Catalog course saved.");
+      onSaved(saved.generationQueued ? "Course saved and activated. Draft lessons are generating in the background." : attach?.archived_at ? "Course restored and syllabus version saved." : attach ? "Syllabus version saved." : "Catalog course saved.");
     } catch (e) {
       setError(e.message);
       if (e.matches) setMatches(e.matches);
@@ -243,11 +294,6 @@ export default function SyllabusWizard({ course, onClose, onSaved }) {
           ? "2. Review Details → 3. Save"
           : "1. Upload PDF → 2. Review Details → 3. Save"}
       </p>
-      {error && (
-        <p ref={errorRef} className="catalog-error" role="alert">
-          {error}
-        </p>
-      )}
       {!upload ? (
         <div
           className="catalog-drop"
@@ -290,7 +336,7 @@ export default function SyllabusWizard({ course, onClose, onSaved }) {
           </button>
           {!course && matches.length > 0 && (
             <div className="catalog-note">
-              <strong role="status">Course code already exists</strong>
+              <strong>Existing course</strong>
               <p>
                 This code matches an existing catalog course, ignoring spaces
                 and letter case. Select it to add a syllabus version instead of
@@ -324,6 +370,7 @@ export default function SyllabusWizard({ course, onClose, onSaved }) {
               Details to change the catalog information.
             </p>
           )}
+          {attach?.archived_at && <p className="catalog-note" role="status">You selected the archived {attach.code}. Review its original course details below. Saving will restore it and add this PDF as a new syllabus version. Existing classes and syllabus history will be kept.</p>}
           <div className="catalog-review">
             <PdfPreview path={`/uploads/${upload.uploadId}/pdf`} />
             <div className="catalog-fields">

@@ -153,6 +153,18 @@ function CatalogDetails({ id, onClose, onClass, onPdf }) {
       active = false;
     };
   }, [id, page]);
+  useEffect(() => {
+    if (!data?.versions?.some(v => ["queued", "running"].includes(v.generation_status))) return;
+    let active = true;
+    const timer = setInterval(() => catalogRequest("/" + id).then(result => { if (active) setData(result); }).catch(e => { if (active) setError(e.message); }), 5000);
+    return () => { active = false; clearInterval(timer); };
+  }, [id, data]);
+  const retryLessons = async versionId => {
+    try {
+      await catalogRequest(`/versions/${versionId}/retry-lessons`, {method:"POST"});
+      setData(await catalogRequest("/" + id));
+    } catch(e) { setError(e.message); }
+  };
   return (
     <CatalogModal
       title="Course Details"
@@ -215,6 +227,8 @@ function CatalogDetails({ id, onClose, onClass, onPdf }) {
                     <td>{period(v)}</td>
                     <td>
                       {v.filename}
+                      {v.generation_status && <p role="status">Draft lessons: {v.generation_status === "completed" ? "Ready for professor review" : v.generation_status}</p>}
+                      {v.generation_status === "failed" && <><p role="alert">{v.generation_error}</p><button className="catalog-button" onClick={() => retryLessons(v.version_id)}>Retry lesson generation</button></>}
                       {readCoverage(v.coverage_modules).length > 0 && (
                         <details>
                           <summary>
@@ -226,6 +240,7 @@ function CatalogDetails({ id, onClose, onClass, onPdf }) {
                               (module, index) => (
                                 <li key={index}>
                                   {module.title}
+                                  {module.lesson_pages?.length > 0 && <details><summary>{module.lesson_pages.length} draft lesson pages</summary>{module.lesson_pages.map((lesson, i) => <div key={i}><h4>{lesson.title}</h4><p style={{whiteSpace:"pre-wrap"}}>{lesson.content}</p></div>)}</details>}
                                   {module.source_page
                                     ? ` (p. ${module.source_page})`
                                     : ""}
@@ -489,7 +504,7 @@ export default function CourseManagementPage() {
       text: activation
         ? "Review the course details and syllabus before confirming activation."
         : action === "archive"
-          ? "This removes the course from new professor selections. Existing classes and their records remain available."
+          ? "This archives the catalog course and its active professor classes. Professors will be notified, and class records will remain available under Archived."
           : "The course will retain its previous draft or active status.",
       showCancelButton: true,
       confirmButtonText: activation

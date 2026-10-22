@@ -735,7 +735,7 @@
   }
 }
 /* ==================================================
-   GREEN ADMIN THEME OVERRIDES
+   BLUE ADMIN THEME OVERRIDES
    Matches Professor Settings
 ================================================== */
 
@@ -745,29 +745,29 @@
 
 .admin-settings-eyebrow,
 .admin-password-card-eyebrow {
-  color: #25714e;
+  color: #234f7b;
 }
 
 .admin-password-settings-card {
-  border-color: #d5dad7;
+  border-color: #c5d8ec;
 
   box-shadow:
     0 18px 45px rgba(23, 25, 39, 0.08),
-    5px 6px 0 rgba(37, 113, 78, 0.1);
+    5px 6px 0 rgba(127, 168, 214, 0.1);
 }
 
 .admin-password-card-header {
   border-bottom-color: #e4e8e5;
 
   background:
-    linear-gradient(135deg, rgba(37, 113, 78, 0.06), transparent 58%), #ffffff;
+    linear-gradient(135deg, rgba(127, 168, 214, 0.06), transparent 58%), #ffffff;
 }
 
 .admin-password-card-icon {
   border-color: transparent;
 
-  background: #eaf4ee;
-  color: #25714e;
+  background: #edf4fc;
+  color: #234f7b;
 }
 
 .admin-account-summary {
@@ -777,7 +777,7 @@
 }
 
 .admin-account-summary-icon {
-  color: #25714e;
+  color: #234f7b;
 }
 
 .admin-account-summary > div > span {
@@ -785,22 +785,22 @@
 }
 
 .admin-password-input-wrapper {
-  border-color: #cdd4d0;
+  border-color: #c5d8ec;
 }
 
 .admin-password-input-wrapper:focus-within {
-  border-color: #25714e;
+  border-color: #234f7b;
 
-  box-shadow: 0 0 0 3px rgba(37, 113, 78, 0.12);
+  box-shadow: 0 0 0 3px rgba(127, 168, 214, 0.12);
 }
 
 .admin-password-visibility-button {
-  background: #f0f6f2;
-  color: #25714e;
+  background: #edf4fc;
+  color: #234f7b;
 }
 
 .admin-password-visibility-button:hover {
-  background: #e3f0e8;
+  background: #c6ddf4;
 }
 
 .admin-password-form-divider {
@@ -814,44 +814,44 @@
 }
 
 .admin-password-requirements-heading svg {
-  color: #25714e;
+  color: #234f7b;
 }
 
 .admin-password-requirement.met {
-  color: #25714e;
+  color: #234f7b;
 }
 
 .admin-password-requirement.met > span {
-  background: #e7f4eb;
+  background: #edf4fc;
 }
 
 .admin-password-match-message.success {
-  color: #25714e;
+  color: #234f7b;
 }
 
 .admin-password-notice.success {
-  border-color: #bfd8c8;
+  border-color: #a0c2e6;
 
-  background: #edf8f1;
-  color: #25714e;
+  background: #edf4fc;
+  color: #234f7b;
 }
 
 .admin-password-save-button {
-  border-color: #25714e;
+  border-color: #234f7b;
 
-  background: #25714e;
+  background: #234f7b;
 }
 
 .admin-password-save-button:hover {
-  background: #1f6746;
+  background: #355a80;
 }
 
 .admin-password-security-note {
-  border-color: #d6ddd8;
+  border-color: #c5d8ec;
 
-  background: #f4f8f5;
+  background: #f2f7fd;
 }
 
 .admin-security-note-icon {
-  color: #25714e;
+  color: #234f7b;
 }

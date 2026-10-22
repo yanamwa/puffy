@@ -104,9 +104,9 @@ export default function SuperAdminSidebar({
       <div
         className="sidebar-brand"
         style={{
-          height: 120,
-          minHeight: 120,
-          padding: "10px 12px",
+          height: 140,
+          minHeight: 140,
+          padding: sidebarCollapsed ? "10px 5px" : "10px 4px",
           boxSizing: "border-box",
         }}
       >
@@ -116,7 +116,7 @@ export default function SuperAdminSidebar({
           style={{
             width: "100%",
             maxWidth: sidebarCollapsed ? 65 : 280,
-            height: sidebarCollapsed ? 65 : 100,
+            height: sidebarCollapsed ? 65 : 120,
             flex: sidebarCollapsed ? "0 1 65px" : "0 1 280px",
             borderRadius: 0,
           }}
@@ -130,8 +130,8 @@ export default function SuperAdminSidebar({
           title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           <img
-            src="/images/logo.png"
-            alt="PuffyBrain"
+            src="/images/superadmin.png"
+            alt="PuffyBrain Super Admin"
             style={{ width: "100%", height: "100%", objectFit: "contain" }}
           />
         </button>

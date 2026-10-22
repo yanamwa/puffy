@@ -11,7 +11,6 @@ import {
 import { useAuth } from "../../../context/AuthContext";
 
 import {
-  FiBell,
   FiBookOpen,
   FiGrid,
   FiClipboard,
@@ -64,11 +63,6 @@ const menuItems = [
     label: "Assessment Analysis",
     path: "/professor/students",
     icon: FiBarChart2,
-  },
-  {
-    label: "Notifications",
-    path: "/professor/notifications",
-    icon: FiBell,
   },
   {
     label: "Profile",
@@ -396,7 +390,7 @@ export default function ProfessorLayout() {
             aria-expanded={!sidebarCollapsed}
             title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
-            <img src="/images/logo.png" alt="PuffyBrain" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+            <img src="/images/Professor.png" alt="PuffyBrain Professor" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
           </button>
         </div>
 

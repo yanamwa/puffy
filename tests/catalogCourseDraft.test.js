@@ -92,3 +92,16 @@ test("empty and missing syllabus coverage does not invent modules or overwrite i
   seeded.contentModules = [];
   assert.deepEqual(applyCatalogToDraft(seeded, course, id).contentModules, []);
 });
+test("generated catalog lessons become independent unpublished professor drafts", () => {
+ const generated = {...course, versions:[{version_id:20,coverage_modules:[{
+  title:"Programming",learning_objectives:"Explain variables",topics:["Variables"],
+  lesson_pages:[{title:"Variables",content:"Draft lesson"}],generated_draft:true,
+ }]}]};
+ const first=applyCatalogToDraft({},generated,id);
+ const second=applyCatalogToDraft({},generated,id);
+ assert.equal(first.contentModules[0].studentPublished,false);
+ assert.equal(first.contentModules[0].lessonPages[0].content,"Draft lesson");
+ first.contentModules[0].lessonPages[0].content="Professor edit";
+ assert.equal(second.contentModules[0].lessonPages[0].content,"Draft lesson");
+ assert.equal(generated.versions[0].coverage_modules[0].lesson_pages[0].content,"Draft lesson");
+});

@@ -503,8 +503,8 @@ export default function AdminLayout({ children }) {
             title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             <img
-              src="/images/logo.png"
-              alt="PuffyBrain"
+              src="/images/Admin.png"
+              alt="PuffyBrain Admin"
               style={{ width: "100%", height: "100%", objectFit: "contain" }}
             />
           </button>

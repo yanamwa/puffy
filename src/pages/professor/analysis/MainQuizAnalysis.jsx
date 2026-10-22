@@ -1621,9 +1621,11 @@ export default function MainQuizAnalysis({
   const selectedMainAttempts = useMemo(
     () =>
       recordedMainAttempts.filter(
-        (attempt) => mainQuizKey(attempt) === activeMainQuiz,
+        (attempt) =>
+          (responseView && moduleIndex === "all") ||
+          mainQuizKey(attempt) === activeMainQuiz,
       ),
-    [recordedMainAttempts, activeMainQuiz],
+    [recordedMainAttempts, activeMainQuiz, responseView, moduleIndex],
   );
   const activeCourse = useMemo(
     () =>
@@ -1875,7 +1877,7 @@ export default function MainQuizAnalysis({
     ? `conic-gradient(${CHART_COLORS.LOTS} 0 ${lotsPercent}%, ${CHART_COLORS.HOTS} ${lotsPercent}% 100%)`
     : "#edf1f5";
 
-  if (!loading && activeCourse && !errorMessage && !quizAttempts.length) {
+  if (!responseView && !loading && activeCourse && !errorMessage && !quizAttempts.length) {
     return (
       <section className="qa-empty-report qa-print-report">
         <header className="qa-empty-report-heading">

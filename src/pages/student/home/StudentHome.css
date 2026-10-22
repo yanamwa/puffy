@@ -945,14 +945,14 @@
 
 /* Highlight dates that have published academic events. */
 .home-mini-calendar .home-calendar-grid button.academic-event-day {
-  color: #c53c43;
+  color: #355a80;
   font-weight: 700;
 }
 .home-mini-calendar .home-calendar-grid button.academic-event-day::after {
-  background: #c53c43;
+  background: #355a80;
 }
 .home-mini-calendar .home-calendar-grid button.academic-event-day.selected {
-  background: #c53c43;
+  background: #355a80;
   color: #fff;
 }
 .home-mini-calendar .home-calendar-grid button.academic-event-day.selected::after {

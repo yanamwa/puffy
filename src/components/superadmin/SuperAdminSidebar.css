@@ -4,7 +4,7 @@
 ===================================================== */
 
 .superadmin-layout {
-  --superadmin-sidebar-expanded: 220px;
+  --superadmin-sidebar-expanded: 280px;
   --superadmin-sidebar-collapsed: 76px;
   --superadmin-green: #7fa9d6;
   --superadmin-dark: #171927;
@@ -20,6 +20,15 @@
 /* =====================================================
    COLLAPSED LAYOUT
 ===================================================== */
+
+.superadmin-layout .header-profile-status-dot {
+  background: #82b3df;
+}
+
+.superadmin-layout .role-notification-button,
+.superadmin-layout .header-profile-dropdown-button:hover {
+  color: #637c97;
+}
 
 .superadmin-layout.superadmin-sidebar-collapsed {
   grid-template-columns:

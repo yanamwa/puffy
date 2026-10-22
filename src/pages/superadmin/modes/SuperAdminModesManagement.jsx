@@ -427,6 +427,7 @@ export default function SuperAdminModesManagement() {
         <input
           value={query}
           onChange={(event) => setQuery(event.target.value)}
+          aria-label="Search modes"
           placeholder="Search by ID, title, description, or route..."
         />
       </div>
@@ -468,7 +469,9 @@ export default function SuperAdminModesManagement() {
 
                 return (
                   <tr key={mode.id}>
-                    <td className="mode-id">{getModeCode(mode)}</td>
+                    <td>
+                      <span className="mode-id">{getModeCode(mode)}</span>
+                    </td>
 
                     <td>{mode.title}</td>
 
