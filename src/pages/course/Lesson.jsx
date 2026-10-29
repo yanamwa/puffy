@@ -1,3 +1,4 @@
+import LessonContent from "../../components/lesson/LessonContent.jsx";
 import { studentModuleNavigation } from "../../utils/studentModuleVisibility.js";
 import {
   readAccountQuizResult,
@@ -33,20 +34,18 @@ const saveAccountLessonProgress = (baseKey, record) => {
 
 const LESSON_QUIZ_LIMIT = 5;
 
-const splitReadableText = (value) => {
-  const text = String(value || "").trim();
-  if (!text) return [];
+// Compare answer text and letter-based multiple-choice keys consistently.
+const normalizeRecapAnswer = (value) => String(value ?? "")
+  .normalize("NFKC").replace(/[‘’]/g, "'").replace(/[“”]/g, '"')
+  .replace(/^\s*[A-Z][.)]\s+/i, "").trim().toLowerCase()
+  .replace(/[.!?]+$/, "").replace(/\s+/g, " ");
 
-  const paragraphs = text
-    .split(/\n\s*\n+/)
-    .map((paragraph) => paragraph.replace(/\s*\n\s*/g, " ").trim())
-    .filter(Boolean);
-
-  if (paragraphs.length > 1) return paragraphs;
-
-  return (
-    text.match(/[^.!?]+[.!?]+|[^.!?]+$/g)?.map((item) => item.trim()) || [text]
-  );
+const resolveRecapAnswer = (quiz) => {
+  const raw = quiz?.correct_answer ?? quiz?.correctAnswer ?? quiz?.answer ?? "";
+  const options = quiz?.options || [];
+  const letter = /^\s*([a-z])[.)]?\s*$/i.exec(String(raw));
+  if (letter && options.length) return options[letter[1].toUpperCase().charCodeAt(0) - 65] ?? raw;
+  return raw;
 };
 
 const getLessonPageMedia = (page) => {
@@ -155,6 +154,18 @@ function Lesson() {
     setQuizResults([]);
     setHasTakenQuiz(false);
   }, [lessonId, moduleIndex]);
+
+  useEffect(() => {
+    if (!allSlides.length) return;
+    const key = getStudentProgressStorageKey(`lessonProgress_${lessonId}_module_${moduleIndex}`);
+    try {
+      const saved = key ? JSON.parse(localStorage.getItem(key) || "null") : null;
+      const viewed = Number(saved?.last_viewed_card ?? saved?.studied_cards);
+      if (Number.isFinite(viewed) && viewed > 0) {
+        setCurrentSlide(Math.min(allSlides.length - 1, Math.max(0, viewed - 1)));
+      }
+    } catch { /* Ignore an invalid saved record. */ }
+  }, [allSlides, lessonId, moduleIndex]);
 
   useEffect(() => {
     if (allSlides.length === 0) return;
@@ -405,7 +416,14 @@ function Lesson() {
 
     if (!quizSlides.length) {
       const result = await Swal.fire({
-        icon: "success",
+        imageUrl: "/images/complete.png",
+        imageWidth: 300,
+        imageAlt: "Module complete",
+        customClass: {
+          popup: "quiz-popup module-complete-popup",
+          title: "quiz-popup-title",
+          confirmButton: "quiz-popup-button",
+        },
         title: `Module ${moduleNumber} Complete`,
         text: nextModule
           ? `Ready to continue to Module ${moduleNumber + 1}?`
@@ -423,7 +441,14 @@ function Lesson() {
     }
 
     const result = await Swal.fire({
-      icon: "success",
+      imageUrl: "/images/complete.png",
+        imageWidth: 300,
+        imageAlt: "Module complete",
+        customClass: {
+          popup: "quiz-popup module-complete-popup",
+          title: "quiz-popup-title",
+          confirmButton: "quiz-popup-button",
+        },
       title: `Module ${moduleNumber} Complete`,
       text: nextModule
         ? `Do you want to practice Module ${moduleNumber}, or continue to Module ${moduleNumber + 1}?`
@@ -449,12 +474,11 @@ function Lesson() {
     if (hasTakenQuiz || selectedAnswers[slideIndex]) return;
 
     const quiz = currentItem?.content;
-    const correctAnswer = quiz?.correct_answer || "";
+    const correctAnswer = resolveRecapAnswer(quiz);
     const explanation = quiz?.explanation || "No explanation available.";
 
-    const isCorrect =
-      String(option).trim().replace(/\s+/g, " ").toLowerCase() ===
-      String(correctAnswer).trim().replace(/\s+/g, " ").toLowerCase();
+    const isCorrect = Boolean(normalizeRecapAnswer(correctAnswer)) &&
+      normalizeRecapAnswer(option) === normalizeRecapAnswer(correctAnswer);
 
     setSelectedAnswers((prev) => ({
       ...prev,
@@ -478,10 +502,16 @@ function Lesson() {
     ];
 
     setQuizResults(updatedResults);
+    // Keep partial recap answers as well as completed results across refreshes.
+    saveAccountQuizResult(quizResultKey, JSON.stringify({
+      lessonId: Number(lessonId), moduleIndex, answers: updatedResults,
+    }));
 
     await Swal.fire({
-      icon: isCorrect ? "success" : "error",
-      title: isCorrect ? "Correct!" : "Incorrect!",
+      imageUrl: isCorrect ? "/images/correct.png" : "/images/wrong.png",
+      imageWidth: 300,
+      imageHeight: 200,
+      imageAlt: isCorrect ? "Correct answer" : "Incorrect answer",
       html: `
         <div class="quiz-popup-content">
           <p class="quiz-popup-answer">
@@ -531,8 +561,15 @@ function Lesson() {
       !hasTakenQuiz
     ) {
       Swal.fire({
-        icon: "warning",
-        title: "Answer first",
+        imageUrl: "/images/reminder.png?v=2",
+        imageWidth: 300,
+        imageAlt: "Reminder to answer the quick check",
+        customClass: {
+          popup: "quiz-popup module-complete-popup",
+          title: "quiz-popup-title",
+          confirmButton: "quiz-popup-button",
+        },
+        title: "Reminder: Answer First",
         text: "Please answer the quick check before continuing.",
       });
       return;
@@ -642,11 +679,7 @@ function Lesson() {
                 )}
 
                 <div className={styles.lessonSlideContent}>
-                  {splitReadableText(currentItem.content.content).map(
-                    (paragraph, index) => (
-                      <p key={`${paragraph}-${index}`}>{paragraph}</p>
-                    ),
-                  )}
+                  <LessonContent content={currentItem.content.content} />
                 </div>
               </div>
             )}
@@ -727,14 +760,14 @@ function Lesson() {
 
           <div className={styles.navButtons}>
             <button
-              className={styles.button}
+              className={`${styles.button} ${styles.previousButton}`}
               onClick={handlePrevious}
               disabled={currentSlide === 0}
             >
               Previous
             </button>
 
-            <button className={styles.button} onClick={handleNext}>
+            <button className={`${styles.button} ${styles.nextButton}`} onClick={handleNext}>
               {totalSlides === 0 || currentSlide === totalSlides - 1
                 ? "Finish"
                 : "Next"}

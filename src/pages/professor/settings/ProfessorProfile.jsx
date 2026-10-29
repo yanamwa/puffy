@@ -459,7 +459,7 @@ export default function ProfessorProfile() {
   if (loading) {
     return (
       <div className="professor-profile-page">
-        <section className="professor-profile-page-heading">
+        <section className="professor-profile-page-heading professor-section-heading">
           <h1>Professor Profile</h1>
         </section>
 
@@ -477,7 +477,7 @@ export default function ProfessorProfile() {
   if (error) {
     return (
       <div className="professor-profile-page">
-        <section className="professor-profile-page-heading">
+        <section className="professor-profile-page-heading professor-section-heading">
           <h1>Professor Profile</h1>
         </section>
 
@@ -494,7 +494,7 @@ export default function ProfessorProfile() {
 
   return (
     <div className="professor-profile-page">
-      <section className="professor-profile-page-heading">
+      <section className="professor-profile-page-heading professor-section-heading">
         <h1>Professor Profile</h1>
       </section>
 
@@ -507,7 +507,7 @@ export default function ProfessorProfile() {
 
             <div className="professor-identity-header">
               <div className="professor-identity-brand">
-                <img src="/images/logo_solo.png" alt="PuffyBrain" />
+                <img src="/images/puffybrain.png" alt="PuffyBrain" />
 
                 <div>
                   <strong>PuffyBrain</strong>

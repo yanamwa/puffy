@@ -650,9 +650,12 @@ export default function StudentCourseDetail() {
   useEffect(() => {
     let active = true;
 
-    async function loadCourse() {
+    let refreshing = false;
+    async function loadCourse(background = false) {
+      if (refreshing) return;
+      refreshing = true;
       try {
-        setLoading(true);
+        if (!background) setLoading(true);
 
         const selectedCourse = await findCourseByIdOrCodeAsync(courseId);
 
@@ -662,20 +665,23 @@ export default function StudentCourseDetail() {
       } catch (error) {
         console.error("Could not load course:", error);
 
-        if (active) {
-          setRawCourse(null);
-        }
+        if (active && !background) setRawCourse(null);
       } finally {
-        if (active) {
-          setLoading(false);
-        }
+        refreshing = false;
+        if (active && !background) setLoading(false);
       }
     }
 
     loadCourse();
-
+    const refresh = () => { if (document.visibilityState === "visible") loadCourse(true); };
+    const timer = window.setInterval(refresh, 5000);
+    window.addEventListener("focus", refresh);
+    document.addEventListener("visibilitychange", refresh);
     return () => {
       active = false;
+      window.clearInterval(timer);
+      window.removeEventListener("focus", refresh);
+      document.removeEventListener("visibilitychange", refresh);
     };
   }, [courseId]);
 
@@ -754,13 +760,15 @@ export default function StudentCourseDetail() {
 
   const allQuizItems = course ? getCourseQuizItems(course) : [];
 
-  const courseProgress = course ? getStudentReadingProgress(courseRouteId) : 0;
 
   const moduleProgressValues = modules.map((_, index) =>
     getStudentModuleReadingProgress(courseRouteId, index, modules.length),
   );
 
   const getModuleProgress = (index) => moduleProgressValues[index] ?? 0;
+  const courseProgress = visibleModuleCount
+    ? Math.round(visibleModuleIndices.reduce((sum, index) => sum + getModuleProgress(index), 0) / visibleModuleCount)
+    : 0;
 
   const isModuleLearnUnlocked = (index) => {
     const position = visibleModuleIndices.indexOf(index);

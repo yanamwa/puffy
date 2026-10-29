@@ -172,6 +172,7 @@ export default function ProfessorLayout() {
   const { user: authUser, logout } = useAuth();
 
   const navigate = useNavigate();
+  const [headerSearch, setHeaderSearch] = useState("");
   const { pathname } = useLocation();
 
   /* ===================================================
@@ -390,7 +391,7 @@ export default function ProfessorLayout() {
             aria-expanded={!sidebarCollapsed}
             title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
-            <img src="/images/Professor.png" alt="PuffyBrain Professor" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+            <img src={sidebarCollapsed ? "/images/puffybrain.png" : "/images/Professor.png"} alt="PuffyBrain Professor" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
           </button>
         </div>
 
@@ -441,17 +442,22 @@ export default function ProfessorLayout() {
         =============================================== */}
 
         <header className="professor-header">
-          <label className="professor-search">
+          <form className="professor-search" role="search" onSubmit={(event) => {
+            event.preventDefault();
+            navigate(`/professor/courses?search=${encodeURIComponent(headerSearch.trim())}`);
+          }}>
             <input
               type="search"
               placeholder="Search..."
-              aria-label="Search professor pages"
+              aria-label="Search courses"
+              value={headerSearch}
+              onChange={(event) => setHeaderSearch(event.target.value)}
             />
 
-            <span className="professor-search-icon" aria-hidden="true">
+            <button type="submit" className="professor-search-icon" aria-label="Search courses">
               <FiSearch />
-            </span>
-          </label>
+            </button>
+          </form>
 
           <div className="professor-header-actions">
             <RoleNotificationMenu role="professor" />

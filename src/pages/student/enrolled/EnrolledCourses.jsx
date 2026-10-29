@@ -232,7 +232,7 @@ export default function EnrolledCourses() {
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
 
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(() => new URLSearchParams(window.location.search).get("search") || "");
   const [dateSort, setDateSort] = useState("Recent");
   const [alphabeticalSort, setAlphabeticalSort] = useState("A to Z");
 

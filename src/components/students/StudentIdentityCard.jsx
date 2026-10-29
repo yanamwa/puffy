@@ -100,7 +100,7 @@ export default function StudentIdentityCard({
 
       <div className="student-identity-header">
         <div className="student-identity-brand">
-          <img src="/images/logo_solo.png" alt="PuffyBrain" />
+          <img src="/images/puffybrain.png" alt="PuffyBrain" />
 
           <div>
             <strong>PuffyBrain</strong>

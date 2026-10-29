@@ -170,7 +170,7 @@ export default function StudentSidebar({ collapsed, onCollapsedChange }) {
 
       <div className="brand-lockup">
         <img
-          src="/images/Student.png"
+          src={sidebarCollapsed ? "/images/puffybrain.png" : "/images/Student.png"}
           alt="PuffyBrain Student"
           className="sidebar-logo"
           style={{ width: "100%", maxWidth: sidebarCollapsed ? 65 : 280, height: sidebarCollapsed ? 65 : 100, objectFit: "contain" }}

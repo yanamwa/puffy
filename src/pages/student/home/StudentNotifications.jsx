@@ -206,6 +206,7 @@ function normalizeNotification(notification) {
       notification.id,
 
     title: notification.title || "Notification",
+      customClass: { container: "student-notification-overlay", popup: "student-notification-dialog" },
 
     message: notification.message || "",
 

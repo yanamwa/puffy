@@ -153,6 +153,7 @@ export default function StudentHeader({
   showJoinCourse = true,
 }) {
   const navigate = useNavigate();
+  const [localSearch, setLocalSearch] = useState("");
   const [currentUser, setCurrentUser] = useState(() => getStoredUser());
   const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
@@ -194,7 +195,7 @@ export default function StudentHeader({
   };
   useEffect(() => {
     loadNotifications();
-    const intervalId = window.setInterval(loadNotifications, 30000);
+    const intervalId = window.setInterval(loadNotifications, 5000);
     return () => {
       window.clearInterval(intervalId);
     };
@@ -437,6 +438,7 @@ export default function StudentHeader({
 
     await Swal.fire({
       title: notificationTitle,
+      customClass: { container: "student-notification-overlay", popup: "student-notification-dialog" },
       html,
       confirmButtonText: "Close",
       confirmButtonColor: "#7fa9d6",
@@ -477,24 +479,30 @@ export default function StudentHeader({
     <header className="student-header">
       {/* SEARCH */}
       {showSearch && (
-        <label className="student-header-search">
+        <form className="student-header-search" role="search" onSubmit={(event) => {
+          event.preventDefault();
+          if (!onSearchChange) navigate(`/student/enrolled-courses?search=${encodeURIComponent(localSearch.trim())}`);
+        }}>
           <input
             type="search"
             placeholder={searchPlaceholder}
-            value={searchValue}
+            aria-label={searchPlaceholder}
+            value={onSearchChange ? searchValue : localSearch}
             onChange={(event) => {
               if (onSearchChange) {
                 onSearchChange(event.target.value);
+              } else {
+                setLocalSearch(event.target.value);
               }
             }}
           />
-          <span className="student-header-search-icon" aria-hidden="true">
+          <button type="submit" className="student-header-search-icon" aria-label="Search courses">
             <svg viewBox="0 0 24 24">
               <circle cx="10.5" cy="10.5" r="5.5" />
               <path d="m15 15 4 4" />
             </svg>
-          </span>
-        </label>
+          </button>
+        </form>
       )}
       {/* RIGHT SIDE */}
       <div className="student-header-actions">

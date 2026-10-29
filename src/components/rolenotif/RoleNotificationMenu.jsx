@@ -586,11 +586,12 @@ export default function RoleNotificationMenu({ role = "admin" }) {
       </div>
     `,
 
-      icon: getSweetAlertIcon(notification.type),
-      confirmButtonText: "Okay",
+      customClass: { container: "student-notification-overlay", popup: "student-notification-dialog" },
+      target: document.body,
+      confirmButtonText: "Close",
       confirmButtonColor: "#2563eb",
       width: 480,
-      showCloseButton: true,
+      showCloseButton: false,
     });
   };
 
