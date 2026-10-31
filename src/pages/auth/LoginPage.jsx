@@ -377,7 +377,7 @@ function Login() {
 
         <div className={styles.signupContainer}>
           <form
-            className={styles.signupCard}
+            className={`${styles.signupCard} ${styles.loginPageCard}`}
             onSubmit={handleLogin}
             noValidate
             aria-busy={isLoggingIn}
