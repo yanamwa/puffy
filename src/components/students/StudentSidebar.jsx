@@ -1,3 +1,4 @@
+import ResponsiveSidebar from "../ResponsiveSidebar";
 import { useEffect, useState } from "react";
 import { NavLink, Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
@@ -53,7 +54,6 @@ export default function StudentSidebar({ collapsed, onCollapsedChange }) {
   });
 
   const [enrolledCoursesOpen, setEnrolledCoursesOpen] = useState(false);
-
   const [enrolledCourses, setEnrolledCourses] = useState([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
 
@@ -159,10 +159,8 @@ export default function StudentSidebar({ collapsed, onCollapsedChange }) {
     `side-nav-item plain-nav-item ${isActive ? "active" : ""}`;
 
   return (
-    <aside
-      className={`enrolled-sidebar ${
-        sidebarCollapsed ? "sidebar-collapsed" : ""
-      }`}
+    <ResponsiveSidebar
+      className={`enrolled-sidebar ${sidebarCollapsed ? "sidebar-collapsed" : ""}`}
     >
       {/* =========================
           BRAND
@@ -170,22 +168,31 @@ export default function StudentSidebar({ collapsed, onCollapsedChange }) {
 
       <div className="brand-lockup">
         <img
-          src={sidebarCollapsed ? "/images/puffybrain.png" : "/images/Student.png"}
+          src={
+            sidebarCollapsed ? "/images/puffybrain.png" : "/images/Student.png"
+          }
           alt="PuffyBrain Student"
           className="sidebar-logo"
-          style={{ width: "100%", maxWidth: sidebarCollapsed ? 65 : 280, height: sidebarCollapsed ? 65 : 100, objectFit: "contain" }}
+          style={{
+            width: "100%",
+            maxWidth: sidebarCollapsed ? 65 : 280,
+            height: sidebarCollapsed ? 65 : 100,
+            objectFit: "contain",
+          }}
           onClick={toggleSidebar}
           title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         />
-
-
       </div>
 
       {/* =========================
           NAVIGATION
       ========================= */}
 
-      <nav className="side-nav" aria-label="Student navigation">
+      <nav
+        id="student-sidebar-navigation"
+        className="side-nav"
+        aria-label="Student navigation"
+      >
         <NavLink
           to="/student"
           end
@@ -337,6 +344,6 @@ export default function StudentSidebar({ collapsed, onCollapsedChange }) {
 
         <span className="logout-label">Logout</span>
       </button>
-    </aside>
+    </ResponsiveSidebar>
   );
 }
