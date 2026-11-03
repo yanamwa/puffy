@@ -6,6 +6,7 @@ import ContactUs from "../pages/unauth/ContactUs/ContactUs.jsx";
 import { Navigate, Route, Routes, useParams } from "react-router-dom";
 import Layout from "../components/Layout";
 import ProtectedRoute from "../components/ProtectedRoute";
+import LandingPage from "../LandingPage";
 
 import LoginPage from "../pages/auth/LoginPage";
 import SignupPage from "../pages/auth/SignupPage";
@@ -589,7 +590,7 @@ export default function AppRoutes() {
         {/* ==========================
             DEFAULT ROUTE
         ========================== */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/" element={<LandingPage />} />
       </Route>
     </Routes>
   );
