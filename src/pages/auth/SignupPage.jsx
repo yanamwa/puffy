@@ -6,13 +6,13 @@ import Swal from "sweetalert2";
 
 import { API_BASE } from "../../config.js";
 import styles from "./login.module.css";
+import "./LoginFeedback.css";
 
 function Signup() {
   const navigate = useNavigate();
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
-  const [facultyId, setFacultyId] = useState("");
   const [department, setDepartment] = useState("");
   const [employmentProof, setEmploymentProof] = useState(null);
   const [proofPreview, setProofPreview] = useState("");
@@ -41,9 +41,15 @@ function Signup() {
 
   const showError = (title, text) => {
     Swal.fire({
-      imageUrl: "/images/error.png",
-      imageWidth: 170,
-      imageHeight: 170,
+      imageUrl: "/images/required.png",
+      imageWidth: 270,
+      imageHeight: 180,
+      imageAlt: "Please complete the required signup information",
+      customClass: {
+        popup: "login-feedback-popup",
+        container: "login-feedback-overlay",
+      },
+      confirmButtonText: "OK",
       title,
       text,
     });
@@ -67,7 +73,6 @@ function Signup() {
   const resetForm = () => {
     setFullName("");
     setEmail("");
-    setFacultyId("");
     setDepartment("");
     setEmploymentProof(null);
     setProofPreview("");
@@ -129,7 +134,6 @@ function Signup() {
 
     const cleanFullName = fullName.trim();
     const cleanEmail = email.trim().toLowerCase();
-    const cleanFacultyId = facultyId.trim();
     const cleanDepartment = department.trim();
 
     if (!cleanFullName) {
@@ -146,22 +150,6 @@ function Signup() {
 
     if (!emailPattern.test(cleanEmail)) {
       showError("Invalid Email", "Please enter a valid email address.");
-      return;
-    }
-
-    if (!cleanFacultyId) {
-      showError(
-        "Employee or Faculty ID Required",
-        "Please enter your employee or faculty ID.",
-      );
-      return;
-    }
-
-    if (cleanFacultyId.length > 100) {
-      showError(
-        "Employee or Faculty ID Too Long",
-        "Employee or faculty ID must be 100 characters or fewer.",
-      );
       return;
     }
 
@@ -210,7 +198,6 @@ function Signup() {
       formData.append("email", cleanEmail);
       formData.append("password", password);
       formData.append("role", "professor");
-      formData.append("facultyId", cleanFacultyId);
       formData.append("department", cleanDepartment);
       formData.append("employmentProof", employmentProof);
 
@@ -237,9 +224,14 @@ function Signup() {
       sessionStorage.setItem("otp_expires_at", String(otpExpiresAt));
 
       await Swal.fire({
-        imageUrl: "/images/success.png",
-        imageWidth: 170,
-        imageHeight: 170,
+        imageUrl: "/images/emailsent.png",
+        imageWidth: 270,
+        imageHeight: 180,
+        imageAlt: "Verification email sent",
+        customClass: {
+          popup: "login-feedback-popup",
+          container: "login-feedback-overlay",
+        },
         title: "Verification Code Sent",
         text: "Please verify your email. After verification, the Super Admin will review your professor account and uploaded ID.",
         confirmButtonText: "Continue",
@@ -313,25 +305,7 @@ function Signup() {
                 />
               </div>
 
-              <div className={styles.professorFormGroup}>
-                <label htmlFor="professor-faculty-id">
-                  Employee or Faculty ID
-                </label>
-
-                <input
-                  id="professor-faculty-id"
-                  type="text"
-                  placeholder="Enter your employee or faculty ID"
-                  value={facultyId}
-                  disabled={isSigningUp}
-                  autoComplete="off"
-                  maxLength={100}
-                  required
-                  onChange={(event) => setFacultyId(event.target.value)}
-                />
-              </div>
-
-              <div className={styles.professorFormGroup}>
+              <div className={`${styles.professorFormGroup} ${styles.professorFullWidth}`}>
                 <label htmlFor="department">Department</label>
 
                 <select
@@ -356,13 +330,13 @@ function Signup() {
                 className={`${styles.professorFormGroup} ${styles.professorFullWidth}`}
               >
                 <label htmlFor="employment-proof">
-                  Upload Your Faculty or Employee ID
+                  Upload Proof of Employment
                 </label>
 
                 <p className={styles.professorUploadDescription}>
-                  Upload a clear photo of the front of your valid school faculty
-                  or employee ID. Accepted formats are JPG, PNG, and WEBP, up to
-                  5 MB.
+                 Upload a clear photo or document proving your current employment with the school.
+                 You may submit your faculty or employee ID, certificate of employment, or
+                 other official employment documents.
                 </p>
 
                 <div className={styles.professorUploadArea}>
@@ -381,7 +355,7 @@ function Signup() {
                   >
                     <i className="fa-solid fa-image" />
 
-                    <span>
+                    <span style={{ color: "white" }}>
                       {employmentProof ? "Change ID Photo" : "Choose ID Photo"}
                     </span>
                   </label>

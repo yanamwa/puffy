@@ -166,6 +166,7 @@ function normalizeUser(user) {
     id: user.id || user.userId || user.user_id || user.UserID || displayName,
     name: displayName,
     email: user.email || "No email found",
+    profileImage: user.profileImage || user.profile_image || user.avatar || "",
     role,
     status: getStatusFromUser(user),
     verificationStatus,
@@ -293,9 +294,10 @@ function getProofSource(value) {
   const proof = String(value || "").trim();
 
   if (!proof) return "";
-  if (/^https?:\/\//i.test(proof) || proof.startsWith("/")) return proof;
-  if (/^api\//i.test(proof)) return `/${proof}`;
-  if (/^uploads\//i.test(proof)) return `${API_BASE}/${proof}`;
+  if (/^https?:\/\//i.test(proof)) return proof;
+  const uploadPath = proof.replace(/^\/?(?:api\/)?uploads\//i, "");
+  if (uploadPath !== proof) return `${API_BASE}/uploads/${uploadPath}`;
+  if (proof.startsWith("/")) return proof;
 
   return proof;
 }
@@ -331,11 +333,36 @@ function validateProfessorProofFile(file) {
   return "";
 }
 
+function getUserProfileSource(value) {
+  const source = String(value || "").trim();
+  if (!source) return "";
+  if (/^(https?:\/\/|blob:|data:image\/)/i.test(source)) return source;
+
+  const pathname = `/${source.replace(/^\/+/, "")}`.replace(
+    /^\/api\/uploads\//,
+    "/uploads/",
+  );
+  const serverOrigin = API_BASE.replace(/\/api\/?$/, "");
+  return `${serverOrigin}${pathname}`;
+}
+
 function UserAvatar({ user, large = false }) {
   const initials = getInitials(user.name) || "?";
+  const source = getUserProfileSource(user.profileImage);
+  const [failedSource, setFailedSource] = useState("");
+
   return (
-    <span className={large ? "users-modal-avatar" : "users-avatar"}>
-      {initials}
+    <span
+      className={`${large ? "users-modal-avatar" : "users-avatar"} users-role-avatar`}
+      data-role={user.role}
+      role="img"
+      aria-label={`${user.name}, ${titleCase(user.role)}`}
+    >
+      {source && source !== failedSource ? (
+        <img src={source} alt="" onError={() => setFailedSource(source)} />
+      ) : (
+        initials
+      )}
     </span>
   );
 }
@@ -2054,7 +2081,7 @@ export default function SuperAdminUserManagementPage() {
           </td>
           <td>{user.email}</td>
           <td>
-            <span className="users-role">{titleCase(user.role)}</span>
+            <span className="users-role" data-role={user.role}>{titleCase(user.role)}</span>
           </td>
           <td>
             <span className={`users-status is-${status}`}>
@@ -2375,7 +2402,7 @@ export default function SuperAdminUserManagementPage() {
         })}
       </div>
 
-      <section className="users-panel">
+      <>
         <div
           className="user-management-tabs"
           aria-label="User management sections"
@@ -2392,6 +2419,7 @@ export default function SuperAdminUserManagementPage() {
           ))}
         </div>
 
+        <section className="users-panel">
         <div className="users-panel-top">
           <div>
             <h2>{USER_TABS.find((tab) => tab.id === activeTab)?.label}</h2>
@@ -2425,6 +2453,7 @@ export default function SuperAdminUserManagementPage() {
         </div>
         <UserPagination pagination={pagination} loading={loading} />
       </section>
+      </>
 
       {credentialResults.length > 0 && (
         <div
@@ -2492,7 +2521,7 @@ export default function SuperAdminUserManagementPage() {
           onClick={() => setAdminModalOpen(false)}
         >
           <section
-            className="users-modal"
+            className="users-modal users-create-modal"
             onClick={(event) => event.stopPropagation()}
           >
             <button
@@ -2556,7 +2585,7 @@ export default function SuperAdminUserManagementPage() {
       {professorModalOpen && (
         <div className="users-modal-backdrop" onClick={closeProfessorModal}>
           <section
-            className="users-modal"
+            className="users-modal users-create-modal"
             onClick={(event) => event.stopPropagation()}
           >
             <button
@@ -2719,7 +2748,7 @@ export default function SuperAdminUserManagementPage() {
       {studentModalOpen && (
         <div className="users-modal-backdrop" onClick={closeStudentModal}>
           <section
-            className="users-modal"
+            className="users-modal users-create-modal"
             onClick={(event) => event.stopPropagation()}
           >
             <button
@@ -2956,3 +2985,4 @@ export default function SuperAdminUserManagementPage() {
     </div>
   );
 }
+

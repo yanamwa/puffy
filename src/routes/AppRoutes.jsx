@@ -85,6 +85,7 @@ function LearningRedirect() {
 export default function AppRoutes() {
   return (
     <Routes>
+      <Route path="/" element={<LandingPage />} />
       <Route element={<Layout />}>
         {/* ==========================
             PUBLIC ROUTES (Guest)
@@ -590,7 +591,7 @@ export default function AppRoutes() {
         {/* ==========================
             DEFAULT ROUTE
         ========================== */}
-        <Route path="/" element={<LandingPage />} />
+
       </Route>
     </Routes>
   );
