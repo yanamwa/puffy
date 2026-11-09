@@ -1445,7 +1445,7 @@ export default function EditModule() {
 
           <div className={styles.popupSection}>
             <label className={styles.popupLabel}>
-              Generate Module from Material
+              Organize Learning Module
             </label>
 
             <div className={styles.uploadRow}>
