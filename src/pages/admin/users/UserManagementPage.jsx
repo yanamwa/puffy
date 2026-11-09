@@ -154,7 +154,10 @@ function UserAvatar({ user, large = false }) {
   const [failed, setFailed] = useState(false);
   useEffect(() => setFailed(false), [user.profileImage]);
   const url = failed ? "" : imageUrl(user.profileImage);
-  return <span className={large ? "users-modal-avatar" : "users-avatar"}>
+  return <span
+    className={large ? "users-modal-avatar" : "users-avatar users-role-avatar"}
+    data-role={user.role}
+  >
     {url ? <img src={url} alt="" onError={() => setFailed(true)} /> : initials(user.name)}
   </span>;
 }
@@ -399,18 +402,26 @@ export default function UserManagementPage() {
       <div className="users-header-actions"><button className="users-create-btn" type="button" onClick={() => { setNotice(""); setStudentModalOpen(true); }}><FiPlus /> Add Student</button></div>
     </div>
     <div className="users-stat-grid">{stats.map(stat => { const Icon = stat.icon; return <div className="users-stat-card" key={stat.label}><div className="users-stat-icon"><Icon /></div><span>{stat.label}</span><strong>{stat.value}</strong></div>; })}</div>
+    <nav className="user-management-tabs" aria-label="User management sections">
+      {USER_TABS.map(tab => <button key={tab.id} type="button" className={activeTab === tab.id ? "active" : ""} aria-pressed={activeTab === tab.id} onClick={() => setActiveTab(tab.id)}>{tab.label}</button>)}
+    </nav>
     <section className="users-panel">
-      <nav className="user-management-tabs" aria-label="User management sections">
-        {USER_TABS.map(tab => <button key={tab.id} type="button" className={activeTab === tab.id ? "active" : ""} aria-pressed={activeTab === tab.id} onClick={() => setActiveTab(tab.id)}>{tab.label}</button>)}
-      </nav><div className="users-panel-top"><div><h2>{USER_TABS.find(tab => tab.id === activeTab)?.label}</h2><p>{pagination.range} user records shown</p></div>
-      <div className="users-controls"><label className="users-search"><FiSearch /><input type="text" placeholder="Search users..." value={query} onChange={event => setQuery(event.target.value)} /></label>
-      </div></div>
+      <div className="users-panel-top">
+        <div>
+          <h2>{USER_TABS.find(tab => tab.id === activeTab)?.label}</h2>
+          <p>{pagination.range} user records shown</p>
+        </div>
+        <label className="users-search">
+          <FiSearch />
+          <input type="text" placeholder="Search users..." value={query} onChange={event => setQuery(event.target.value)} />
+        </label>
+      </div>
       {notice && <div className="users-notice" role="status">{notice}</div>}
       {loadError && <div className="users-notice" role="alert">{loadError} <button type="button" onClick={loadUsers}>Retry</button></div>}
       <div className="users-table-wrap"><table className="users-table"><thead><tr><th>User</th><th>Email</th><th>Role</th><th>Status</th><th>Joined</th><th>Security</th><th>Action</th></tr></thead>
         <tbody>{loading ? <tr><td className="users-empty" colSpan={7}>Loading users...</td></tr> : filteredUsers.length === 0 ? <tr><td className="users-empty" colSpan={7}>{loadError ? "Unable to load users." : "No users match your filters."}</td></tr> : pagination.rows.map(user => <tr key={user.id}>
           <td><div className="users-person"><UserAvatar user={user} /><div><strong>{user.name}</strong><small>User ID: {formatUserDisplayId(user)}</small></div></div></td>
-          <td>{user.email}</td><td><span className="users-role">{titleCase(user.role)}</span></td>
+          <td>{user.email}</td><td><span className="users-role" data-role={user.role}>{titleCase(user.role)}</span></td>
           <td><span className={`users-status is-${String(user.status).toLowerCase()}`}>{titleCase(user.status)}</span></td>
           <td>{formatDate(user.joined)}</td><td>{securityLabel(user)}</td>
           <td><div className="users-action-group"><button className="users-icon-btn users-view-btn" type="button" onClick={() => setSelectedUser(user)} title="View user"><FiEye /><span>View</span></button>

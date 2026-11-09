@@ -170,7 +170,7 @@ function getDisplayName(user) {
 ===================================================== */
 
 export default function ProfessorLayout() {
-  const { user: authUser, logout } = useAuth();
+  const { user: authUser, logout, switchRole } = useAuth();
 
   const navigate = useNavigate();
   const [headerSearch, setHeaderSearch] = useState("");
@@ -183,6 +183,7 @@ export default function ProfessorLayout() {
   const [headerUser, setHeaderUser] = useState(() => {
     return getStoredUser() || authUser || null;
   });
+  const [profileMenuRevision, setProfileMenuRevision] = useState(0);
 
   /* ===================================================
      SIDEBAR
@@ -197,6 +198,7 @@ export default function ProfessorLayout() {
   =================================================== */
 
   useEffect(() => {
+    const controller = new AbortController();
     const fetchCurrentProfessor = async () => {
       try {
         const token = getStoredToken();
@@ -207,6 +209,7 @@ export default function ProfessorLayout() {
 
         const response = await fetch(`${API_BASE_URL}/users/me`, {
           method: "GET",
+          signal: controller.signal,
 
           headers: {
             Accept: "application/json",
@@ -225,7 +228,7 @@ export default function ProfessorLayout() {
 
         const loggedInUser = data.user || data.data?.user || data.data || data;
 
-        if (!loggedInUser) {
+        if (!loggedInUser || controller.signal.aborted || getStoredToken() !== token) {
           return;
         }
 
@@ -251,12 +254,13 @@ export default function ProfessorLayout() {
 
         localStorage.setItem("currentUser", serializedUser);
       } catch (error) {
-        console.error("Professor header loading error:", error);
+        if (!controller.signal.aborted) console.error("Professor header loading error:", error);
       }
     };
 
     fetchCurrentProfessor();
-  }, []);
+    return () => controller.abort();
+  }, [profileMenuRevision]);
 
   /* ===================================================
      SYNC WITH AUTH USER
@@ -532,6 +536,9 @@ export default function ProfessorLayout() {
                 },
               ]}
               onLogout={handleLogout}
+              onMenuOpen={() => setProfileMenuRevision((revision) => revision + 1)}
+              switchToRole={headerUser?.hasAdminAccess ? "admin" : undefined}
+              onSwitchRole={switchRole}
             />
           </div>
         </header>
