@@ -668,3 +668,14 @@
     grid-column: 2;
   }
 }
+/* Make the admin Recent Users row full width */
+#root .dashboard-main-grid.dashboard-single-column {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+#root .dashboard-main-grid.dashboard-single-column > .dashboard-panel {
+  grid-column: 1 / -1;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}

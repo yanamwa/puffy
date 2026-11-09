@@ -114,6 +114,14 @@ function normalizeUser(user = {}) {
     gender: user.gender || "",
     yearLevel: user.yearLevel || user.year_level || "",
     sectionName: user.sectionName || user.section_name || "",
+    course: user.course || user.program || "",
+    department: user.department || "",
+    professorFacultyId:
+      user.professorFacultyId || user.professor_faculty_id || "",
+    professorPosition:
+      user.professorPosition || user.professor_position || "",
+    professorSpecialization:
+      user.professorSpecialization || user.professor_specialization || "",
     professorId: user.professorId || user.professor_id || "",
     professorDepartment: user.professorDepartment || user.professor_department || "",
     verified: user.verified === true || user.is_verified === 1 || user.is_verified === true,
@@ -325,7 +333,21 @@ export default function UserManagementPage() {
     } catch (error) { showError(error.message || "Could not update account."); }
     finally { setBusyUserId(null); }
   };
+
   const handleResetCredentials = async user => {
+    
+    if (!user.mustChangePassword) {
+      await Swal.fire({
+        icon: "info",
+        title: "Password Managed by User",
+        text: "This user has already taken control of their password. Administrators can no longer reset their credentials.",
+        confirmButtonText: "Understood",
+        confirmButtonColor: "#7fa8d6",
+      });
+      return;
+    }
+
+
     const confirmation = await Swal.fire({
       icon: "warning", title: "Reset Credentials?",
       text: `Generate a new temporary password for ${user.name}? Their previous password will stop working.`,
@@ -395,18 +417,273 @@ export default function UserManagementPage() {
             <button className="users-icon-btn users-archive-btn" type="button" onClick={() => handleArchiveToggle(user)} disabled={busyUserId !== null} title={user.isArchived ? "Restore account" : "Archive account"}><FiArchive /><span>{busyUserId === user.id ? "Saving..." : user.isArchived ? "Restore" : "Archive"}</span></button></div></td>
         </tr>)}</tbody></table></div><UserPagination pagination={pagination} loading={loading} />
     </section>
-    {selectedUser && <div className="users-modal-backdrop" onClick={() => setSelectedUser(null)}><section className="users-modal" role="dialog" aria-modal="true" aria-label="User details" onClick={event => event.stopPropagation()}>
-      <button className="users-modal-close" type="button" onClick={() => setSelectedUser(null)} aria-label="Close user details"><FiX /></button>
-      <div className="users-modal-profile"><UserAvatar user={selectedUser} large /><div><h2>{selectedUser.name}</h2><p>{selectedUser.email}</p></div></div>
-      <dl className="users-detail-grid">{[
-        ["User ID", formatUserDisplayId(selectedUser)], ["Role", titleCase(selectedUser.role)], ["Status", titleCase(selectedUser.status)],
-        ["Email Verification", selectedUser.verified ? "Verified" : "Not verified"], ["Gender", selectedUser.gender || "Not provided"],
-        ["Student ID", selectedUser.studentId || "None"], ["Year Level", selectedUser.yearLevel || "None"], ["Section", selectedUser.sectionName || "None"],
-        ["Professor ID", selectedUser.professorId || "None"], ["Department", selectedUser.professorDepartment || "None"],
-        ["Joined", formatDate(selectedUser.joined)], ["Activity", selectedUser.decks === null && selectedUser.modules === null ? "Not available" : `${selectedUser.decks ?? 0} decks / ${selectedUser.modules ?? 0} modules`],
-      ].map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>
-      <div className="users-modal-actions"><button className="users-icon-btn users-reset-btn" type="button" disabled={busyUserId !== null} onClick={() => handleResetCredentials(selectedUser)}><FiRefreshCw /> Reset Credentials</button></div>
-    </section></div>}
+          {selectedUser && (
+          <div
+            className="users-modal-backdrop"
+            onClick={() => setSelectedUser(null)}
+          >
+            <section
+              className="users-modal user-profile-dialog"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="user-profile-title"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <button
+                className="user-profile-close"
+                type="button"
+                onClick={() => setSelectedUser(null)}
+                aria-label="Close user details"
+              >
+                <FiX />
+              </button>
+
+              {/* LEFT: IDENTIFICATION CARD */}
+              <aside className="user-profile-card">
+                <header className="user-profile-brand">
+                  <div>
+                    <strong>PuffyBrain</strong>
+                    <span>{titleCase(selectedUser.role)} Identification Card</span>
+                  </div>
+
+                  <span className="user-profile-role">
+                    {titleCase(selectedUser.role)}
+                  </span>
+                </header>
+
+                <div className="user-profile-identity">
+                  <div className="user-profile-photo">
+                    <UserAvatar user={selectedUser} large />
+                  </div>
+
+                  <p className="user-profile-eyebrow">
+                    Official {titleCase(selectedUser.role)} Profile
+                  </p>
+
+                  <h2>{selectedUser.name}</h2>
+
+                  <strong className="user-profile-number">
+                    {formatUserDisplayId(selectedUser)}
+                  </strong>
+
+                  <p className="user-profile-affiliation">
+                    {selectedUser.role === "student"
+                      ? selectedUser.course || "Student"
+                      : selectedUser.role === "professor"
+                        ? selectedUser.professorDepartment || "Faculty"
+                        : selectedUser.department || "Administration"}
+                  </p>
+
+                  <span className="user-profile-status">
+                    {titleCase(selectedUser.role)}
+                    <span aria-hidden="true"> · </span>
+                    {titleCase(selectedUser.status)}
+                  </span>
+                </div>
+
+                <footer className="user-profile-issued">
+                  <span>Issued by</span>
+                  <strong>PuffyBrain Learning System</strong>
+                </footer>
+              </aside>
+
+              {/* RIGHT: COMPLETE USER INFORMATION */}
+              <div className="user-profile-information">
+                <header className="user-profile-heading">
+                  <p className="user-profile-eyebrow">Profile Overview</p>
+                  <h2 id="user-profile-title">
+                    {titleCase(selectedUser.role)} Information
+                  </h2>
+                  <p>Personal, role, and account information.</p>
+                </header>
+
+                <section className="user-profile-section">
+                  <h3>Personal Information</h3>
+                  <p>Basic account details</p>
+
+                  <dl className="user-profile-fields">
+                    {[
+                      ["Full Name", selectedUser.name],
+                      ["User ID", formatUserDisplayId(selectedUser)],
+                      ["Gender", selectedUser.gender],
+                    ].map(([label, value]) => (
+                      <div key={label}>
+                        <dt>{label}</dt>
+                        <dd>{value || "Not provided"}</dd>
+                      </div>
+                    ))}
+
+                    <div className="user-profile-wide">
+                      <dt>Email Address</dt>
+                      <dd>{selectedUser.email || "Not provided"}</dd>
+                    </div>
+                  </dl>
+                </section>
+
+                {selectedUser.role === "student" && (
+                  <section className="user-profile-section">
+                    <h3>Student Information</h3>
+                    <p>Academic and enrollment details</p>
+
+                    <dl className="user-profile-fields">
+                      {[
+                        ["Student ID", selectedUser.studentId],
+                        ["Course / Program", selectedUser.course],
+                        ["Year Level", selectedUser.yearLevel],
+                        ["Section", selectedUser.sectionName],
+                      ].map(([label, value]) => (
+                        <div key={label}>
+                          <dt>{label}</dt>
+                          <dd>{value || "Not provided"}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  </section>
+                )}
+
+                {selectedUser.role === "professor" && (
+                  <section className="user-profile-section">
+                    <h3>Faculty Information</h3>
+                    <p>Professional and department details</p>
+
+                    <dl className="user-profile-fields">
+                      {[
+                        ["Professor ID", selectedUser.professorId],
+                        ["Faculty ID", selectedUser.professorFacultyId],
+                        ["Department", selectedUser.professorDepartment],
+                        ["Position", selectedUser.professorPosition],
+                        ["Specialization", selectedUser.professorSpecialization],
+                        [
+                          "Approval Status",
+                          titleCase(selectedUser.verificationStatus || ""),
+                        ],
+                      ].map(([label, value]) => (
+                        <div key={label}>
+                          <dt>{label}</dt>
+                          <dd>{value || "Not provided"}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  </section>
+                )}
+
+                {["admin", "super_admin", "superadmin"].includes(
+                  selectedUser.role
+                ) && (
+                  <section className="user-profile-section">
+                    <h3>Administrative Information</h3>
+                    <p>Administrative account details</p>
+
+                    <dl className="user-profile-fields">
+                      <div>
+                        <dt>Admin ID</dt>
+                        <dd>{formatUserDisplayId(selectedUser)}</dd>
+                      </div>
+
+                      <div>
+                        <dt>Role</dt>
+                        <dd>{titleCase(selectedUser.role)}</dd>
+                      </div>
+
+                      <div className="user-profile-wide">
+                        <dt>Department</dt>
+                        <dd>{selectedUser.department || "Not provided"}</dd>
+                      </div>
+                    </dl>
+                  </section>
+                )}
+
+                <section className="user-profile-section">
+                  <h3>Account Information</h3>
+                  <p>Account status and security</p>
+
+                  <dl className="user-profile-fields">
+                    {[
+                      ["Status", titleCase(selectedUser.status)],
+                      [
+                        "Email Verification",
+                        selectedUser.verified ? "Verified" : "Not verified",
+                      ],
+                      ["Registered", formatDate(selectedUser.joined)],
+                      [
+                        "Account Type",
+                        selectedUser.isTemporary ? "Temporary" : "Permanent",
+                      ],
+                      [
+                        "Password Status",
+                        selectedUser.mustChangePassword
+                          ? "Password change required"
+                          : "User managed",
+                      ],
+                      [
+                        "Archived",
+                        selectedUser.isArchived ? "Yes" : "No",
+                      ],
+                      ...(selectedUser.isTemporary
+                        ? [
+                            [
+                              "Expiration Date",
+                              formatDate(selectedUser.temporaryExpiresAt),
+                            ],
+                          ]
+                        : []),
+                      [
+                        "Activity",
+                        selectedUser.decks == null &&
+                        selectedUser.modules == null
+                          ? "Not available"
+                          : `${selectedUser.decks ?? 0} decks / ${
+                              selectedUser.modules ?? 0
+                            } modules`,
+                      ],
+                    ].map(([label, value]) => (
+                      <div key={label}>
+                        <dt>{label}</dt>
+                        <dd>{value || "Not provided"}</dd>
+                      </div>
+                    ))}
+                  </dl>
+
+                      <div className="user-profile-actions">
+                        <div className="users-reset-section">
+                          <button
+                            type="button"
+                            disabled={
+                              busyUserId !== null ||
+                              !selectedUser.mustChangePassword
+                            }
+                            onClick={() => handleResetCredentials(selectedUser)}
+                          >
+                            <FiRefreshCw aria-hidden="true" />
+                            Reset Credentials
+                          </button>
+
+                          {!selectedUser.mustChangePassword && (
+                            
+                                <small
+                                  style={{
+                                    display: "block",
+                                    fontSize: "5px",
+                                    fontWeight: 400,
+                                    lineHeight: 1.3,
+                                    color: "#98a2b3",
+                                    textAlign: "right",
+                                    marginTop: "4px",
+                                  }}
+                                >
+                                  Password is already managed by the user.
+                                </small>
+
+                          )}
+                        </div>
+                      </div>
+
+
+                </section>
+              </div>
+            </section>
+          </div>
+        )}
     {studentModalOpen && <div className="users-modal-backdrop" onClick={closeModal}><section className="users-modal" role="dialog" aria-modal="true" aria-label="Add student" onClick={event => event.stopPropagation()}>
       <button className="users-modal-close" type="button" onClick={closeModal} disabled={creatingStudent || importBusy} aria-label="Close student form"><FiX /></button>
       <div className="users-modal-profile"><span className="users-modal-avatar"><FiUser /></span><div><h2>Add Student</h2><p>Create or import student accounts with generated credentials.</p></div></div>

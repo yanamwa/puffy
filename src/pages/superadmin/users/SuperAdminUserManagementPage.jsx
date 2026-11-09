@@ -174,6 +174,10 @@ function normalizeUser(user) {
     verificationStatus,
     joined,
     studentId: user.studentId || user.student_id || "",
+    gender: user.gender || "",
+    course: user.course || user.program || "",
+    yearLevel: user.yearLevel || user.year_level || "",
+    sectionName: user.sectionName || user.section_name || "",
     professorId: user.professorId || user.professor_id || "",
     professorFacultyId:
       user.professorFacultyId || user.professor_faculty_id || "",
@@ -2988,84 +2992,145 @@ export default function SuperAdminUserManagementPage() {
       )}
 
       {selectedUser && (
-        <div
-          className="users-modal-backdrop"
+  <div
+    className="users-modal-backdrop"
+    onClick={() => setSelectedUser(null)}
+  >
+    <section
+      className="users-modal users-id-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="users-id-name"
+      onClick={(event) => event.stopPropagation()}
+    >
+      <div className="users-id-topbar">
+        <span>PuffyBrain · User Details</span>
+
+        <button
+          className="users-modal-close"
+          type="button"
           onClick={() => setSelectedUser(null)}
+          aria-label="Close user details"
         >
-          <section
-            className="users-modal"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <button
-              className="users-modal-close"
-              type="button"
-              onClick={() => setSelectedUser(null)}
-              aria-label="Close user details"
-            >
-              x
-            </button>
-            <div className="users-modal-profile">
-              <UserAvatar user={selectedUser} large />
-              <div>
-                <h2>{selectedUser.name}</h2>
-                <p>{selectedUser.email}</p>
+          <FiX />
+        </button>
+      </div>
+
+      <div className="users-id-body">
+        <aside className="users-id-photo-column">
+          <div className="users-id-photo-frame">
+            <UserAvatar user={selectedUser} large />
+          </div>
+
+          <strong>{formatUserDisplayId(selectedUser)}</strong>
+
+          <span className="users-id-role">
+            {titleCase(selectedUser.role)}
+          </span>
+
+          <span className="users-id-status">
+            {titleCase(selectedUser.status)}
+          </span>
+        </aside>
+
+        <div className="users-id-info">
+          <div className="users-id-kicker">
+            <FiShield aria-hidden="true" />
+            Account Information
+          </div>
+
+          <h2 id="users-id-name">{selectedUser.name}</h2>
+
+          <p className="users-id-email">
+            <FiMail aria-hidden="true" />
+            <span>{selectedUser.email}</span>
+          </p>
+
+          <dl className="users-id-details">
+            {[
+              ["User ID", formatUserDisplayId(selectedUser)],
+              ["Role", titleCase(selectedUser.role)],
+              ["Status", titleCase(selectedUser.status)],
+              ["Gender", selectedUser.gender],
+              ["Registered", formatDate(selectedUser.joined)],
+              [
+                "Verification Status",
+                titleCase(selectedUser.verificationStatus),
+              ],
+              [
+                "Verified Account",
+                selectedUser.verified ? "Yes" : "No",
+              ],
+              [
+                "Archived Account",
+                selectedUser.isArchived ? "Yes" : "No",
+              ],
+              [
+                "Account Type",
+                selectedUser.isTemporary ? "Temporary" : "Permanent",
+              ],
+              [
+                "Expires",
+                selectedUser.isTemporary
+                  ? formatDate(selectedUser.temporaryExpiresAt)
+                  : "Never",
+              ],
+              [
+                "Password Status",
+                selectedUser.mustChangePassword
+                  ? "Password change required"
+                  : "User managed",
+              ],
+
+              ...(selectedUser.role === "student"
+                ? [
+                    ["Student ID", selectedUser.studentId],
+                    ["Course / Program", selectedUser.course],
+                    ["Year Level", selectedUser.yearLevel],
+                    ["Section", selectedUser.sectionName],
+                  ]
+                : []),
+
+              ...(selectedUser.role === "professor"
+                ? [
+                    ["Professor ID", selectedUser.professorId],
+                    ["Faculty ID", selectedUser.professorFacultyId],
+                    ["Department", selectedUser.professorDepartment],
+                    ["Position", selectedUser.professorPosition],
+                    [
+                      "Specialization",
+                      selectedUser.professorSpecialization,
+                    ],
+                  ]
+                : []),
+            ].map(([label, value]) => (
+              <div key={label}>
+                <dt>{label}</dt>
+                <dd>{value || "Not provided"}</dd>
               </div>
+            ))}
+
+            <div className="users-id-proof">
+              <dt>Supporting Document / Proof</dt>
+              <dd>{renderProof(selectedUser)}</dd>
             </div>
-            <dl className="users-detail-grid">
-              <div>
-                <dt>User ID</dt>
-                <dd>{formatUserDisplayId(selectedUser)}</dd>
-              </div>
-              <div>
-                <dt>Role</dt>
-                <dd>{titleCase(selectedUser.role)}</dd>
-              </div>
-              <div>
-                <dt>Status</dt>
-                <dd>{titleCase(selectedUser.status)}</dd>
-              </div>
-              <div>
-                <dt>Registered</dt>
-                <dd>{formatDate(selectedUser.joined)}</dd>
-              </div>
-              <div className="users-detail-wide">
-                <dt>Department</dt>
-                <dd>{selectedUser.professorDepartment || "None"}</dd>
-              </div>
-              <div className="users-proof-detail">
-                <dt>Proof</dt>
-                <dd>{renderProof(selectedUser)}</dd>
-              </div>
-              <div>
-                <dt>Account Type</dt>
-                <dd>{selectedUser.isTemporary ? "Temporary" : "Permanent"}</dd>
-              </div>
-              <div>
-                <dt>Expires</dt>
-                <dd>
-                  {selectedUser.isTemporary
-                    ? formatDate(selectedUser.temporaryExpiresAt)
-                    : "Never"}
-                </dd>
-              </div>
-              <div>
-                <dt>Password</dt>
-                <dd>
-                  {selectedUser.mustChangePassword
-                    ? "Temporary"
-                    : "User managed"}
-                </dd>
-              </div>
-            </dl>
-            {selectedUser.role === "professor" && !selectedUser.isArchived &&
-              String(selectedUser.verificationStatus).toLowerCase() === "pending" && (
-                <div className="users-action-group users-approval-dialog-actions">
-                  {renderProfessorDecisionButtons(selectedUser)}
+                  </dl>
                 </div>
-              )}
-          </section>
-        </div>
-      )}
+              </div>
+
+              {selectedUser.role === "professor" &&
+                !selectedUser.isArchived &&
+                String(selectedUser.verificationStatus).toLowerCase() ===
+                  "pending" && (
+                  <div className="users-id-footer">
+                    <div className="users-action-group users-approval-dialog-actions">
+                      {renderProfessorDecisionButtons(selectedUser)}
+                    </div>
+                  </div>
+                )}
+            </section>
+          </div>
+        )}
     </div>
   );
 }
