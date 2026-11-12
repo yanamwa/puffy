@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { useStudentTutorial } from "../../pages/student/tutorial/StudentTutorialContext.js";
+import { confirmLogout } from "../../utils/confirmLogout.js";
 
 import "./StudentHeader.css";
 
@@ -464,9 +465,11 @@ export default function StudentHeader({
     setProfileMenuOpen((current) => !current);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setProfileMenuOpen(false);
     setNotificationMenuOpen(false);
+    if (!(await confirmLogout())) return;
+
     logout();
     navigate("/login", {
       replace: true,
