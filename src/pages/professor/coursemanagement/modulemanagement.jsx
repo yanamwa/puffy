@@ -13,6 +13,17 @@ function formatCourseId(course) {
   return course.code || `CRS${String(course.id).slice(-3).padStart(3, "0")}`;
 }
 
+function getArchiveSource(course) {
+  const role = String(
+    course.archivedByRole || course.archived_by_role || "",
+  ).toLowerCase();
+  if (role === "super_admin" || role === "superadmin") return "Super Admin";
+  if (role === "admin") return "Admin";
+  if (role === "professor") return "you";
+  if (course.catalogArchivedAt || course.catalog_archived_at) return "Admin";
+  return "";
+}
+
 export default function ModuleManagement() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -181,6 +192,8 @@ export default function ModuleManagement() {
             ? {
                 ...item,
                 archived: true,
+                archivedByRole: "professor",
+                archived_by_role: "professor",
               }
             : item,
         ),
@@ -230,6 +243,8 @@ export default function ModuleManagement() {
             ? {
                 ...item,
                 archived: false,
+                archivedByRole: null,
+                archived_by_role: null,
               }
             : item,
         ),
@@ -332,7 +347,12 @@ export default function ModuleManagement() {
           <div className={styles.emptyState}>No courses found.</div>
         ) : (
           <div className={styles.moduleGrid}>
-            {shownCourses.map((course) => (
+            {shownCourses.map((course) => {
+              const archiveSource = getArchiveSource(course);
+              const administratorArchived =
+                archiveSource === "Admin" || archiveSource === "Super Admin";
+
+              return (
               <article
                 key={course.id}
                 className={styles.moduleBox}
@@ -452,20 +472,34 @@ export default function ModuleManagement() {
                     </button>
                   </>
                 ) : (
-                  <button
-                    type="button"
-                    className={styles.actionRestore}
-                    disabled={showExamples}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      restoreCourse(course);
-                    }}
-                  >
-                    Restore
-                  </button>
+                  <>
+                    <div className={styles.courseMeta} role="status">
+                      {archiveSource
+                        ? `Archived by ${archiveSource}`
+                        : "Archived course"}
+                    </div>
+                    {administratorArchived ? (
+                      <div className={styles.courseMeta}>
+                        Contact an administrator to restore this course.
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        className={styles.actionRestore}
+                        disabled={showExamples}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          restoreCourse(course);
+                        }}
+                      >
+                        Restore
+                      </button>
+                    )}
+                  </>
                 )}
               </article>
-            ))}
+              );
+            })}
           </div>
         )}
 
