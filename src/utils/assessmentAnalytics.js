@@ -9,8 +9,8 @@ const skillOf = (level) =>
 export function summarizeAssessment(attempts, students, items) {
   const progress = new Map(
     students.map((s) => [
-      String(s.user_id),
-      { name: s.student_name || `Student ${s.user_id}`, scores: [] },
+      String(s.user_id ?? s.userId ?? s.id),
+      { name: s.student_name || s.name || `Student ${s.user_id ?? s.userId ?? s.id}`, scores: [] },
     ]),
   );
   const questions = new Map();
@@ -22,7 +22,7 @@ export function summarizeAssessment(attempts, students, items) {
         name: attempt.student_name || `Unavailable account (ID ${key})`,
         scores: [],
       });
-    if (Number(attempt.total) > 0) {
+    if (attempt.score != null && Number.isFinite(Number(attempt.score)) && Number(attempt.total) > 0) {
       const score = (Number(attempt.score) / Number(attempt.total)) * 100;
       progress.get(key).scores.push(score);
       scores.push(score);
@@ -72,9 +72,11 @@ export function summarizeAssessment(attempts, students, items) {
       };
     });
   return {
-    students: [...progress.values()].map((s) => ({
+    students: [...progress.entries()].map(([id, s]) => ({
+      id,
       name: s.name,
       attempts: s.scores.length,
+      average: mean(s.scores),
       first: s.scores[0] ?? null,
       latest: s.scores.at(-1) ?? null,
       best: s.scores.length ? Math.max(...s.scores) : null,
@@ -86,4 +88,33 @@ export function summarizeAssessment(attempts, students, items) {
     cognitive: aggregate("skill"),
     levels: aggregate("level"),
   };
+}
+
+export function summarizePracticeReport(summary, passing) {
+  const coverage = new Map();
+  for (const question of summary.questions) {
+    const key = JSON.stringify([question.topic, question.skill, question.level]);
+    if (!coverage.has(key)) {
+      coverage.set(key, {
+        key,
+        topic: question.topic,
+        skill: question.skill,
+        level: question.level || "Unclassified",
+        questions: 0,
+        responses: 0,
+        correct: 0,
+      });
+    }
+    const row = coverage.get(key);
+    row.questions++;
+    row.responses += question.responses;
+    row.correct += question.correct;
+  }
+  const studentPerformance = [...summary.students].sort(
+    (a, b) => b.attempts - a.attempts || a.name.localeCompare(b.name),
+  );
+  const studentsNeedingAttention = passing == null ? [] : studentPerformance
+    .filter(({ average }) => average != null && average < passing)
+    .sort((a, b) => a.average - b.average);
+  return { coverage: [...coverage.values()], studentPerformance, studentsNeedingAttention };
 }
