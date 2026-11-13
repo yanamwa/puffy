@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import confirmLogout from "../../utils/confirmLogout.js";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { useStudentTutorial } from "../../pages/student/tutorial/StudentTutorialContext.js";
 
@@ -464,7 +465,9 @@ export default function StudentHeader({
     setProfileMenuOpen((current) => !current);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    if (!(await confirmLogout())) return;
+
     setProfileMenuOpen(false);
     setNotificationMenuOpen(false);
     logout();

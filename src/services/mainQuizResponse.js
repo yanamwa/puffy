@@ -7,7 +7,12 @@ export function readMainQuizResponseAnswer(answer, index) {
       answer.selectedAnswer ??
       answer.user_answer ??
       answer.userAnswer ??
+      answer.selected ??
+      answer.choice ??
+      answer.student_answer ??
+      answer.studentAnswer ??
       answer.response ??
+      answer.value ??
       answer.answer,
   );
   const correct = text(

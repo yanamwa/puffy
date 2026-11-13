@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../../../context/AuthContext";
+import confirmLogout from "../../../utils/confirmLogout.js";
 
 import { API_BASE } from "../../../config.js";
 
@@ -442,7 +443,9 @@ export default function AdminLayout({ children }) {
 
   =================================================== */
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    if (!(await confirmLogout())) return;
+
     void logout();
 
     navigate("/login", {

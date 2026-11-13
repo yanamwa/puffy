@@ -1681,6 +1681,17 @@ export default function MainQuizAnalysis({
             student?.student_name ||
             attempt.studentName ||
             `Student ${attempt.userId ?? "(name unavailable)"}`,
+          yearLevel:
+            student?.yearLevel ||
+            student?.year_level ||
+            student?.student_year_level ||
+            student?.year ||
+            attempt.yearLevel ||
+            attempt.year_level ||
+            attempt.student_year_level ||
+            attempt.student?.yearLevel ||
+            attempt.student?.year_level ||
+            "N/A",
           section:
             student?.sectionName ||
             student?.section_name ||
