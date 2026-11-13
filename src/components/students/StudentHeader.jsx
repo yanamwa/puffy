@@ -4,6 +4,7 @@ import Swal from "sweetalert2";
 import confirmLogout from "../../utils/confirmLogout.js";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { useStudentTutorial } from "../../pages/student/tutorial/StudentTutorialContext.js";
+import { confirmLogout } from "../../utils/confirmLogout.js";
 
 import "./StudentHeader.css";
 
@@ -466,10 +467,10 @@ export default function StudentHeader({
   };
 
   const handleLogout = async () => {
-    if (!(await confirmLogout())) return;
-
     setProfileMenuOpen(false);
     setNotificationMenuOpen(false);
+    if (!(await confirmLogout())) return;
+
     logout();
     navigate("/login", {
       replace: true,

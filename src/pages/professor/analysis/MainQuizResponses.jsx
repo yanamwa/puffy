@@ -279,6 +279,13 @@ export default function MainQuizResponses({
           </div>
           <div className="main-response-action-buttons">
             <button
+              type="button"
+              onClick={() => window.print()}
+              disabled={!attempt}
+            >
+              <FiPrinter /> Print
+            </button>
+            <button
               className="main-response-primary"
               type="button"
               onClick={emailScore}

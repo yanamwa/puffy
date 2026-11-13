@@ -24,6 +24,7 @@ import RoleNotificationMenu from "../../../components/rolenotif/RoleNotification
 
 import HeaderProfileChip from "../../../components/HeaderProfileChip";
 import SystemPageSearch from "../../../components/SystemPageSearch.jsx";
+import { confirmLogout } from "../../../utils/confirmLogout.js";
 
 import "./AdminLayout.css";
 

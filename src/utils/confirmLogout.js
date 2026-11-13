@@ -1,22 +1,20 @@
 import Swal from "sweetalert2";
+import "./confirmLogout.css";
 
-export default async function confirmLogout() {
+export async function confirmLogout() {
   const result = await Swal.fire({
-    title: "Log out?",
-    text: "Are you sure you want to log out?",
+    title: "Are you sure you want to log out?",
+    text: "You will be signed out of your account.",
+    target: document.body,
     showCancelButton: true,
-    confirmButtonText: "Yes, log out",
+    confirmButtonText: "Confirm",
     cancelButtonText: "Cancel",
     reverseButtons: true,
     focusCancel: true,
     buttonsStyling: false,
     customClass: {
-      popup: "logout-confirm-dialog",
-      title: "logout-confirm-title",
-      htmlContainer: "logout-confirm-text",
-      actions: "logout-confirm-actions",
-      confirmButton: "logout-confirm-accept",
-      cancelButton: "logout-confirm-cancel",
+      container: "logout-confirmation-overlay",
+      popup: "logout-confirmation-dialog",
     },
   });
 

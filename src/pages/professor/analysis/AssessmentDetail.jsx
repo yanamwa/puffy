@@ -27,7 +27,6 @@ export default function AssessmentDetail() {
   const [course, setCourse] = useState(tutorialAnalysis ? tutorialCourseDraft : initial);
   const [loading, setLoading] = useState(!tutorialAnalysis);
   const [error, setError] = useState("");
-  const savePdf = () => window.print();
   useEffect(() => {
     if (tutorialAnalysis) {
       setCourse(tutorialCourseDraft);
@@ -71,7 +70,10 @@ export default function AssessmentDetail() {
         <div><h1>Assessment Analysis</h1><p>Review practice and main quiz results for {title}.</p></div>
         <div className="qa-page-print-actions">
           <button type="button" className="qa-page-print" onClick={() => window.print()} disabled={loading || Boolean(error)}>Print</button>
+<<<<<<< HEAD
           <button type="button" className="qa-page-print" onClick={savePdf} disabled={loading || Boolean(error)}>Save as PDF</button>
+=======
+>>>>>>> 25d1f6380f7d642043d2f0326040c8483e37824d
         </div>
       </header>
       {loading ? <p>Loading assessment details…</p> : error ? <p role="alert">{error}</p> : (
