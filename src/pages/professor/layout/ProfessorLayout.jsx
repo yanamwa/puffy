@@ -10,6 +10,7 @@ import {
 } from "react-router-dom";
 
 import { useAuth } from "../../../context/AuthContext";
+import confirmLogout from "../../../utils/confirmLogout.js";
 import { API_BASE } from "../../../config.js";
 import { lessonAuthHeaders } from "../../../services/lessonAuth.js";
 import {

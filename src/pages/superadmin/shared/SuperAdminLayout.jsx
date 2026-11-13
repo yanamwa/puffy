@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import { API_BASE } from "../../../config.js";
 import { useAuth } from "../../../context/AuthContext";
+import confirmLogout from "../../../utils/confirmLogout.js";
 
 import SuperAdminSidebar from "../../../components/superadmin/SuperAdminSidebar.jsx";
 import SuperAdminHeader from "../../../components/superadmin/SuperAdminHeader.jsx";

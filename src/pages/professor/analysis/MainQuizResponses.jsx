@@ -6,7 +6,6 @@ import {
   FiArrowLeft,
   FiChevronLeft,
   FiChevronRight,
-  FiPrinter,
   FiMail,
   FiDownload,
 } from "react-icons/fi";
@@ -318,22 +317,149 @@ export default function MainQuizResponses({
           </p>
         )}
       </div>
-      {!detailsOpen && <section className="response-directory">
-        <div className="response-directory-heading"><label htmlFor="response-search">Student responses</label><span>{visibleResponses.length} responses</span></div>
-        <input id="response-search" type="search" placeholder="Search student name, section, or email" value={search} onChange={e => setSearch(e.target.value)} />
-        <nav className="response-result-tabs" aria-label="Filter results">{["all", "passed", "failed"].map(value => <button type="button" key={value} aria-pressed={resultFilter === value} onClick={() => setResultFilter(value)}>{value[0].toUpperCase() + value.slice(1)}</button>)}</nav>
-        {visibleResponses.map((student, i) => <article className="response-student-card" key={student.id ?? i}>
-          <div><h3>{student.name}</h3><p className="response-student-meta"><span>{student.section || "Section unavailable"}</span><span>{student.email || "Email not recorded"}</span></p><span className={`response-outcome ${passed(student) ? "passed" : "failed"}`}>{percentOf(student) === null ? "Not graded" : passed(student) ? "Passed" : "Failed"}</span></div>
-          <div className="response-card-actions"><strong className={passed(student) ? "passed" : "failed"}>{percentOf(student) === null ? "Not graded" : `${percentOf(student)}%`}</strong><button type="button" onClick={() => { setSelectedId(student.id); setDetailsOpen(true); }}>View Details</button></div>
-        </article>)}
-        {!visibleResponses.length && <p>No responses match these filters.</p>}
-        {detailsOpen && <button type="button" className="response-close-details" onClick={() => setDetailsOpen(false)}>Close details</button>}
-      </section>}
+      {!detailsOpen && (
+        <section className="response-directory qa-print-report">
+          <header className="response-print-heading">
+            <span>ACADEMIC REPORT</span>
+            <h2>Student Response Summary</h2>
+            <p>{courseTitle}</p>
+            <p>{quizTitle}</p>
+          </header>
+          <div className="response-directory-heading">
+            <label htmlFor="response-search">Student responses</label>
+            <span>{visibleResponses.length} responses</span>
+          </div>
+          <input
+            id="response-search"
+            type="search"
+            placeholder="Search student name, section, or email"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+          />
+          <nav className="response-result-tabs" aria-label="Filter results">
+            {["all", "passed", "failed"].map((value) => (
+              <button
+                type="button"
+                key={value}
+                aria-pressed={resultFilter === value}
+                onClick={() => setResultFilter(value)}
+              >
+                {value[0].toUpperCase() + value.slice(1)}
+              </button>
+            ))}
+          </nav>
+          {visibleResponses.map((student, i) => (
+            <article
+              className="response-student-card"
+              key={student.id ?? i}
+            >
+              <div>
+                <h3>{student.name}</h3>
+                <p className="response-student-meta">
+                  <span>{student.section || "Section unavailable"}</span>
+                  <span>{student.email || "Email not recorded"}</span>
+                </p>
+                <span
+                  className={`response-outcome ${passed(student) ? "passed" : "failed"}`}
+                >
+                  {percentOf(student) === null
+                    ? "Not graded"
+                    : passed(student)
+                      ? "Passed"
+                      : "Failed"}
+                </span>
+              </div>
+              <div className="response-card-actions">
+                <strong className={passed(student) ? "passed" : "failed"}>
+                  {percentOf(student) === null
+                    ? "Not graded"
+                    : `${percentOf(student)}%`}
+                </strong>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedId(student.id);
+                    setDetailsOpen(true);
+                  }}
+                >
+                  View Details
+                </button>
+              </div>
+            </article>
+          ))}
+          {!visibleResponses.length && (
+            <p className="response-directory-empty">
+              No responses match these filters.
+            </p>
+          )}
+          {visibleResponses.length > 0 && (
+            <table className="response-summary-print" aria-label="Student score summary">
+              <thead>
+                <tr>
+                  <th scope="col">Student Name</th>
+                  <th scope="col">Year Level</th>
+                  <th scope="col">Section</th>
+                  <th scope="col">Score</th>
+                  <th scope="col">Result</th>
+                </tr>
+              </thead>
+              <tbody>
+                {visibleResponses.map((student, i) => (
+                  <tr key={student.id ?? i}>
+                    <td>{student.name || "Name unavailable"}</td>
+                    <td>{student.yearLevel || "N/A"}</td>
+                    <td>{student.section || "Section unavailable"}</td>
+                    <td>
+                      {percentOf(student) === null ? (
+                        "Not graded"
+                      ) : (
+                        <>
+                          <strong>{percentOf(student)}%</strong>
+                          <small>
+                            {student.earnedScore} / {student.total}
+                          </small>
+                        </>
+                      )}
+                    </td>
+                    <td>
+                      {percentOf(student) === null
+                        ? "Not graded"
+                        : passed(student)
+                          ? "Passed"
+                          : "Failed"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </section>
+      )}
       {detailsOpen && attempt ? (
         <div className="main-response-report qa-print-report">
+          <header className="response-print-heading">
+            <span>ACADEMIC REPORT</span>
+            <h2>Student Assessment Report</h2>
+            <p>{courseTitle}</p>
+            <p>{quizTitle}</p>
+          </header>
           <nav className="response-detail-back"><button type="button" onClick={() => setDetailsOpen(false)}>‹ Back to students</button></nav>
           <section className="response-detail-summary main-response-card">
             <header><h2>{attempt.name}</h2><p>{attempt.section || "Section unavailable"} · {quizTitle}</p><span className={`response-outcome ${passed(attempt) ? "passed" : "failed"}`}>{passed(attempt) ? "Passed" : "Failed"}</span></header>
+            <dl className="response-print-student-meta">
+              <dt>Student Name</dt>
+              <dd>{attempt.name || "Name unavailable"}</dd>
+              <dt>Year Level</dt>
+              <dd>{attempt.yearLevel || "N/A"}</dd>
+              <dt>Section</dt>
+              <dd>{attempt.section || "Section unavailable"}</dd>
+              <dt>Score</dt>
+              <dd>
+                {percentOf(attempt) === null
+                  ? "Not graded"
+                  : `${attempt.earnedScore} / ${attempt.total} (${percentOf(attempt)}%)`}
+              </dd>
+            </dl>
             <div className="response-detail-metrics">
               <div><span>Score</span><strong>{percentOf(attempt)}%</strong></div>
               {["LOTS", "HOTS"].map(skill => {
