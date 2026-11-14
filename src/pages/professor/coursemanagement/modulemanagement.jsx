@@ -13,6 +13,13 @@ function formatCourseId(course) {
   return course.code || `CRS${String(course.id).slice(-3).padStart(3, "0")}`;
 }
 
+function truncateCourseDescription(value, maxLength = 80) {
+  const description = String(value || "").trim();
+  return description.length > maxLength
+    ? `${description.slice(0, maxLength).trimEnd()}...`
+    : description;
+}
+
 function getArchiveSource(course) {
   const role = String(
     course.archivedByRole || course.archived_by_role || "",
@@ -397,7 +404,11 @@ export default function ModuleManagement() {
 
                 <h2>{course.title || "Untitled Course"}</h2>
 
-                <p>{course.summary || "No course description yet."}</p>
+                <p>
+                  {course.summary
+                    ? truncateCourseDescription(course.summary)
+                    : "No course description yet."}
+                </p>
 
                 {/* =========================
                     COURSE STATS

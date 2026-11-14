@@ -38,7 +38,6 @@ import {
 import RoleNotificationMenu from "../../../components/rolenotif/RoleNotificationMenu";
 
 import HeaderProfileChip from "../../../components/HeaderProfileChip";
-import { confirmLogout } from "../../../utils/confirmLogout.js";
 
 import "./ProfessorLayout.css";
 

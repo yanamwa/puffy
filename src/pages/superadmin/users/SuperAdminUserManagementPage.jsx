@@ -78,6 +78,21 @@ function getStudentYearFilterValue(yearLevel) {
   return String(yearLevel || "").trim().match(/[1-4]/)?.[0] || "";
 }
 
+function getProfessorDepartmentGroup(department) {
+  const value = String(department || "").trim().toLowerCase();
+  if (value.includes("computer science") || value === "cs" || /\bcs\b/.test(value)) {
+    return "cs";
+  }
+  if (
+    value.includes("information technology") ||
+    value === "it" ||
+    /\bit\b/.test(value)
+  ) {
+    return "it";
+  }
+  return "other";
+}
+
 function isTemporaryExpired(user) {
   const isTemporary =
     user.isTemporary === true ||
@@ -417,6 +432,7 @@ export default function SuperAdminUserManagementPage() {
   const [query, setQuery] = useState("");
   const [studentYearFilter, setStudentYearFilter] = useState("all");
   const [studentSectionFilter, setStudentSectionFilter] = useState("all");
+  const [professorDepartmentFilter, setProfessorDepartmentFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState(null);
   const [adminModalOpen, setAdminModalOpen] = useState(false);
@@ -617,6 +633,15 @@ export default function SuperAdminUserManagementPage() {
         }
       }
 
+      if (
+        ["approvals", "professors", "admins", "archived"].includes(activeTab) &&
+        professorDepartmentFilter !== "all" &&
+        getProfessorDepartmentGroup(user.professorDepartment) !==
+          professorDepartmentFilter
+      ) {
+        return false;
+      }
+
       if (!search) return true;
 
       return [
@@ -631,7 +656,14 @@ export default function SuperAdminUserManagementPage() {
         .map((value) => String(value || "").toLowerCase())
         .some((value) => value.includes(search));
     });
-  }, [activeTab, query, studentSectionFilter, studentYearFilter, userGroups]);
+  }, [
+    activeTab,
+    professorDepartmentFilter,
+    query,
+    studentSectionFilter,
+    studentYearFilter,
+    userGroups,
+  ]);
   const pagination = useUserPagination(filteredUsers, activeTab, query);
   const visibleUsers = pagination.rows;
 
@@ -2211,6 +2243,22 @@ export default function SuperAdminUserManagementPage() {
                 </label>
               </>
             )}
+            {["approvals", "professors", "admins", "archived"].includes(activeTab) && (
+              <label className="users-student-filter">
+                Department
+                <select
+                  value={professorDepartmentFilter}
+                  onChange={(event) => {
+                    setProfessorDepartmentFilter(event.target.value);
+                    pagination.setPage(1);
+                  }}
+                >
+                  <option value="all">All Departments</option>
+                  <option value="cs">Computer Science (CS)</option>
+                  <option value="it">Information Technology (IT)</option>
+                </select>
+              </label>
+            )}
             <label className="users-search">
               <FiSearch />
               <input
@@ -2633,6 +2681,7 @@ export default function SuperAdminUserManagementPage() {
                     setStudentForm((form) => ({
                       ...form,
                       yearLevel: event.target.value,
+                      sectionName: "",
                     }))
                   }
                   required
@@ -2647,8 +2696,7 @@ export default function SuperAdminUserManagementPage() {
 
               <label>
                 Section
-                <input
-                  type="text"
+                <select
                   value={studentForm.sectionName}
                   onChange={(event) =>
                     setStudentForm((form) => ({
@@ -2656,9 +2704,20 @@ export default function SuperAdminUserManagementPage() {
                       sectionName: event.target.value,
                     }))
                   }
-                  placeholder="Example: 1A"
+                  disabled={!studentForm.yearLevel}
                   required
-                />
+                >
+                  <option value="">Select section</option>
+                  {studentForm.yearLevel &&
+                    "ABCDEF".split("").map((letter) => {
+                      const value = `${getStudentYearFilterValue(studentForm.yearLevel)}${letter}`;
+                      return (
+                        <option key={value} value={value}>
+                          {value}
+                        </option>
+                      );
+                    })}
+                </select>
               </label>
 
               <button className="users-submit-btn" type="submit">

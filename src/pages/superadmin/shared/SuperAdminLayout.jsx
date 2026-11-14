@@ -7,7 +7,6 @@ import confirmLogout from "../../../utils/confirmLogout.js";
 
 import SuperAdminSidebar from "../../../components/superadmin/SuperAdminSidebar.jsx";
 import SuperAdminHeader from "../../../components/superadmin/SuperAdminHeader.jsx";
-import { confirmLogout } from "../../../utils/confirmLogout.js";
 
 import "../../admin/shared/AdminLayout.css";
 import "./SuperAdminLayout.css";

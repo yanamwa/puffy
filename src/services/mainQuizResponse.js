@@ -29,6 +29,9 @@ export function readMainQuizResponseAnswer(answer, index) {
           : null;
   return {
     question: text(answer.question || answer.prompt || `Question ${index + 1}`),
+    questionType: text(
+      answer.type || answer.question_type || answer.questionType || "",
+    ),
     selected,
     correct,
     isCorrect,
